@@ -109,10 +109,10 @@ int sz_list_add(union sz_tag *list, union sz_tag *elem);
 int sz_dict_add(union sz_tag *dict, const char *key, union sz_tag *elem);
 
 #define sz_list_foreach(_iter,_list) \
-for (int i = 0; _iter = _list->list.vals[i], i < _list->list.size; ++i)
+for (int _i = 0; _iter = _list->list.vals[_i], _i < _list->list.size; ++_i)
 
 #define sz_dict_foreach(_key,_val,_dict) \
-for (int i = 0; _key = _dict->dict.keys[i], _val = _dict->dict.vals[i], i < _dict->dict.size; ++i)
+for (int _i = 0; _key = _dict->dict.keys[_i], _val = _dict->dict.vals[_i], _i < _dict->dict.size; ++_i)
 
 int sz_read(int fd, union sz_tag *root);
 int sz_write(int fd, union sz_tag *root);

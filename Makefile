@@ -5,15 +5,19 @@ include config.mk
 # headers in the current directory.
 ALL_CFLAGS += -I$(shell pwd)
 
-objs += chunk.o
-objs += simplex.o
-objs += sz.o
-objs += terraform.o
-objs += voxel.o
+voxel_objs += chunk.o
+voxel_objs += simplex.o
+voxel_objs += sz.o
+voxel_objs += terraform.o
+voxel_objs += voxel.o
 
+szcat_objs += sz.o
+
+objs = $(voxel_objs) $(szcat_objs)
 deps = $(objs:.o=.d)
 
 programs += voxel
+programs += szcat
 
 install_programs = $(addprefix $(DESTDIR)$(bindir)/,$(programs))
 
@@ -38,7 +42,9 @@ $(DESTDIR)$(localstatedir):
 	$(QUIET_INSTALL)$(INSTALL) -d $@ -g ftu -m 0770
 
 # Rules to compile tools that require specific libraries or flags
-voxel: $(objs)
+voxel: $(voxel_objs)
+
+szcat: $(szcat_objs)
 
 -include $(DEPS)
 

@@ -6,6 +6,12 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#ifdef NDEBUG
+#define PROPAGATE_ERROR() return -1
+#else
+#define PROPAGATE_ERROR() abort()
+#endif
+
 void sz_destroy(union sz_tag *tag)
 {
 	if (tag->tag == SZ_STR) {
@@ -164,11 +170,11 @@ int read_bytes(int fd, void *data, size_t nbytes)
 	ret = read(fd, data, nbytes);
 	if (ret < 0) {
 		perror(__func__);
-		return -1;
+		PROPAGATE_ERROR();
 	}
 	if (ret < nbytes) {
 		fprintf(stderr, "%s: read %d of %d bytes", __func__, ret, nbytes);
-		return -1;
+		PROPAGATE_ERROR();
 	}
 	return 0;
 }
@@ -179,26 +185,26 @@ int read_str(int fd, char **data, int16_t *rlen)
 {
 	int16_t len;
 	if (read_atom(fd, &len) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	if (rlen != NULL)
 		*rlen = len;
 	if (len == 0) {
 		*data = NULL;
 		return 0;
 	}
-	data = calloc(len + 1, 1);
+	*data = calloc(len + 1, 1);
 	if (read_bytes(fd, *data, len) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	return 0;
 }
 
 int read_raw(int fd, void **data, int32_t *len)
 {
 	if (read_atom(fd, len) != 0)
-		return -1;
-	data = calloc(*len, 1);
+		PROPAGATE_ERROR();
+	*data = calloc(*len, 1);
 	if (read_bytes(fd, *data, *len) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	return 0;
 }
 
@@ -216,14 +222,15 @@ int read_list(int fd, union sz_tag *root)
 	union sz_tag tag;
 
 	if (read_atom(fd, &root->list.size) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	root->dict.alloc = next_power_of_2(root->dict.size);
 	root->list.vals = calloc(root->list.alloc, sizeof(*root->list.vals));
 	for (i = 0; i < root->list.size; ++i) {
 		if (sz_read(fd, &tag) != 0)
-			return -1;
+			PROPAGATE_ERROR();
 		root->list.vals[i] = sz_dup(&tag);
 	}
+	return 0;
 }
 
 int read_dict(int fd, union sz_tag *root)
@@ -233,24 +240,25 @@ int read_dict(int fd, union sz_tag *root)
 	union sz_tag tag;
 
 	if (read_atom(fd, &root->dict.size) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	root->dict.alloc = next_power_of_2(root->dict.size);
 	root->dict.keys = calloc(root->dict.alloc, sizeof(*root->dict.keys));
 	root->dict.vals = calloc(root->dict.alloc, sizeof(*root->dict.vals));
 	for (i = 0; i < root->dict.size; ++i) {
 		if (read_str(fd, &key, NULL) != 0)
-			return -1;
+			PROPAGATE_ERROR();
 		if (sz_read(fd, &tag) != 0)
-			return -1;
+			PROPAGATE_ERROR();
 		root->dict.keys[i] = key;
 		root->dict.vals[i] = sz_dup(&tag);
 	}
+	return 0;
 }
 
 int sz_read(int fd, union sz_tag *tag)
 {
 	if (read_atom(fd, &tag->tag) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	if (tag->tag == SZ_NULL) {
 		return 0;
 	} else if (tag->tag == SZ_I8) {
@@ -275,7 +283,7 @@ int sz_read(int fd, union sz_tag *tag)
 		return read_dict(fd, tag);
 	}
 	fprintf(stderr, "%s: bad tag %02x\n", __func__, tag->tag);
-	return -1;
+	PROPAGATE_ERROR();
 }
 
 int write_bytes(int fd, void *data, size_t nbytes)
@@ -284,11 +292,11 @@ int write_bytes(int fd, void *data, size_t nbytes)
 	ret = write(fd, data, nbytes);
 	if (ret < 0) {
 		perror(__func__);
-		return -1;
+		PROPAGATE_ERROR();
 	}
 	if (ret < nbytes) {
 		fprintf(stderr, "%s: write %d of %d bytes", __func__, ret, nbytes);
-		return -1;
+		PROPAGATE_ERROR();
 	}
 	return 0;
 }
@@ -298,18 +306,18 @@ int write_bytes(int fd, void *data, size_t nbytes)
 int write_str(int fd, char *data, int16_t len)
 {
 	if (write_atom(fd, len) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	if (write_bytes(fd, data, len) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	return 0;
 }
 
 int write_raw(int fd, void *data, int32_t len)
 {
 	if (write_atom(fd, len) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	if (write_bytes(fd, data, len) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	return 0;
 }
 
@@ -317,10 +325,10 @@ int write_list(int fd, union sz_tag *root)
 {
 	union sz_tag *iter;
 	if (write_atom(fd, root->list.size) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	sz_list_foreach(iter, root) {
 		if (sz_write(fd, iter) != 0)
-			return -1;
+			PROPAGATE_ERROR();
 	}
 	return 0;
 }
@@ -330,12 +338,12 @@ int write_dict(int fd, union sz_tag *root)
 	char *key;
 	union sz_tag *val;
 	if (write_atom(fd, root->dict.size) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	sz_dict_foreach(key, val, root) {
 		if (write_str(fd, key, strlen(key)) != 0)
-			return -1;
+			PROPAGATE_ERROR();
 		if (sz_write(fd, val) != 0)
-			return -1;
+			PROPAGATE_ERROR();
 	}
 	return 0;
 }
@@ -343,7 +351,7 @@ int write_dict(int fd, union sz_tag *root)
 int sz_write(int fd, union sz_tag *tag)
 {
 	if (write_atom(fd, tag->tag) != 0)
-		return -1;
+		PROPAGATE_ERROR();
 	if (tag->tag == SZ_NULL) {
 		return 0;
 	} else if (tag->tag == SZ_I8) {
@@ -368,5 +376,5 @@ int sz_write(int fd, union sz_tag *tag)
 		return write_dict(fd, tag);
 	}
 	fprintf(stderr, "%s: bad tag %02x\n", __func__, tag->tag);
-	return -1;
+	PROPAGATE_ERROR();
 }
