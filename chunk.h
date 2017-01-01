@@ -36,8 +36,7 @@ struct shard {
 	int8_t y;
 	int8_t mat[SHARD_W][SHARD_H][SHARD_D];
 	int8_t shape[SHARD_W][SHARD_H][SHARD_D];
-	int8_t light1[SHARD_W][SHARD_H][SHARD_D];
-	int8_t light2[SHARD_W][SHARD_H][SHARD_D];
+	int8_t light[SHARD_W][SHARD_H][SHARD_D];
 };
 
 struct cell_entity {
@@ -51,6 +50,7 @@ struct chunk {
 };
 
 struct world {
+	uint64_t x, z;
 	struct chunk *chunks[CHUNKS_PER_WORLD][CHUNKS_PER_WORLD];
 };
 
@@ -66,8 +66,8 @@ int chunk_save(struct chunk *c, union sz_tag **root);
 
 struct world *world_new(void);
 void world_destroy(struct world *w);
-int world_load(struct world *w);
-int world_save(struct world *w);
+int world_load(struct world *w, union sz_tag *root);
+int world_save(struct world *w, union sz_tag **root);
 
 #endif
 
