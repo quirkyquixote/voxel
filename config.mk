@@ -36,7 +36,7 @@ CFLAGS = -g \
 	 -Werror \
 	 -Wfatal-errors
 
-LDFLAGS =
+LDFLAGS = -lm
 
 # These flags are necessary
 

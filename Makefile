@@ -6,7 +6,9 @@ include config.mk
 ALL_CFLAGS += -I$(shell pwd)
 
 objs += chunk.o
+objs += simplex.o
 objs += sz.o
+objs += terraform.o
 objs += voxel.o
 
 deps = $(objs:.o=.d)
@@ -37,7 +39,6 @@ $(DESTDIR)$(localstatedir):
 
 # Rules to compile tools that require specific libraries or flags
 voxel: $(objs)
-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $<
 
 -include $(DEPS)
 

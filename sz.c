@@ -2,692 +2,371 @@
 
 #include "sz.h"
 
-#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 
-int write_data(int fd, const void *data, size_t len)
+void sz_destroy(union sz_tag *tag)
 {
-	int rval = write(fd, data, len);
-	if (rval < 0) {
-		perror("write_data");
+	if (tag->tag == SZ_STR) {
+		free(tag->str.data);
+	} else if (tag->tag == SZ_RAW) {
+		free(tag->raw.data);
+	} else if (tag->tag == SZ_LIST) {
+		union sz_tag *val;
+		sz_list_foreach(val, tag)
+			sz_destroy(val);
+		free(tag->list.vals);
+	} else if (tag->tag == SZ_DICT) {
+		char *key;
+		union sz_tag *val;
+		sz_dict_foreach(key, val, tag) {
+			free(key);
+			sz_destroy(val);
+		}
+		free(tag->list.vals);
+	}
+	free(tag);
+}
+
+union sz_tag *sz_dup(union sz_tag *other)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	memcpy(tag, other, sizeof(*tag));
+	return tag;
+}
+
+union sz_tag *sz_null(void)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_NULL;
+	return tag;
+}
+
+union sz_tag *sz_i8(int8_t data)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_I8;
+	tag->i8.data = data;
+	return tag;
+}
+
+union sz_tag *sz_i16(int16_t data)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_I16;
+	tag->i16.data = data;
+	return tag;
+}
+
+union sz_tag *sz_i32(int32_t data)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_I32;
+	tag->i32.data = data;
+	return tag;
+}
+
+union sz_tag *sz_i64(int64_t data)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_I64;
+	tag->i64.data = data;
+	return tag;
+}
+
+union sz_tag *sz_f32(float data)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_F32;
+	tag->f32.data = data;
+	return tag;
+}
+
+union sz_tag *sz_f64(double data)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_F64;
+	tag->f64.data = data;
+	return tag;
+}
+
+union sz_tag *sz_str(const char *data)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_STR;
+	tag->str.size = strlen(data);
+	tag->str.data = strdup(data);
+	return tag;
+}
+
+union sz_tag *sz_raw(const void *data, size_t size)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_RAW;
+	tag->raw.size = size;
+	tag->raw.data = calloc(1, size);
+	memcpy(tag->raw.data, data, size);
+	return tag;
+}
+
+union sz_tag *sz_list(void)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_LIST;
+	return tag;
+}
+
+union sz_tag *sz_dict(void)
+{
+	union sz_tag *tag = calloc(1, sizeof(*tag));
+	tag->tag = SZ_DICT;
+	return tag;
+}
+
+
+int sz_list_add(union sz_tag *tag, union sz_tag *elem)
+{
+	if (tag->list.size == tag->list.alloc) {
+		if (tag->list.alloc == 0)
+			tag->list.alloc = 2;
+		else
+			tag->list.alloc *= 2;
+		tag->list.vals = realloc(tag->list.vals,
+				tag->list.alloc * sizeof(*tag->list.vals));
+	}
+	tag->list.vals[tag->list.size] = elem;
+	++tag->list.size;
+	return 0;
+}
+
+int sz_dict_add(union sz_tag *tag, const char *name, union sz_tag *elem)
+{
+	if (tag->dict.size == tag->dict.alloc) {
+		if (tag->dict.alloc == 0)
+			tag->dict.alloc = 2;
+		else
+			tag->dict.alloc *= 2;
+		tag->dict.keys = realloc(tag->dict.keys,
+				tag->dict.alloc * sizeof(*tag->dict.keys));
+		tag->dict.vals = realloc(tag->dict.vals,
+				tag->dict.alloc * sizeof(*tag->dict.vals));
+	}
+	tag->dict.keys[tag->dict.size] = strdup(name);
+	tag->dict.vals[tag->dict.size] = elem;
+	++tag->dict.size;
+	return 0;
+}
+
+int read_bytes(int fd, void *data, size_t nbytes)
+{
+	int ret;
+	ret = read(fd, data, nbytes);
+	if (ret < 0) {
+		perror(__func__);
 		return -1;
 	}
-	if (rval < len) {
-		fprintf(stderr, "write_data: %d of %d bytes written\n", rval, len);
-		return -1;
-	}
-	return 0;
-}
-
-int write_i8(int fd, int8_t data)
-{
-	return write_data(fd, &data, sizeof(data));
-}
-
-int write_i16(int fd, int16_t data)
-{
-	return write_data(fd, &data, sizeof(data));
-}
-
-int write_i32(int fd, int32_t data)
-{
-	return write_data(fd, &data, sizeof(data));
-}
-
-int write_i64(int fd, int32_t data)
-{
-	return write_data(fd, &data, sizeof(data));
-}
-
-int write_f32(int fd, float data)
-{
-	return write_data(fd, &data, sizeof(data));
-}
-
-int write_f64(int fd, double data)
-{
-	return write_data(fd, &data, sizeof(data));
-}
-
-int write_i8v(int fd, const int8_t* data, size_t len)
-{
-	if (write_i16(fd, len) != 0)
-		return -1;
-	if (write_data(fd, data, sizeof(*data) * len) != 0)
-		return -1;
-	return 0;
-}
-
-int write_i16v(int fd, const int16_t* data, size_t len)
-{
-	if (write_i16(fd, len) != 0)
-		return -1;
-	if (write_data(fd, data, sizeof(*data) * len) != 0)
-		return -1;
-	return 0;
-}
-
-int write_i32v(int fd, const int32_t* data, size_t len)
-{
-	if (write_i16(fd, len) != 0)
-		return -1;
-	if (write_data(fd, data, sizeof(*data) * len) != 0)
-		return -1;
-	return 0;
-}
-
-int write_i64v(int fd, const int64_t* data, size_t len)
-{
-	if (write_i16(fd, len) != 0)
-		return -1;
-	if (write_data(fd, data, sizeof(*data) * len) != 0)
-		return -1;
-	return 0;
-}
-
-int write_f32v(int fd, const float* data, size_t len)
-{
-	if (write_i16(fd, len) != 0)
-		return -1;
-	if (write_data(fd, data, sizeof(*data) * len) != 0)
-		return -1;
-	return 0;
-}
-
-int write_f64v(int fd, const double* data, size_t len)
-{
-	if (write_i16(fd, len) != 0)
-		return -1;
-	if (write_data(fd, data, sizeof(*data) * len) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_null(int fd, const char *name)
-{
-	if (write_i8(fd, SZ_NULL) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_i8(int fd, const char *name, int8_t data)
-{
-	if (write_i8(fd, SZ_I8) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_i8(fd, data) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_i16(int fd, const char *name, int16_t data)
-{
-	if (write_i8(fd, SZ_I16) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_i16(fd, data) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_i32(int fd, const char *name, int32_t data)
-{
-	if (write_i8(fd, SZ_I32) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_i32(fd, data) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_i64(int fd, const char *name, int64_t data)
-{
-	if (write_i8(fd, SZ_I64) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_i64(fd, data) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_f32(int fd, const char *name, float data)
-{
-	if (write_i8(fd, SZ_F32) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_i32(fd, data) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_f64(int fd, const char *name, double data)
-{
-	if (write_i8(fd, SZ_F64) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_f64(fd, data) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_i8v(int fd, const char *name, int8_t *data, size_t len)
-{
-	if (write_i8(fd, SZ_I8) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_i8v(fd, data, len) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_i16v(int fd, const char *name, int16_t *data, size_t len)
-{
-	if (write_i8(fd, SZ_I16) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_i16v(fd, data, len) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_i32v(int fd, const char *name, int32_t *data, size_t len)
-{
-	if (write_i8(fd, SZ_I32) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_i32v(fd, data, len) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_i64v(int fd, const char *name, int64_t *data, size_t len)
-{
-	if (write_i8(fd, SZ_I64) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_i64v(fd, data, len) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_f32v(int fd, const char *name, float *data, size_t len)
-{
-	if (write_i8(fd, SZ_F32) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_f32v(fd, data, len) != 0)
-		return -1;
-	return 0;
-}
-
-int sz_write_f64v(int fd, const char *name, double *data, size_t len)
-{
-	if (write_i8(fd, SZ_F64) != 0)
-		return -1;
-	if (write_i8v(fd, name, strlen(name)) != 0)
-		return -1;
-	if (write_f64v(fd, data, len) != 0)
-		return -1;
-	return 0;
-}
-
-int read_data(int fd, void *data, size_t len)
-{
-	int rval = read(fd, data, len);
-	if (rval < 0) {
-		perror("read_data");
-		return -1;
-	}
-	if (rval < len) {
-		fprintf(stderr, "read_data: %d of %d bytes read\n", rval, len);
+	if (ret < nbytes) {
+		fprintf(stderr, "%s: read %d of %d bytes", __func__, ret, nbytes);
 		return -1;
 	}
 	return 0;
 }
 
-int read_i8(int fd, int8_t *data)
-{
-	return read_data(fd, data, sizeof(*data));
-}
+#define read_atom(fd,data) read_bytes(fd, data, sizeof(*(data)))
 
-int read_i16(int fd, int16_t *data)
+int read_str(int fd, char **data, int16_t *rlen)
 {
-	return read_data(fd, data, sizeof(*data));
-}
-
-int read_i32(int fd, int32_t *data)
-{
-	return read_data(fd, data, sizeof(*data));
-}
-
-int read_i64(int fd, int64_t *data)
-{
-	return read_data(fd, data, sizeof(*data));
-}
-
-int read_f32(int fd, float *data)
-{
-	return read_data(fd, data, sizeof(*data));
-}
-
-int read_f64(int fd, double *data)
-{
-	return read_data(fd, data, sizeof(*data));
-}
-
-int read_i8v(int fd, int8_t **data, size_t *size)
-{
-	int16_t tmp;
-	if (read_data(fd, &tmp, sizeof(tmp)) != 0)
+	int16_t len;
+	if (read_atom(fd, &len) != 0)
 		return -1;
-	if (size != NULL)
-		*size = tmp;
-	if (*data == NULL)
-		*data = calloc(tmp, sizeof(**data));
-	if (read_data(fd, *data, sizeof(*data) * tmp) != 0)
+	if (rlen != NULL)
+		*rlen = len;
+	if (len == 0) {
+		*data = NULL;
+		return 0;
+	}
+	data = calloc(len + 1, 1);
+	if (read_bytes(fd, *data, len) != 0)
 		return -1;
 	return 0;
 }
 
-int read_i16v(int fd, int16_t **data, size_t *size)
+int read_raw(int fd, void **data, int32_t *len)
 {
-	int16_t tmp;
-	if (read_data(fd, &tmp, sizeof(tmp)) != 0)
+	if (read_atom(fd, len) != 0)
 		return -1;
-	if (size != NULL)
-		*size = tmp;
-	if (*data == NULL)
-		*data = calloc(tmp, sizeof(**data));
-	if (read_data(fd, *data, sizeof(*data) * tmp) != 0)
+	data = calloc(*len, 1);
+	if (read_bytes(fd, *data, *len) != 0)
 		return -1;
 	return 0;
 }
 
-int read_i32v(int fd, int32_t **data, size_t *size)
+int next_power_of_2(int x)
 {
-	int16_t tmp;
-	if (read_data(fd, &tmp, sizeof(tmp)) != 0)
-		return -1;
-	if (size != NULL)
-		*size = tmp;
-	if (*data == NULL)
-		*data = calloc(tmp, sizeof(**data));
-	if (read_data(fd, *data, sizeof(*data) * tmp) != 0)
-		return -1;
-	return 0;
+	int y = 2;
+	while (y < x)
+		y *= 2;
+	return y;
 }
 
-int read_i64v(int fd, int64_t **data, size_t *size)
+int read_list(int fd, union sz_tag *root)
 {
-	int16_t tmp;
-	if (read_data(fd, &tmp, sizeof(tmp)) != 0)
+	int i;
+	union sz_tag tag;
+
+	if (read_atom(fd, &root->list.size) != 0)
 		return -1;
-	if (size != NULL)
-		*size = tmp;
-	if (*data == NULL)
-		*data = calloc(tmp, sizeof(**data));
-	if (read_data(fd, *data, sizeof(*data) * tmp) != 0)
-		return -1;
-	return 0;
+	root->dict.alloc = next_power_of_2(root->dict.size);
+	root->list.vals = calloc(root->list.alloc, sizeof(*root->list.vals));
+	for (i = 0; i < root->list.size; ++i) {
+		if (sz_read(fd, &tag) != 0)
+			return -1;
+		root->list.vals[i] = sz_dup(&tag);
+	}
 }
 
-int read_f32v(int fd, float **data, size_t *size)
+int read_dict(int fd, union sz_tag *root)
 {
-	int16_t tmp;
-	if (read_data(fd, &tmp, sizeof(tmp)) != 0)
+	int i;
+	char *key;
+	union sz_tag tag;
+
+	if (read_atom(fd, &root->dict.size) != 0)
 		return -1;
-	if (size != NULL)
-		*size = tmp;
-	if (*data == NULL)
-		*data = calloc(tmp, sizeof(**data));
-	if (read_data(fd, *data, sizeof(*data) * tmp) != 0)
-		return -1;
-	return 0;
+	root->dict.alloc = next_power_of_2(root->dict.size);
+	root->dict.keys = calloc(root->dict.alloc, sizeof(*root->dict.keys));
+	root->dict.vals = calloc(root->dict.alloc, sizeof(*root->dict.vals));
+	for (i = 0; i < root->dict.size; ++i) {
+		if (read_str(fd, &key, NULL) != 0)
+			return -1;
+		if (sz_read(fd, &tag) != 0)
+			return -1;
+		root->dict.keys[i] = key;
+		root->dict.vals[i] = sz_dup(&tag);
+	}
 }
 
-int read_f64v(int fd, double **data, size_t *size)
+int sz_read(int fd, union sz_tag *tag)
 {
-	int16_t tmp;
-	if (read_data(fd, &tmp, sizeof(tmp)) != 0)
+	if (read_atom(fd, &tag->tag) != 0)
 		return -1;
-	if (size != NULL)
-		*size = tmp;
-	if (*data == NULL)
-		*data = calloc(tmp, sizeof(**data));
-	if (read_data(fd, *data, sizeof(*data) * tmp) != 0)
-		return -1;
-	return 0;
-}
-
-int read_list(int fd, struct sz_list *list)
-{
-	if (read_i8(fd, &list->tag) != 0)
-		return -1;
-	list->data = NULL;
-	if (list->tag == SZ_I8)
-		return read_i8v(fd, (int8_t**)&list->data, &list->size);
-	if (list->tag == SZ_I16)
-		return read_i16v(fd, (int16_t**)&list->data, &list->size);
-	if (list->tag == SZ_I32)
-		return read_i32v(fd, (int32_t**)&list->data, &list->size);
-	if (list->tag == SZ_I64)
-		return read_i64v(fd, (int64_t**)&list->data, &list->size);
-	if (list->tag == SZ_F32)
-		return read_f32v(fd, (float **)&list->data, &list->size);
-	if (list->tag == SZ_F64)
-		return read_f64v(fd, (double **)&list->data, &list->size);
-	fprintf(stderr, "read_list: bad tag: %d\n", list->tag);
+	if (tag->tag == SZ_NULL) {
+		return 0;
+	} else if (tag->tag == SZ_I8) {
+		return read_atom(fd, &tag->i8.data);
+	} else if (tag->tag == SZ_I16) {
+		return read_atom(fd, &tag->i16.data);
+	} else if (tag->tag == SZ_I32) {
+		return read_atom(fd, &tag->i32.data);
+	} else if (tag->tag == SZ_I64) {
+		return read_atom(fd, &tag->i64.data);
+	} else if (tag->tag == SZ_F32) {
+		return read_atom(fd, &tag->f32.data);
+	} else if (tag->tag == SZ_F64) {
+		return read_atom(fd, &tag->f64.data);
+	} else if (tag->tag == SZ_STR) {
+		return read_str(fd, &tag->str.data, &tag->str.size);
+	} else if (tag->tag == SZ_RAW) {
+		return read_raw(fd, &tag->raw.data, &tag->raw.size);
+	} else if (tag->tag == SZ_LIST) {
+		return read_list(fd, tag);
+	} else if (tag->tag == SZ_DICT) {
+		return read_dict(fd, tag);
+	}
+	fprintf(stderr, "%s: bad tag %02x\n", __func__, tag->tag);
 	return -1;
 }
 
-int sz_read(int fd, struct sz_tag *it)
+int write_bytes(int fd, void *data, size_t nbytes)
 {
-	if (it->tag == SZ_LIST)
-		free(it->data.list.data);
-	if (read_i8(fd, &it->tag) != 0)
+	int ret;
+	ret = write(fd, data, nbytes);
+	if (ret < 0) {
+		perror(__func__);
 		return -1;
-	if (it->tag == SZ_END)
-		return SZ_END;
-	if (read_i8v(fd, (int8_t **)&it->name, NULL) != 0)
+	}
+	if (ret < nbytes) {
+		fprintf(stderr, "%s: write %d of %d bytes", __func__, ret, nbytes);
 		return -1;
-	if (it->tag == SZ_NULL)
+	}
+	return 0;
+}
+
+#define write_atom(fd,data) write_bytes(fd, &data, sizeof(data))
+
+int write_str(int fd, char *data, int16_t len)
+{
+	if (write_atom(fd, len) != 0)
+		return -1;
+	if (write_bytes(fd, data, len) != 0)
+		return -1;
+	return 0;
+}
+
+int write_raw(int fd, void *data, int32_t len)
+{
+	if (write_atom(fd, len) != 0)
+		return -1;
+	if (write_bytes(fd, data, len) != 0)
+		return -1;
+	return 0;
+}
+
+int write_list(int fd, union sz_tag *root)
+{
+	union sz_tag *iter;
+	if (write_atom(fd, root->list.size) != 0)
+		return -1;
+	sz_list_foreach(iter, root) {
+		if (sz_write(fd, iter) != 0)
+			return -1;
+	}
+	return 0;
+}
+
+int write_dict(int fd, union sz_tag *root)
+{
+	char *key;
+	union sz_tag *val;
+	if (write_atom(fd, root->dict.size) != 0)
+		return -1;
+	sz_dict_foreach(key, val, root) {
+		if (write_str(fd, key, strlen(key)) != 0)
+			return -1;
+		if (sz_write(fd, val) != 0)
+			return -1;
+	}
+	return 0;
+}
+
+int sz_write(int fd, union sz_tag *tag)
+{
+	if (write_atom(fd, tag->tag) != 0)
+		return -1;
+	if (tag->tag == SZ_NULL) {
 		return 0;
-	if (it->tag == SZ_I8)
-		return read_i8(fd, &it->data.i8);
-	if (it->tag == SZ_I16)
-		return read_i16(fd, &it->data.i16);
-	if (it->tag == SZ_I32)
-		return read_i32(fd, &it->data.i32);
-	if (it->tag == SZ_I64)
-		return read_i64(fd, &it->data.i64);
-	if (it->tag == SZ_F32)
-		return read_f32(fd, &it->data.f32);
-	if (it->tag == SZ_F64)
-		return read_f64(fd, &it->data.f64);
-	if (it->tag == SZ_LIST)
-		return read_list(fd, &it->data.list);
-	fprintf(stderr, "sz_read: bad tag: %d\n", it->tag);
-	return SZ_ERROR;
+	} else if (tag->tag == SZ_I8) {
+		return write_atom(fd, tag->i8.data);
+	} else if (tag->tag == SZ_I16) {
+		return write_atom(fd, tag->i16.data);
+	} else if (tag->tag == SZ_I32) {
+		return write_atom(fd, tag->i32.data);
+	} else if (tag->tag == SZ_I64) {
+		return write_atom(fd, tag->i64.data);
+	} else if (tag->tag == SZ_F32) {
+		return write_atom(fd, tag->f32.data);
+	} else if (tag->tag == SZ_F64) {
+		return write_atom(fd, tag->f64.data);
+	} else if (tag->tag == SZ_STR) {
+		return write_str(fd, tag->str.data, tag->str.size);
+	} else if (tag->tag == SZ_RAW) {
+		return write_raw(fd, tag->raw.data, tag->raw.size);
+	} else if (tag->tag == SZ_LIST) {
+		return write_list(fd, tag);
+	} else if (tag->tag == SZ_DICT) {
+		return write_dict(fd, tag);
+	}
+	fprintf(stderr, "%s: bad tag %02x\n", __func__, tag->tag);
+	return -1;
 }
-
-int sz_to_null(struct sz_tag *t)
-{
-	if (t->tag != SZ_NULL) {
-		fprintf(stderr, "%s: not null\n", __func__);
-		return -1;
-	}
-	return 0;
-}
-
-int sz_to_i8(struct sz_tag *t, int8_t *data)
-{
-	if (t->tag != SZ_I8) {
-		fprintf(stderr, "%s: not i8\n", __func__);
-		return -1;
-	}
-	*data = t->data.i8;
-	return 0;
-}
-
-int sz_to_i16(struct sz_tag *t, int16_t *data)
-{
-	if (t->tag != SZ_I16) {
-		fprintf(stderr, "%s: not i16\n", __func__);
-		return -1;
-	}
-	*data = t->data.i16;
-	return 0;
-}
-
-int sz_to_i32(struct sz_tag *t, int32_t *data)
-{
-	if (t->tag != SZ_I32) {
-		fprintf(stderr, "%s: not i32\n", __func__);
-		return -1;
-	}
-	*data = t->data.i32;
-	return 0;
-}
-
-int sz_to_i64(struct sz_tag *t, int64_t *data)
-{
-	if (t->tag != SZ_I64) {
-		fprintf(stderr, "%s: not i64\n", __func__);
-		return -1;
-	}
-	*data = t->data.i64;
-	return 0;
-}
-
-int sz_to_f32(struct sz_tag *t, float *data)
-{
-	if (t->tag != SZ_F32) {
-		fprintf(stderr, "%s: not f32\n", __func__);
-		return -1;
-	}
-	*data = t->data.f32;
-	return 0;
-}
-
-int sz_to_f64(struct sz_tag *t, double *data)
-{
-	if (t->tag != SZ_F64) {
-		fprintf(stderr, "%s: not f64\n", __func__);
-		return -1;
-	}
-	*data = t->data.f64;
-	return 0;
-}
-
-int sz_to_i8v(struct sz_tag *t, int8_t **data, size_t *len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_I8) {
-		fprintf(stderr, "%s: not i8\n", __func__);
-		return -1;
-	}
-	*data = t->data.list.data;
-	*len = t->data.list.size;
-	return 0;
-}
-
-int sz_to_i16v(struct sz_tag *t, int16_t **data, size_t *len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_I16) {
-		fprintf(stderr, "%s: not i16\n", __func__);
-		return -1;
-	}
-	*data = t->data.list.data;
-	*len = t->data.list.size;
-	return 0;
-}
-
-int sz_to_i32v(struct sz_tag *t, int32_t **data, size_t *len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_I32) {
-		fprintf(stderr, "%s: not i32\n", __func__);
-		return -1;
-	}
-	*data = t->data.list.data;
-	*len = t->data.list.size;
-	return 0;
-}
-
-int sz_to_i64v(struct sz_tag *t, int64_t **data, size_t *len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_I64) {
-		fprintf(stderr, "%s: not i64\n", __func__);
-		return -1;
-	}
-	*data = t->data.list.data;
-	*len = t->data.list.size;
-	return 0;
-}
-
-int sz_to_f32v(struct sz_tag *t, float **data, size_t *len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_F32) {
-		fprintf(stderr, "%s: not f32\n", __func__);
-		return -1;
-	}
-	*data = t->data.list.data;
-	*len = t->data.list.size;
-	return 0;
-}
-
-int sz_to_f64v(struct sz_tag *t, double **data, size_t *len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_F64) {
-		fprintf(stderr, "%s: not f64\n", __func__);
-		return -1;
-	}
-	*data = t->data.list.data;
-	*len = t->data.list.size;
-	return 0;
-}
-
-int sz_copy_i8v(struct sz_tag *t, int8_t *data, size_t len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_I8) {
-		fprintf(stderr, "%s: not i8\n", __func__);
-		return -1;
-	}
-	if (len < t->data.list.size) {
-		fprintf(stderr, "%s: not enough space", __func__);
-		return -1;
-	}
-	memcpy(data, t->data.list.data, t->data.list.size * sizeof(*data));
-	return 0;
-}
-
-int sz_copy_i16v(struct sz_tag *t, int16_t *data, size_t len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_I16) {
-		fprintf(stderr, "%s: not i16\n", __func__);
-		return -1;
-	}
-	if (len < t->data.list.size) {
-		fprintf(stderr, "%s: not enough space", __func__);
-		return -1;
-	}
-	memcpy(data, t->data.list.data, t->data.list.size * sizeof(*data));
-	return 0;
-}
-
-int sz_copy_i32v(struct sz_tag *t, int32_t *data, size_t len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_I32) {
-		fprintf(stderr, "%s: not i32\n", __func__);
-		return -1;
-	}
-	if (len < t->data.list.size) {
-		fprintf(stderr, "%s: not enough space", __func__);
-		return -1;
-	}
-	memcpy(data, t->data.list.data, t->data.list.size * sizeof(*data));
-	return 0;
-}
-
-int sz_copy_i64v(struct sz_tag *t, int64_t *data, size_t len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_I64) {
-		fprintf(stderr, "%s: not i64\n", __func__);
-		return -1;
-	}
-	if (len < t->data.list.size) {
-		fprintf(stderr, "%s: not enough space", __func__);
-		return -1;
-	}
-	memcpy(data, t->data.list.data, t->data.list.size * sizeof(*data));
-	return 0;
-}
-
-int sz_copy_f32v(struct sz_tag *t, float *data, size_t len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_F32) {
-		fprintf(stderr, "%s: not f32\n", __func__);
-		return -1;
-	}
-	if (len < t->data.list.size) {
-		fprintf(stderr, "%s: not enough space", __func__);
-		return -1;
-	}
-	memcpy(data, t->data.list.data, t->data.list.size * sizeof(*data));
-	return 0;
-}
-
-int sz_copy_f64v(struct sz_tag *t, double *data, size_t len)
-{
-	if (t->tag != SZ_LIST) {
-		fprintf(stderr, "%s: not a list\n", __func__);
-		return -1;
-	}
-	if (t->data.list.tag != SZ_F64) {
-		fprintf(stderr, "%s: not f64\n", __func__);
-		return -1;
-	}
-	if (len < t->data.list.size) {
-		fprintf(stderr, "%s: not enough space", __func__);
-		return -1;
-	}
-	memcpy(data, t->data.list.data, t->data.list.size * sizeof(*data));
-	return 0;
-}
-

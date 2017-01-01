@@ -15,68 +15,107 @@ enum sz_typeid {
 	SZ_F32 = 5,
 	SZ_F64 = 6,
 	SZ_STR = 7,
-	SZ_LIST = 8,
-	SZ_DICT = 9,
-	SZ_END = -1,
-	SZ_ERROR = -2,
+	SZ_RAW = 8,
+	SZ_LIST = 9,
+	SZ_DICT = 10,
 };
 
-struct sz_list {
-	int8_t tag;
-	size_t size;
+struct sz_i8 {
+	uint8_t tag;
+	int8_t data;
+};
+
+struct sz_i16 {
+	uint8_t tag;
+	int16_t data;
+};
+
+struct sz_i32 {
+	uint8_t tag;
+	int32_t data;
+};
+
+struct sz_i64 {
+	uint8_t tag;
+	int64_t data;
+};
+
+struct sz_f32 {
+	uint8_t tag;
+	float data;
+};
+
+struct sz_f64 {
+	uint8_t tag;
+	double data;
+};
+
+struct sz_str {
+	uint8_t tag;
+	int16_t size;
+	char *data;
+};
+
+struct sz_raw {
+	uint8_t tag;
+	int32_t size;
 	void *data;
 };
 
-union sz_data {
-	int8_t i8;
-	int16_t i16;
-	int32_t i32;
-	int64_t i64;
-	float f32;
-	double f64;
+struct sz_list {
+	uint8_t tag;
+	int32_t size;
+	int32_t alloc;
+	union sz_tag **vals;
+};
+
+struct sz_dict {
+	uint8_t tag;
+	int32_t size;
+	int32_t alloc;
+	char **keys;
+	union sz_tag **vals;
+};
+
+union sz_tag {
+	uint8_t tag;
+	struct sz_i8 i8;
+	struct sz_i16 i16;
+	struct sz_i32 i32;
+	struct sz_i64 i64;
+	struct sz_f32 f32;
+	struct sz_f64 f64;
+	struct sz_str str;
+	struct sz_raw raw;
 	struct sz_list list;
+	struct sz_dict dict;
 };
 
-struct sz_tag {
-	int8_t tag;
-	char *name;
-	union sz_data data;
-};
+union sz_tag *sz_null(void);
+union sz_tag *sz_i8(int8_t data);
+union sz_tag *sz_i16(int16_t data);
+union sz_tag *sz_i32(int32_t data);
+union sz_tag *sz_i64(int64_t data);
+union sz_tag *sz_f32(float data);
+union sz_tag *sz_f64(double data);
+union sz_tag *sz_str(const char *data);
+union sz_tag *sz_raw(const void *data, size_t size);
+union sz_tag *sz_list(void);
+union sz_tag *sz_dict(void);
 
-int sz_write_null(int fd, const char *name);
-int sz_write_i8(int fd, const char *name, int8_t data);
-int sz_write_i16(int fd, const char *name, int16_t data);
-int sz_write_i32(int fd, const char *name, int32_t data);
-int sz_write_i64(int fd, const char *name, int64_t data);
-int sz_write_f32(int fd, const char *name, float data);
-int sz_write_f64(int fd, const char *name, double data);
-int sz_write_i8v(int fd, const char *name, int8_t *data, size_t len);
-int sz_write_i16v(int fd, const char *name, int16_t *data, size_t len);
-int sz_write_i32v(int fd, const char *name, int32_t *data, size_t len);
-int sz_write_i64v(int fd, const char *name, int64_t *data, size_t len);
-int sz_write_f32v(int fd, const char *name, float *data, size_t len);
-int sz_write_f64v(int fd, const char *name, double *data, size_t len);
+void sz_destroy(union sz_tag *tag);
 
-int sz_read(int fd, struct sz_tag *it);
-int sz_to_null(struct sz_tag *t);
-int sz_to_i8(struct sz_tag *t, int8_t *data);
-int sz_to_i16(struct sz_tag *t, int16_t *data);
-int sz_to_i32(struct sz_tag *t, int32_t *data);
-int sz_to_i64(struct sz_tag *t, int64_t *data);
-int sz_to_f32(struct sz_tag *t, float *data);
-int sz_to_f64(struct sz_tag *t, double *data);
-int sz_to_i8v(struct sz_tag *t, int8_t **data, size_t *len);
-int sz_to_i16v(struct sz_tag *t, int16_t **data, size_t *len);
-int sz_to_i32v(struct sz_tag *t, int32_t **data, size_t *len);
-int sz_to_i64v(struct sz_tag *t, int64_t **data, size_t *len);
-int sz_to_f32v(struct sz_tag *t, float **data, size_t *len);
-int sz_to_f64v(struct sz_tag *t, double **data, size_t *len);
+int sz_list_add(union sz_tag *list, union sz_tag *elem);
+int sz_dict_add(union sz_tag *dict, const char *key, union sz_tag *elem);
 
-int sz_copy_i8v(struct sz_tag *t, int8_t *data, size_t len);
-int sz_copy_i16v(struct sz_tag *t, int16_t *data, size_t len);
-int sz_copy_i32v(struct sz_tag *t, int32_t *data, size_t len);
-int sz_copy_i64v(struct sz_tag *t, int64_t *data, size_t len);
-int sz_copy_f32v(struct sz_tag *t, float *data, size_t len);
-int sz_copy_f64v(struct sz_tag *t, double *data, size_t len);
+#define sz_list_foreach(_iter,_list) \
+for (int i = 0; _iter = _list->list.vals[i], i < _list->list.size; ++i)
+
+#define sz_dict_foreach(_key,_val,_dict) \
+for (int i = 0; _key = _dict->dict.keys[i], _val = _dict->dict.vals[i], i < _dict->dict.size; ++i)
+
+int sz_read(int fd, union sz_tag *root);
+int sz_write(int fd, union sz_tag *root);
 
 #endif
+
