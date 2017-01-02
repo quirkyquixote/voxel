@@ -10,10 +10,15 @@
 #include "chunk.h"
 #include "terraform.h"
 #include "main_loop.h"
+#include "profile.h"
+#include "renderer.h"
 
 struct context {
 	struct main_loop *ml;
 	struct world *w;
+	struct profile_manager *prof_mgr;
+	struct renderer *shard_renderer;
+	int64_t px, py, pz;
 	int chunks_per_tick;
 };
 
@@ -36,6 +41,8 @@ int main(int argc, char *argv[])
 
 	ctx.ml = main_loop(30);
 	ctx.w = world();
+	ctx.prof_mgr = profile_manager();
+	ctx.shard_renderer = renderer(SHARDS_PER_WORLD, &vertex3_traits);
 	ctx.chunks_per_tick = 8;
 	main_loop_on_event(ctx.ml, event, &ctx);
 	main_loop_on_update(ctx.ml, update, &ctx);
@@ -46,6 +53,8 @@ int main(int argc, char *argv[])
 	save_all(&ctx);
 	world_destroy(ctx.w);
 	main_loop_destroy(ctx.ml);
+	renderer_destroy(ctx.shard_renderer);
+	profile_manager_destroy(ctx.prof_mgr);
 	return 0;
 }
 
@@ -53,6 +62,9 @@ int load_all(struct context *ctx)
 {
 	if (load_world(ctx->w) != 0)
 		return -1;
+	ctx->px = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
+	ctx->py = CHUNK_H / 2;
+	ctx->pz = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	return 0;
 }
 
@@ -166,9 +178,60 @@ int chunks_by_priority(const void *p1, const void *p2)
 	return c1->priority - c2->priority;
 }
 
+void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
+{
+	int64_t x1, y1, z1;
+	int64_t x, y, z;
+	struct vertex3 *data;
+	size_t size;
+	size_t alloc;
+	int8_t m, l, d, b;
+
+	x1 = x0 + SHARD_W;
+	y1 = y0 + SHARD_H;
+	z1 = z0 + SHARD_D;
+	size = 0;
+	alloc = 0;
+	data = NULL;
+
+	for (x = x0; x < x1; ++x) {
+		for (y = y0; y < y1; ++y) {
+			for (z = z0; z < z1; ++z) {
+				m = WORLD_AT(ctx->w, mat, x, y, z);
+				l = WORLD_AT(ctx->w, mat, x - 1, y, z);
+				d = y == 0 ? 0 : WORLD_AT(ctx->w, mat, x, y - 1, z);
+				b = WORLD_AT(ctx->w, mat, x, y, z - 1);
+				if (m == 0) {
+					if (l != 0) {
+						/* left face, facing right */
+					}
+					if (d != 0) {
+						/* down face, facing up */
+					}
+					if (b != 0) {
+						/* back face, facing front */
+					}
+				} else {
+					if (l == 0) {
+						/* left face, facing left */
+					}
+					if (d == 0) {
+						/* down face, facing down */
+					}
+					if (b == 0) {
+						/* back face, facing back */
+					}
+				}
+			}
+		}
+	}
+
+	renderer_update(ctx->shard_renderer, id, data, size);
+}
+
 void update_chunks(struct context *ctx)
 {
-	int x, z, i, j;
+	int x, z, i, j, k;
 	struct chunk *c;
 	struct chunk *unloaded[CHUNKS_PER_WORLD * CHUNKS_PER_WORLD];
 
@@ -179,7 +242,8 @@ void update_chunks(struct context *ctx)
 			if (c->loaded == 0) {
 				c->x = x * CHUNK_W;
 				c->z = z * CHUNK_D;
-				c->priority = c->x + c->z;
+				c->priority = hypot((double)c->x - (double)ctx->px,
+						(double)c->z - (double)ctx->pz);
 				unloaded[i++] = c;
 			}
 		}
@@ -196,6 +260,9 @@ void update_chunks(struct context *ctx)
 			terraform(0, c);
 		} else {
 			fprintf(stdout, "; from file");
+		}
+		for (k = 0; k < SHARDS_PER_CHUNK; ++k) {
+			update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
 		}
 		fprintf(stdout, "\n");
 		c->loaded = 1;
@@ -221,7 +288,7 @@ void event(const SDL_Event *e, void *data)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else if (e->key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE START ===\n");
-			//			profile_reset(ctx->prof);
+			profile_manager_reset(ctx->prof_mgr);
 		}
 	} else if (e->type == SDL_KEYUP) {
 		if (e->key.repeat) {
@@ -230,7 +297,7 @@ void event(const SDL_Event *e, void *data)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		} else if (e->key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE DUMP ===\n");
-			//			profile_dump(ctx->prof);
+			profile_manager_dump(ctx->prof_mgr);
 		}
 	}
 }
