@@ -72,14 +72,11 @@ double noise_4d(double a, double b, double c, double d, double zoom, int steps)
     return ret;
 }
 
-int terraform(int64_t seed, int64_t i, int64_t j, struct chunk *c)
+int terraform(int64_t seed, struct chunk *c)
 {
 	uint64_t u, v;
 	int x, y, z;
 	int height, heat, humidity;
-
-	c->x = i * CHUNK_W;
-	c->z = j * CHUNK_D;
 
 	for (x = 0, u = c->x; x < CHUNK_W; ++x, ++u) {
 		for (z = 0, v = c->z; z < CHUNK_D; ++z, ++v) {

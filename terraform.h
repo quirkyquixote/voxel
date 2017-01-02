@@ -5,6 +5,6 @@
 
 #include "chunk.h"
 
-int terraform(int64_t seed, int64_t i, int64_t j, struct chunk *c);
+int terraform(int64_t seed, struct chunk *c);
 
 #endif

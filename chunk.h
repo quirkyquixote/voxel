@@ -44,6 +44,8 @@ struct cell_entity {
 };
 
 struct chunk {
+	int loaded;
+	int priority;
 	int64_t x, z;
 	struct shard *shards[SHARDS_PER_CHUNK];
 	struct cell_entity *entities;

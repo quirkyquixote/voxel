@@ -156,3 +156,4 @@ int world_save(struct world *w, union sz_tag **root)
 	sz_dict_add(*root, "z", sz_i64(w->z));
 	return 0;
 }
+
