@@ -8,6 +8,7 @@ ALL_CFLAGS += -I$(shell pwd)
 voxel_objs += chunk.o
 voxel_objs += fps_manager.o
 voxel_objs += main_loop.o
+voxel_objs += profile.o
 voxel_objs += simplex.o
 voxel_objs += renderer.o
 voxel_objs += resource.o
