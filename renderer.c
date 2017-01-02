@@ -62,6 +62,94 @@ void vertex3_disable_client_states(void)
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
+struct vertex3_buf *vertex3_buf(void)
+{
+	struct vertex3_buf *b = calloc(1, sizeof(*b));
+	return b;
+}
+
+void vertex3_buf_destroy(struct vertex3_buf *b)
+{
+	if (b->data != NULL)
+		free(b->data);
+	free(b);
+}
+
+void vertex3_buf_push(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z)
+{
+	if (buf->size == buf->alloc) {
+		if (buf->alloc == 0)
+			buf->alloc = 2;
+		else
+			buf->alloc *= 2;
+		buf->data = realloc(buf->data, buf->alloc * sizeof(*buf->data));
+	}
+	buf->data[buf->size].x = x;
+	buf->data[buf->size].y = z;
+	buf->data[buf->size].y = z;
+	++buf->size;
+}
+
+void vertex3_buf_left(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z)
+{
+	vertex3_buf_push(buf, x, y, z);
+	vertex3_buf_push(buf, x, y + 1, z);
+	vertex3_buf_push(buf, x, y, z + 1);
+	vertex3_buf_push(buf, x, y, z + 1);
+	vertex3_buf_push(buf, x, y + 1, z);
+	vertex3_buf_push(buf, x, y + 1, z + 1);
+}
+
+void vertex3_buf_right(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z)
+{
+	vertex3_buf_push(buf, x + 1, y + 1, z + 1);
+	vertex3_buf_push(buf, x + 1, y + 1, z);
+	vertex3_buf_push(buf, x + 1, y, z + 1);
+	vertex3_buf_push(buf, x + 1, y, z + 1);
+	vertex3_buf_push(buf, x + 1, y + 1, z);
+	vertex3_buf_push(buf, x + 1, y, z);
+}
+
+void vertex3_buf_down(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z)
+{
+	vertex3_buf_push(buf, x, y, z);
+	vertex3_buf_push(buf, x + 1, y, z);
+	vertex3_buf_push(buf, x, y, z + 1);
+	vertex3_buf_push(buf, x, y, z + 1);
+	vertex3_buf_push(buf, x + 1, y, z);
+	vertex3_buf_push(buf, x + 1, y, z + 1);
+}
+
+void vertex3_buf_up(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z)
+{
+	vertex3_buf_push(buf, x + 1, y + 1, z + 1);
+	vertex3_buf_push(buf, x + 1, y + 1, z);
+	vertex3_buf_push(buf, x, y + 1, z + 1);
+	vertex3_buf_push(buf, x, y + 1, z + 1);
+	vertex3_buf_push(buf, x + 1, y + 1, z);
+	vertex3_buf_push(buf, x, y + 1, z);
+}
+
+void vertex3_buf_back(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z)
+{
+	vertex3_buf_push(buf, x, y, z);
+	vertex3_buf_push(buf, x + 1, y, z);
+	vertex3_buf_push(buf, x, y + 1, z);
+	vertex3_buf_push(buf, x, y + 1, z);
+	vertex3_buf_push(buf, x + 1, y, z);
+	vertex3_buf_push(buf, x + 1, y + 1, z);
+}
+
+void vertex3_buf_front(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z)
+{
+	vertex3_buf_push(buf, x + 1, y + 1, z + 1);
+	vertex3_buf_push(buf, x + 1, y, z + 1);
+	vertex3_buf_push(buf, x, y + 1, z + 1);
+	vertex3_buf_push(buf, x, y + 1, z + 1);
+	vertex3_buf_push(buf, x + 1, y, z + 1);
+	vertex3_buf_push(buf, x, y, z + 1);
+}
+
 struct renderer *renderer(int vbo_count, const struct vertex_traits *traits)
 {
 	struct renderer *r = calloc(1, sizeof(*r));

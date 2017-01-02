@@ -28,6 +28,12 @@ struct vertex3 {
 	GLfloat v;
 };
 
+struct vertex3_buf {
+	struct vertex3 *data;
+	size_t size;
+	size_t alloc;
+};
+
 struct renderer {
 	const struct vertex_traits *traits;
 	size_t vbo_count;
@@ -46,6 +52,16 @@ static inline struct vertex3 vertex3(GLfloat x, GLfloat y, GLfloat z, GLfloat u,
 {
 	return (struct vertex3){ x, y, z, u, v };
 }
+
+struct vertex3_buf *vertex3_buf(void);
+void vertex3_buf_destroy(struct vertex3_buf *b);
+void vertex3_buf_push(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z);
+void vertex3_buf_left(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z);
+void vertex3_buf_right(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z);
+void vertex3_buf_down(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z);
+void vertex3_buf_up(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z);
+void vertex3_buf_back(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z);
+void vertex3_buf_front(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z);
 
 struct renderer *renderer(int nbufs, const struct vertex_traits *traits);
 void renderer_destroy(struct renderer *r);
