@@ -1,56 +1,106 @@
 
-include config.mk
+# Targets to build and install binaries 
+# Also, the help text for tntsh
 
-# Independently of where the files being compiled are, they search for C
-# headers in the current directory.
-ALL_CFLAGS += -I$(shell pwd)
+SRC_TARGETS += all
+SRC_TARGETS += install
+SRC_TARGETS += clean
 
-voxel_objs += chunk.o
-voxel_objs += fps_manager.o
-voxel_objs += main_loop.o
-voxel_objs += profile.o
-voxel_objs += simplex.o
-voxel_objs += renderer.o
-voxel_objs += resource.o
-voxel_objs += sz.o
-voxel_objs += terraform.o
-voxel_objs += voxel.o
+.PHONY: $(SRC_TARGETS)
 
-szcat_objs += sz.o
+all:
+	@make -C src all
+	@make -C doc text
 
-objs = $(voxel_objs) $(szcat_objs)
-deps = $(objs:.o=.d)
+install:
+	@make -C src install
+	@make -C doc install-text
 
-programs += voxel
-programs += szcat
-
-install_programs = $(addprefix $(DESTDIR)$(bindir)/,$(programs))
-
-files += data
-
-install_files = $(addprefix $(DESTDIR)$(datadir)/,$(files))
-
-# The default target of this makefile
-.PHONY: all
-all: $(programs)
-
-.PHONY: clean
 clean:
-	$(RM) $(deps)
-	$(RM) $(objs)
-	$(RM) $(programs)
+	@make -C src clean
+	@make -C doc clean-text
 
-.PHONY: install
-install: all $(install_programs) $(install_files) $(DESTDIR)$(localstatedir)
 
-$(DESTDIR)$(localstatedir):
-	$(QUIET_INSTALL)$(INSTALL) -d $@ -g ftu -m 0770
+# Targets to build and install all the documentation
 
-# Rules to compile tools that require specific libraries or flags
-voxel: $(voxel_objs)
-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $^ -lGL -lSDL2 -lSDL2_mixer
+DOC_TARGETS += doc
+DOC_TARGETS += install-doc
+DOC_TARGETS += clean-doc
+DOC_TARGETS += html
+DOC_TARGETS += install-html
+DOC_TARGETS += clean-html
+DOC_TARGETS += pdf
+DOC_TARGETS += install-pdf
+DOC_TARGETS += clean-pdf
+DOC_TARGETS += text
+DOC_TARGETS += install-text
+DOC_TARGETS += clean-text
 
-szcat: $(szcat_objs)
+.PHONY: $(DOC_TARGETS)
+$(DOC_TARGETS):
+	@make -C doc $@
 
--include $(DEPS)
+# Targets to build and install the API documentation
 
+APIDOC_TARGETS += apidoc
+APIDOC_TARGETS += install-apidoc
+APIDOC_TARGETS += clean-apidoc
+
+.PHONY: $(APIDOC_TARGETS)
+$(APIDOC_TARGETS):
+	@make -C apidoc $@
+
+# Targets to build and run tests
+
+TEST_TARGETS += test
+TEST_TARGETS += stest
+TEST_TARGETS += ftest
+TEST_TARGETS += clean-test
+
+.PHONY: $(TEST_TARGETS)
+
+test: all
+	@make -C tests all
+
+stest: all
+	@make -C tests software
+
+ftest: all
+	@make -C tests firmware
+
+clean-test:
+	@make -C tests clean
+
+# Target to clean everything
+
+.PHONY: realclean
+realclean:
+	git clean -fdx
+
+# Target to list targets
+
+.PHONY: help
+help:
+	@echo "This Makefile accepts the following targets:"
+	@echo "    all (the default if no target is provided)"
+	@echo "    clean"
+	@echo "    install"
+	@echo "    doc"
+	@echo "    clean-doc"
+	@echo "    install-doc"
+	@echo "    html"
+	@echo "    clean-html"
+	@echo "    install-html"
+	@echo "    pdf"
+	@echo "    clean-pdf"
+	@echo "    install-pdf"
+	@echo "    text"
+	@echo "    clean-text"
+	@echo "    install-text"
+	@echo "    apidoc"
+	@echo "    clean-apidoc"
+	@echo "    install-apidoc"
+	@echo "    test"
+	@echo "    stest"
+	@echo "    ftest"
+	@echo "    clean-test"
