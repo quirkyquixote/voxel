@@ -6,7 +6,7 @@
 
 #include "sz.h"
 
-struct shard *shard_new(void)
+struct shard *shard(void)
 {
 	struct shard *s = calloc(1, sizeof(*s));
 	return s;
@@ -48,12 +48,12 @@ int shard_save(struct shard *s, union sz_tag **root)
 	return 0;
 }
 
-struct chunk *chunk_new(void)
+struct chunk *chunk(void)
 {
 	struct chunk *c = calloc(1, sizeof(*c));
 	int i;
 	for (i = 0; i < SHARDS_PER_CHUNK; ++i)
-		c->shards[i] = shard_new();
+		c->shards[i] = shard();
 	return c;
 }
 
@@ -113,14 +113,14 @@ int chunk_save(struct chunk *c, union sz_tag **root)
 	return 0;
 }
 
-struct world *world_new(void)
+struct world *world(void)
 {
 	struct world *w;
 	int x, z;
 	w = calloc(1, sizeof(*w));
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x)
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z)
-			w->chunks[x][z] = chunk_new();
+			w->chunks[x][z] = chunk();
 	return w;
 }
 

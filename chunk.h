@@ -54,17 +54,17 @@ struct world {
 	struct chunk *chunks[CHUNKS_PER_WORLD][CHUNKS_PER_WORLD];
 };
 
-struct shard *shard_new(void);
+struct shard *shard(void);
 void shard_destroy(struct shard *s);
 int shard_load(struct shard *s, union sz_tag *root);
 int shard_save(struct shard *s, union sz_tag **root);
 
-struct chunk *chunk_new(void);
+struct chunk *chunk(void);
 void chunk_destroy(struct chunk *c);
 int chunk_load(struct chunk *c, union sz_tag *root);
 int chunk_save(struct chunk *c, union sz_tag **root);
 
-struct world *world_new(void);
+struct world *world(void);
 void world_destroy(struct world *w);
 int world_load(struct world *w, union sz_tag *root);
 int world_save(struct world *w, union sz_tag **root);
