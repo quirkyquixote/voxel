@@ -10,15 +10,12 @@ SRC_TARGETS += clean
 
 all:
 	@make -C src all
-	@make -C doc text
 
 install:
 	@make -C src install
-	@make -C doc install-text
 
 clean:
 	@make -C src clean
-	@make -C doc clean-text
 
 
 # Targets to build and install all the documentation

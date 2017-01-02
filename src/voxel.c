@@ -12,6 +12,7 @@
 #include "main_loop.h"
 #include "profile.h"
 #include "renderer.h"
+#include "camera.h"
 
 struct context {
 	char *dir;
@@ -19,7 +20,9 @@ struct context {
 	struct world *w;
 	struct profile_manager *prof_mgr;
 	struct renderer *shard_renderer;
+	struct camera *cam;
 	int64_t px, py, pz;
+	int move_lf, move_rt, move_bk, move_ft, move_up, move_dn;
 	int chunks_per_tick;
 };
 
@@ -38,31 +41,34 @@ int save_chunk(struct chunk *c, const char *dir);
 
 int main(int argc, char *argv[])
 {
-	struct context ctx;
+	struct context *ctx;
 
-	ctx.dir = "foo";
-	ctx.ml = main_loop(30);
-	ctx.w = world();
-	ctx.prof_mgr = profile_manager();
-	ctx.shard_renderer = renderer(SHARDS_PER_WORLD, &vertex3_traits);
-	ctx.chunks_per_tick = 8;
-	main_loop_on_event(ctx.ml, event, &ctx);
-	main_loop_on_update(ctx.ml, update, &ctx);
+	ctx = calloc(1, sizeof(*ctx));
+	ctx->dir = "foo";
+	ctx->ml = main_loop(30);
+	ctx->cam = camera(1024);
+	ctx->w = world();
+	ctx->prof_mgr = profile_manager();
+	ctx->chunks_per_tick = 1;
+	main_loop_on_event(ctx->ml, event, ctx);
+	main_loop_on_update(ctx->ml, update, ctx);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 //	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 3);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-	main_loop_add_window(ctx.ml, window("voxel", 0, 0, 1024, 768, 0));
-	window_on_render(ctx.ml->windows, render, &ctx);
-	load_all(&ctx);
-	main_loop_run(ctx.ml);
-	save_all(&ctx);
-	world_destroy(ctx.w);
-	main_loop_destroy(ctx.ml);
-	renderer_destroy(ctx.shard_renderer);
-	profile_manager_destroy(ctx.prof_mgr);
+	main_loop_add_window(ctx->ml, window("voxel", 0, 0, 1024, 768, 0));
+	window_on_render(ctx->ml->windows, render, ctx);
+	load_all(ctx);
+	ctx->shard_renderer = renderer(SHARDS_PER_WORLD, &vertex3_traits);
+	main_loop_run(ctx->ml);
+	save_all(ctx);
+	world_destroy(ctx->w);
+	main_loop_destroy(ctx->ml);
+	renderer_destroy(ctx->shard_renderer);
+	profile_manager_destroy(ctx->prof_mgr);
+	free(ctx);
 	return 0;
 }
 
@@ -70,9 +76,9 @@ int load_all(struct context *ctx)
 {
 	if (load_world(ctx->w, ctx->dir) != 0)
 		return -1;
-	ctx->px = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
-	ctx->py = CHUNK_H / 2;
-	ctx->pz = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
+	ctx->cam->pos.x = ctx->px = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
+	ctx->cam->pos.y = ctx->py = CHUNK_H;
+	ctx->cam->pos.z = ctx->pz = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	return 0;
 }
 
@@ -176,6 +182,38 @@ int save_chunk(struct chunk *c, const char *dir)
 void render(void *data)
 {
 	struct context *ctx = data;
+	int64_t x, y, z;
+	struct v3 p;
+	struct chunk *c;
+	struct shard *s;
+	int shards_rendered;
+
+	shards_rendered = 0;
+	camera_update(ctx->cam, 1024, 768);
+	renderer_begin(ctx->shard_renderer);
+	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
+		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
+			c = ctx->w->chunks[x][z];
+			if (c->loaded == 0)
+				continue;
+			p.x = c->x + CHUNK_W / 2;
+			p.z = c->z + CHUNK_W / 2;
+			for (y = 0; y < SHARDS_PER_CHUNK; ++y) {
+				s = c->shards[y];
+				if (ctx->shard_renderer->vbo_sizes[s->id] == 0)
+					continue;
+				p.y = s->y + SHARD_W / 2;
+			/*	if (camera_visible(ctx->cam, p, SHARD_W) == 0)
+					continue;*/
+				renderer_buffer(ctx->shard_renderer, GL_TRIANGLES, s->id);
+				++shards_rendered;
+			}
+		}
+	}
+	renderer_end(ctx->shard_renderer);
+	printf("p:%g,%g,%g; ", ctx->cam->pos.x, ctx->cam->pos.y, ctx->cam->pos.z);
+	printf("a:%g,%g,%g; ", ctx->cam->angles.x, ctx->cam->angles.y, ctx->cam->angles.z);
+	printf("shards rendered:%d\n", shards_rendered);
 }
 
 int chunks_by_priority(const void *p1, const void *p2)
@@ -184,6 +222,33 @@ int chunks_by_priority(const void *p1, const void *p2)
 	c1 = *(const void **)p1;
 	c2 = *(const void **)p2;
 	return c1->priority - c2->priority;
+}
+
+void update_camera(struct context *ctx)
+{
+	int w, h;
+	int x, y;
+	int buttons;
+	struct v3 angles;
+	struct v3 move;
+
+	SDL_GetWindowSize(ctx->ml->windows->sdl_window, &w, &h);
+	buttons = SDL_GetMouseState(&x, &y);
+	SDL_WarpMouseInWindow(ctx->ml->windows->sdl_window, w / 2, h / 2);
+
+	angles = ctx->cam->angles;
+	angles.y += (x - w / 2) * .005;
+	angles.x -= (y - h / 2) * .005;
+	if (angles.x < -M_PI_2 * .99)
+		angles.x = -M_PI_2 * .99;
+	else if (angles.x > M_PI_2 * .99)
+		angles.x = M_PI_2 *.99;
+//	angles.x = CLAMP(angles.x, -M_PI_2 * .99, M_PI_2 * .99);
+	ctx->cam->angles = angles;
+
+	move = v3(ctx->move_rt - ctx->move_lf, ctx->move_up - ctx->move_dn, ctx->move_bk - ctx->move_ft);
+	move = v3roty(move, angles.y);
+	ctx->cam->pos = v3addx(ctx->cam->pos, move, 2.5);
 }
 
 void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
@@ -207,18 +272,18 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 				b = WORLD_AT(ctx->w, mat, x, y, z - 1);
 				if (m == 0) {
 					if (l != 0)
-						vertex3_buf_right(buf, x - 1, y, z);
+						vertex3_buf_right(buf, x - 1, y, z, 0, 0, 1, 1);
 					if (d != 0)
-						vertex3_buf_up(buf, x, y - 1, z);
+						vertex3_buf_up(buf, x, y - 1, z, 0, 0, 1, 1);
 					if (b != 0)
-						vertex3_buf_front(buf, x, y, z - 1);
+						vertex3_buf_front(buf, x, y, z - 1, 0, 0, 1, 1);
 				} else {
 					if (l == 0)
-						vertex3_buf_left(buf, x, y, z);
+						vertex3_buf_left(buf, x, y, z, 0, 0, 1, 1);
 					if (d == 0)
-						vertex3_buf_down(buf, x, y, z);
+						vertex3_buf_down(buf, x, y, z, 0, 0, 1, 1);
 					if (b == 0)
-						vertex3_buf_back(buf, x, y, z);
+						vertex3_buf_back(buf, x, y, z, 0, 0, 1, 1);
 				}
 			}
 		}
@@ -271,6 +336,7 @@ void update_chunks(struct context *ctx)
 void update(void *data)
 {
 	struct context *ctx = data;
+	update_camera(ctx);
 	update_chunks(ctx);
 }
 
@@ -283,6 +349,18 @@ void event(const SDL_Event *e, void *data)
 			return;
 		} else if (e->key.keysym.sym == SDLK_ESCAPE) {
 			main_loop_kill(ctx->ml);
+		} else if (e->key.keysym.sym == SDLK_w) {
+			ctx->move_ft = 1;
+		} else if (e->key.keysym.sym == SDLK_a) {
+			ctx->move_lf = 1;
+		} else if (e->key.keysym.sym == SDLK_s) {
+			ctx->move_bk = 1;
+		} else if (e->key.keysym.sym == SDLK_d) {
+			ctx->move_rt = 1;
+		} else if (e->key.keysym.sym == SDLK_LSHIFT) {
+			ctx->move_dn = 1;
+		} else if (e->key.keysym.sym == SDLK_SPACE) {
+			ctx->move_up = 1;
 		} else if (e->key.keysym.sym == SDLK_o) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else if (e->key.keysym.sym == SDLK_p) {
@@ -292,6 +370,18 @@ void event(const SDL_Event *e, void *data)
 	} else if (e->type == SDL_KEYUP) {
 		if (e->key.repeat) {
 			return;
+		} else if (e->key.keysym.sym == SDLK_w) {
+			ctx->move_ft = 0;
+		} else if (e->key.keysym.sym == SDLK_a) {
+			ctx->move_lf = 0;
+		} else if (e->key.keysym.sym == SDLK_s) {
+			ctx->move_bk = 0;
+		} else if (e->key.keysym.sym == SDLK_d) {
+			ctx->move_rt = 0;
+		} else if (e->key.keysym.sym == SDLK_LSHIFT) {
+			ctx->move_dn = 0;
+		} else if (e->key.keysym.sym == SDLK_SPACE) {
+			ctx->move_up = 0;
 		} else if (e->key.keysym.sym == SDLK_o) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		} else if (e->key.keysym.sym == SDLK_p) {

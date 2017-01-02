@@ -5,6 +5,7 @@ include ../config.mk
 # headers in the current directory.
 ALL_CFLAGS += -I$(shell pwd)
 
+voxel_objs += camera.o
 voxel_objs += chunk.o
 voxel_objs += fps_manager.o
 voxel_objs += main_loop.o
@@ -48,7 +49,7 @@ $(DESTDIR)$(localstatedir):
 
 # Rules to compile tools that require specific libraries or flags
 voxel: $(voxel_objs)
-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $^ -lGL -lSDL2 -lSDL2_mixer
+	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $^ -lGL -lGLU -lSDL2 -lSDL2_mixer
 
 szcat: $(szcat_objs)
 
