@@ -80,14 +80,16 @@ int load_all(struct context *ctx)
 	int x, z;
 	struct chunk *c;
 
-	if (load_world(ctx->w, ctx->dir) != 0)
-		return -1;
+	if (load_world(ctx->w, ctx->dir) != 0) {
+		/* initialize from scratch */
+	}
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
 			c = ctx->w->chunks[x][z];
 			c->x = ctx->w->x + x * CHUNK_W;
 			c->z = ctx->w->z + z * CHUNK_D;
-			load_chunk(c, ctx->dir);
+			if (load_chunk(c, ctx->dir) != 0)
+				terraform(0, c);
 		}
 	}
 	ctx->cam->pos.x = ctx->px = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
@@ -195,16 +197,18 @@ void render(void *data)
 {
 	struct context *ctx = data;
 	int64_t x, y, z;
+	int w, h;
 	struct v3 p;
 	struct chunk *c;
 	struct shard *s;
 	int shards_rendered;
 
 	shards_rendered = 0;
-	camera_update(ctx->cam, 1024, 768);
+	SDL_GetWindowSize(ctx->ml->windows->sdl_window, &w, &h);
+	camera_update(ctx->cam, w, h);
 	glColor3f(1, 1, 1);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//	glEnable(GL_BLEND);
+//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
 	renderer_begin(ctx->shard_renderer);
@@ -217,7 +221,7 @@ void render(void *data)
 				s = c->shards[y];
 				if (ctx->shard_renderer->vbo_sizes[s->id] == 0)
 					continue;
-				p.y = s->y + SHARD_W / 2;
+				p.y = (s->y + 0.5) * SHARD_W;
 				if (camera_visible(ctx->cam, p, SHARD_W) == 0)
 					continue;
 				renderer_buffer(ctx->shard_renderer, GL_TRIANGLES, s->id);
@@ -260,7 +264,7 @@ void update_camera(struct context *ctx)
 
 	move = v3(ctx->move_rt - ctx->move_lf, ctx->move_up - ctx->move_dn, ctx->move_bk - ctx->move_ft);
 	move = v3roty(move, angles.y);
-	ctx->cam->pos = v3addx(ctx->cam->pos, move, 2.5);
+	ctx->cam->pos = v3addx(ctx->cam->pos, move, .5);
 }
 
 void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
@@ -328,7 +332,7 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-		fprintf(stdout, "Update chunk %d,%d; priority:%d", c->x, c->z, c->priority);
+		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
 		for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 			update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
 		fprintf(stdout, "\n");
