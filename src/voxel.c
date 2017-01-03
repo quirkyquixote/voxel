@@ -10,10 +10,12 @@
 #include "chunk.h"
 #include "terraform.h"
 #include "main_loop.h"
+#include "physics.h"
 #include "profile.h"
 #include "renderer.h"
 #include "camera.h"
 #include "media.h"
+
 
 struct context {
 	char *dir;
@@ -23,6 +25,8 @@ struct context {
 	struct renderer *shard_renderer;
 	struct camera *cam;
 	GLuint tex_terrain;
+	struct space *space;
+	struct body *player;
 	int64_t px, py, pz;
 	int move_lf, move_rt, move_bk, move_ft, move_up, move_dn;
 	int chunks_per_tick;
@@ -52,6 +56,8 @@ int main(int argc, char *argv[])
 	ctx->w = world();
 	ctx->prof_mgr = profile_manager();
 	ctx->chunks_per_tick = 4;
+
+	/* Setup main loop */
 	main_loop_on_event(ctx->ml, event, ctx);
 	main_loop_on_update(ctx->ml, update, ctx);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -62,11 +68,30 @@ int main(int argc, char *argv[])
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	main_loop_add_window(ctx->ml, window("voxel", 0, 0, 1280, 768, 0));
 	window_on_render(ctx->ml->windows, render, ctx);
+
+	/* Load textures */
 	ctx->tex_terrain = texture("data/terrain.png");
-	load_all(ctx);
+
+	/* Initialize physics */
+	ctx->space = space(ctx->w);
+	space_set_gravity(ctx->space, v3f(0, -0.05, 0));
+	space_set_iterations(ctx->space, 1);
+	space_set_impulse(ctx->space, 0.001);
+	space_set_terminal_speed(ctx->space, 1);
+
+	/* Create renderers */
 	ctx->shard_renderer = renderer(SHARDS_PER_WORLD, &vertex3_traits);
+
+	/* Load world */
+	load_all(ctx);
+
+	/* Run */
 	main_loop_run(ctx->ml);
+
+	/* Save the world */
 	save_all(ctx);
+
+	/* Destroy everything */
 	world_destroy(ctx->w);
 	main_loop_destroy(ctx->ml);
 	renderer_destroy(ctx->shard_renderer);
@@ -95,6 +120,9 @@ int load_all(struct context *ctx)
 	ctx->cam->pos.x = ctx->px = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	ctx->cam->pos.y = ctx->py = CHUNK_H;
 	ctx->cam->pos.z = ctx->pz = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
+	ctx->player = body(ctx->space);
+	body_set_position(ctx->player, ctx->cam->pos);
+	body_set_size(ctx->player, v3f(0.325, 0.825, 0.325));
 	return 0;
 }
 
@@ -207,8 +235,8 @@ void render(void *data)
 	SDL_GetWindowSize(ctx->ml->windows->sdl_window, &w, &h);
 	camera_update(ctx->cam, w, h);
 	glColor3f(1, 1, 1);
-//	glEnable(GL_BLEND);
-//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//	glEnable(GL_BLEND);
+	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
 	renderer_begin(ctx->shard_renderer);
@@ -246,27 +274,30 @@ void update_camera(struct context *ctx)
 	int w, h;
 	int x, y;
 	int buttons;
-	struct v3f angles;
-	struct v3f move;
+	struct v3f r, v;
 
 	SDL_GetWindowSize(ctx->ml->windows->sdl_window, &w, &h);
 	buttons = SDL_GetMouseState(&x, &y);
 	SDL_WarpMouseInWindow(ctx->ml->windows->sdl_window, w / 2, h / 2);
 
-	angles = ctx->cam->angles;
-	angles.y += (x - w / 2) * .005;
-	angles.x -= (y - h / 2) * .005;
-	if (angles.x < -M_PI_2 * .99)
-		angles.x = -M_PI_2 * .99;
-	else if (angles.x > M_PI_2 * .99)
-		angles.x = M_PI_2 *.99;
-	ctx->cam->angles = angles;
+	r = body_get_rotation(ctx->player);
+	r.y += (x - w / 2) * .005;
+	r.x -= (y - h / 2) * .005;
+	if (r.x < -M_PI_2 * .99)
+		r.x = -M_PI_2 * .99;
+	else if (r.x > M_PI_2 * .99)
+		r.x = M_PI_2 *.99;
+	body_set_rotation(ctx->player, r);
 
-	move.x = ctx->move_rt - ctx->move_lf;
-	move.y = ctx->move_up - ctx->move_dn;
-	move.z = ctx->move_bk - ctx->move_ft;
-	move = v3froty(move, angles.y);
-	ctx->cam->pos = v3faddx(ctx->cam->pos, move, .5);
+	v = body_get_velocity(ctx->player);
+	v.x = (ctx->move_rt - ctx->move_lf) * .25;
+	v.y += (ctx->move_up - ctx->move_dn) * .25;
+	v.z = (ctx->move_bk - ctx->move_ft) * .25;
+	v = v3froty(v, r.y);
+	body_set_velocity(ctx->player, v);
+
+	ctx->cam->angles = ctx->player->r;
+	ctx->cam->pos = ctx->player->p;
 }
 
 void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
@@ -345,6 +376,7 @@ void update_chunks(struct context *ctx)
 void update(void *data)
 {
 	struct context *ctx = data;
+	space_run(ctx->space);
 	update_camera(ctx);
 	update_chunks(ctx);
 }

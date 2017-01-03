@@ -10,6 +10,7 @@ voxel_objs += chunk.o
 voxel_objs += fps_manager.o
 voxel_objs += main_loop.o
 voxel_objs += media.o
+voxel_objs += physics.o
 voxel_objs += profile.o
 voxel_objs += simplex.o
 voxel_objs += renderer.o
@@ -53,5 +54,5 @@ voxel: $(voxel_objs)
 
 szcat: $(szcat_objs)
 
--include $(DEPS)
+-include $(deps)
 
