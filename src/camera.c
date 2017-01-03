@@ -25,12 +25,12 @@ void camera_destroy(struct camera *c)
 	free(c);
 }
 
-int camera_visible(struct camera *c, struct v3 p, float r)
+int camera_visible(struct camera *c, struct v3f p, float r)
 {
-	p = v3sub(p, c->pos);
-	return (v3length(p) + r <= c->distance
-			&& v3dot(c->nup, p) < r && v3dot(c->ndn, p) < r
-			&& v3dot(c->nlf, p) < r && v3dot(c->nrt, p) < r);
+	p = v3fsub(p, c->pos);
+	return (v3flength(p) + r <= c->distance
+			&& v3fdot(c->nup, p) < r && v3fdot(c->ndn, p) < r
+			&& v3fdot(c->nlf, p) < r && v3fdot(c->nrt, p) < r);
 }
 
 void camera_update(struct camera *c, float w, float h)
@@ -45,28 +45,28 @@ void camera_update(struct camera *c, float w, float h)
 	float ca = cos(a);
 	float sa = sin(a);
 
-	struct v3 target;
+	struct v3f target;
 
-	c->nlf = v3(-ca, 0, sa);
-	c->nlf = v3rotx(c->nlf, c->angles.x);
-	c->nlf = v3roty(c->nlf, c->angles.y);
+	c->nlf = v3f(-ca, 0, sa);
+	c->nlf = v3frotx(c->nlf, c->angles.x);
+	c->nlf = v3froty(c->nlf, c->angles.y);
 
-	c->nrt = v3(ca, 0, sa);
-	c->nrt = v3rotx(c->nrt, c->angles.x);
-	c->nrt = v3roty(c->nrt, c->angles.y);
+	c->nrt = v3f(ca, 0, sa);
+	c->nrt = v3frotx(c->nrt, c->angles.x);
+	c->nrt = v3froty(c->nrt, c->angles.y);
 
-	c->nup = v3(0, cb, sb);
-	c->nup = v3rotx(c->nup, c->angles.x);
-	c->nup = v3roty(c->nup, c->angles.y);
+	c->nup = v3f(0, cb, sb);
+	c->nup = v3frotx(c->nup, c->angles.x);
+	c->nup = v3froty(c->nup, c->angles.y);
 
-	c->ndn = v3(0, -cb, sb);
-	c->ndn = v3rotx(c->ndn, c->angles.x);
-	c->ndn = v3roty(c->ndn, c->angles.y);
+	c->ndn = v3f(0, -cb, sb);
+	c->ndn = v3frotx(c->ndn, c->angles.x);
+	c->ndn = v3froty(c->ndn, c->angles.y);
 
-	target = v3(0, 0, -c->distance);
-	target = v3rotx(target, c->angles.x);
-	target = v3roty(target, c->angles.y);
-	target = v3add(target, c->pos);
+	target = v3f(0, 0, -c->distance);
+	target = v3frotx(target, c->angles.x);
+	target = v3froty(target, c->angles.y);
+	target = v3fadd(target, c->pos);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

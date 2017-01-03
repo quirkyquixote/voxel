@@ -198,7 +198,7 @@ void render(void *data)
 	struct context *ctx = data;
 	int64_t x, y, z;
 	int w, h;
-	struct v3 p;
+	struct v3f p;
 	struct chunk *c;
 	struct shard *s;
 	int shards_rendered;
@@ -246,8 +246,8 @@ void update_camera(struct context *ctx)
 	int w, h;
 	int x, y;
 	int buttons;
-	struct v3 angles;
-	struct v3 move;
+	struct v3f angles;
+	struct v3f move;
 
 	SDL_GetWindowSize(ctx->ml->windows->sdl_window, &w, &h);
 	buttons = SDL_GetMouseState(&x, &y);
@@ -262,9 +262,11 @@ void update_camera(struct context *ctx)
 		angles.x = M_PI_2 *.99;
 	ctx->cam->angles = angles;
 
-	move = v3(ctx->move_rt - ctx->move_lf, ctx->move_up - ctx->move_dn, ctx->move_bk - ctx->move_ft);
-	move = v3roty(move, angles.y);
-	ctx->cam->pos = v3addx(ctx->cam->pos, move, .5);
+	move.x = ctx->move_rt - ctx->move_lf;
+	move.y = ctx->move_up - ctx->move_dn;
+	move.z = ctx->move_bk - ctx->move_ft;
+	move = v3froty(move, angles.y);
+	ctx->cam->pos = v3faddx(ctx->cam->pos, move, .5);
 }
 
 void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
