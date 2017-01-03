@@ -12,9 +12,10 @@
 
 static const GLfloat bkgrcolor[] = { 1, .75, .5, 1 };
 
-struct camera *camera(float distance)
+struct camera *camera(float fovy, float distance)
 {
 	struct camera *c = calloc(1, sizeof(*c));
+	c->fovy = fovy;
 	c->distance = distance;
 	return c;
 }
@@ -34,15 +35,15 @@ int camera_visible(struct camera *c, struct v3 p, float r)
 
 void camera_update(struct camera *c, float w, float h)
 {
-    static const float a = M_PI / 4;
-    static const float b = M_PI / 6;
+    float ratio = w / h;
+
+    float a = c->fovy * M_PI / 180.;
+    float b = a * ratio;
 
     float ca = cos(a);
     float sa = sin(a);
     float cb = cos(b);
     float sb = sin(b);
-
-    float ratio = w / h;
 
     struct v3 target;
 
@@ -74,7 +75,7 @@ void camera_update(struct camera *c, float w, float h)
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0f, ratio, .1, 300);
+    gluPerspective(c->fovy, ratio, .1, c->distance);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);

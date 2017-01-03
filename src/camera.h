@@ -12,10 +12,11 @@ struct camera {
     struct v3 nrt;		// normal of the right clipping plane
     struct v3 nup;		// normal of the top clipping plane
     struct v3 ndn;		// normal of the bottom clipping plane
+    float fovy;
     float distance;		// shards farther than this will not be drawn. Also determines fog
 };
 
-struct camera *camera(float distance);
+struct camera *camera(float fovy, float distance);
 void camera_destroy(struct camera *c);
 void camera_update(struct camera *c, float w, float h);
 int camera_visible(struct camera *c, struct v3 p, float r);

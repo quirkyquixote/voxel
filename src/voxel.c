@@ -48,10 +48,10 @@ int main(int argc, char *argv[])
 	ctx = calloc(1, sizeof(*ctx));
 	ctx->dir = "foo";
 	ctx->ml = main_loop(30);
-	ctx->cam = camera(1024);
+	ctx->cam = camera(60.0, 1024);
 	ctx->w = world();
 	ctx->prof_mgr = profile_manager();
-	ctx->chunks_per_tick = 1;
+	ctx->chunks_per_tick = 4;
 	main_loop_on_event(ctx->ml, event, ctx);
 	main_loop_on_update(ctx->ml, update, ctx);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-	main_loop_add_window(ctx->ml, window("voxel", 0, 0, 1024, 768, 0));
+	main_loop_add_window(ctx->ml, window("voxel", 0, 0, 1280, 768, 0));
 	window_on_render(ctx->ml->windows, render, ctx);
 	ctx->tex_terrain = texture("data/terrain.png");
 	load_all(ctx);
@@ -77,8 +77,19 @@ int main(int argc, char *argv[])
 
 int load_all(struct context *ctx)
 {
+	int x, z;
+	struct chunk *c;
+
 	if (load_world(ctx->w, ctx->dir) != 0)
 		return -1;
+	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
+		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
+			c = ctx->w->chunks[x][z];
+			c->x = ctx->w->x + x * CHUNK_W;
+			c->z = ctx->w->z + z * CHUNK_D;
+			load_chunk(c, ctx->dir);
+		}
+	}
 	ctx->cam->pos.x = ctx->px = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	ctx->cam->pos.y = ctx->py = CHUNK_H;
 	ctx->cam->pos.z = ctx->pz = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
@@ -165,8 +176,6 @@ int save_chunk(struct chunk *c, const char *dir)
 	int fd;
 	union sz_tag *root;
 
-	if (c->loaded == 0)
-		return -1;
 	if (chunk_save(c, &root) != 0)
 		return -1;
 	snprintf(path, sizeof(path), "%s/%06x%06x.dat", dir, c->x / CHUNK_W, c->z / CHUNK_D);
@@ -202,8 +211,6 @@ void render(void *data)
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
 			c = ctx->w->chunks[x][z];
-			if (c->loaded == 0)
-				continue;
 			p.x = c->x + CHUNK_W / 2;
 			p.z = c->z + CHUNK_W / 2;
 			for (y = 0; y < SHARDS_PER_CHUNK; ++y) {
@@ -211,8 +218,8 @@ void render(void *data)
 				if (ctx->shard_renderer->vbo_sizes[s->id] == 0)
 					continue;
 				p.y = s->y + SHARD_W / 2;
-				/*	if (camera_visible(ctx->cam, p, SHARD_W) == 0)
-					continue;*/
+				if (camera_visible(ctx->cam, p, SHARD_W) == 0)
+					continue;
 				renderer_buffer(ctx->shard_renderer, GL_TRIANGLES, s->id);
 				++shards_rendered;
 			}
@@ -302,39 +309,30 @@ void update_chunks(struct context *ctx)
 {
 	int x, z, i, j, k;
 	struct chunk *c;
-	struct chunk *unloaded[CHUNKS_PER_WORLD * CHUNKS_PER_WORLD];
+	struct chunk *out_of_date[CHUNKS_PER_WORLD * CHUNKS_PER_WORLD];
 
 	i = 0;
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
 			c = ctx->w->chunks[x][z];
-			if (c->loaded == 0) {
-				c->x = x * CHUNK_W;
-				c->z = z * CHUNK_D;
+			if (c->up_to_date == 0) {
 				c->priority = hypot((double)c->x - (double)ctx->px,
 						(double)c->z - (double)ctx->pz);
-				unloaded[i++] = c;
+				out_of_date[i++] = c;
 			}
 		}
 	}
 	if (i == 0)
 		return;
-	qsort(unloaded, i, sizeof(*unloaded), chunks_by_priority);
+	qsort(out_of_date, i, sizeof(*out_of_date), chunks_by_priority);
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
-		c = unloaded[j];
+		c = out_of_date[j];
 		fprintf(stdout, "Update chunk %d,%d; priority:%d", c->x, c->z, c->priority);
-		if (load_chunk(c, ctx->dir) != 0) {
-			fprintf(stdout, "; from scratch");
-			terraform(0, c);
-		} else {
-			fprintf(stdout, "; from file");
-		}
-		for (k = 0; k < SHARDS_PER_CHUNK; ++k) {
+		for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 			update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
-		}
 		fprintf(stdout, "\n");
-		c->loaded = 1;
+		c->up_to_date = 1;
 	}
 }
 
