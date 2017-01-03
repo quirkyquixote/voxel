@@ -26,6 +26,10 @@ struct vertex3 {
 	GLfloat z;
 	GLfloat u;
 	GLfloat v;
+	GLubyte r;
+	GLubyte g;
+	GLubyte b;
+	GLubyte a;
 };
 
 struct vertex3_buf {
@@ -56,13 +60,20 @@ static inline struct vertex3 vertex3(GLfloat x, GLfloat y, GLfloat z, GLfloat u,
 
 struct vertex3_buf *vertex3_buf(void);
 void vertex3_buf_destroy(struct vertex3_buf *b);
-void vertex3_buf_push(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z, GLfloat u, GLfloat v);
-void vertex3_buf_left(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z, GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
-void vertex3_buf_right(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z, GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
-void vertex3_buf_down(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z, GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
-void vertex3_buf_up(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z, GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
-void vertex3_buf_back(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z, GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
-void vertex3_buf_front(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z, GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
+void vertex3_buf_push(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
+		GLfloat u, GLfloat v, GLubyte r, GLubyte g, GLubyte b, GLubyte a);
+void vertex3_buf_left(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
+		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
+void vertex3_buf_right(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
+		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
+void vertex3_buf_down(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
+		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
+void vertex3_buf_up(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
+		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
+void vertex3_buf_back(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
+		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
+void vertex3_buf_front(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
+		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1);
 
 struct renderer *renderer(int nbufs, const struct vertex_traits *traits);
 void renderer_destroy(struct renderer *r);

@@ -52,14 +52,17 @@ void vertex3_enable_client_states(void)
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 	glVertexPointer(3, GL_FLOAT, sizeof(struct vertex3), (char *)0);
 	glTexCoordPointer(2, GL_FLOAT, sizeof(struct vertex3), (char *)offsetof(struct vertex3, u));
+	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(struct vertex3), (char *)offsetof(struct vertex3, r));
 }
 
 void vertex3_disable_client_states(void)
 {
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
 }
 
 struct vertex3_buf *vertex3_buf(void)
@@ -76,7 +79,7 @@ void vertex3_buf_destroy(struct vertex3_buf *b)
 }
 
 void vertex3_buf_push(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
-		GLfloat u, GLfloat v)
+		GLfloat u, GLfloat v, GLubyte r, GLubyte g, GLubyte b, GLubyte a)
 {
 	if (buf->size == buf->alloc) {
 		if (buf->alloc == 0)
@@ -90,73 +93,77 @@ void vertex3_buf_push(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
 	buf->data[buf->size].z = z;
 	buf->data[buf->size].u = u;
 	buf->data[buf->size].v = v;
+	buf->data[buf->size].r = r;
+	buf->data[buf->size].g = g;
+	buf->data[buf->size].b = b;
+	buf->data[buf->size].a = a;
 	++buf->size;
 }
 
 void vertex3_buf_left(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
 		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1)
 {
-	vertex3_buf_push(buf, x, y + 1, z + 1, u1, v1);
-	vertex3_buf_push(buf, x, y + 1, z, u0, v1);
-	vertex3_buf_push(buf, x, y, z + 1, u1, v0);
-	vertex3_buf_push(buf, x, y, z + 1, u1, v0);
-	vertex3_buf_push(buf, x, y + 1, z, u0, v1);
-	vertex3_buf_push(buf, x, y, z, u0, v0);
+	vertex3_buf_push(buf, x, y + 1, z + 1, u1, v1, 192, 192, 192, 255);
+	vertex3_buf_push(buf, x, y + 1, z, u0, v1, 192, 192, 192, 255);
+	vertex3_buf_push(buf, x, y, z + 1, u1, v0, 192, 192, 192, 255);
+	vertex3_buf_push(buf, x, y, z + 1, u1, v0, 192, 192, 192, 255);
+	vertex3_buf_push(buf, x, y + 1, z, u0, v1, 192, 192, 192, 255);
+	vertex3_buf_push(buf, x, y, z, u0, v0, 192, 192, 192, 255);
 }
 
 void vertex3_buf_right(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
 		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1)
 {
-	vertex3_buf_push(buf, x + 1, y, z, u0, v0);
-	vertex3_buf_push(buf, x + 1, y + 1, z, u0, v1);
-	vertex3_buf_push(buf, x + 1, y, z + 1, u1, v0);
-	vertex3_buf_push(buf, x + 1, y, z + 1, u1, v0);
-	vertex3_buf_push(buf, x + 1, y + 1, z, u0, v1);
-	vertex3_buf_push(buf, x + 1, y + 1, z + 1, u1, v1);
+	vertex3_buf_push(buf, x + 1, y, z, u0, v0, 192, 192, 192, 255);
+	vertex3_buf_push(buf, x + 1, y + 1, z, u0, v1, 192, 192, 192, 255);
+	vertex3_buf_push(buf, x + 1, y, z + 1, u1, v0, 192, 192, 192, 255);
+	vertex3_buf_push(buf, x + 1, y, z + 1, u1, v0, 192, 192, 192, 255);
+	vertex3_buf_push(buf, x + 1, y + 1, z, u0, v1, 192, 192, 192, 255);
+	vertex3_buf_push(buf, x + 1, y + 1, z + 1, u1, v1, 192, 192, 192, 255);
 }
 
 void vertex3_buf_down(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
 		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1)
 {
-	vertex3_buf_push(buf, x, y, z, u0, v0);
-	vertex3_buf_push(buf, x + 1, y, z, u0, v1);
-	vertex3_buf_push(buf, x, y, z + 1, u1, v0);
-	vertex3_buf_push(buf, x, y, z + 1, u1, v0);
-	vertex3_buf_push(buf, x + 1, y, z, u0, v1);
-	vertex3_buf_push(buf, x + 1, y, z + 1, u1, v1);
+	vertex3_buf_push(buf, x, y, z, u0, v0, 64, 64, 64, 255);
+	vertex3_buf_push(buf, x + 1, y, z, u0, v1, 64, 64, 64, 255);
+	vertex3_buf_push(buf, x, y, z + 1, u1, v0, 64, 64, 64, 255);
+	vertex3_buf_push(buf, x, y, z + 1, u1, v0, 64, 64, 64, 255);
+	vertex3_buf_push(buf, x + 1, y, z, u0, v1, 64, 64, 64, 255);
+	vertex3_buf_push(buf, x + 1, y, z + 1, u1, v1, 64, 64, 64, 255);
 }
 
 void vertex3_buf_up(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
 		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1)
 {
-	vertex3_buf_push(buf, x + 1, y + 1, z + 1, u1, v1);
-	vertex3_buf_push(buf, x + 1, y + 1, z, u0, v1);
-	vertex3_buf_push(buf, x, y + 1, z + 1, u1, v0);
-	vertex3_buf_push(buf, x, y + 1, z + 1, u1, v0);
-	vertex3_buf_push(buf, x + 1, y + 1, z, u0, v1);
-	vertex3_buf_push(buf, x, y + 1, z, u0, v0);
+	vertex3_buf_push(buf, x + 1, y + 1, z + 1, u1, v1, 255, 255, 255, 255);
+	vertex3_buf_push(buf, x + 1, y + 1, z, u0, v1, 255, 255, 255, 255);
+	vertex3_buf_push(buf, x, y + 1, z + 1, u1, v0, 255, 255, 255, 255);
+	vertex3_buf_push(buf, x, y + 1, z + 1, u1, v0, 255, 255, 255, 255);
+	vertex3_buf_push(buf, x + 1, y + 1, z, u0, v1, 255, 255, 255, 255);
+	vertex3_buf_push(buf, x, y + 1, z, u0, v0, 255, 255, 255, 255);
 }
 
 void vertex3_buf_back(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
 		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1)
 {
-	vertex3_buf_push(buf, x + 1, y + 1, z, u1, v1);
-	vertex3_buf_push(buf, x + 1, y, z, u0, v1);
-	vertex3_buf_push(buf, x, y + 1, z, u1, v0);
-	vertex3_buf_push(buf, x, y + 1, z, u1, v0);
-	vertex3_buf_push(buf, x + 1, y, z, u0, v1);
-	vertex3_buf_push(buf, x, y, z, u0, v0);
+	vertex3_buf_push(buf, x + 1, y + 1, z, u1, v1, 128, 128, 128, 255);
+	vertex3_buf_push(buf, x + 1, y, z, u0, v1, 128, 128, 128, 255);
+	vertex3_buf_push(buf, x, y + 1, z, u1, v0, 128, 128, 128, 255);
+	vertex3_buf_push(buf, x, y + 1, z, u1, v0, 128, 128, 128, 255);
+	vertex3_buf_push(buf, x + 1, y, z, u0, v1, 128, 128, 128, 255);
+	vertex3_buf_push(buf, x, y, z, u0, v0, 128, 128, 128, 255);
 }
 
 void vertex3_buf_front(struct vertex3_buf *buf, GLfloat x, GLfloat y, GLfloat z,
 		GLfloat u0, GLfloat v0, GLfloat u1, GLfloat v1)
 {
-	vertex3_buf_push(buf, x, y, z + 1, u0, v0);
-	vertex3_buf_push(buf, x + 1, y, z + 1, u0, v1);
-	vertex3_buf_push(buf, x, y + 1, z + 1, u1, v0);
-	vertex3_buf_push(buf, x, y + 1, z + 1, u1, v0);
-	vertex3_buf_push(buf, x + 1, y, z + 1, u0, v1);
-	vertex3_buf_push(buf, x + 1, y + 1, z + 1, u1, v1);
+	vertex3_buf_push(buf, x, y, z + 1, u0, v0, 128, 128, 128, 255);
+	vertex3_buf_push(buf, x + 1, y, z + 1, u0, v1, 128, 128, 128, 255);
+	vertex3_buf_push(buf, x, y + 1, z + 1, u1, v0, 128, 128, 128, 255);
+	vertex3_buf_push(buf, x, y + 1, z + 1, u1, v0, 128, 128, 128, 255);
+	vertex3_buf_push(buf, x + 1, y, z + 1, u0, v1, 128, 128, 128, 255);
+	vertex3_buf_push(buf, x + 1, y + 1, z + 1, u1, v1, 128, 128, 128, 255);
 }
 
 struct renderer *renderer(int vbo_count, const struct vertex_traits *traits)
