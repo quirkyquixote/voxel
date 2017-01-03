@@ -65,15 +65,11 @@ struct main_loop *main_loop(int fps)
 		return NULL;
 	}
 	Mix_Init(0);
-	ml->textures = resource_factory(&texture_traits);
-	ml->samples = resource_factory(&sample_traits);
 	return ml;
 }
 
 void main_loop_destroy(struct main_loop *ml)
 {
-	resource_factory_destroy(ml->textures);
-	resource_factory_destroy(ml->samples);
 	SDL_Quit();
 }
 

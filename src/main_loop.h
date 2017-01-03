@@ -8,8 +8,6 @@
 #include "SDL2/SDL_opengl.h"
 #include "GL/glu.h"
 
-#include "resource.h"
-
 struct window {
 	struct window *next;
 	SDL_Window *sdl_window;
@@ -24,8 +22,6 @@ struct main_loop {
 	void(*event_func)(const SDL_Event *, void *);
 	void *event_data;
 	struct window *windows;
-	struct resource_factory *textures;
-	struct resource_factory *samples;
 	int fps;
 	int keep_going;
 };

@@ -9,10 +9,10 @@ voxel_objs += camera.o
 voxel_objs += chunk.o
 voxel_objs += fps_manager.o
 voxel_objs += main_loop.o
+voxel_objs += media.o
 voxel_objs += profile.o
 voxel_objs += simplex.o
 voxel_objs += renderer.o
-voxel_objs += resource.o
 voxel_objs += sz.o
 voxel_objs += terraform.o
 voxel_objs += voxel.o
@@ -49,7 +49,7 @@ $(DESTDIR)$(localstatedir):
 
 # Rules to compile tools that require specific libraries or flags
 voxel: $(voxel_objs)
-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $^ -lGL -lGLU -lSDL2 -lSDL2_mixer
+	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $^ -lGL -lGLU -lSDL2 -lSDL2_mixer -lSDL2_image
 
 szcat: $(szcat_objs)
 

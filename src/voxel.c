@@ -13,6 +13,7 @@
 #include "profile.h"
 #include "renderer.h"
 #include "camera.h"
+#include "media.h"
 
 struct context {
 	char *dir;
@@ -21,6 +22,7 @@ struct context {
 	struct profile_manager *prof_mgr;
 	struct renderer *shard_renderer;
 	struct camera *cam;
+	GLuint tex_terrain;
 	int64_t px, py, pz;
 	int move_lf, move_rt, move_bk, move_ft, move_up, move_dn;
 	int chunks_per_tick;
@@ -53,13 +55,14 @@ int main(int argc, char *argv[])
 	main_loop_on_event(ctx->ml, event, ctx);
 	main_loop_on_update(ctx->ml, update, ctx);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-//	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 3);
+	//	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 3);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	main_loop_add_window(ctx->ml, window("voxel", 0, 0, 1024, 768, 0));
 	window_on_render(ctx->ml->windows, render, ctx);
+	ctx->tex_terrain = texture("data/terrain.png");
 	load_all(ctx);
 	ctx->shard_renderer = renderer(SHARDS_PER_WORLD, &vertex3_traits);
 	main_loop_run(ctx->ml);
@@ -190,6 +193,11 @@ void render(void *data)
 
 	shards_rendered = 0;
 	camera_update(ctx->cam, 1024, 768);
+	glColor3f(1, 1, 1);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
 	renderer_begin(ctx->shard_renderer);
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
@@ -203,7 +211,7 @@ void render(void *data)
 				if (ctx->shard_renderer->vbo_sizes[s->id] == 0)
 					continue;
 				p.y = s->y + SHARD_W / 2;
-			/*	if (camera_visible(ctx->cam, p, SHARD_W) == 0)
+				/*	if (camera_visible(ctx->cam, p, SHARD_W) == 0)
 					continue;*/
 				renderer_buffer(ctx->shard_renderer, GL_TRIANGLES, s->id);
 				++shards_rendered;
@@ -211,9 +219,7 @@ void render(void *data)
 		}
 	}
 	renderer_end(ctx->shard_renderer);
-	printf("p:%g,%g,%g; ", ctx->cam->pos.x, ctx->cam->pos.y, ctx->cam->pos.z);
-	printf("a:%g,%g,%g; ", ctx->cam->angles.x, ctx->cam->angles.y, ctx->cam->angles.z);
-	printf("shards rendered:%d\n", shards_rendered);
+	glDisable(GL_TEXTURE_2D);
 }
 
 int chunks_by_priority(const void *p1, const void *p2)
@@ -243,7 +249,6 @@ void update_camera(struct context *ctx)
 		angles.x = -M_PI_2 * .99;
 	else if (angles.x > M_PI_2 * .99)
 		angles.x = M_PI_2 *.99;
-//	angles.x = CLAMP(angles.x, -M_PI_2 * .99, M_PI_2 * .99);
 	ctx->cam->angles = angles;
 
 	move = v3(ctx->move_rt - ctx->move_lf, ctx->move_up - ctx->move_dn, ctx->move_bk - ctx->move_ft);

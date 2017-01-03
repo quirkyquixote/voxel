@@ -6,10 +6,11 @@
 
 #include "sz.h"
 
-struct shard *shard(int id)
+struct shard *shard(int id, int y)
 {
 	struct shard *s = calloc(1, sizeof(*s));
 	s->id = id;
+	s->y = y;
 	return s;
 }
 
@@ -55,7 +56,7 @@ struct chunk *chunk(int id)
 	struct chunk *c = calloc(1, sizeof(*c));
 	c->id = id;
 	for (i = 0; i < SHARDS_PER_CHUNK; ++i)
-		c->shards[i] = shard(id * SHARDS_PER_CHUNK + i);
+		c->shards[i] = shard(id * SHARDS_PER_CHUNK + i, i);
 	return c;
 }
 
