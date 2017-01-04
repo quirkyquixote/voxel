@@ -6,10 +6,9 @@
 #define VOXEL_PHYSICS_H_
 
 #include "list.h"
-#include "v2f.h"
-#include "v3f.h"
-#include "v3i.h"
-#include "aab3f.h"
+#include "v2.h"
+#include "v3.h"
+#include "aab3.h"
 #include "chunk.h"
 
 enum {
@@ -86,7 +85,7 @@ static inline void body_set_size(struct body *b, struct v2f s)
 struct space *space(struct world *w);
 void space_destroy(struct space *s);
 void space_run(struct space *s);
-int space_query(struct space *s, struct v3f p, struct v3f v, struct v3i *q);
+int space_query(struct space *s, struct v3f p, struct v3f v, struct v3ll *q);
 
 static inline void space_set_gravity(struct space *s, struct v3f g)
 {

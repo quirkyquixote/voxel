@@ -15,7 +15,6 @@
 #include "renderer.h"
 #include "camera.h"
 #include "media.h"
-#include "aab3i.h"
 
 
 struct context {
@@ -29,8 +28,8 @@ struct context {
 	struct space *space;
 	struct body *player;
 	int cur_type;
-	struct v3i cur_pos;
-	struct aab3i move;
+	struct v3ll cur_pos;
+	struct aab3c move;
 	int chunks_per_tick;
 };
 
@@ -348,15 +347,15 @@ void update_camera(struct context *ctx)
 	v.x = (ctx->move.x1 - ctx->move.x0) * .25;
 	v.y += (ctx->move.y1 - ctx->move.y0) * .25;
 	v.z = (ctx->move.z1 - ctx->move.z0) * .25;
-	v = v3f_roty(v, r.y);
+	v = v3_roty(v, r.y);
 	body_set_velocity(ctx->player, v);
 
-	camera_set_position(ctx->cam, v3f_add(ctx->player->p, v3f(0, .6, 0)));
+	camera_set_position(ctx->cam, v3_add(ctx->player->p, v3f(0, .6, 0)));
 	camera_set_rotation(ctx->cam, ctx->player->r);
 
 	v = v3f(0, 0, -4);
-	v = v3f_rotx(v, r.x);
-	v = v3f_roty(v, r.y);
+	v = v3_rotx(v, r.x);
+	v = v3_roty(v, r.y);
 	ctx->cur_type = space_query(ctx->space, ctx->cam->p, v, &ctx->cur_pos);
 	if (ctx->cur_type != QUERY_NONE)
 		printf("looking at %d,%d,%d (%d)\n", ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z, ctx->cur_type);

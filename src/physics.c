@@ -162,7 +162,7 @@ void space_step(struct space *s, float dt)
 	struct body *b;
 
 	list_foreach(b, &s->body, list) {
-		b->v = v3f_addx(b->v, s->gravity, dt);
+		b->v = v3_addx(b->v, s->gravity, dt);
 		if (b->v.x < -s->terminal_speed)
 			b->v.x = -s->terminal_speed;
 		else if (b->v.x > s->terminal_speed)
@@ -224,7 +224,7 @@ int test_distance1(float p, float v, float r, float t0, float t1, float *t)
 	return (*t >= t0 && *t < t1);
 }
 
-int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
 {
 	int64_t x0, x1, x, y, z;
 	float t;
@@ -238,7 +238,7 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 		y = floor(p.y + v.y * t);
 		z = floor(p.z + v.z * t);
 		if (WORLD_AT(s->world, shape, x, y, z) == 1) {
-			*q = v3i(x, y, z);
+			*q = v3ll(x, y, z);
 			*best_t = t;
 			return 1;
 		}
@@ -246,7 +246,7 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 	return 0;
 }
 
-int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
 {
 	int64_t x0, x1, x, y, z;
 	float t;
@@ -260,7 +260,7 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 		y = floor(p.y + v.y * t);
 		z = floor(p.z + v.z * t);
 		if (WORLD_AT(s->world, shape, x - 1, y, z) == 1) {
-			*q = v3i(x - 1, y, z);
+			*q = v3ll(x - 1, y, z);
 			*best_t = t;
 			return 1;
 		}
@@ -268,7 +268,7 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 	return 0;
 }
 
-int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
 {
 	int64_t z0, z1, x, y, z;
 	float t;
@@ -282,7 +282,7 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 		x = floor(p.x + v.x * t);
 		y = floor(p.y + v.y * t);
 		if (WORLD_AT(s->world, shape, x, y, z) == 1) {
-			*q = v3i(x, y, z);
+			*q = v3ll(x, y, z);
 			*best_t = t;
 			return 1;
 		}
@@ -290,7 +290,7 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 	return 0;
 }
 
-int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
 {
 	int64_t z0, z1, x, y, z;
 	float t;
@@ -304,7 +304,7 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 		x = floor(p.x + v.x * t);
 		y = floor(p.y + v.y * t);
 		if (WORLD_AT(s->world, shape, x, y, z - 1) == 1) {
-			*q = v3i(x, y, z - 1);
+			*q = v3ll(x, y, z - 1);
 			*best_t = t;
 			return 1;
 		}
@@ -312,7 +312,7 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 	return 0;
 }
 
-int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
 {
 	int64_t y0, y1, x, y, z;
 	float t;
@@ -326,7 +326,7 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 		x = floor(p.x + v.x * t);
 		z = floor(p.z + v.z * t);
 		if (WORLD_AT(s->world, shape, x, y, z) == 1) {
-			*q = v3i(x, y, z);
+			*q = v3ll(x, y, z);
 			*best_t = t;
 			return 1;
 		}
@@ -334,7 +334,7 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 	return 0;
 }
 
-int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
 {
 	int64_t y0, y1, x, y, z;
 	float t;
@@ -348,7 +348,7 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 		x = floor(p.x + v.x * t);
 		z = floor(p.z + v.z * t);
 		if (WORLD_AT(s->world, shape, x, y - 1, z) == 1) {
-			*q = v3i(x, y - 1, z);
+			*q = v3ll(x, y - 1, z);
 			*best_t = t;
 			return 1;
 		}
@@ -356,7 +356,7 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float
 	return 0;
 }
 
-int space_query(struct space *s, struct v3f p, struct v3f v, struct v3i *q)
+int space_query(struct space *s, struct v3f p, struct v3f v, struct v3ll *q)
 {
 	float t = FLT_MAX;
 	int ret = 0;

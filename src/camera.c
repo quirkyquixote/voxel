@@ -25,10 +25,10 @@ void camera_destroy(struct camera *c)
 
 int camera_visible(struct camera *c, struct v3f p, float r)
 {
-	p = v3f_sub(p, c->p);
-	return (v3f_length(p) + r <= c->distance
-			&& v3f_dot(c->nup, p) < r && v3f_dot(c->ndn, p) < r
-			&& v3f_dot(c->nlf, p) < r && v3f_dot(c->nrt, p) < r);
+	p = v3_sub(p, c->p);
+	return (v3_length(p) + r <= c->distance
+			&& v3_dot(c->nup, p) < r && v3_dot(c->ndn, p) < r
+			&& v3_dot(c->nlf, p) < r && v3_dot(c->nrt, p) < r);
 }
 
 void camera_load_gl_matrices(struct camera *c)
@@ -44,25 +44,25 @@ void camera_load_gl_matrices(struct camera *c)
 	struct v3f target;
 
 	c->nlf = v3f(-ca, 0, sa);
-	c->nlf = v3f_rotx(c->nlf, c->r.x);
-	c->nlf = v3f_roty(c->nlf, c->r.y);
+	c->nlf = v3_rotx(c->nlf, c->r.x);
+	c->nlf = v3_roty(c->nlf, c->r.y);
 
 	c->nrt = v3f(ca, 0, sa);
-	c->nrt = v3f_rotx(c->nrt, c->r.x);
-	c->nrt = v3f_roty(c->nrt, c->r.y);
+	c->nrt = v3_rotx(c->nrt, c->r.x);
+	c->nrt = v3_roty(c->nrt, c->r.y);
 
 	c->nup = v3f(0, cb, sb);
-	c->nup = v3f_rotx(c->nup, c->r.x);
-	c->nup = v3f_roty(c->nup, c->r.y);
+	c->nup = v3_rotx(c->nup, c->r.x);
+	c->nup = v3_roty(c->nup, c->r.y);
 
 	c->ndn = v3f(0, -cb, sb);
-	c->ndn = v3f_rotx(c->ndn, c->r.x);
-	c->ndn = v3f_roty(c->ndn, c->r.y);
+	c->ndn = v3_rotx(c->ndn, c->r.x);
+	c->ndn = v3_roty(c->ndn, c->r.y);
 
 	target = v3f(0, 0, -c->distance);
-	target = v3f_rotx(target, c->r.x);
-	target = v3f_roty(target, c->r.y);
-	target = v3f_add(target, c->p);
+	target = v3_rotx(target, c->r.x);
+	target = v3_roty(target, c->r.y);
+	target = v3_add(target, c->p);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
