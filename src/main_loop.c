@@ -18,6 +18,12 @@ struct window *window(const char *title, int x, int y, int sx, int sy, int flags
 		fprintf(stderr, "%s:%s\n", __func__, SDL_GetError());
 		return NULL;
 	}
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	//	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 3);
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	return w;
 }
 
@@ -44,7 +50,7 @@ int window_has_mouse_focus(struct window *w)
     return SDL_GetMouseFocus() == w->sdl_window;
 }
 
-void window_on_render(struct window *w, void(*func)(void *), void *data)
+void window_set_render_callback(struct window *w, void(*func)(void *), void *data)
 {
 	w->render_func = func;
 	w->render_data = data;
@@ -125,13 +131,13 @@ void main_loop_remove_window(struct main_loop *ml, struct window *w)
 	}
 }
 
-void main_loop_on_update(struct main_loop *ml, void(*func)(void *), void *data)
+void main_loop_set_update_callback(struct main_loop *ml, void(*func)(void *), void *data)
 {
 	ml->update_func = func;
 	ml->update_data = data;
 }
 
-void main_loop_on_event(struct main_loop *ml, void(*func)(const SDL_Event *, void *), void *data)
+void main_loop_set_event_callback(struct main_loop *ml, void(*func)(const SDL_Event *, void *), void *data)
 {
 	ml->event_func = func;
 	ml->event_data = data;

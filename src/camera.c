@@ -10,13 +10,11 @@
 #include "GL/glu.h"
 #undef GL_GLEXT_PROTOTYPES
 
-static const GLfloat bkgrcolor[] = { 1, .75, .5, 1 };
+static const GLfloat bkgrcolor[] = { .5, .75, 1, 1 };
 
-struct camera *camera(float fovy, float distance)
+struct camera *camera(void)
 {
 	struct camera *c = calloc(1, sizeof(*c));
-	c->fovy = fovy;
-	c->distance = distance;
 	return c;
 }
 
@@ -27,55 +25,53 @@ void camera_destroy(struct camera *c)
 
 int camera_visible(struct camera *c, struct v3f p, float r)
 {
-	p = v3f_sub(p, c->pos);
+	p = v3f_sub(p, c->p);
 	return (v3f_length(p) + r <= c->distance
 			&& v3f_dot(c->nup, p) < r && v3f_dot(c->ndn, p) < r
 			&& v3f_dot(c->nlf, p) < r && v3f_dot(c->nrt, p) < r);
 }
 
-void camera_update(struct camera *c, float w, float h)
+void camera_load_gl_matrices(struct camera *c)
 {
-	float ratio = w / h;
-
 	float b = c->fovy * 0.5 * M_PI / 180.;
 	float cb = cos(b);
 	float sb = sin(b);
 
-	float a = asin(sb * ratio);
+	float a = asin(sb * c->ratio);
 	float ca = cos(a);
 	float sa = sin(a);
 
 	struct v3f target;
 
 	c->nlf = v3f(-ca, 0, sa);
-	c->nlf = v3f_rotx(c->nlf, c->angles.x);
-	c->nlf = v3f_roty(c->nlf, c->angles.y);
+	c->nlf = v3f_rotx(c->nlf, c->r.x);
+	c->nlf = v3f_roty(c->nlf, c->r.y);
 
 	c->nrt = v3f(ca, 0, sa);
-	c->nrt = v3f_rotx(c->nrt, c->angles.x);
-	c->nrt = v3f_roty(c->nrt, c->angles.y);
+	c->nrt = v3f_rotx(c->nrt, c->r.x);
+	c->nrt = v3f_roty(c->nrt, c->r.y);
 
 	c->nup = v3f(0, cb, sb);
-	c->nup = v3f_rotx(c->nup, c->angles.x);
-	c->nup = v3f_roty(c->nup, c->angles.y);
+	c->nup = v3f_rotx(c->nup, c->r.x);
+	c->nup = v3f_roty(c->nup, c->r.y);
 
 	c->ndn = v3f(0, -cb, sb);
-	c->ndn = v3f_rotx(c->ndn, c->angles.x);
-	c->ndn = v3f_roty(c->ndn, c->angles.y);
+	c->ndn = v3f_rotx(c->ndn, c->r.x);
+	c->ndn = v3f_roty(c->ndn, c->r.y);
 
 	target = v3f(0, 0, -c->distance);
-	target = v3f_rotx(target, c->angles.x);
-	target = v3f_roty(target, c->angles.y);
-	target = v3f_add(target, c->pos);
+	target = v3f_rotx(target, c->r.x);
+	target = v3f_roty(target, c->r.y);
+	target = v3f_add(target, c->p);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(c->pos.x, c->pos.y, c->pos.z,
+	gluLookAt(c->p.x, c->p.y, c->p.z,
 			target.x, target.y, target.z, 0, 1, 0);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(c->fovy, ratio, .1, c->distance);
+	gluPerspective(c->fovy, c->ratio, .1, c->distance);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);

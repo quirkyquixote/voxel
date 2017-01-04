@@ -27,7 +27,6 @@ struct context {
 	GLuint tex_terrain;
 	struct space *space;
 	struct body *player;
-	int64_t px, py, pz;
 	int move_lf, move_rt, move_bk, move_ft, move_up, move_dn;
 	int chunks_per_tick;
 };
@@ -51,23 +50,16 @@ int main(int argc, char *argv[])
 
 	ctx = calloc(1, sizeof(*ctx));
 	ctx->dir = "foo";
-	ctx->ml = main_loop(30);
-	ctx->cam = camera(60.0, 1024);
 	ctx->w = world();
 	ctx->prof_mgr = profile_manager();
 	ctx->chunks_per_tick = 4;
 
 	/* Setup main loop */
-	main_loop_on_event(ctx->ml, event, ctx);
-	main_loop_on_update(ctx->ml, update, ctx);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	//	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 3);
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	ctx->ml = main_loop(30);
+	main_loop_set_event_callback(ctx->ml, event, ctx);
+	main_loop_set_update_callback(ctx->ml, update, ctx);
 	main_loop_add_window(ctx->ml, window("voxel", 0, 0, 1280, 768, 0));
-	window_on_render(ctx->ml->windows, render, ctx);
+	window_set_render_callback(ctx->ml->windows, render, ctx);
 
 	/* Load textures */
 	ctx->tex_terrain = texture("data/terrain.png");
@@ -78,6 +70,12 @@ int main(int argc, char *argv[])
 	space_set_iterations(ctx->space, 1);
 	space_set_impulse(ctx->space, 0.001);
 	space_set_terminal_speed(ctx->space, 1);
+
+	/* Setup camera */
+	ctx->cam = camera();
+	camera_set_fovy(ctx->cam, 60.f);
+	camera_set_max_distance(ctx->cam, 1024);
+	camera_set_aspect_ratio(ctx->cam, 1280.0 / 768.0);
 
 	/* Create renderers */
 	ctx->shard_renderer = renderer(SHARDS_PER_WORLD, &vertex3_traits);
@@ -104,6 +102,7 @@ int load_all(struct context *ctx)
 {
 	int x, z;
 	struct chunk *c;
+	struct v3f p;
 
 	if (load_world(ctx->w, ctx->dir) != 0) {
 		/* initialize from scratch */
@@ -117,11 +116,11 @@ int load_all(struct context *ctx)
 				terraform(0, c);
 		}
 	}
-	ctx->cam->pos.x = ctx->px = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
-	ctx->cam->pos.y = ctx->py = CHUNK_H;
-	ctx->cam->pos.z = ctx->pz = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
+	p.x = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
+	p.y = CHUNK_H;
+	p.z = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	ctx->player = body(ctx->space);
-	body_set_position(ctx->player, ctx->cam->pos);
+	body_set_position(ctx->player, p);
 	body_set_size(ctx->player, v2f(0.325, 0.825));
 	return 0;
 }
@@ -225,15 +224,13 @@ void render(void *data)
 {
 	struct context *ctx = data;
 	int64_t x, y, z;
-	int w, h;
 	struct v3f p;
 	struct chunk *c;
 	struct shard *s;
 	int shards_rendered;
 
 	shards_rendered = 0;
-	SDL_GetWindowSize(ctx->ml->windows->sdl_window, &w, &h);
-	camera_update(ctx->cam, w, h);
+	camera_load_gl_matrices(ctx->cam);
 	glColor3f(1, 1, 1);
 	//	glEnable(GL_BLEND);
 	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -296,8 +293,8 @@ void update_camera(struct context *ctx)
 	v = v3f_roty(v, r.y);
 	body_set_velocity(ctx->player, v);
 
-	ctx->cam->angles = ctx->player->r;
-	ctx->cam->pos = ctx->player->p;
+	camera_set_position(ctx->cam, ctx->player->p);
+	camera_set_rotation(ctx->cam, ctx->player->r);
 }
 
 void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
@@ -353,8 +350,8 @@ void update_chunks(struct context *ctx)
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
 			c = ctx->w->chunks[x][z];
 			if (c->up_to_date == 0) {
-				c->priority = hypot((double)c->x - (double)ctx->px,
-						(double)c->z - (double)ctx->pz);
+				c->priority = hypot((double)c->x - ctx->player->p.x,
+						(double)c->z - ctx->player->p.z);
 				out_of_date[i++] = c;
 			}
 		}

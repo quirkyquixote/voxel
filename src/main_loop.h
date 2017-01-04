@@ -31,7 +31,7 @@ void window_destroy(struct window *w);
 void window_redraw(struct window *w);
 int window_has_keyboard_focus(struct window *w);
 int window_has_mouse_focus(struct window *w);
-void window_on_render(struct window *w, void(*func)(void *), void *data);
+void window_set_render_callback(struct window *w, void(*func)(void *), void *data);
 
 struct main_loop *main_loop(int fps);
 void main_loop_destroy(struct main_loop *ml);
@@ -39,8 +39,8 @@ void main_loop_run(struct main_loop *ml);
 void main_loop_kill(struct main_loop *ml);
 void main_loop_add_window(struct main_loop *ml, struct window *w);
 void main_loop_remove_window(struct main_loop *ml, struct window *w);
-void main_loop_on_update(struct main_loop *ml, void(*func)(void *), void *data);
-void main_loop_on_event(struct main_loop *ml, void(*func)(const SDL_Event *, void *), void *data);
+void main_loop_set_update_callback(struct main_loop *ml, void(*func)(void *), void *data);
+void main_loop_set_event_callback(struct main_loop *ml, void(*func)(const SDL_Event *, void *), void *data);
 
 #endif
 
