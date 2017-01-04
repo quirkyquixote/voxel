@@ -122,7 +122,7 @@ int load_all(struct context *ctx)
 	ctx->cam->pos.z = ctx->pz = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	ctx->player = body(ctx->space);
 	body_set_position(ctx->player, ctx->cam->pos);
-	body_set_size(ctx->player, v3f(0.325, 0.825, 0.325));
+	body_set_size(ctx->player, v2f(0.325, 0.825));
 	return 0;
 }
 

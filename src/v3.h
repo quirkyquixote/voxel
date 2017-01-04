@@ -1,6 +1,6 @@
 
-#ifndef VOXEL_VEC_H_
-#define VOXEL_VEC_H_
+#ifndef VOXEL_V3_H_
+#define VOXEL_V3_H_
 
 #include <math.h>
 

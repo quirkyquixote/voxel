@@ -6,6 +6,7 @@
 #define VOXEL_PHYSICS_H_
 
 #include "list.h"
+#include "v2.h"
 #include "v3.h"
 #include "aab3.h"
 #include "chunk.h"
@@ -22,7 +23,7 @@ struct body {
 	struct v3f p;
 	struct v3f r;
 	struct v3f v;
-	struct v3f s;
+	struct v2f s;
 	struct aab3f bb;
 };
 
@@ -61,7 +62,7 @@ static inline struct v3f body_get_velocity(struct body *b)
 	return b->v;
 }
 
-static inline struct v3f body_get_size(struct body *b)
+static inline struct v2f body_get_size(struct body *b)
 {
 	return b->s;
 }
@@ -81,7 +82,7 @@ static inline void body_set_velocity(struct body *b, struct v3f v)
 	b->v = v;
 }
 
-static inline void body_set_size(struct body *b, struct v3f s)
+static inline void body_set_size(struct body *b, struct v2f s)
 {
 	b->s = s;
 }

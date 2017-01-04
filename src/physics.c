@@ -100,7 +100,7 @@ void move_zpos(struct space *s, struct body *b, float dt)
 		for (y = y0; y <= y1; ++y) {
 			if (WORLD_AT(s->world, shape, x, y, z) == 1) {
 				b->v.z = 0;
-				b->p.z = z - b->s.z - s->impulse;
+				b->p.z = z - b->s.x - s->impulse;
 				return;
 			}
 		}
@@ -121,7 +121,7 @@ void move_zneg(struct space *s, struct body *b, float dt)
 		for (y = y0; y <= y1; ++y) {
 			if (WORLD_AT(s->world, shape, x, y, z) == 1) {
 				b->v.z = 0;
-				b->p.z = z + b->s.z + 1 + s->impulse;
+				b->p.z = z + b->s.x + 1 + s->impulse;
 				return;
 			}
 		}
@@ -202,8 +202,8 @@ void space_step(struct space *s, float dt)
 	list_foreach(b, &s->body, list) {
 		b->bb.x0 = b->p.x - b->s.x;
 		b->bb.x1 = b->p.x + b->s.x;
-		b->bb.z0 = b->p.z - b->s.z;
-		b->bb.z1 = b->p.z + b->s.z;
+		b->bb.z0 = b->p.z - b->s.x;
+		b->bb.z1 = b->p.z + b->s.x;
 		b->bb.y0 = b->p.y - b->s.y;
 		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.x > 0)
@@ -216,8 +216,8 @@ void space_step(struct space *s, float dt)
 			move_zpos(s, b, dt);
 		else if (b->v.z < 0)
 			move_zneg(s, b, dt);
-		b->bb.z0 = b->p.z - b->s.z;
-		b->bb.z1 = b->p.z + b->s.z;
+		b->bb.z0 = b->p.z - b->s.x;
+		b->bb.z1 = b->p.z + b->s.x;
 		if (b->v.y > 0)
 			move_ypos(s, b, dt);
 		else if (b->v.y < 0)
