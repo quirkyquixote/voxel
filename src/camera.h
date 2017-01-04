@@ -3,7 +3,7 @@
 #ifndef VOXEL_CAMERA_H_
 #define VOXEL_CAMERA_H_
 
-#include "v3.h"
+#include "v3f.h"
 
 struct camera {
 	struct v3f p;		// position of the camera

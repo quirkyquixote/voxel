@@ -27,6 +27,8 @@ struct context {
 	GLuint tex_terrain;
 	struct space *space;
 	struct body *player;
+	int cur_type;
+	struct v3i cur_pos;
 	int move_lf, move_rt, move_bk, move_ft, move_up, move_dn;
 	int chunks_per_tick;
 };
@@ -220,6 +222,60 @@ int save_chunk(struct chunk *c, const char *dir)
 	return 0;
 }
 
+void render_cursor(struct context *ctx)
+{
+	if (ctx->cur_type == QUERY_NONE)
+		return;
+	GLfloat x = ctx->cur_pos.x;
+	GLfloat y = ctx->cur_pos.y;
+	GLfloat z = ctx->cur_pos.z;
+
+	glColor3f(0, 0, 0);
+	glLineWidth(2);
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(x, y, z);
+	glVertex3f(x, y, z + 1);
+	glVertex3f(x, y + 1, z + 1);
+	glVertex3f(x, y + 1, z);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(x + 1, y, z);
+	glVertex3f(x + 1, y, z + 1);
+	glVertex3f(x + 1, y + 1, z + 1);
+	glVertex3f(x + 1, y + 1, z);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(x, y, z);
+	glVertex3f(x, y, z + 1);
+	glVertex3f(x + 1, y, z + 1);
+	glVertex3f(x + 1, y, z);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(x, y + 1, z);
+	glVertex3f(x, y + 1, z + 1);
+	glVertex3f(x + 1, y + 1, z + 1);
+	glVertex3f(x + 1, y + 1, z);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(x, y, z);
+	glVertex3f(x + 1, y, z);
+	glVertex3f(x + 1, y + 1, z);
+	glVertex3f(x, y + 1, z);
+	glEnd();
+
+	glBegin(GL_LINE_LOOP);
+	glVertex3f(x, y, z + 1);
+	glVertex3f(x + 1, y, z + 1);
+	glVertex3f(x + 1, y + 1, z + 1);
+	glVertex3f(x, y + 1, z + 1);
+	glEnd();
+}
+
 void render(void *data)
 {
 	struct context *ctx = data;
@@ -231,6 +287,7 @@ void render(void *data)
 
 	shards_rendered = 0;
 	camera_load_gl_matrices(ctx->cam);
+	render_cursor(ctx);
 	glColor3f(1, 1, 1);
 	//	glEnable(GL_BLEND);
 	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -293,8 +350,15 @@ void update_camera(struct context *ctx)
 	v = v3f_roty(v, r.y);
 	body_set_velocity(ctx->player, v);
 
-	camera_set_position(ctx->cam, v3f_add(ctx->player->p, v3f(0, 1, 0)));
+	camera_set_position(ctx->cam, v3f_add(ctx->player->p, v3f(0, .6, 0)));
 	camera_set_rotation(ctx->cam, ctx->player->r);
+
+	v = v3f(0, 0, -4);
+	v = v3f_rotx(v, r.x);
+	v = v3f_roty(v, r.y);
+	ctx->cur_type = space_query(ctx->space, ctx->cam->p, v, &ctx->cur_pos);
+	if (ctx->cur_type != QUERY_NONE)
+		printf("looking at %d,%d,%d (%d)\n", ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z, ctx->cur_type);
 }
 
 void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
@@ -428,4 +492,3 @@ void event(const SDL_Event *e, void *data)
 		}
 	}
 }
-

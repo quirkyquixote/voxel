@@ -6,17 +6,21 @@
 #define VOXEL_PHYSICS_H_
 
 #include "list.h"
-#include "v2.h"
-#include "v3.h"
-#include "aab3.h"
+#include "v2f.h"
+#include "v3f.h"
+#include "v3i.h"
+#include "aab3f.h"
 #include "chunk.h"
 
-#define FACE_LF 0x01
-#define FACE_RT 0x02
-#define FACE_DN 0x04
-#define FACE_UP 0x08
-#define FACE_FT 0x10
-#define FACE_BK 0x20
+enum {
+    QUERY_NONE,
+    QUERY_FACE_LF,
+    QUERY_FACE_RT,
+    QUERY_FACE_UP,
+    QUERY_FACE_DN,
+    QUERY_FACE_BK,
+    QUERY_FACE_FT,
+};
 
 struct body {
 	struct list list;
@@ -82,6 +86,7 @@ static inline void body_set_size(struct body *b, struct v2f s)
 struct space *space(struct world *w);
 void space_destroy(struct space *s);
 void space_run(struct space *s);
+int space_query(struct space *s, struct v3f p, struct v3f v, struct v3i *q);
 
 static inline void space_set_gravity(struct space *s, struct v3f g)
 {

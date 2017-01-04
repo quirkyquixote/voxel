@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <float.h>
 
 struct body *body(struct space *s)
 {
@@ -212,4 +213,174 @@ void space_run(struct space *s)
 }
 
 
+int test_distance1(float p, float v, float r, float t0, float t1, float *t)
+{
+	if ((p + v * t0) * v >= 0)
+		return 0;
+	if (v < 0)
+		*t = (r - p) / v;
+	else
+		*t = (-r - p) / v;
+	return (*t >= t0 && *t < t1);
+}
 
+int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+{
+	int64_t x0, x1, x, y, z;
+	float t;
+
+	x0 = floor(p.x);
+	x1 = floor(p.x + v.x);
+	for (x = x0; x <= x1; ++x) {
+		t = (x - p.x) / v.x;
+		if (t >= *best_t)
+			return 0;
+		y = floor(p.y + v.y * t);
+		z = floor(p.z + v.z * t);
+		if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+			*q = v3i(x, y, z);
+			*best_t = t;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+{
+	int64_t x0, x1, x, y, z;
+	float t;
+
+	x0 = floor(p.x);
+	x1 = floor(p.x + v.x);
+	for (x = x0; x >= x1; --x) {
+		t = (x - p.x) / v.x;
+		if (t >= *best_t)
+			return 0;
+		y = floor(p.y + v.y * t);
+		z = floor(p.z + v.z * t);
+		if (WORLD_AT(s->world, shape, x - 1, y, z) == 1) {
+			*q = v3i(x - 1, y, z);
+			*best_t = t;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+{
+	int64_t z0, z1, x, y, z;
+	float t;
+
+	z0 = floor(p.z);
+	z1 = floor(p.z + v.z);
+	for (z = z0; z <= z1; ++z) {
+		t = (z - p.z) / v.z;
+		if (t >= *best_t)
+			return 0;
+		x = floor(p.x + v.x * t);
+		y = floor(p.y + v.y * t);
+		if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+			*q = v3i(x, y, z);
+			*best_t = t;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+{
+	int64_t z0, z1, x, y, z;
+	float t;
+
+	z0 = floor(p.z);
+	z1 = floor(p.z + v.z);
+	for (z = z0; z >= z1; --z) {
+		t = (z - p.z) / v.z;
+		if (t >= *best_t)
+			return 0;
+		x = floor(p.x + v.x * t);
+		y = floor(p.y + v.y * t);
+		if (WORLD_AT(s->world, shape, x, y, z - 1) == 1) {
+			*q = v3i(x, y, z - 1);
+			*best_t = t;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+{
+	int64_t y0, y1, x, y, z;
+	float t;
+
+	y0 = floor(p.y);
+	y1 = floor(p.y + v.y);
+	for (y = y0; y <= y1; ++y) {
+		t = (y - p.y) / v.y;
+		if (t >= *best_t)
+			return 0;
+		x = floor(p.x + v.x * t);
+		z = floor(p.z + v.z * t);
+		if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+			*q = v3i(x, y, z);
+			*best_t = t;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3i *q, float *best_t)
+{
+	int64_t y0, y1, x, y, z;
+	float t;
+
+	y0 = floor(p.y);
+	y1 = floor(p.y + v.y);
+	for (y = y0; y >= y1; --y) {
+		t = (y - p.y) / v.y;
+		if (t >= *best_t)
+			return 0;
+		x = floor(p.x + v.x * t);
+		z = floor(p.z + v.z * t);
+		if (WORLD_AT(s->world, shape, x, y - 1, z) == 1) {
+			*q = v3i(x, y - 1, z);
+			*best_t = t;
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int space_query(struct space *s, struct v3f p, struct v3f v, struct v3i *q)
+{
+	float t = FLT_MAX;
+	int ret = 0;
+
+	if (v.x < 0) {
+		if (query_xneg(s, p, v, q, &t))
+			ret = QUERY_FACE_LF;
+	} else if (v.x > 0) {
+		if (query_xpos(s, p, v, q, &t))
+			ret = QUERY_FACE_RT;
+	}
+	if (v.y < 0) {
+		if (query_yneg(s, p, v, q, &t))
+			ret = QUERY_FACE_DN;
+	} else if (v.y > 0) {
+		if (query_ypos(s, p, v, q, &t))
+			ret = QUERY_FACE_UP;
+	}
+	if (v.z < 0) {
+		if (query_zneg(s, p, v, q, &t))
+			ret = QUERY_FACE_BK;
+	} else if (v.z > 0) {
+		if (query_zpos(s, p, v, q, &t))
+			ret = QUERY_FACE_FT;
+	}
+	return ret;
+}
