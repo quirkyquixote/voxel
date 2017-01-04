@@ -416,27 +416,27 @@ void tcoord_by_material(uint8_t m, struct aab2f *tc)
 	tc->y1 = tc->y0 + 1 / 16.;
 }
 
-static const char has_left_side[] = {
+static const char has_left_side[256] = {
 	0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0
 };
 
-static const char has_right_side[] = {
+static const char has_right_side[256] = {
 	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0
 };
 
-static const char has_down_side[] = {
+static const char has_down_side[256] = {
 	0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
 };
 
-static const char has_up_side[] = {
+static const char has_up_side[256] = {
 	0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0
 };
 
-static const char has_back_side[] = {
+static const char has_back_side[256] = {
 	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0
 };
 
-static const char has_front_side[] = {
+static const char has_front_side[256] = {
 	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1
 };
 
@@ -528,6 +528,33 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.5), 1, 0.5, tc);
 		vertex3_buf_left(buf, v3f(x, y, z + 0.5), 1, 0.5, tc);
 		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.5), 1, 0.5, tc);
+	} else if (s == SHAPE_PANE_Y) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_down(buf, v3f(x, y + 0.46875, z), 1, 1, tc);
+		vertex3_buf_up(buf, v3f(x, y + 0.53125, z), 1, 1, tc);
+		vertex3_buf_left(buf, v3f(x, y + 0.46875, z), 0.0625, 1, tc);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.46875, z), 0.0625, 1, tc);
+		vertex3_buf_back(buf, v3f(x, y + 0.46875, z), 1, 0.0625, tc);
+		vertex3_buf_front(buf, v3f(x, y + 0.46875, z + 1), 1, 0.0625, tc);
+	} else if (s == SHAPE_PANE_X) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_left(buf, v3f(x + 0.46875, y, z), 1, 1, tc);
+		vertex3_buf_right(buf, v3f(x + 0.53125, y, z), 1, 1, tc);
+		vertex3_buf_down(buf, v3f(x + 0.46875, y, z), 0.0625, 1, tc);
+		vertex3_buf_up(buf, v3f(x + 0.46875, y + 1, z), 0.0625, 1, tc);
+		vertex3_buf_back(buf, v3f(x + 0.46875, y, z), 0.0625, 1, tc);
+		vertex3_buf_front(buf, v3f(x + 0.46875, y, z + 1), 0.0625, 1, tc);
+	} else if (s == SHAPE_PANE_Z) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_back(buf, v3f(x, y, z + 0.46875), 1, 1, tc);
+		vertex3_buf_front(buf, v3f(x, y, z + 0.53125), 1, 1, tc);
+		vertex3_buf_down(buf, v3f(x, y, z + 0.46875), 1, 0.0625, tc);
+		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.46875), 1, 0.0625, tc);
+		vertex3_buf_left(buf, v3f(x, y, z + 0.46875), 1, 0.0625, tc);
+		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.46875), 1, 0.0625, tc);
 	}
 }
 
@@ -593,6 +620,37 @@ void update(void *data)
 	update_camera(ctx);
 	update_chunks(ctx);
 }
+
+static const char *shape_names[] = {
+	"empty",
+	"block_dn",
+	"block_up",
+	"block_lf",
+	"block_rt",
+	"block_bk",
+	"block_ft",
+	"slab_dn",
+	"slab_up",
+	"slab_lf",
+	"slab_rt",
+	"slab_bk",
+	"slab_ft",
+	"pane_x",
+	"pane_y",
+	"pane_z",
+	"stairs_ul",
+	"stairs_ub",
+	"stairs_ur",
+	"stairs_uf",
+	"stairs_dl",
+	"stairs_db",
+	"stairs_dr",
+	"stairs_df",
+	"stairs_lf",
+	"stairs_lb",
+	"stairs_rb",
+	"stairs_rf",
+};
 
 void event(const SDL_Event *e, void *data)
 {
@@ -663,12 +721,12 @@ void event(const SDL_Event *e, void *data)
 	} else if (e->type == SDL_MOUSEWHEEL) {
 		if (e->wheel.y > 0) {
 			if (--ctx->shape == 0)
-				ctx->shape = 12;
-			printf("Holding %d\n", ctx->shape);
+				ctx->shape = SHAPE_COUNT - 1;
+			printf("Holding %s\n", shape_names[ctx->shape]);
 		} else if (e->wheel.y < 0) {
-			if (++ctx->shape == 13)
+			if (++ctx->shape == SHAPE_COUNT)
 				ctx->shape = 1;
-			printf("Holding %d\n", ctx->shape);
+			printf("Holding %s\n", shape_names[ctx->shape]);
 		}
 	}
 }

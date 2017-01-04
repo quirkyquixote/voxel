@@ -41,7 +41,7 @@ void space_destroy(struct space *s)
 #define MASK_RUB 0x40
 #define MASK_RUF 0x80
 
-static const int shape_masks[] = { 
+static const int shape_masks_xpos[] = {
 	0x00,
 	0xff,
 	0xff,
@@ -55,14 +55,112 @@ static const int shape_masks[] = {
 	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
 	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
 	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
+	0,
+	0,
 };
 
-int cell_at(struct space *s, int64_t x, int64_t y, int64_t z)
+static const int shape_masks_xneg[] = {
+	0x00,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
+	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
+	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
+	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
+	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
+	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
+	0,
+	0,
+};
+
+static const int shape_masks_zpos[] = {
+	0x00,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
+	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
+	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
+	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
+	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
+	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	0,
+	0,
+	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+};
+
+static const int shape_masks_zneg[] = {
+	0x00,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
+	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
+	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
+	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
+	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
+	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	0,
+	0,
+	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
+};
+
+static const int shape_masks_ypos[] = {
+	0x00,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
+	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
+	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
+	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
+	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
+	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	0,
+	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
+	0,
+};
+
+static const int shape_masks_yneg[] = {
+	0x00,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
+	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
+	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
+	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
+	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
+	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	0,
+	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
+	0,
+};
+
+int cell_at(struct space *s, const int *masks, int64_t x, int64_t y, int64_t z)
 {
 	int shape, mask;
 	shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
 	mask = (1 << (((x & 1) * 4) + ((y & 1) * 2) + (z & 1)));
-	return shape_masks[shape] & mask;
+	return masks[shape] & mask;
 }
 
 void move_xpos(struct space *s, struct body *b, float dt)
@@ -77,7 +175,7 @@ void move_xpos(struct space *s, struct body *b, float dt)
 	z1 = floor(b->bb.z1 * 2);
 	for (y = y0; y <= y1; ++y) {
 		for (z = z0; z <= z1; ++z) {
-			if (cell_at(s, x, y, z)) {
+			if (cell_at(s, shape_masks_xpos, x, y, z)) {
 				if (y == y0) {
 					step_up = 1;
 				} else {
@@ -105,7 +203,7 @@ void move_xneg(struct space *s, struct body *b, float dt)
 	z1 = floor(b->bb.z1 * 2);
 	for (y = y0; y <= y1; ++y) {
 		for (z = z0; z <= z1; ++z) {
-			if (cell_at(s, x, y, z)) {
+			if (cell_at(s, shape_masks_xneg, x, y, z)) {
 				if (y == y0) {
 					step_up = 1;
 				} else {
@@ -133,7 +231,7 @@ void move_zpos(struct space *s, struct body *b, float dt)
 	y1 = floor(b->bb.y1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (y = y0; y <= y1; ++y) {
-			if (cell_at(s, x, y, z)) {
+			if (cell_at(s, shape_masks_zpos, x, y, z)) {
 				if (y == y0) {
 					step_up = 1;
 				} else {
@@ -161,7 +259,7 @@ void move_zneg(struct space *s, struct body *b, float dt)
 	y1 = floor(b->bb.y1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (y = y0; y <= y1; ++y) {
-			if (cell_at(s, x, y, z)) {
+			if (cell_at(s, shape_masks_zneg, x, y, z)) {
 				if (y == y0) {
 					step_up = 1;
 				} else {
@@ -188,7 +286,7 @@ void move_ypos(struct space *s, struct body *b, float dt)
 	z1 = floor(b->bb.z1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (z = z0; z <= z1; ++z) {
-			if (cell_at(s, x, y, z)) {
+			if (cell_at(s, shape_masks_ypos, x, y, z)) {
 				b->v.y = 0;
 				b->p.y = 0.5 * y - b->s.y - s->impulse;
 				return;
@@ -209,7 +307,7 @@ void move_yneg(struct space *s, struct body *b, float dt)
 	z1 = floor(b->bb.z1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (z = z0; z <= z1; ++z) {
-			if (cell_at(s, x, y, z)) {
+			if (cell_at(s, shape_masks_yneg, x, y, z)) {
 				b->v.y = 0;
 				b->p.y = 0.5 * (y + 1) + b->s.y + s->impulse;
 				return;
@@ -292,7 +390,7 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		y = floor((p.y + v.y * t) * 2);
 		z = floor((p.z + v.z * t) * 2);
-		if (cell_at(s, x, y, z)) {
+		if (cell_at(s, shape_masks_xpos, x, y, z)) {
 			*q = v3ll(x >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
@@ -314,7 +412,7 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		y = floor((p.y + v.y * t) * 2);
 		z = floor((p.z + v.z * t) * 2);
-		if (cell_at(s, x - 1, y, z)) {
+		if (cell_at(s, shape_masks_xneg, x - 1, y, z)) {
 			*q = v3ll((x - 1) >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
@@ -336,7 +434,7 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		x = floor((p.x + v.x * t) * 2);
 		y = floor((p.y + v.y * t) * 2);
-		if (cell_at(s, x, y, z)) {
+		if (cell_at(s, shape_masks_zpos, x, y, z)) {
 			*q = v3ll(x >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
@@ -358,7 +456,7 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		x = floor((p.x + v.x * t) * 2);
 		y = floor((p.y + v.y * t) * 2);
-		if (cell_at(s, x, y, z - 1)) {
+		if (cell_at(s, shape_masks_zneg, x, y, z - 1)) {
 			*q = v3ll(x >> 1, y >> 1, (z - 1) >> 1);
 			*best_t = t;
 			return 1;
@@ -380,7 +478,7 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		x = floor((p.x + v.x * t) * 2);
 		z = floor((p.z + v.z * t) * 2);
-		if (cell_at(s, x, y, z)) {
+		if (cell_at(s, shape_masks_ypos, x, y, z)) {
 			*q = v3ll(x >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
@@ -402,7 +500,7 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		x = floor((p.x + v.x * t) * 2);
 		z = floor((p.z + v.z * t) * 2);
-		if (cell_at(s, x, y - 1, z)) {
+		if (cell_at(s, shape_masks_yneg, x, y - 1, z)) {
 			*q = v3ll(x >> 1, (y - 1) >> 1, z >> 1);
 			*best_t = t;
 			return 1;
