@@ -27,8 +27,7 @@ struct context {
 	GLuint tex_terrain;
 	struct space *space;
 	struct body *player;
-	int cur_type;
-	struct v3ll cur_pos;
+	struct query cur;
 	struct aab3c move;
 	char act;
 	char use;
@@ -229,11 +228,11 @@ int save_chunk(struct chunk *c, const char *dir)
 
 void render_cursor(struct context *ctx)
 {
-	if (ctx->cur_type == QUERY_NONE)
+	if (ctx->cur.face == -1)
 		return;
-	GLfloat x = ctx->cur_pos.x;
-	GLfloat y = ctx->cur_pos.y;
-	GLfloat z = ctx->cur_pos.z;
+	GLfloat x = ctx->cur.p.x;
+	GLfloat y = ctx->cur.p.y;
+	GLfloat z = ctx->cur.p.z;
 
 	glColor3f(0, 0, 0);
 	glLineWidth(2);
@@ -331,22 +330,22 @@ int chunks_by_priority(const void *p1, const void *p2)
 void update_player(struct context *ctx)
 {
 	if (ctx->act == 1) {
-		if (ctx->cur_type != QUERY_NONE)
-			world_set(ctx->w, ctx->cur_pos, 0, 0);
+		if (ctx->cur.face != -1)
+			world_set(ctx->w, ctx->cur.p, 0, 0);
 	}
 	if (ctx->use == 1) {
-		if (ctx->cur_type == QUERY_FACE_LF)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(-1, 0, 0)), ctx->shape, 255);
-		else if (ctx->cur_type == QUERY_FACE_RT)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(1, 0, 0)), ctx->shape, 255);
-		else if (ctx->cur_type == QUERY_FACE_DN)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, -1, 0)), ctx->shape, 255);
-		else if (ctx->cur_type == QUERY_FACE_UP)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 1, 0)), ctx->shape, 255);
-		else if (ctx->cur_type == QUERY_FACE_BK)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, -1)), ctx->shape, 255);
-		else if (ctx->cur_type == QUERY_FACE_FT)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, 1)), ctx->shape, 255);
+		if (ctx->cur.face == FACE_LF)
+			world_set(ctx->w, v3_add(ctx->cur.p, v3c(-1, 0, 0)), ctx->shape, 255);
+		else if (ctx->cur.face == FACE_RT)
+			world_set(ctx->w, v3_add(ctx->cur.p, v3c(1, 0, 0)), ctx->shape, 255);
+		else if (ctx->cur.face == FACE_DN)
+			world_set(ctx->w, v3_add(ctx->cur.p, v3c(0, -1, 0)), ctx->shape, 255);
+		else if (ctx->cur.face == FACE_UP)
+			world_set(ctx->w, v3_add(ctx->cur.p, v3c(0, 1, 0)), ctx->shape, 255);
+		else if (ctx->cur.face == FACE_BK)
+			world_set(ctx->w, v3_add(ctx->cur.p, v3c(0, 0, -1)), ctx->shape, 255);
+		else if (ctx->cur.face == FACE_FT)
+			world_set(ctx->w, v3_add(ctx->cur.p, v3c(0, 0, 1)), ctx->shape, 255);
 	}
 	if (ctx->pick == 1) {
 	}
@@ -402,7 +401,7 @@ void update_camera(struct context *ctx)
 	v = v3f(0, 0, -5);
 	v = v3_rotx(v, r.x);
 	v = v3_roty(v, r.y);
-	ctx->cur_type = space_query(ctx->space, ctx->cam->p, v, &ctx->cur_pos);
+	space_query(ctx->space, ctx->cam->p, v, &ctx->cur);
 }
 
 void tcoord_by_material(uint8_t m, struct aab2f *tc)
@@ -699,12 +698,12 @@ void event(const SDL_Event *e, void *data)
 			fprintf(stdout, "=== PROFILE DUMP ===\n");
 			profile_manager_dump(ctx->prof_mgr);
 		} else if (e->key.keysym.sym == SDLK_q) {
-			if (ctx->cur_type != QUERY_NONE)
+			if (ctx->cur.face != -1)
 				printf("looking at %d,%d,%d; face %s; mat %d; shape %d\n",
-						ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z,
-						face_names[ctx->cur_type],
-						WORLD_AT(ctx->w, mat, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z),
-						WORLD_AT(ctx->w, shape, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z));
+						ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z,
+						face_names[ctx->cur.face],
+						WORLD_AT(ctx->w, mat, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z),
+						WORLD_AT(ctx->w, shape, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z));
 		}
 	} else if (e->type == SDL_MOUSEBUTTONDOWN) {
 		if (e->button.button == SDL_BUTTON_LEFT) {

@@ -32,15 +32,6 @@ void space_destroy(struct space *s)
 	free(s);
 }
 
-#define MASK_LDB 0x01
-#define MASK_LDF 0x02
-#define MASK_LUB 0x04
-#define MASK_LUF 0x08
-#define MASK_RDB 0x10
-#define MASK_RDF 0x20
-#define MASK_RUB 0x40
-#define MASK_RUF 0x80
-
 static const int shape_masks_xpos[] = {
 	0x00,
 	0xff,
@@ -49,13 +40,13 @@ static const int shape_masks_xpos[] = {
 	0xff,
 	0xff,
 	0xff,
-	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
-	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
-	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
-	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
-	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
-	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
-	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
+	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF,
+	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF,
+	CELL_LUB | CELL_LUF | CELL_LDB | CELL_LDF,
+	CELL_RUB | CELL_RUF | CELL_RDB | CELL_RDF,
+	CELL_LDB | CELL_LUB | CELL_RDB | CELL_RDB,
+	CELL_LDF | CELL_LUF | CELL_RDF | CELL_RDF,
+	CELL_RUB | CELL_RUF | CELL_RDB | CELL_RDF,
 	0,
 	0,
 };
@@ -68,13 +59,13 @@ static const int shape_masks_xneg[] = {
 	0xff,
 	0xff,
 	0xff,
-	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
-	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
-	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
-	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
-	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
-	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
-	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
+	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF,
+	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF,
+	CELL_LUB | CELL_LUF | CELL_LDB | CELL_LDF,
+	CELL_RUB | CELL_RUF | CELL_RDB | CELL_RDF,
+	CELL_LDB | CELL_LUB | CELL_RDB | CELL_RDB,
+	CELL_LDF | CELL_LUF | CELL_RDF | CELL_RDF,
+	CELL_LUB | CELL_LUF | CELL_LDB | CELL_LDF,
 	0,
 	0,
 };
@@ -87,15 +78,15 @@ static const int shape_masks_zpos[] = {
 	0xff,
 	0xff,
 	0xff,
-	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
-	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
-	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
-	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
-	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
-	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF,
+	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF,
+	CELL_LUB | CELL_LUF | CELL_LDB | CELL_LDF,
+	CELL_RUB | CELL_RUF | CELL_RDB | CELL_RDF,
+	CELL_LDB | CELL_LUB | CELL_RDB | CELL_RDB,
+	CELL_LDF | CELL_LUF | CELL_RDF | CELL_RDF,
 	0,
 	0,
-	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	CELL_LDF | CELL_LUF | CELL_RDF | CELL_RDF,
 };
 
 static const int shape_masks_zneg[] = {
@@ -106,15 +97,15 @@ static const int shape_masks_zneg[] = {
 	0xff,
 	0xff,
 	0xff,
-	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
-	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
-	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
-	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
-	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
-	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF,
+	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF,
+	CELL_LUB | CELL_LUF | CELL_LDB | CELL_LDF,
+	CELL_RUB | CELL_RUF | CELL_RDB | CELL_RDF,
+	CELL_LDB | CELL_LUB | CELL_RDB | CELL_RDB,
+	CELL_LDF | CELL_LUF | CELL_RDF | CELL_RDF,
 	0,
 	0,
-	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
+	CELL_LDB | CELL_LUB | CELL_RDB | CELL_RDB,
 };
 
 static const int shape_masks_ypos[] = {
@@ -125,14 +116,14 @@ static const int shape_masks_ypos[] = {
 	0xff,
 	0xff,
 	0xff,
-	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
-	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
-	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
-	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
-	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
-	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF,
+	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF,
+	CELL_LUB | CELL_LUF | CELL_LDB | CELL_LDF,
+	CELL_RUB | CELL_RUF | CELL_RDB | CELL_RDF,
+	CELL_LDB | CELL_LUB | CELL_RDB | CELL_RDB,
+	CELL_LDF | CELL_LUF | CELL_RDF | CELL_RDF,
 	0,
-	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
+	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF,
 	0,
 };
 
@@ -144,14 +135,14 @@ static const int shape_masks_yneg[] = {
 	0xff,
 	0xff,
 	0xff,
-	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
-	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
-	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
-	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
-	MASK_LDB | MASK_LUB | MASK_RDB | MASK_RDB,
-	MASK_LDF | MASK_LUF | MASK_RDF | MASK_RDF,
+	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF,
+	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF,
+	CELL_LUB | CELL_LUF | CELL_LDB | CELL_LDF,
+	CELL_RUB | CELL_RUF | CELL_RDB | CELL_RDF,
+	CELL_LDB | CELL_LUB | CELL_RDB | CELL_RDB,
+	CELL_LDF | CELL_LUF | CELL_RDF | CELL_RDF,
 	0,
-	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
+	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF,
 	0,
 };
 
@@ -377,7 +368,7 @@ void space_run(struct space *s)
 }
 
 
-int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
+int query_xpos(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
 {
 	int64_t x0, x1, x, y, z;
 	float t;
@@ -391,7 +382,9 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 		y = floor((p.y + v.y * t) * 2);
 		z = floor((p.z + v.z * t) * 2);
 		if (cell_at(s, shape_masks_xpos, x, y, z)) {
-			*q = v3ll(x >> 1, y >> 1, z >> 1);
+			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
+			q->face = FACE_LF;
+			q->p = v3ll(x >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -399,7 +392,7 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	return 0;
 }
 
-int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
+int query_xneg(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
 {
 	int64_t x0, x1, x, y, z;
 	float t;
@@ -413,7 +406,9 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 		y = floor((p.y + v.y * t) * 2);
 		z = floor((p.z + v.z * t) * 2);
 		if (cell_at(s, shape_masks_xneg, x - 1, y, z)) {
-			*q = v3ll((x - 1) >> 1, y >> 1, z >> 1);
+			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
+			q->face = FACE_RT;
+			q->p = v3ll((x - 1) >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -421,7 +416,7 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	return 0;
 }
 
-int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
+int query_zpos(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
 {
 	int64_t z0, z1, x, y, z;
 	float t;
@@ -435,7 +430,9 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 		x = floor((p.x + v.x * t) * 2);
 		y = floor((p.y + v.y * t) * 2);
 		if (cell_at(s, shape_masks_zpos, x, y, z)) {
-			*q = v3ll(x >> 1, y >> 1, z >> 1);
+			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
+			q->face = FACE_BK;
+			q->p = v3ll(x >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -443,7 +440,7 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	return 0;
 }
 
-int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
+int query_zneg(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
 {
 	int64_t z0, z1, x, y, z;
 	float t;
@@ -457,7 +454,9 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 		x = floor((p.x + v.x * t) * 2);
 		y = floor((p.y + v.y * t) * 2);
 		if (cell_at(s, shape_masks_zneg, x, y, z - 1)) {
-			*q = v3ll(x >> 1, y >> 1, (z - 1) >> 1);
+			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
+			q->face = FACE_FT;
+			q->p = v3ll(x >> 1, y >> 1, (z - 1) >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -465,7 +464,7 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	return 0;
 }
 
-int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
+int query_ypos(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
 {
 	int64_t y0, y1, x, y, z;
 	float t;
@@ -479,7 +478,9 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 		x = floor((p.x + v.x * t) * 2);
 		z = floor((p.z + v.z * t) * 2);
 		if (cell_at(s, shape_masks_ypos, x, y, z)) {
-			*q = v3ll(x >> 1, y >> 1, z >> 1);
+			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
+			q->face = FACE_DN;
+			q->p = v3ll(x >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -487,7 +488,7 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	return 0;
 }
 
-int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, float *best_t)
+int query_yneg(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
 {
 	int64_t y0, y1, x, y, z;
 	float t;
@@ -501,7 +502,9 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 		x = floor((p.x + v.x * t) * 2);
 		z = floor((p.z + v.z * t) * 2);
 		if (cell_at(s, shape_masks_yneg, x, y - 1, z)) {
-			*q = v3ll(x >> 1, (y - 1) >> 1, z >> 1);
+			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
+			q->face = FACE_UP;
+			q->p = v3ll(x >> 1, (y - 1) >> 1, z >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -509,31 +512,22 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	return 0;
 }
 
-int space_query(struct space *s, struct v3f p, struct v3f v, struct v3ll *q)
+int space_query(struct space *s, struct v3f p, struct v3f v, struct query *q)
 {
 	float t = FLT_MAX;
-	int ret = 0;
 
-	if (v.x < 0) {
-		if (query_xneg(s, p, v, q, &t))
-			ret = QUERY_FACE_RT;
-	} else if (v.x > 0) {
-		if (query_xpos(s, p, v, q, &t))
-			ret = QUERY_FACE_LF;
-	}
-	if (v.y < 0) {
-		if (query_yneg(s, p, v, q, &t))
-			ret = QUERY_FACE_UP;
-	} else if (v.y > 0) {
-		if (query_ypos(s, p, v, q, &t))
-			ret = QUERY_FACE_DN;
-	}
-	if (v.z < 0) {
-		if (query_zneg(s, p, v, q, &t))
-			ret = QUERY_FACE_FT;
-	} else if (v.z > 0) {
-		if (query_zpos(s, p, v, q, &t))
-			ret = QUERY_FACE_BK;
-	}
-	return ret;
+	q->face = -1;
+	if (v.x < 0)
+		query_xneg(s, p, v, q, &t);
+	else if (v.x > 0)
+		query_xpos(s, p, v, q, &t);
+	if (v.y < 0)
+		query_yneg(s, p, v, q, &t);
+	else if (v.y > 0)
+		query_ypos(s, p, v, q, &t);
+	if (v.z < 0)
+		query_zneg(s, p, v, q, &t);
+	else if (v.z > 0)
+		query_zpos(s, p, v, q, &t);
+	return q->face;
 }
