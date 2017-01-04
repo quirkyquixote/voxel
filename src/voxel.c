@@ -33,6 +33,7 @@ struct context {
 	char act;
 	char use;
 	char pick;
+	char run;
 	uint8_t shape;
 	int chunks_per_tick;
 };
@@ -79,7 +80,6 @@ int main(int argc, char *argv[])
 
 	/* Setup camera */
 	ctx->cam = camera();
-	camera_set_fovy(ctx->cam, 60.f);
 	camera_set_max_distance(ctx->cam, 1024);
 	camera_set_aspect_ratio(ctx->cam, 1280.0 / 768.0);
 
@@ -387,12 +387,15 @@ void update_camera(struct context *ctx)
 	body_set_rotation(ctx->player, r);
 
 	v = body_get_velocity(ctx->player);
-	v.x = (ctx->move.x1 - ctx->move.x0) * .25;
-	v.y += (ctx->move.y1 - ctx->move.y0) * .25;
-	v.z = (ctx->move.z1 - ctx->move.z0) * .25;
+	if (ctx->move.x0 == 0 && ctx->move.x1 == 0 && ctx->move.z0 == 0 && ctx->move.z1 == 0)
+		ctx->run = 0;
+	v.x = (ctx->move.x1 - ctx->move.x0) * (ctx->run ? .18 : 0.15);
+	v.y += (ctx->move.y1 - ctx->move.y0) * (ctx->run ? .18 : 0.15);
+	v.z = (ctx->move.z1 - ctx->move.z0) * (ctx->run ? .18 : 0.15);
 	v = v3_roty(v, r.y);
 	body_set_velocity(ctx->player, v);
 
+	camera_set_fovy(ctx->cam, (ctx->cam->fovy + (ctx->run ? 70.f : 60.f)) * 0.5);
 	camera_set_position(ctx->cam, v3_add(ctx->player->p, v3f(0, .6, 0)));
 	camera_set_rotation(ctx->cam, ctx->player->r);
 
@@ -612,6 +615,8 @@ void event(const SDL_Event *e, void *data)
 			ctx->move.y0 = 1;
 		} else if (e->key.keysym.sym == SDLK_SPACE) {
 			ctx->move.y1 = 1;
+		} else if (e->key.keysym.sym == SDLK_LCTRL) {
+			ctx->run = 1;
 		} else if (e->key.keysym.sym == SDLK_o) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else if (e->key.keysym.sym == SDLK_p) {
