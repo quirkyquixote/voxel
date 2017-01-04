@@ -41,8 +41,6 @@ void space_destroy(struct space *s)
 #define MASK_RUB 0x40
 #define MASK_RUF 0x80
 
-#define MASK(x,y,z) (1 << (((x & 1) * 4) + ((y & 1) * 2) + (z & 1)))
-
 static const int shape_masks[] = { 
 	0x00,
 	0xff,
@@ -286,16 +284,16 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	int64_t x0, x1, x, y, z;
 	float t;
 
-	x0 = floor(p.x);
-	x1 = floor(p.x + v.x);
+	x0 = floor(p.x * 2);
+	x1 = floor((p.x + v.x) * 2);
 	for (x = x0; x <= x1; ++x) {
-		t = (x - p.x) / v.x;
+		t = (0.5 * x - p.x) / v.x;
 		if (t >= *best_t)
 			return 0;
-		y = floor(p.y + v.y * t);
-		z = floor(p.z + v.z * t);
-		if (WORLD_AT(s->world, shape, x, y, z) != 0) {
-			*q = v3ll(x, y, z);
+		y = floor((p.y + v.y * t) * 2);
+		z = floor((p.z + v.z * t) * 2);
+		if (cell_at(s, x, y, z)) {
+			*q = v3ll(x >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -308,16 +306,16 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	int64_t x0, x1, x, y, z;
 	float t;
 
-	x0 = floor(p.x);
-	x1 = floor(p.x + v.x);
+	x0 = floor(p.x * 2);
+	x1 = floor((p.x + v.x) * 2);
 	for (x = x0; x >= x1; --x) {
-		t = (x - p.x) / v.x;
+		t = (0.5 * x - p.x) / v.x;
 		if (t >= *best_t)
 			return 0;
-		y = floor(p.y + v.y * t);
-		z = floor(p.z + v.z * t);
-		if (WORLD_AT(s->world, shape, x - 1, y, z) != 0) {
-			*q = v3ll(x - 1, y, z);
+		y = floor((p.y + v.y * t) * 2);
+		z = floor((p.z + v.z * t) * 2);
+		if (cell_at(s, x - 1, y, z)) {
+			*q = v3ll((x - 1) >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -330,16 +328,16 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	int64_t z0, z1, x, y, z;
 	float t;
 
-	z0 = floor(p.z);
-	z1 = floor(p.z + v.z);
+	z0 = floor(p.z * 2);
+	z1 = floor((p.z + v.z) * 2);
 	for (z = z0; z <= z1; ++z) {
-		t = (z - p.z) / v.z;
+		t = (0.5 * z - p.z) / v.z;
 		if (t >= *best_t)
 			return 0;
-		x = floor(p.x + v.x * t);
-		y = floor(p.y + v.y * t);
-		if (WORLD_AT(s->world, shape, x, y, z) != 0) {
-			*q = v3ll(x, y, z);
+		x = floor((p.x + v.x * t) * 2);
+		y = floor((p.y + v.y * t) * 2);
+		if (cell_at(s, x, y, z)) {
+			*q = v3ll(x >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -352,16 +350,16 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	int64_t z0, z1, x, y, z;
 	float t;
 
-	z0 = floor(p.z);
-	z1 = floor(p.z + v.z);
+	z0 = floor(p.z * 2);
+	z1 = floor((p.z + v.z) * 2);
 	for (z = z0; z >= z1; --z) {
-		t = (z - p.z) / v.z;
+		t = (0.5 * z - p.z) / v.z;
 		if (t >= *best_t)
 			return 0;
-		x = floor(p.x + v.x * t);
-		y = floor(p.y + v.y * t);
-		if (WORLD_AT(s->world, shape, x, y, z - 1) != 0) {
-			*q = v3ll(x, y, z - 1);
+		x = floor((p.x + v.x * t) * 2);
+		y = floor((p.y + v.y * t) * 2);
+		if (cell_at(s, x, y, z - 1)) {
+			*q = v3ll(x >> 1, y >> 1, (z - 1) >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -374,16 +372,16 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	int64_t y0, y1, x, y, z;
 	float t;
 
-	y0 = floor(p.y);
-	y1 = floor(p.y + v.y);
+	y0 = floor(p.y * 2);
+	y1 = floor((p.y + v.y) * 2);
 	for (y = y0; y <= y1; ++y) {
-		t = (y - p.y) / v.y;
+		t = (0.5 * y - p.y) / v.y;
 		if (t >= *best_t)
 			return 0;
-		x = floor(p.x + v.x * t);
-		z = floor(p.z + v.z * t);
-		if (WORLD_AT(s->world, shape, x, y, z) != 0) {
-			*q = v3ll(x, y, z);
+		x = floor((p.x + v.x * t) * 2);
+		z = floor((p.z + v.z * t) * 2);
+		if (cell_at(s, x, y, z)) {
+			*q = v3ll(x >> 1, y >> 1, z >> 1);
 			*best_t = t;
 			return 1;
 		}
@@ -396,16 +394,16 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	int64_t y0, y1, x, y, z;
 	float t;
 
-	y0 = floor(p.y);
-	y1 = floor(p.y + v.y);
+	y0 = floor(p.y * 2);
+	y1 = floor((p.y + v.y) * 2);
 	for (y = y0; y >= y1; --y) {
-		t = (y - p.y) / v.y;
+		t = (0.5 * y - p.y) / v.y;
 		if (t >= *best_t)
 			return 0;
-		x = floor(p.x + v.x * t);
-		z = floor(p.z + v.z * t);
-		if (WORLD_AT(s->world, shape, x, y - 1, z) != 0) {
-			*q = v3ll(x, y - 1, z);
+		x = floor((p.x + v.x * t) * 2);
+		z = floor((p.z + v.z * t) * 2);
+		if (cell_at(s, x, y - 1, z)) {
+			*q = v3ll(x >> 1, (y - 1) >> 1, z >> 1);
 			*best_t = t;
 			return 1;
 		}
