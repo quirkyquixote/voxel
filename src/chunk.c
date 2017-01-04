@@ -161,3 +161,21 @@ int world_save(struct world *w, union sz_tag **root)
 	return 0;
 }
 
+void world_set(struct world *w, struct v3ll p, int shape, int mat)
+{
+	int x;
+	int z;
+	WORLD_AT(w, shape, p.x, p.y, p.z) = shape;
+	WORLD_AT(w, mat, p.x, p.y, p.z) = mat;
+	x = (p.x >> 4) & 0xf;
+	z = (p.z >> 4) & 0xf;
+	w->chunks[x][z]->up_to_date = 0;
+	if ((p.x & 0xf) == 0)
+		w->chunks[x - 1][z]->up_to_date = 0;
+	if ((p.z & 0xf) == 0)
+		w->chunks[x][z - 1]->up_to_date = 0;
+	if ((p.x & 0xf) == 0xf)
+		w->chunks[x + 1][z]->up_to_date = 0;
+	if ((p.z & 0xf) == 0xf)
+		w->chunks[x][z + 1]->up_to_date = 0;
+}

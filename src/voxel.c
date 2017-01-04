@@ -323,6 +323,8 @@ int chunks_by_priority(const void *p1, const void *p2)
 	return c1->priority - c2->priority;
 }
 
+static const char *face_names[] = { NULL, "left", "right", "up", "down", "back", "front" };
+
 void update_camera(struct context *ctx)
 {
 	int w, h;
@@ -358,10 +360,10 @@ void update_camera(struct context *ctx)
 	v = v3_roty(v, r.y);
 	ctx->cur_type = space_query(ctx->space, ctx->cam->p, v, &ctx->cur_pos);
 	if (ctx->cur_type != QUERY_NONE)
-		printf("looking at %d,%d,%d (%d)\n", ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z, ctx->cur_type);
+		printf("looking at %d,%d,%d; face %s; mat %d; shape %d\n", ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z, face_names[ctx->cur_type], WORLD_AT(ctx->w, mat, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z), WORLD_AT(ctx->w, shape, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z));
 }
 
-void tcoord_by_material(int8_t m, GLfloat *u0, GLfloat *v0, GLfloat *u1, GLfloat *v1)
+void tcoord_by_material(uint8_t m, GLfloat *u0, GLfloat *v0, GLfloat *u1, GLfloat *v1)
 {
 	*u0 = (m % 16) / 16.;
 	*v0 = (m / 16) / 16.;
@@ -515,6 +517,24 @@ void event(const SDL_Event *e, void *data)
 		} else if (e->key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE DUMP ===\n");
 			profile_manager_dump(ctx->prof_mgr);
+		}
+	} else if (e->type == SDL_MOUSEBUTTONDOWN) {
+		if (e->button.button == SDL_BUTTON_LEFT) {
+			if (ctx->cur_type != QUERY_NONE)
+				world_set(ctx->w, ctx->cur_pos, 0, 0);
+		} else if (e->button.button == SDL_BUTTON_RIGHT) {
+			if (ctx->cur_type == QUERY_FACE_LF)
+				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(-1, 0, 0)), 1, 255);
+			else if (ctx->cur_type == QUERY_FACE_RT)
+				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(1, 0, 0)), 1, 255);
+			else if (ctx->cur_type == QUERY_FACE_DN)
+				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, -1, 0)), 1, 255);
+			else if (ctx->cur_type == QUERY_FACE_UP)
+				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 1, 0)), 1, 255);
+			else if (ctx->cur_type == QUERY_FACE_BK)
+				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, -1)), 1, 255);
+			else if (ctx->cur_type == QUERY_FACE_FT)
+				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, 1)), 1, 255);
 		}
 	}
 }

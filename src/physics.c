@@ -363,24 +363,24 @@ int space_query(struct space *s, struct v3f p, struct v3f v, struct v3ll *q)
 
 	if (v.x < 0) {
 		if (query_xneg(s, p, v, q, &t))
-			ret = QUERY_FACE_LF;
+			ret = QUERY_FACE_RT;
 	} else if (v.x > 0) {
 		if (query_xpos(s, p, v, q, &t))
-			ret = QUERY_FACE_RT;
+			ret = QUERY_FACE_LF;
 	}
 	if (v.y < 0) {
 		if (query_yneg(s, p, v, q, &t))
-			ret = QUERY_FACE_DN;
+			ret = QUERY_FACE_UP;
 	} else if (v.y > 0) {
 		if (query_ypos(s, p, v, q, &t))
-			ret = QUERY_FACE_UP;
+			ret = QUERY_FACE_DN;
 	}
 	if (v.z < 0) {
 		if (query_zneg(s, p, v, q, &t))
-			ret = QUERY_FACE_BK;
+			ret = QUERY_FACE_FT;
 	} else if (v.z > 0) {
 		if (query_zpos(s, p, v, q, &t))
-			ret = QUERY_FACE_FT;
+			ret = QUERY_FACE_BK;
 	}
 	return ret;
 }

@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "sz.h"
+#include "v3.h"
 
 #define SHARD_W 16
 #define SHARD_H 16
@@ -37,9 +38,9 @@
 struct shard {
 	int id;
 	int8_t y;
-	int8_t mat[SHARD_W][SHARD_H][SHARD_D];
-	int8_t shape[SHARD_W][SHARD_H][SHARD_D];
-	int8_t light[SHARD_W][SHARD_H][SHARD_D];
+	uint8_t mat[SHARD_W][SHARD_H][SHARD_D];
+	uint8_t shape[SHARD_W][SHARD_H][SHARD_D];
+	uint8_t light[SHARD_W][SHARD_H][SHARD_D];
 };
 
 struct cell_entity {
@@ -74,6 +75,7 @@ struct world *world(void);
 void world_destroy(struct world *w);
 int world_load(struct world *w, union sz_tag *root);
 int world_save(struct world *w, union sz_tag **root);
+void world_set(struct world *w, struct v3ll p, int shape, int mat);
 
 #endif
 
