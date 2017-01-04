@@ -30,6 +30,9 @@ struct context {
 	int cur_type;
 	struct v3ll cur_pos;
 	struct aab3c move;
+	char act;
+	char use;
+	char pick;
 	int chunks_per_tick;
 };
 
@@ -323,6 +326,42 @@ int chunks_by_priority(const void *p1, const void *p2)
 	return c1->priority - c2->priority;
 }
 
+void update_player(struct context *ctx)
+{
+	if (ctx->act == 1) {
+		if (ctx->cur_type != QUERY_NONE)
+			world_set(ctx->w, ctx->cur_pos, 0, 0);
+	}
+	if (ctx->use == 1) {
+		if (ctx->cur_type == QUERY_FACE_LF)
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(-1, 0, 0)), 1, 255);
+		else if (ctx->cur_type == QUERY_FACE_RT)
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(1, 0, 0)), 1, 255);
+		else if (ctx->cur_type == QUERY_FACE_DN)
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, -1, 0)), 1, 255);
+		else if (ctx->cur_type == QUERY_FACE_UP)
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 1, 0)), 1, 255);
+		else if (ctx->cur_type == QUERY_FACE_BK)
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, -1)), 1, 255);
+		else if (ctx->cur_type == QUERY_FACE_FT)
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, 1)), 1, 255);
+	}
+	if (ctx->pick == 1) {
+	}
+	if (ctx->act > 0) {
+		if (++ctx->act >= 8)
+			ctx->act = 1;
+	}
+	if (ctx->use > 0) {
+		if (++ctx->use >= 8)
+			ctx->use = 1;
+	}
+	if (ctx->pick > 0) {
+		if (++ctx->pick >= 8)
+			ctx->pick = 1;
+	}
+}
+
 static const char *face_names[] = { NULL, "left", "right", "up", "down", "back", "front" };
 
 void update_camera(struct context *ctx)
@@ -466,6 +505,7 @@ void update(void *data)
 {
 	struct context *ctx = data;
 	space_run(ctx->space);
+	update_player(ctx);
 	update_camera(ctx);
 	update_chunks(ctx);
 }
@@ -520,21 +560,19 @@ void event(const SDL_Event *e, void *data)
 		}
 	} else if (e->type == SDL_MOUSEBUTTONDOWN) {
 		if (e->button.button == SDL_BUTTON_LEFT) {
-			if (ctx->cur_type != QUERY_NONE)
-				world_set(ctx->w, ctx->cur_pos, 0, 0);
+			ctx->act = 1;
 		} else if (e->button.button == SDL_BUTTON_RIGHT) {
-			if (ctx->cur_type == QUERY_FACE_LF)
-				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(-1, 0, 0)), 1, 255);
-			else if (ctx->cur_type == QUERY_FACE_RT)
-				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(1, 0, 0)), 1, 255);
-			else if (ctx->cur_type == QUERY_FACE_DN)
-				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, -1, 0)), 1, 255);
-			else if (ctx->cur_type == QUERY_FACE_UP)
-				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 1, 0)), 1, 255);
-			else if (ctx->cur_type == QUERY_FACE_BK)
-				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, -1)), 1, 255);
-			else if (ctx->cur_type == QUERY_FACE_FT)
-				world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, 1)), 1, 255);
+			ctx->use = 1;
+		} else if (e->button.button == SDL_BUTTON_MIDDLE) {
+			ctx->pick = 1;
+		}
+	} else if (e->type == SDL_MOUSEBUTTONUP) {
+		if (e->button.button == SDL_BUTTON_LEFT) {
+			ctx->act = 0;
+		} else if (e->button.button == SDL_BUTTON_RIGHT) {
+			ctx->use = 0;
+		} else if (e->button.button == SDL_BUTTON_MIDDLE) {
+			ctx->pick = 0;
 		}
 	}
 }
