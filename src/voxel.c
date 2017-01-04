@@ -293,7 +293,7 @@ void update_camera(struct context *ctx)
 	v = v3f_roty(v, r.y);
 	body_set_velocity(ctx->player, v);
 
-	camera_set_position(ctx->cam, ctx->player->p);
+	camera_set_position(ctx->cam, v3f_add(ctx->player->p, v3f(0, 1, 0)));
 	camera_set_rotation(ctx->cam, ctx->player->r);
 }
 
@@ -302,7 +302,7 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 	int64_t x1, y1, z1;
 	int64_t x, y, z;
 	struct vertex3_buf *buf;
-	int8_t m, l, d, b;
+	int8_t s, l, d, b;
 
 	x1 = x0 + SHARD_W;
 	y1 = y0 + SHARD_H;
@@ -312,24 +312,24 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 	for (x = x0; x < x1; ++x) {
 		for (y = y0; y < y1; ++y) {
 			for (z = z0; z < z1; ++z) {
-				m = WORLD_AT(ctx->w, mat, x, y, z);
-				l = WORLD_AT(ctx->w, mat, x - 1, y, z);
-				d = y == 0 ? 0 : WORLD_AT(ctx->w, mat, x, y - 1, z);
-				b = WORLD_AT(ctx->w, mat, x, y, z - 1);
-				if (m == 0) {
-					if (l != 0)
-						vertex3_buf_right(buf, x - 1, y, z, 0, 0, 1, 1);
-					if (d != 0)
-						vertex3_buf_up(buf, x, y - 1, z, 0, 0, 1, 1);
-					if (b != 0)
-						vertex3_buf_front(buf, x, y, z - 1, 0, 0, 1, 1);
+				s = WORLD_AT(ctx->w, shape, x, y, z);
+				l = WORLD_AT(ctx->w, shape, x - 1, y, z);
+				d = y == 0 ? 0 : WORLD_AT(ctx->w, shape, x, y - 1, z);
+				b = WORLD_AT(ctx->w, shape, x, y, z - 1);
+				if (s != 1) {
+					if (l == 1)
+						vertex3_buf_right(buf, x - 1, y, z, 0, 0, 0.0625, 0.0625);
+					if (d == 1)
+						vertex3_buf_up(buf, x, y - 1, z, 0, 0, 0.0625, 0.0625);
+					if (b == 1)
+						vertex3_buf_front(buf, x, y, z - 1, 0, 0, 0.0625, 0.0625);
 				} else {
-					if (l == 0)
-						vertex3_buf_left(buf, x, y, z, 0, 0, 1, 1);
-					if (d == 0)
-						vertex3_buf_down(buf, x, y, z, 0, 0, 1, 1);
-					if (b == 0)
-						vertex3_buf_back(buf, x, y, z, 0, 0, 1, 1);
+					if (l != 1)
+						vertex3_buf_left(buf, x, y, z, 0, 0, 0.0625, 0.0625);
+					if (d != 1)
+						vertex3_buf_down(buf, x, y, z, 0, 0, 0.0625, 0.0625);
+					if (b != 1)
+						vertex3_buf_back(buf, x, y, z, 0, 0, 0.0625, 0.0625);
 				}
 			}
 		}

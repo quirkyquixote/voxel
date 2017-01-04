@@ -82,9 +82,10 @@ int terraform(int64_t seed, struct chunk *c)
 		for (z = 0, v = c->z; z < CHUNK_D; ++z, ++v) {
 			height = CHUNK_H * (0.5 + noise_3d(seed, u, v, 100, 4) * 0.1);
 //			height = CHUNK_H / 2;
-			for (y = 0; y < height; ++y)
+			for (y = 0; y < height; ++y) {
 				CHUNK_AT(c, mat, x, y, z) = 1;
 				CHUNK_AT(c, shape, x, y, z) = 1;
+			}
 		}
 	}
 }

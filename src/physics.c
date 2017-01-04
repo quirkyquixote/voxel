@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_JOINTS 1024
-
 struct body *body(struct space *s)
 {
 	struct body *b = calloc(1, sizeof(*b));
@@ -120,7 +118,7 @@ void move_ypos(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, z0, z1;
 
-	y = floor(b->bb.x1 + b->v.x * dt);
+	y = floor(b->bb.y1 + b->v.y * dt);
 	x0 = floor(b->bb.x0);
 	z0 = floor(b->bb.z0);
 	x1 = floor(b->bb.x1);
