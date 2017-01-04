@@ -27,13 +27,6 @@ struct body {
 	struct aab3f bb;
 };
 
-struct joint {
-	struct list list;
-	struct body *b1;
-	struct body *b2;
-	int mask;
-};
-
 struct space {
 	int iterations;
 	float impulse;
@@ -41,7 +34,6 @@ struct space {
 	float terminal_speed;
 	struct world *world;
 	struct list body;
-	struct list joint;
 };
 
 struct body *body(struct space *s);
@@ -86,9 +78,6 @@ static inline void body_set_size(struct body *b, struct v2f s)
 {
 	b->s = s;
 }
-
-struct joint *joint(struct space *s);
-void joint_destroy(struct joint *j);
 
 struct space *space(struct world *w);
 void space_destroy(struct space *s);

@@ -19,19 +19,6 @@ void body_destroy(struct body *b)
 	free(b);
 }
 
-struct joint *joint(struct space *s)
-{
-	struct joint *j = calloc(1, sizeof(*j));
-	list_link(&s->joint, &j->list);
-	return j;
-}
-
-void joint_destroy(struct joint *j)
-{
-	list_unlink(&j->list);
-	free(j);
-}
-
 struct space *space(struct world *world)
 {
 	struct space *s = calloc(1, sizeof(*s));
@@ -173,18 +160,10 @@ void move_yneg(struct space *s, struct body *b, float dt)
 
 void space_step(struct space *s, float dt)
 {
-	struct body *b, *b1, *b2;
-	struct joint joints[MAX_JOINTS];
-	struct joint *j;
-	int jointc, i;
-	int64_t x0, y0, z0, x1, y1, z1, x, y, z;
-	struct aab3f bb, depth;
-	int mask;
-
-	/* Update X coordinate */
+	struct body *b;
 
 	list_foreach(b, &s->body, list) {
-		b->v = v3faddx(b->v, s->gravity, dt);
+		b->v = v3f_addx(b->v, s->gravity, dt);
 		if (b->v.x < -s->terminal_speed)
 			b->v.x = -s->terminal_speed;
 		else if (b->v.x > s->terminal_speed)

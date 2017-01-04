@@ -293,7 +293,7 @@ void update_camera(struct context *ctx)
 	v.x = (ctx->move_rt - ctx->move_lf) * .25;
 	v.y += (ctx->move_up - ctx->move_dn) * .25;
 	v.z = (ctx->move_bk - ctx->move_ft) * .25;
-	v = v3froty(v, r.y);
+	v = v3f_roty(v, r.y);
 	body_set_velocity(ctx->player, v);
 
 	ctx->cam->angles = ctx->player->r;
