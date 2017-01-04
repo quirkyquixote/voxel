@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
+#include <stdio.h>
 
 struct body *body(struct space *s)
 {
@@ -31,20 +32,49 @@ void space_destroy(struct space *s)
 	free(s);
 }
 
+#define MASK_LDB 0x01
+#define MASK_LDF 0x02
+#define MASK_LUB 0x04
+#define MASK_LUF 0x08
+#define MASK_RDB 0x10
+#define MASK_RDF 0x20
+#define MASK_RUB 0x40
+#define MASK_RUF 0x80
+
+#define MASK(x,y,z) (1 << (((x & 1) * 4) + ((y & 1) * 2) + (z & 1)))
+
+static const int shape_masks[] = { 
+	0x00,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	0xff,
+	MASK_LDB | MASK_LDF | MASK_RDB | MASK_RDF,
+	MASK_LUB | MASK_LUF | MASK_RUB | MASK_RUF,
+	MASK_LUB | MASK_LUF | MASK_LDB | MASK_LDF,
+	MASK_RUB | MASK_RUF | MASK_RDB | MASK_RDF,
+	MASK_LDB | MASK_LUB | MASK_RDB | MASK_LDB,
+	MASK_LDF | MASK_LUF | MASK_RDF | MASK_LDF,
+};
+
 void move_xpos(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, y0, y1, z0, z1;
+	int shape;
 
-	x = floor(b->bb.x1 + b->v.x * dt);
-	y0 = floor(b->bb.y0);
-	z0 = floor(b->bb.z0);
-	y1 = floor(b->bb.y1);
-	z1 = floor(b->bb.z1);
+	x = floor((b->bb.x1 + b->v.x * dt) * 2);
+	y0 = floor(b->bb.y0 * 2);
+	z0 = floor(b->bb.z0 * 2);
+	y1 = floor(b->bb.y1 * 2);
+	z1 = floor(b->bb.z1 * 2);
 	for (y = y0; y <= y1; ++y) {
 		for (z = z0; z <= z1; ++z) {
-			if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+			shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
+			if (shape_masks[shape] & MASK(x, y, z)) {
 				b->v.x = 0;
-				b->p.x = x - b->s.x - s->impulse;
+				b->p.x = 0.5 * x - b->s.x - s->impulse;
 				return;
 			}
 		}
@@ -55,17 +85,19 @@ void move_xpos(struct space *s, struct body *b, float dt)
 void move_xneg(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, y0, y1, z0, z1;
+	int shape;
 
-	x = floor(b->bb.x0 + b->v.x * dt);
-	y0 = floor(b->bb.y0);
-	z0 = floor(b->bb.z0);
-	y1 = floor(b->bb.y1);
-	z1 = floor(b->bb.z1);
+	x = floor((b->bb.x0 + b->v.x * dt) * 2);
+	y0 = floor(b->bb.y0 * 2);
+	z0 = floor(b->bb.z0 * 2);
+	y1 = floor(b->bb.y1 * 2);
+	z1 = floor(b->bb.z1 * 2);
 	for (y = y0; y <= y1; ++y) {
 		for (z = z0; z <= z1; ++z) {
-			if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+			shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
+			if (shape_masks[shape] & MASK(x, y, z)) {
 				b->v.x = 0;
-				b->p.x = x + b->s.x + 1 + s->impulse;
+				b->p.x = 0.5 * (x + 1) + b->s.x + s->impulse;
 				return;
 			}
 		}
@@ -76,17 +108,19 @@ void move_xneg(struct space *s, struct body *b, float dt)
 void move_zpos(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, y0, y1;
+	int shape;
 
-	z = floor(b->bb.z1 + b->v.z * dt);
-	x0 = floor(b->bb.x0);
-	y0 = floor(b->bb.y0);
-	x1 = floor(b->bb.x1);
-	y1 = floor(b->bb.y1);
+	z = floor((b->bb.z1 + b->v.z * dt) * 2);
+	x0 = floor(b->bb.x0 * 2);
+	y0 = floor(b->bb.y0 * 2);
+	x1 = floor(b->bb.x1 * 2);
+	y1 = floor(b->bb.y1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (y = y0; y <= y1; ++y) {
-			if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+			shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
+			if (shape_masks[shape] & MASK(x, y, z)) {
 				b->v.z = 0;
-				b->p.z = z - b->s.x - s->impulse;
+				b->p.z = 0.5 * z - b->s.x - s->impulse;
 				return;
 			}
 		}
@@ -97,17 +131,19 @@ void move_zpos(struct space *s, struct body *b, float dt)
 void move_zneg(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, y0, y1;
+	int shape;
 
-	z = floor(b->bb.z0 + b->v.z * dt);
-	x0 = floor(b->bb.x0);
-	y0 = floor(b->bb.y0);
-	x1 = floor(b->bb.x1);
-	y1 = floor(b->bb.y1);
+	z = floor((b->bb.z0 + b->v.z * dt) * 2);
+	x0 = floor(b->bb.x0 * 2);
+	y0 = floor(b->bb.y0 * 2);
+	x1 = floor(b->bb.x1 * 2);
+	y1 = floor(b->bb.y1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (y = y0; y <= y1; ++y) {
-			if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+			shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
+			if (shape_masks[shape] & MASK(x, y, z)) {
 				b->v.z = 0;
-				b->p.z = z + b->s.x + 1 + s->impulse;
+				b->p.z = 0.5 * (z + 1) + b->s.x + s->impulse;
 				return;
 			}
 		}
@@ -118,17 +154,19 @@ void move_zneg(struct space *s, struct body *b, float dt)
 void move_ypos(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, z0, z1;
+	int shape;
 
-	y = floor(b->bb.y1 + b->v.y * dt);
-	x0 = floor(b->bb.x0);
-	z0 = floor(b->bb.z0);
-	x1 = floor(b->bb.x1);
-	z1 = floor(b->bb.z1);
+	y = floor((b->bb.y1 + b->v.y * dt) * 2);
+	x0 = floor(b->bb.x0 * 2);
+	z0 = floor(b->bb.z0 * 2);
+	x1 = floor(b->bb.x1 * 2);
+	z1 = floor(b->bb.z1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (z = z0; z <= z1; ++z) {
-			if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+			shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
+			if (shape_masks[shape] & MASK(x, y, z)) {
 				b->v.y = 0;
-				b->p.y = y - b->s.y - s->impulse;
+				b->p.y = 0.5 * y - b->s.y - s->impulse;
 				return;
 			}
 		}
@@ -139,17 +177,19 @@ void move_ypos(struct space *s, struct body *b, float dt)
 void move_yneg(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, z0, z1;
+	int shape;
 
-	y = floor(b->bb.y0 + b->v.y * dt);
-	x0 = floor(b->bb.x0);
-	z0 = floor(b->bb.z0);
-	x1 = floor(b->bb.x1);
-	z1 = floor(b->bb.z1);
+	y = floor((b->bb.y0 + b->v.y * dt) * 2);
+	x0 = floor(b->bb.x0 * 2);
+	z0 = floor(b->bb.z0 * 2);
+	x1 = floor(b->bb.x1 * 2);
+	z1 = floor(b->bb.z1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (z = z0; z <= z1; ++z) {
-			if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+			shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
+			if (shape_masks[shape] & MASK(x, y, z)) {
 				b->v.y = 0;
-				b->p.y = y + b->s.y + 1 + s->impulse;
+				b->p.y = 0.5 * (y + 1) + b->s.y + s->impulse;
 				return;
 			}
 		}
@@ -237,7 +277,7 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		y = floor(p.y + v.y * t);
 		z = floor(p.z + v.z * t);
-		if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+		if (WORLD_AT(s->world, shape, x, y, z) != 0) {
 			*q = v3ll(x, y, z);
 			*best_t = t;
 			return 1;
@@ -259,7 +299,7 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		y = floor(p.y + v.y * t);
 		z = floor(p.z + v.z * t);
-		if (WORLD_AT(s->world, shape, x - 1, y, z) == 1) {
+		if (WORLD_AT(s->world, shape, x - 1, y, z) != 0) {
 			*q = v3ll(x - 1, y, z);
 			*best_t = t;
 			return 1;
@@ -281,7 +321,7 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		x = floor(p.x + v.x * t);
 		y = floor(p.y + v.y * t);
-		if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+		if (WORLD_AT(s->world, shape, x, y, z) != 0) {
 			*q = v3ll(x, y, z);
 			*best_t = t;
 			return 1;
@@ -303,7 +343,7 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		x = floor(p.x + v.x * t);
 		y = floor(p.y + v.y * t);
-		if (WORLD_AT(s->world, shape, x, y, z - 1) == 1) {
+		if (WORLD_AT(s->world, shape, x, y, z - 1) != 0) {
 			*q = v3ll(x, y, z - 1);
 			*best_t = t;
 			return 1;
@@ -325,7 +365,7 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		x = floor(p.x + v.x * t);
 		z = floor(p.z + v.z * t);
-		if (WORLD_AT(s->world, shape, x, y, z) == 1) {
+		if (WORLD_AT(s->world, shape, x, y, z) != 0) {
 			*q = v3ll(x, y, z);
 			*best_t = t;
 			return 1;
@@ -347,7 +387,7 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 			return 0;
 		x = floor(p.x + v.x * t);
 		z = floor(p.z + v.z * t);
-		if (WORLD_AT(s->world, shape, x, y - 1, z) == 1) {
+		if (WORLD_AT(s->world, shape, x, y - 1, z) != 0) {
 			*q = v3ll(x, y - 1, z);
 			*best_t = t;
 			return 1;

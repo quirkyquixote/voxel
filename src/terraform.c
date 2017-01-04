@@ -84,7 +84,7 @@ int terraform(int64_t seed, struct chunk *c)
 //			height = CHUNK_H / 2;
 			for (y = 0; y < height; ++y) {
 				CHUNK_AT(c, mat, x, y, z) = y;
-				CHUNK_AT(c, shape, x, y, z) = 1;
+				CHUNK_AT(c, shape, x, y, z) = SHAPE_BLOCK_DN;
 			}
 		}
 	}

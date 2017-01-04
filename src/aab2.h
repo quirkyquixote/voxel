@@ -3,27 +3,27 @@
 #define VOXEL_AAB2_H_
 
 struct aab2f {
-	float x0, y0, x1, y1
+	float x0, y0, x1, y1;
 };
 
 struct aab2d {
-	double x0, y0, x1, y1
+	double x0, y0, x1, y1;
 };
 
 struct aab2c {
-	char x0, y0, x1, y1
+	char x0, y0, x1, y1;
 };
 
 struct aab2s {
-	short x0, y0, x1, y1
+	short x0, y0, x1, y1;
 };
 
 struct aab2l {
-	long x0, y0, x1, y1
+	long x0, y0, x1, y1;
 };
 
 struct aab2ll {
-	long long x0, y0, x1, y1
+	long long x0, y0, x1, y1;
 };
 
 static inline struct aab2f aab2f(float x0, float y0, float x1, float y1)

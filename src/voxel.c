@@ -33,6 +33,7 @@ struct context {
 	char act;
 	char use;
 	char pick;
+	uint8_t shape;
 	int chunks_per_tick;
 };
 
@@ -72,7 +73,7 @@ int main(int argc, char *argv[])
 	/* Initialize physics */
 	ctx->space = space(ctx->w);
 	space_set_gravity(ctx->space, v3f(0, -0.05, 0));
-	space_set_iterations(ctx->space, 1);
+	space_set_iterations(ctx->space, 2);
 	space_set_impulse(ctx->space, 0.001);
 	space_set_terminal_speed(ctx->space, 1);
 
@@ -127,6 +128,7 @@ int load_all(struct context *ctx)
 	ctx->player = body(ctx->space);
 	body_set_position(ctx->player, p);
 	body_set_size(ctx->player, v2f(0.325, 0.825));
+	ctx->shape = 1;
 	return 0;
 }
 
@@ -334,17 +336,17 @@ void update_player(struct context *ctx)
 	}
 	if (ctx->use == 1) {
 		if (ctx->cur_type == QUERY_FACE_LF)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(-1, 0, 0)), 1, 255);
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(-1, 0, 0)), ctx->shape, 255);
 		else if (ctx->cur_type == QUERY_FACE_RT)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(1, 0, 0)), 1, 255);
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(1, 0, 0)), ctx->shape, 255);
 		else if (ctx->cur_type == QUERY_FACE_DN)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, -1, 0)), 1, 255);
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, -1, 0)), ctx->shape, 255);
 		else if (ctx->cur_type == QUERY_FACE_UP)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 1, 0)), 1, 255);
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 1, 0)), ctx->shape, 255);
 		else if (ctx->cur_type == QUERY_FACE_BK)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, -1)), 1, 255);
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, -1)), ctx->shape, 255);
 		else if (ctx->cur_type == QUERY_FACE_FT)
-			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, 1)), 1, 255);
+			world_set(ctx->w, v3_add(ctx->cur_pos, v3c(0, 0, 1)), ctx->shape, 255);
 	}
 	if (ctx->pick == 1) {
 	}
@@ -398,52 +400,131 @@ void update_camera(struct context *ctx)
 	v = v3_rotx(v, r.x);
 	v = v3_roty(v, r.y);
 	ctx->cur_type = space_query(ctx->space, ctx->cam->p, v, &ctx->cur_pos);
+/*
 	if (ctx->cur_type != QUERY_NONE)
-		printf("looking at %d,%d,%d; face %s; mat %d; shape %d\n", ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z, face_names[ctx->cur_type], WORLD_AT(ctx->w, mat, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z), WORLD_AT(ctx->w, shape, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z));
+		printf("looking at %d,%d,%d; face %s; mat %d; shape %d\n", ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z, face_names[ctx->cur_type], WORLD_AT(ctx->w, mat, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z), WORLD_AT(ctx->w, shape, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z));*/
 }
 
-void tcoord_by_material(uint8_t m, GLfloat *u0, GLfloat *v0, GLfloat *u1, GLfloat *v1)
+void tcoord_by_material(uint8_t m, struct aab2f *tc)
 {
-	*u0 = (m % 16) / 16.;
-	*v0 = (m / 16) / 16.;
-	*u1 = *u0 + 1 / 16.;
-	*v1 = *v0 + 1 / 16.;
+	tc->x0 = (m % 16) / 16.;
+	tc->y0 = (m / 16) / 16.;
+	tc->x1 = tc->x0 + 1 / 16.;
+	tc->y1 = tc->y0 + 1 / 16.;
 }
+
+static const char has_left_side[] = {
+	0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0
+};
+
+static const char has_right_side[] = {
+	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0
+};
+
+static const char has_down_side[] = {
+	0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0
+};
+
+static const char has_up_side[] = {
+	0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0
+};
+
+static const char has_back_side[] = {
+	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0
+};
+
+static const char has_front_side[] = {
+	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1
+};
+
 
 void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_t y, int64_t z)
 {
 	int8_t s, l, d, b, m;
-	GLfloat u0, v0, u1, v1;
+	struct aab2f tc;
 
 	s = WORLD_AT(ctx->w, shape, x, y, z);
 	l = WORLD_AT(ctx->w, shape, x - 1, y, z);
 	d = y == 0 ? 0 : WORLD_AT(ctx->w, shape, x, y - 1, z);
 	b = WORLD_AT(ctx->w, shape, x, y, z - 1);
-	if (s != 1) {
-		if (l == 1) {
-			m = WORLD_AT(ctx->w, mat, x - 1, y, z);
-			tcoord_by_material(m, &u0, &v0, &u1, &v1);
-			vertex3_buf_right(buf, x - 1, y, z, u0, v0, u1, v1);
-		}
-		if (d == 1) {
-			m = WORLD_AT(ctx->w, mat, x, y - 1, z);
-			tcoord_by_material(m, &u0, &v0, &u1, &v1);
-			vertex3_buf_up(buf, x, y - 1, z, u0, v0, u1, v1);
-		}
-		if (b == 1) {
-			m = WORLD_AT(ctx->w, mat, x, y, z - 1);
-			tcoord_by_material(m, &u0, &v0, &u1, &v1);
-			vertex3_buf_front(buf, x, y, z - 1, u0, v0, u1, v1);
-		}
-	} else {
+	if (has_down_side[s] && !has_up_side[d]) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
-		tcoord_by_material(m, &u0, &v0, &u1, &v1);
-		if (l != 1)
-			vertex3_buf_left(buf, x, y, z, u0, v0, u1, v1);
-		if (d != 1)
-			vertex3_buf_down(buf, x, y, z, u0, v0, u1, v1);
-		if (b != 1)
-			vertex3_buf_back(buf, x, y, z, u0, v0, u1, v1);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_down(buf, v3f(x, y, z), 1, 1, tc);
+	}
+	if (has_up_side[d] && !has_down_side[s]) {
+		m = WORLD_AT(ctx->w, mat, x, y - 1, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_up(buf, v3f(x, y, z), 1, 1, tc);
+	}
+	if (has_left_side[s] && !has_right_side[l]) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_left(buf, v3f(x, y, z), 1, 1, tc);
+	}
+	if (has_right_side[l] && !has_left_side[s]) {
+		m = WORLD_AT(ctx->w, mat, x - 1, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_right(buf, v3f(x, y, z), 1, 1, tc);
+	}
+	if (has_back_side[s] && !has_front_side[b]) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 1, tc);
+	}
+	if (has_front_side[b] && !has_back_side[s]) {
+		m = WORLD_AT(ctx->w, mat, x, y, z - 1);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_front(buf, v3f(x, y, z), 1, 1, tc);
+	}
+	if (s == SHAPE_SLAB_DN) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 1, 1, tc);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, tc);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, tc);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, tc);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, tc);
+	} else if (s == SHAPE_SLAB_UP) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 1, 1, tc);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, tc);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, tc);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, tc);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, tc);
+	} else if (s == SHAPE_SLAB_LF) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_right(buf, v3f(x + 0.5, y, z), 1, 1, tc);
+		vertex3_buf_down(buf, v3f(x, y, z), 0.5, 1, tc);
+		vertex3_buf_up(buf, v3f(x, y + 1, z), 0.5, 1, tc);
+		vertex3_buf_back(buf, v3f(x, y, z), 0.5, 1, tc);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 0.5, 1, tc);
+	} else if (s == SHAPE_SLAB_RT) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_left(buf, v3f(x + 0.5, y, z), 1, 1, tc);
+		vertex3_buf_down(buf, v3f(x + 0.5, y, z), 0.5, 1, tc);
+		vertex3_buf_up(buf, v3f(x + 0.5, y + 1, z), 0.5, 1, tc);
+		vertex3_buf_back(buf, v3f(x + 0.5, y, z), 0.5, 1, tc);
+		vertex3_buf_front(buf, v3f(x + 0.5, y, z + 1), 0.5, 1, tc);
+	} else if (s == SHAPE_SLAB_BK) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_front(buf, v3f(x, y, z + 0.5), 1, 1, tc);
+		vertex3_buf_down(buf, v3f(x, y, z), 1, 0.5, tc);
+		vertex3_buf_up(buf, v3f(x, y + 1, z), 1, 0.5, tc);
+		vertex3_buf_left(buf, v3f(x, y, z), 1, 0.5, tc);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 1, 0.5, tc);
+	} else if (s == SHAPE_SLAB_FT) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_back(buf, v3f(x, y, z + 0.5), 1, 1, tc);
+		vertex3_buf_down(buf, v3f(x, y, z + 0.5), 1, 0.5, tc);
+		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.5), 1, 0.5, tc);
+		vertex3_buf_left(buf, v3f(x, y, z + 0.5), 1, 0.5, tc);
+		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.5), 1, 0.5, tc);
 	}
 }
 
@@ -573,6 +654,16 @@ void event(const SDL_Event *e, void *data)
 			ctx->use = 0;
 		} else if (e->button.button == SDL_BUTTON_MIDDLE) {
 			ctx->pick = 0;
+		}
+	} else if (e->type == SDL_MOUSEWHEEL) {
+		if (e->wheel.y > 0) {
+			if (--ctx->shape == 0)
+				ctx->shape = 12;
+			printf("Holding %d\n", ctx->shape);
+		} else if (e->wheel.y < 0) {
+			if (++ctx->shape == 13)
+				ctx->shape = 1;
+			printf("Holding %d\n", ctx->shape);
 		}
 	}
 }
