@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 	window_set_render_callback(ctx->ml->windows, render, ctx);
 
 	/* Load textures */
-	ctx->tex_terrain = texture("data/terrain.png");
+	ctx->tex_terrain = texture("data/gradient.png");
 
 	/* Initialize physics */
 	ctx->space = space(ctx->w);
@@ -361,12 +361,56 @@ void update_camera(struct context *ctx)
 		printf("looking at %d,%d,%d (%d)\n", ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z, ctx->cur_type);
 }
 
+void tcoord_by_material(int8_t m, GLfloat *u0, GLfloat *v0, GLfloat *u1, GLfloat *v1)
+{
+	*u0 = (m % 16) / 16.;
+	*v0 = (m / 16) / 16.;
+	*u1 = *u0 + 1 / 16.;
+	*v1 = *v0 + 1 / 16.;
+}
+
+void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_t y, int64_t z)
+{
+	int8_t s, l, d, b, m;
+	GLfloat u0, v0, u1, v1;
+
+	s = WORLD_AT(ctx->w, shape, x, y, z);
+	l = WORLD_AT(ctx->w, shape, x - 1, y, z);
+	d = y == 0 ? 0 : WORLD_AT(ctx->w, shape, x, y - 1, z);
+	b = WORLD_AT(ctx->w, shape, x, y, z - 1);
+	if (s != 1) {
+		if (l == 1) {
+			m = WORLD_AT(ctx->w, mat, x - 1, y, z);
+			tcoord_by_material(m, &u0, &v0, &u1, &v1);
+			vertex3_buf_right(buf, x - 1, y, z, u0, v0, u1, v1);
+		}
+		if (d == 1) {
+			m = WORLD_AT(ctx->w, mat, x, y - 1, z);
+			tcoord_by_material(m, &u0, &v0, &u1, &v1);
+			vertex3_buf_up(buf, x, y - 1, z, u0, v0, u1, v1);
+		}
+		if (b == 1) {
+			m = WORLD_AT(ctx->w, mat, x, y, z - 1);
+			tcoord_by_material(m, &u0, &v0, &u1, &v1);
+			vertex3_buf_front(buf, x, y, z - 1, u0, v0, u1, v1);
+		}
+	} else {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &u0, &v0, &u1, &v1);
+		if (l != 1)
+			vertex3_buf_left(buf, x, y, z, u0, v0, u1, v1);
+		if (d != 1)
+			vertex3_buf_down(buf, x, y, z, u0, v0, u1, v1);
+		if (b != 1)
+			vertex3_buf_back(buf, x, y, z, u0, v0, u1, v1);
+	}
+}
+
 void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 {
 	int64_t x1, y1, z1;
 	int64_t x, y, z;
 	struct vertex3_buf *buf;
-	int8_t s, l, d, b;
 
 	x1 = x0 + SHARD_W;
 	y1 = y0 + SHARD_H;
@@ -376,25 +420,7 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 	for (x = x0; x < x1; ++x) {
 		for (y = y0; y < y1; ++y) {
 			for (z = z0; z < z1; ++z) {
-				s = WORLD_AT(ctx->w, shape, x, y, z);
-				l = WORLD_AT(ctx->w, shape, x - 1, y, z);
-				d = y == 0 ? 0 : WORLD_AT(ctx->w, shape, x, y - 1, z);
-				b = WORLD_AT(ctx->w, shape, x, y, z - 1);
-				if (s != 1) {
-					if (l == 1)
-						vertex3_buf_right(buf, x - 1, y, z, 0, 0, 0.0625, 0.0625);
-					if (d == 1)
-						vertex3_buf_up(buf, x, y - 1, z, 0, 0, 0.0625, 0.0625);
-					if (b == 1)
-						vertex3_buf_front(buf, x, y, z - 1, 0, 0, 0.0625, 0.0625);
-				} else {
-					if (l != 1)
-						vertex3_buf_left(buf, x, y, z, 0, 0, 0.0625, 0.0625);
-					if (d != 1)
-						vertex3_buf_down(buf, x, y, z, 0, 0, 0.0625, 0.0625);
-					if (b != 1)
-						vertex3_buf_back(buf, x, y, z, 0, 0, 0.0625, 0.0625);
-				}
+				update_cell(ctx, buf, x, y, z);
 			}
 		}
 	}
