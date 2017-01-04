@@ -382,7 +382,7 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	int64_t x0, x1, x, y, z;
 	float t;
 
-	x0 = floor(p.x * 2);
+	x0 = ceil(p.x * 2);
 	x1 = floor((p.x + v.x) * 2);
 	for (x = x0; x <= x1; ++x) {
 		t = (0.5 * x - p.x) / v.x;
@@ -426,7 +426,7 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	int64_t z0, z1, x, y, z;
 	float t;
 
-	z0 = floor(p.z * 2);
+	z0 = ceil(p.z * 2);
 	z1 = floor((p.z + v.z) * 2);
 	for (z = z0; z <= z1; ++z) {
 		t = (0.5 * z - p.z) / v.z;
@@ -470,7 +470,7 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct v3ll *q, floa
 	int64_t y0, y1, x, y, z;
 	float t;
 
-	y0 = floor(p.y * 2);
+	y0 = ceil(p.y * 2);
 	y1 = floor((p.y + v.y) * 2);
 	for (y = y0; y <= y1; ++y) {
 		t = (0.5 * y - p.y) / v.y;

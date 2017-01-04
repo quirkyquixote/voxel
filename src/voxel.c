@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	window_set_render_callback(ctx->ml->windows, render, ctx);
 
 	/* Load textures */
-	ctx->tex_terrain = texture("data/gradient.png");
+	ctx->tex_terrain = texture("data/materials.png");
 
 	/* Initialize physics */
 	ctx->space = space(ctx->w);
@@ -399,13 +399,10 @@ void update_camera(struct context *ctx)
 	camera_set_position(ctx->cam, v3_add(ctx->player->p, v3f(0, .6, 0)));
 	camera_set_rotation(ctx->cam, ctx->player->r);
 
-	v = v3f(0, 0, -4);
+	v = v3f(0, 0, -5);
 	v = v3_rotx(v, r.x);
 	v = v3_roty(v, r.y);
 	ctx->cur_type = space_query(ctx->space, ctx->cam->p, v, &ctx->cur_pos);
-/*
-	if (ctx->cur_type != QUERY_NONE)
-		printf("looking at %d,%d,%d; face %s; mat %d; shape %d\n", ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z, face_names[ctx->cur_type], WORLD_AT(ctx->w, mat, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z), WORLD_AT(ctx->w, shape, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z));*/
 }
 
 void tcoord_by_material(uint8_t m, struct aab2f *tc)
@@ -701,6 +698,13 @@ void event(const SDL_Event *e, void *data)
 		} else if (e->key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE DUMP ===\n");
 			profile_manager_dump(ctx->prof_mgr);
+		} else if (e->key.keysym.sym == SDLK_q) {
+			if (ctx->cur_type != QUERY_NONE)
+				printf("looking at %d,%d,%d; face %s; mat %d; shape %d\n",
+						ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z,
+						face_names[ctx->cur_type],
+						WORLD_AT(ctx->w, mat, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z),
+						WORLD_AT(ctx->w, shape, ctx->cur_pos.x, ctx->cur_pos.y, ctx->cur_pos.z));
 		}
 	} else if (e->type == SDL_MOUSEBUTTONDOWN) {
 		if (e->button.button == SDL_BUTTON_LEFT) {
