@@ -15,6 +15,7 @@
 #include "renderer.h"
 #include "camera.h"
 #include "media.h"
+#include "aab3i.h"
 
 
 struct context {
@@ -29,7 +30,7 @@ struct context {
 	struct body *player;
 	int cur_type;
 	struct v3i cur_pos;
-	int move_lf, move_rt, move_bk, move_ft, move_up, move_dn;
+	struct aab3i move;
 	int chunks_per_tick;
 };
 
@@ -344,9 +345,9 @@ void update_camera(struct context *ctx)
 	body_set_rotation(ctx->player, r);
 
 	v = body_get_velocity(ctx->player);
-	v.x = (ctx->move_rt - ctx->move_lf) * .25;
-	v.y += (ctx->move_up - ctx->move_dn) * .25;
-	v.z = (ctx->move_bk - ctx->move_ft) * .25;
+	v.x = (ctx->move.x1 - ctx->move.x0) * .25;
+	v.y += (ctx->move.y1 - ctx->move.y0) * .25;
+	v.z = (ctx->move.z1 - ctx->move.z0) * .25;
 	v = v3f_roty(v, r.y);
 	body_set_velocity(ctx->player, v);
 
@@ -452,17 +453,17 @@ void event(const SDL_Event *e, void *data)
 		} else if (e->key.keysym.sym == SDLK_ESCAPE) {
 			main_loop_kill(ctx->ml);
 		} else if (e->key.keysym.sym == SDLK_w) {
-			ctx->move_ft = 1;
+			ctx->move.z0 = 1;
 		} else if (e->key.keysym.sym == SDLK_a) {
-			ctx->move_lf = 1;
+			ctx->move.x0 = 1;
 		} else if (e->key.keysym.sym == SDLK_s) {
-			ctx->move_bk = 1;
+			ctx->move.z1 = 1;
 		} else if (e->key.keysym.sym == SDLK_d) {
-			ctx->move_rt = 1;
+			ctx->move.x1 = 1;
 		} else if (e->key.keysym.sym == SDLK_LSHIFT) {
-			ctx->move_dn = 1;
+			ctx->move.y0 = 1;
 		} else if (e->key.keysym.sym == SDLK_SPACE) {
-			ctx->move_up = 1;
+			ctx->move.y1 = 1;
 		} else if (e->key.keysym.sym == SDLK_o) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else if (e->key.keysym.sym == SDLK_p) {
@@ -473,17 +474,17 @@ void event(const SDL_Event *e, void *data)
 		if (e->key.repeat) {
 			return;
 		} else if (e->key.keysym.sym == SDLK_w) {
-			ctx->move_ft = 0;
+			ctx->move.z0 = 0;
 		} else if (e->key.keysym.sym == SDLK_a) {
-			ctx->move_lf = 0;
+			ctx->move.x0 = 0;
 		} else if (e->key.keysym.sym == SDLK_s) {
-			ctx->move_bk = 0;
+			ctx->move.z1 = 0;
 		} else if (e->key.keysym.sym == SDLK_d) {
-			ctx->move_rt = 0;
+			ctx->move.x1 = 0;
 		} else if (e->key.keysym.sym == SDLK_LSHIFT) {
-			ctx->move_dn = 0;
+			ctx->move.y0 = 0;
 		} else if (e->key.keysym.sym == SDLK_SPACE) {
-			ctx->move_up = 0;
+			ctx->move.y1 = 0;
 		} else if (e->key.keysym.sym == SDLK_o) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		} else if (e->key.keysym.sym == SDLK_p) {

@@ -1,6 +1,6 @@
 
-#ifndef VOXEL_AAB2_H_
-#define VOXEL_AAB2_H_
+#ifndef VOXEL_AAB2F_H_
+#define VOXEL_AAB2F_H_
 
 struct aab2f {
 	float x0, y0;
