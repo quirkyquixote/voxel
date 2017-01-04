@@ -63,6 +63,7 @@ void move_xpos(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, y0, y1, z0, z1;
 	int shape;
+	int step_up = 0;
 
 	x = floor((b->bb.x1 + b->v.x * dt) * 2);
 	y0 = floor(b->bb.y0 * 2);
@@ -73,12 +74,18 @@ void move_xpos(struct space *s, struct body *b, float dt)
 		for (z = z0; z <= z1; ++z) {
 			shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
 			if (shape_masks[shape] & MASK(x, y, z)) {
-				b->v.x = 0;
-				b->p.x = 0.5 * x - b->s.x - s->impulse;
-				return;
+				if (y == y0) {
+					step_up = 1;
+				} else {
+					b->v.x = 0;
+					b->p.x = 0.5 * x - b->s.x - s->impulse;
+					return;
+				}
 			}
 		}
 	}
+	if (step_up)
+		b->p.y = 0.5 * (y0 + 1) + b->s.y + s->impulse;
 	b->p.x += b->v.x * dt;
 }
 
@@ -86,6 +93,7 @@ void move_xneg(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, y0, y1, z0, z1;
 	int shape;
+	int step_up = 0;
 
 	x = floor((b->bb.x0 + b->v.x * dt) * 2);
 	y0 = floor(b->bb.y0 * 2);
@@ -96,12 +104,18 @@ void move_xneg(struct space *s, struct body *b, float dt)
 		for (z = z0; z <= z1; ++z) {
 			shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
 			if (shape_masks[shape] & MASK(x, y, z)) {
-				b->v.x = 0;
-				b->p.x = 0.5 * (x + 1) + b->s.x + s->impulse;
-				return;
+				if (y == y0) {
+					step_up = 1;
+				} else {
+					b->v.x = 0;
+					b->p.x = 0.5 * (x + 1) + b->s.x + s->impulse;
+					return;
+				}
 			}
 		}
 	}
+	if (step_up)
+		b->p.y = 0.5 * (y0 + 1) + b->s.y + s->impulse;
 	b->p.x += b->v.x * dt;
 }
 
@@ -109,6 +123,7 @@ void move_zpos(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, y0, y1;
 	int shape;
+	int step_up = 0;
 
 	z = floor((b->bb.z1 + b->v.z * dt) * 2);
 	x0 = floor(b->bb.x0 * 2);
@@ -119,12 +134,18 @@ void move_zpos(struct space *s, struct body *b, float dt)
 		for (y = y0; y <= y1; ++y) {
 			shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
 			if (shape_masks[shape] & MASK(x, y, z)) {
-				b->v.z = 0;
-				b->p.z = 0.5 * z - b->s.x - s->impulse;
-				return;
+				if (y == y0) {
+					step_up = 1;
+				} else {
+					b->v.z = 0;
+					b->p.z = 0.5 * z - b->s.x - s->impulse;
+					return;
+				}
 			}
 		}
 	}
+	if (step_up)
+		b->p.y = 0.5 * (y0 + 1) + b->s.y + s->impulse;
 	b->p.z += b->v.z * dt;
 }
 
@@ -132,6 +153,7 @@ void move_zneg(struct space *s, struct body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, y0, y1;
 	int shape;
+	int step_up = 0;
 
 	z = floor((b->bb.z0 + b->v.z * dt) * 2);
 	x0 = floor(b->bb.x0 * 2);
@@ -142,12 +164,18 @@ void move_zneg(struct space *s, struct body *b, float dt)
 		for (y = y0; y <= y1; ++y) {
 			shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
 			if (shape_masks[shape] & MASK(x, y, z)) {
-				b->v.z = 0;
-				b->p.z = 0.5 * (z + 1) + b->s.x + s->impulse;
-				return;
+				if (y == y0) {
+					step_up = 1;
+				} else {
+					b->v.z = 0;
+					b->p.z = 0.5 * (z + 1) + b->s.x + s->impulse;
+					return;
+				}
 			}
 		}
 	}
+	if (step_up)
+		b->p.y = 0.5 * (y0 + 1) + b->s.y + s->impulse;
 	b->p.z += b->v.z * dt;
 }
 
@@ -230,12 +258,16 @@ void space_step(struct space *s, float dt)
 			move_xneg(s, b, dt);
 		b->bb.x0 = b->p.x - b->s.x;
 		b->bb.x1 = b->p.x + b->s.x;
+		b->bb.y0 = b->p.y - b->s.y;
+		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.z > 0)
 			move_zpos(s, b, dt);
 		else if (b->v.z < 0)
 			move_zneg(s, b, dt);
 		b->bb.z0 = b->p.z - b->s.x;
 		b->bb.z1 = b->p.z + b->s.x;
+		b->bb.y0 = b->p.y - b->s.y;
+		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.y > 0)
 			move_ypos(s, b, dt);
 		else if (b->v.y < 0)
