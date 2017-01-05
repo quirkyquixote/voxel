@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	window_set_render_callback(ctx->ml->windows, render, ctx);
 
 	/* Load textures */
-	ctx->tex_terrain = texture("data/materials.png");
+	ctx->tex_terrain = texture("data/gradient.png");
 
 	/* Initialize physics */
 	ctx->space = space(ctx->w);
@@ -329,23 +329,30 @@ int chunks_by_priority(const void *p1, const void *p2)
 
 void update_player(struct context *ctx)
 {
+	struct v3ll p;
 	if (ctx->act == 1) {
-		if (ctx->cur.face != -1)
-			world_set(ctx->w, ctx->cur.p, 0, 0);
+		if (ctx->cur.face != -1) {
+			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) != 0)
+				world_set(ctx->w, ctx->cur.p, 0, 0);
+		}
 	}
 	if (ctx->use == 1) {
-		if (ctx->cur.face == FACE_LF)
-			world_set(ctx->w, v3_add(ctx->cur.p, v3c(-1, 0, 0)), ctx->shape, 255);
-		else if (ctx->cur.face == FACE_RT)
-			world_set(ctx->w, v3_add(ctx->cur.p, v3c(1, 0, 0)), ctx->shape, 255);
-		else if (ctx->cur.face == FACE_DN)
-			world_set(ctx->w, v3_add(ctx->cur.p, v3c(0, -1, 0)), ctx->shape, 255);
-		else if (ctx->cur.face == FACE_UP)
-			world_set(ctx->w, v3_add(ctx->cur.p, v3c(0, 1, 0)), ctx->shape, 255);
-		else if (ctx->cur.face == FACE_BK)
-			world_set(ctx->w, v3_add(ctx->cur.p, v3c(0, 0, -1)), ctx->shape, 255);
-		else if (ctx->cur.face == FACE_FT)
-			world_set(ctx->w, v3_add(ctx->cur.p, v3c(0, 0, 1)), ctx->shape, 255);
+		if (ctx->cur.face != -1) {
+			if (ctx->cur.face == FACE_LF)
+				p = v3_add(ctx->cur.p, v3c(-1, 0, 0));
+			else if (ctx->cur.face == FACE_RT)
+				p = v3_add(ctx->cur.p, v3c(1, 0, 0));
+			else if (ctx->cur.face == FACE_DN)
+				p = v3_add(ctx->cur.p, v3c(0, -1, 0));
+			else if (ctx->cur.face == FACE_UP)
+				p = v3_add(ctx->cur.p, v3c(0, 1, 0));
+			else if (ctx->cur.face == FACE_BK)
+				p = v3_add(ctx->cur.p, v3c(0, 0, -1));
+			else if (ctx->cur.face == FACE_FT)
+				p = v3_add(ctx->cur.p, v3c(0, 0, 1));
+			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == 0)
+				world_set(ctx->w, p, ctx->shape, 255);
+		}
 	}
 	if (ctx->pick == 1) {
 	}
@@ -699,9 +706,9 @@ void event(const SDL_Event *e, void *data)
 			profile_manager_dump(ctx->prof_mgr);
 		} else if (e->key.keysym.sym == SDLK_q) {
 			if (ctx->cur.face != -1)
-				printf("looking at %d,%d,%d; face %s; mat %d; shape %d\n",
+				printf("looking at %d,%d,%d; face %s; cell %02x; mat %d; shape %d\n",
 						ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z,
-						face_names[ctx->cur.face],
+						face_names[ctx->cur.face], ctx->cur.cell,
 						WORLD_AT(ctx->w, mat, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z),
 						WORLD_AT(ctx->w, shape, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z));
 		}
