@@ -12,12 +12,12 @@
 #include "chunk.h"
 
 enum {
+	FACE_FT,
 	FACE_LF,
+	FACE_BK,
 	FACE_RT,
 	FACE_UP,
 	FACE_DN,
-	FACE_BK,
-	FACE_FT,
 };
 
 enum {
