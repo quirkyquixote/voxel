@@ -58,6 +58,7 @@ static const int shape_masks[] = {
 	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF | CELL_LDB | CELL_RDB,
 	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF | CELL_RDF | CELL_RDB,
 	0xff,
+	0xff,
 };
 
 int cell_at(struct space *s, const int *masks, int64_t x, int64_t y, int64_t z)

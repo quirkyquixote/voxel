@@ -61,6 +61,7 @@ enum {
 	SHAPE_STAIRS_UB,
 	SHAPE_STAIRS_UR,
 	SHAPE_WORKBENCH,
+	SHAPE_CRATE,
 	SHAPE_COUNT,
 };
 
@@ -70,10 +71,7 @@ struct shard {
 	uint8_t mat[SHARD_W][SHARD_H][SHARD_D];
 	uint8_t shape[SHARD_W][SHARD_H][SHARD_D];
 	uint8_t light[SHARD_W][SHARD_H][SHARD_D];
-};
-
-struct cell_entity {
-	struct cell_entity *next;
+	void *data[SHARD_W][SHARD_H][SHARD_D];
 };
 
 struct chunk {
@@ -82,7 +80,6 @@ struct chunk {
 	int priority;
 	int64_t x, z;
 	struct shard *shards[SHARDS_PER_CHUNK];
-	struct cell_entity *entities;
 };
 
 struct world {
@@ -104,7 +101,7 @@ struct world *world(void);
 void world_destroy(struct world *w);
 int world_load(struct world *w, union sz_tag *root);
 int world_save(struct world *w, union sz_tag **root);
-void world_set(struct world *w, struct v3ll p, int shape, int mat);
+void world_set(struct world *w, struct v3ll p, int shape, int mat, void *data);
 
 #endif
 

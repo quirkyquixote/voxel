@@ -120,6 +120,8 @@ void update_player(struct context *ctx)
 					}
 				} else if (obj == OBJ_WORKBENCH) {
 					world_set(ctx->w, p, SHAPE_WORKBENCH, 255);
+				} else if (obj == OBJ_CRATE) {
+					world_set(ctx->w, p, SHAPE_CRATE, 255);
 				}
 			}
 		}
