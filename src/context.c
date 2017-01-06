@@ -601,9 +601,10 @@ void event(const SDL_Event *e, void *data)
 			profile_manager_dump(ctx->prof_mgr);
 		} else if (e->key.keysym.sym == SDLK_q) {
 			if (ctx->cur.face != -1)
-				printf("looking at %d,%d,%d; face %s; cell %02x; mat %d; shape %d\n",
+				printf("looking at %d,%d,%d (%g,%g,%g); face %s; mat %d; shape %d\n",
 						ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z,
-						face_names[ctx->cur.face], ctx->cur.cell,
+						ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z,
+						face_names[ctx->cur.face],
 						WORLD_AT(ctx->w, mat, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z),
 						WORLD_AT(ctx->w, shape, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z));
 		} else if (e->key.keysym.sym == SDLK_c) {

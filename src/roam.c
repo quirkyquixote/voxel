@@ -66,8 +66,8 @@ void roam_render(struct context *ctx)
 void update_player(struct context *ctx)
 {
 	struct v3ll p = ctx->cur.p;
+	struct v3f q = ctx->cur.q;
 	int f = ctx->cur.face;
-	int c = ctx->cur.cell;
 	int obj = ctx->inv->slots[ctx->tool].obj;
 	int mat = ctx->inv->slots[ctx->tool].mat;
 
@@ -103,7 +103,7 @@ void update_player(struct context *ctx)
 						world_set(ctx->w, p, SHAPE_SLAB_DN, 255);
 					} else if (f == FACE_DN) {
 						world_set(ctx->w, p, SHAPE_SLAB_UP, 255);
-					} else if (c & (CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF)) {
+					} else if (q.y > 0.5) {
 						world_set(ctx->w, p, SHAPE_SLAB_UP, 255);
 					} else {
 						world_set(ctx->w, p, SHAPE_SLAB_DN, 255);
@@ -113,7 +113,7 @@ void update_player(struct context *ctx)
 						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255);
 					} else if (f == FACE_DN) {
 						world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255);
-					} else if (c & (CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF)) {
+					} else if (q.y > 0.5) {
 						world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255);
 					} else {
 						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255);

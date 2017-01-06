@@ -286,6 +286,7 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 {
 	int64_t x0, x1, x, y, z;
 	float t;
+	struct v3f p1;
 
 	x0 = ceil(p.x * 2);
 	x1 = floor((p.x + v.x) * 2);
@@ -293,12 +294,13 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * x - p.x) / v.x;
 		if (t >= *best_t)
 			return 0;
-		y = floor((p.y + v.y * t) * 2);
-		z = floor((p.z + v.z * t) * 2);
+		p1 = v3_addx(p, v, t);
+		y = floor(p1.y * 2);
+		z = floor(p1.z * 2);
 		if (cell_at(s, shape_masks, x, y, z)) {
-			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
 			q->face = FACE_LF;
 			q->p = v3ll(x >> 1, y >> 1, z >> 1);
+			q->q = v3_sub(p1, q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -310,6 +312,7 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 {
 	int64_t x0, x1, x, y, z;
 	float t;
+	struct v3f p1;
 
 	x0 = floor(p.x * 2);
 	x1 = floor((p.x + v.x) * 2);
@@ -317,12 +320,13 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * x - p.x) / v.x;
 		if (t >= *best_t)
 			return 0;
-		y = floor((p.y + v.y * t) * 2);
-		z = floor((p.z + v.z * t) * 2);
+		p1 = v3_addx(p, v, t);
+		y = floor(p1.y * 2);
+		z = floor(p1.z * 2);
 		if (cell_at(s, shape_masks, x - 1, y, z)) {
-			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
 			q->face = FACE_RT;
 			q->p = v3ll((x - 1) >> 1, y >> 1, z >> 1);
+			q->q = v3_sub(p1, q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -334,6 +338,7 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 {
 	int64_t z0, z1, x, y, z;
 	float t;
+	struct v3f p1;
 
 	z0 = ceil(p.z * 2);
 	z1 = floor((p.z + v.z) * 2);
@@ -341,12 +346,13 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * z - p.z) / v.z;
 		if (t >= *best_t)
 			return 0;
-		x = floor((p.x + v.x * t) * 2);
-		y = floor((p.y + v.y * t) * 2);
+		p1 = v3_addx(p, v, t);
+		x = floor(p1.x * 2);
+		y = floor(p1.y * 2);
 		if (cell_at(s, shape_masks, x, y, z)) {
-			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
 			q->face = FACE_BK;
 			q->p = v3ll(x >> 1, y >> 1, z >> 1);
+			q->q = v3_sub(p1, q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -358,6 +364,7 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 {
 	int64_t z0, z1, x, y, z;
 	float t;
+	struct v3f p1;
 
 	z0 = floor(p.z * 2);
 	z1 = floor((p.z + v.z) * 2);
@@ -365,12 +372,13 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * z - p.z) / v.z;
 		if (t >= *best_t)
 			return 0;
-		x = floor((p.x + v.x * t) * 2);
-		y = floor((p.y + v.y * t) * 2);
+		p1 = v3_addx(p, v, t);
+		x = floor(p1.x * 2);
+		y = floor(p1.y * 2);
 		if (cell_at(s, shape_masks, x, y, z - 1)) {
-			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
 			q->face = FACE_FT;
 			q->p = v3ll(x >> 1, y >> 1, (z - 1) >> 1);
+			q->q = v3_sub(p1, q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -382,6 +390,7 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 {
 	int64_t y0, y1, x, y, z;
 	float t;
+	struct v3f p1;
 
 	y0 = ceil(p.y * 2);
 	y1 = floor((p.y + v.y) * 2);
@@ -389,12 +398,13 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * y - p.y) / v.y;
 		if (t >= *best_t)
 			return 0;
-		x = floor((p.x + v.x * t) * 2);
-		z = floor((p.z + v.z * t) * 2);
+		p1 = v3_addx(p, v, t);
+		x = floor(p1.x * 2);
+		z = floor(p1.z * 2);
 		if (cell_at(s, shape_masks, x, y, z)) {
-			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
 			q->face = FACE_DN;
 			q->p = v3ll(x >> 1, y >> 1, z >> 1);
+			q->q = v3_sub(p1, q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -406,6 +416,7 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 {
 	int64_t y0, y1, x, y, z;
 	float t;
+	struct v3f p1;
 
 	y0 = floor(p.y * 2);
 	y1 = floor((p.y + v.y) * 2);
@@ -413,12 +424,13 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * y - p.y) / v.y;
 		if (t >= *best_t)
 			return 0;
-		x = floor((p.x + v.x * t) * 2);
-		z = floor((p.z + v.z * t) * 2);
+		p1 = v3_addx(p, v, t);
+		x = floor(p1.x * 2);
+		z = floor(p1.z * 2);
 		if (cell_at(s, shape_masks, x, y - 1, z)) {
-			q->cell = ((x & 1) << 2) | ((y & 1) << 1) | (z & 1);
 			q->face = FACE_UP;
 			q->p = v3ll(x >> 1, (y - 1) >> 1, z >> 1);
+			q->q = v3_sub(p1, q->p);
 			*best_t = t;
 			return 1;
 		}

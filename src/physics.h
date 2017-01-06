@@ -51,8 +51,8 @@ struct space {
 
 struct query {
 	int face;
-	int cell;
 	struct v3ll p;
+	struct v3f q;
 };
 
 struct body *body(struct space *s);
