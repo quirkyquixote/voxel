@@ -7,6 +7,7 @@ ALL_CFLAGS += -I$(shell pwd)
 
 voxel_objs += camera.o
 voxel_objs += chunk.o
+voxel_objs += context.o
 voxel_objs += fps_manager.o
 voxel_objs += main_loop.o
 voxel_objs += media.o
@@ -17,7 +18,6 @@ voxel_objs += renderer.o
 voxel_objs += roam.o
 voxel_objs += sz.o
 voxel_objs += terraform.o
-voxel_objs += voxel.o
 
 szcat_objs += sz.o
 

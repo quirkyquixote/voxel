@@ -2,7 +2,7 @@
 #ifndef VOXEL_ROAM_H_
 #define VOXEL_ROAM_H_
 
-#include "voxel.h"
+#include "context.h"
 
 void roam_update(struct context *ctx);
 void roam_render(struct context *ctx);
