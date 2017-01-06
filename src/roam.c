@@ -68,6 +68,8 @@ void update_player(struct context *ctx)
 	struct v3ll p = ctx->cur.p;
 	int f = ctx->cur.face;
 	int c = ctx->cur.cell;
+	int obj = ctx->inv->slots[ctx->tool].obj;
+	int mat = ctx->inv->slots[ctx->tool].mat;
 
 	if (ctx->act == 1) {
 		if (ctx->cur.face != -1) {
@@ -94,9 +96,9 @@ void update_player(struct context *ctx)
 			else if (f == FACE_FT)
 				p = v3_add(p, v3c(0, 0, 1));
 			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == 0) {
-				if (ctx->obj == OBJ_BLOCK) {
+				if (obj == OBJ_BLOCK) {
 					world_set(ctx->w, p, SHAPE_BLOCK_DN, 255);
-				} else if (ctx->obj == OBJ_SLAB) {
+				} else if (obj == OBJ_SLAB) {
 					if (f == FACE_UP) {
 						world_set(ctx->w, p, SHAPE_SLAB_DN, 255);
 					} else if (f == FACE_DN) {
@@ -106,7 +108,7 @@ void update_player(struct context *ctx)
 					} else {
 						world_set(ctx->w, p, SHAPE_SLAB_DN, 255);
 					}
-				} else if (ctx->obj == OBJ_STAIRS) {
+				} else if (obj == OBJ_STAIRS) {
 					if (f == FACE_UP) {
 						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255);
 					} else if (f == FACE_DN) {
@@ -116,7 +118,7 @@ void update_player(struct context *ctx)
 					} else {
 						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255);
 					}
-				} else if (ctx->obj == OBJ_WORKBENCH) {
+				} else if (obj == OBJ_WORKBENCH) {
 					world_set(ctx->w, p, SHAPE_WORKBENCH, 255);
 				}
 			}
@@ -259,16 +261,28 @@ int roam_event(const SDL_Event *e, struct context *ctx)
 		}
 	} else if (e->type == SDL_MOUSEWHEEL) {
 		if (e->wheel.y > 0) {
-			if (ctx->obj == 0)
-				ctx->obj = OBJ_COUNT;
-			--ctx->obj;
-			printf("Holding %s\n", obj_names[ctx->obj]);
+			if (ctx->tool == 0)
+				ctx->tool = ctx->inv->size;
+			--ctx->tool;
+			if (ctx->inv->slots[ctx->tool].num)
+				printf("Holding %d: %s %s x%d\n", ctx->tool,
+					mat_names[ctx->inv->slots[ctx->tool].mat],
+					obj_names[ctx->inv->slots[ctx->tool].obj],
+					ctx->inv->slots[ctx->tool].num);
+			else
+				printf("Holding %d: nothing\n", ctx->tool);
 			return 1;
 		} else if (e->wheel.y < 0) {
-			++ctx->obj;
-			if (ctx->obj == OBJ_COUNT)
-				ctx->obj = 0;
-			printf("Holding %s\n", obj_names[ctx->obj]);
+			++ctx->tool;
+			if (ctx->tool == ctx->inv->size)
+				ctx->tool = 0;
+			if (ctx->inv->slots[ctx->tool].num)
+				printf("Holding %d: %s %s x%d\n", ctx->tool,
+					mat_names[ctx->inv->slots[ctx->tool].mat],
+					obj_names[ctx->inv->slots[ctx->tool].obj],
+					ctx->inv->slots[ctx->tool].num);
+			else
+				printf("Holding %d: nothing\n", ctx->tool);
 			return 1;
 		}
 	}

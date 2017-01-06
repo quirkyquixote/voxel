@@ -19,6 +19,10 @@ const char *obj_names[] = {
 	"workbench",
 };
 
+const char *mat_names[] = {
+	[255] = "foo"
+};
+
 const char *face_names[] = {
 	"front"
 	"left",
@@ -118,7 +122,13 @@ int load_all(struct context *ctx)
 	ctx->player = body(ctx->space);
 	body_set_position(ctx->player, p);
 	body_set_size(ctx->player, v2f(0.325, 0.825));
-	ctx->obj = OBJ_BLOCK;
+	ctx->inv = inventory(40);
+	ctx->tool = 0;
+	for (z = 255; z < 256; ++z) {
+		for (x = 0; x < OBJ_COUNT; ++x) {
+			inventory_add(ctx->inv, x, z, 64);
+		}
+	}
 	return 0;
 }
 
@@ -548,10 +558,10 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
+//		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
 		for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 			update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
-		fprintf(stdout, "\n");
+//		fprintf(stdout, "\n");
 		c->up_to_date = 1;
 	}
 }

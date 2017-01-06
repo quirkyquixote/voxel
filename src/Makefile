@@ -9,6 +9,7 @@ voxel_objs += camera.o
 voxel_objs += chunk.o
 voxel_objs += context.o
 voxel_objs += fps_manager.o
+voxel_objs += inventory.o
 voxel_objs += main_loop.o
 voxel_objs += media.o
 voxel_objs += physics.o

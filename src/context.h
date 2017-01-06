@@ -10,6 +10,7 @@
 #include "renderer.h"
 #include "camera.h"
 #include "media.h"
+#include "inventory.h"
 
 enum {
 	MODE_ROAM,
@@ -37,19 +38,20 @@ struct context {
 	struct body *player;
 	struct query cur;
 	struct aab3c move;
+	struct inventory *inv;
 	char mode;
 	char act;
 	char use;
 	char pick;
 	char run;
-	char obj;
-	char mat;
+	char tool;
 	char roty;
 	char rotx;
 	int chunks_per_tick;
 };
 
 extern const char *obj_names[];
+extern const char *mat_names[];
 extern const char *face_names[];
 
 #endif
