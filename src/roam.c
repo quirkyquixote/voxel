@@ -74,7 +74,7 @@ void update_player(struct context *ctx)
 	if (ctx->act == 1) {
 		if (ctx->cur.face != -1) {
 			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) != 0)
-				world_set(ctx->w, p, 0, 0);
+				world_set(ctx->w, p, 0, 0, NULL);
 		}
 	}
 	if (ctx->use == 1) {
@@ -97,31 +97,31 @@ void update_player(struct context *ctx)
 				p = v3_add(p, v3c(0, 0, 1));
 			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == 0) {
 				if (obj == OBJ_BLOCK) {
-					world_set(ctx->w, p, SHAPE_BLOCK_DN, 255);
+					world_set(ctx->w, p, SHAPE_BLOCK_DN, 255, NULL);
 				} else if (obj == OBJ_SLAB) {
 					if (f == FACE_UP) {
-						world_set(ctx->w, p, SHAPE_SLAB_DN, 255);
+						world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
 					} else if (f == FACE_DN) {
-						world_set(ctx->w, p, SHAPE_SLAB_UP, 255);
+						world_set(ctx->w, p, SHAPE_SLAB_UP, 255, NULL);
 					} else if (q.y > 0.5) {
-						world_set(ctx->w, p, SHAPE_SLAB_UP, 255);
+						world_set(ctx->w, p, SHAPE_SLAB_UP, 255, NULL);
 					} else {
-						world_set(ctx->w, p, SHAPE_SLAB_DN, 255);
+						world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
 					}
 				} else if (obj == OBJ_STAIRS) {
 					if (f == FACE_UP) {
-						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255);
+						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
 					} else if (f == FACE_DN) {
-						world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255);
+						world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255, NULL);
 					} else if (q.y > 0.5) {
-						world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255);
+						world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255, NULL);
 					} else {
-						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255);
+						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
 					}
 				} else if (obj == OBJ_WORKBENCH) {
-					world_set(ctx->w, p, SHAPE_WORKBENCH, 255);
+					world_set(ctx->w, p, SHAPE_WORKBENCH, 255, inventory(4));
 				} else if (obj == OBJ_CRATE) {
-					world_set(ctx->w, p, SHAPE_CRATE, 255);
+					world_set(ctx->w, p, SHAPE_CRATE, 255, inventory(16));
 				}
 			}
 		}

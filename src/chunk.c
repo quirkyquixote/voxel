@@ -34,7 +34,6 @@ int shard_load(struct shard *s, union sz_tag *root)
 			memcpy(s->light, val->raw.data, val->raw.size);
 		} else {
 			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
-			return -1;
 		}
 	}
 	return 0;
@@ -63,14 +62,48 @@ struct chunk *chunk(int id)
 void chunk_destroy(struct chunk *c)
 {
 	int i;
-	struct cell_entity *it, *next;
 	for (i = 0; i < SHARDS_PER_CHUNK; ++i)
 		shard_destroy(c->shards[i]);
-	for (it = c->entities; it != NULL; it = next) {
-		next = it->next;
-		free(it);
-	}
 	free(c);
+}
+
+int inventory_load(struct inventory *i, union sz_tag *root)
+{
+	char *key;
+	union sz_tag *val;
+	sz_dict_foreach(key, val, root) {
+		if (strcmp(key, "size") == 0) {
+			inventory_resize(i, val->i8.data);
+		} else if (strcmp(key, "items") == 0) {
+			memcpy(i->slots, val->raw.data, val->raw.size);
+		} else {
+			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
+		}
+	}
+	return 0;
+}
+
+int entity_load(struct chunk *c, union sz_tag *root)
+{
+	char *key;
+	union sz_tag *val;
+	struct v3ll p;
+	sz_dict_foreach(key, val, root) {
+		if (strcmp(key, "x") == 0) {
+			p.x = val->i64.data;
+		} else if (strcmp(key, "y") == 0) {
+			p.y = val->i64.data;
+		} else if (strcmp(key, "z") == 0) {
+			p.z = val->i64.data;
+		} else if (strcmp(key, "items") == 0) {
+			struct inventory *inv = inventory(0);
+			inventory_load(inv, val);
+			CHUNK_AT(c, data, p.x, p.y, p.z) = inv;
+		} else {
+			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
+		}
+	}
+	return 0;
 }
 
 int chunk_load(struct chunk *c, union sz_tag *root)
@@ -91,18 +124,51 @@ int chunk_load(struct chunk *c, union sz_tag *root)
 					return -1;
 				++i;
 			}
+		} else if (strcmp(key, "entities") == 0) {
+			int i;
+			union sz_tag *iter;
+			i = 0;
+			sz_list_foreach(iter, val) {
+				if (entity_load(c, iter) != 0)
+					return -1;
+				++i;
+			}
 		} else {
 			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
-			return -1;
 		}
 	}
 	return 0;
 }
 
+int inventory_save(struct inventory *i, union sz_tag **root)
+{
+	*root = sz_dict();
+	sz_dict_add(*root, "size", sz_i8(i->size));
+	sz_dict_add(*root, "items", sz_raw(i->slots, sizeof(*i->slots) * i->size));
+	return 0;
+}
+
+int entity_save(struct chunk *c, struct v3ll p, union sz_tag **root)
+{
+	struct inventory *inv;
+	union sz_tag *tag;
+	inv = CHUNK_AT(c, data, p.x, p.y, p.z);
+	if (inv == NULL)
+		return 0;
+	*root = sz_dict();
+	sz_dict_add(*root, "x", sz_i64(p.x));
+	sz_dict_add(*root, "y", sz_i64(p.y));
+	sz_dict_add(*root, "z", sz_i64(p.z));
+	inventory_save(inv, &tag);
+	sz_dict_add(*root, "items", tag);
+	return 1;
+}
+
 int chunk_save(struct chunk *c, union sz_tag **root)
 {
 	int i;
-	union sz_tag *shards;
+	union sz_tag *shards, *entities;
+	uint64_t x, y, z;
 	*root = sz_dict();
 	sz_dict_add(*root, "x", sz_i64(c->x));
 	sz_dict_add(*root, "z", sz_i64(c->z));
@@ -113,6 +179,17 @@ int chunk_save(struct chunk *c, union sz_tag **root)
 		sz_list_add(shards, tag);
 	}
 	sz_dict_add(*root, "shards", shards);
+	entities = sz_list();
+	for (x = 0; x < CHUNK_W; ++x) {
+		for (z = 0; z < CHUNK_D; ++z) {
+			for (y = 0; y < CHUNK_H; ++y) {
+				union sz_tag *tag;
+				if (entity_save(c, v3ll(x, y, z), &tag))
+					sz_list_add(entities, tag);
+			}
+		}
+	}
+	sz_dict_add(*root, "entities", entities);
 	return 0;
 }
 

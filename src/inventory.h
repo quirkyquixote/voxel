@@ -13,11 +13,12 @@ struct stack {
 
 struct inventory {
 	size_t size;
-	struct stack slots[];
+	struct stack *slots;
 };
 
 struct inventory *inventory(size_t size);
 void inventory_destroy(struct inventory *i);
+int inventory_resize(struct inventory *i, size_t size);
 int inventory_add(struct inventory *i, int obj, int mat, int num);
 int inventory_add_to_slot(struct inventory *i, int slot, int obj, int mat, int num);
 int inventory_remove(struct inventory *i, int obj, int mat, int num);

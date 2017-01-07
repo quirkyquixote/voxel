@@ -7,6 +7,7 @@
 
 #include "sz.h"
 #include "v3.h"
+#include "inventory.h"
 
 #define SHARD_W 16
 #define SHARD_H 16

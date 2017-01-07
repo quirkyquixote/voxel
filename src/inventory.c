@@ -2,16 +2,29 @@
 
 #include "inventory.h"
 
+#include <string.h>
+
 struct inventory *inventory(size_t size)
 {
-	struct inventory *i = calloc(1, sizeof(*i) + sizeof(*i->slots) * size);
-	i->size = size;
+	struct inventory *i = calloc(1, sizeof(*i));
+	inventory_resize(i, size);
 	return i;
 }
 
 void inventory_destroy(struct inventory *i)
 {
+	if (i->slots != NULL)
+		free(i);
 	free(i);
+}
+
+int inventory_resize(struct inventory *i, size_t size)
+{
+	i->slots = realloc(i->slots, sizeof(*i->slots) * size);
+	if (size > i->size)
+		memset(i->slots + i->size, 0, sizeof(*i->slots) * (size - i->size));
+	i->size = size;
+	return 0;
 }
 
 int inventory_add(struct inventory *i, int obj, int mat, int num)

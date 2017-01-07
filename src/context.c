@@ -24,8 +24,37 @@ const char *mat_names[] = {
 	[255] = "foo"
 };
 
+const char *shape_names[] = {
+	"none",
+	"block_dn",
+	"block_up",
+	"block_lf",
+	"block_rt",
+	"block_bk",
+	"block_ft",
+	"slab_dn",
+	"slab_up",
+	"slab_lf",
+	"slab_rt",
+	"slab_bk",
+	"slab_ft",
+	"pane_x",
+	"pane_y",
+	"pane_z",
+	"stairs_df",
+	"stairs_dl",
+	"stairs_db",
+	"stairs_dr",
+	"stairs_uf",
+	"stairs_ul",
+	"stairs_ub",
+	"stairs_ur",
+	"workbench",
+	"crate",
+};
+
 const char *face_names[] = {
-	"front"
+	"front",
 	"left",
 	"back",
 	"right",
@@ -601,13 +630,30 @@ void event(const SDL_Event *e, void *data)
 			fprintf(stdout, "=== PROFILE DUMP ===\n");
 			profile_manager_dump(ctx->prof_mgr);
 		} else if (e->key.keysym.sym == SDLK_q) {
-			if (ctx->cur.face != -1)
-				printf("looking at %d,%d,%d (%g,%g,%g); face %s; mat %d; shape %d\n",
-						ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z,
-						ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z,
-						face_names[ctx->cur.face],
-						WORLD_AT(ctx->w, mat, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z),
-						WORLD_AT(ctx->w, shape, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z));
+			if (ctx->cur.face == -1)
+				return;
+			printf("looking at %d,%d,%d; %.02g,%.02g,%.02g; %s; %s %s\n",
+				ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z,
+				ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z,
+				face_names[ctx->cur.face],
+				mat_names[WORLD_AT(ctx->w, mat, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)],
+				shape_names[WORLD_AT(ctx->w, shape, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)]);
+			struct inventory *inv = WORLD_AT(ctx->w, data, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z);
+			if (inv != NULL) {
+				printf("inventory: [");
+				for (int i = 0; i < inv->size; ++i) {
+					if (i > 0)
+						printf(",");
+					if (inv->slots[i].num == 0)
+						printf("");
+					else
+						printf("%s %s x%d\n",
+							mat_names[inv->slots[i].mat],
+							obj_names[inv->slots[i].obj],
+							inv->slots[i].num);
+				}
+				printf("]\n");
+			}
 		} else if (e->key.keysym.sym == SDLK_c) {
 			printf("at %g,%g,%g; rot %g,%g; facing %d,%s\n",
 				ctx->cam->p.x, ctx->cam->p.y, ctx->cam->p.x,
