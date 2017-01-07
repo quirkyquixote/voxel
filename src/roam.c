@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 
+#include "recipes.h"
+
 void render_cursor(struct context *ctx)
 {
 	if (ctx->cur.face == -1)
@@ -343,6 +345,23 @@ void update_player(struct context *ctx)
 				--ctx->inv->slots[ctx->tool].num;
 				printf("left %s %s 1\n", mat_names[mat], obj_names[obj]);
 			}
+			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == SHAPE_WORKBENCH) {
+				const struct recipe *r;
+				int i;
+				for (r = recipes; r->num != 0; ++r) {
+					if (recipe_match(r, inv)) {
+						do {
+							for (i = 0; i < 9; ++i) {
+								if (inv->slots[i].num)
+									--inv->slots[i].num;
+							}
+							inventory_add(ctx->inv, r->obj, 255, r->num);
+							printf("pick %s %s %d\n", mat_names[255], obj_names[r->obj], r->num);
+						} while (recipe_match(r, inv));
+						break;
+					}
+				}
+			}
 			return;
 		}
 	}
@@ -390,7 +409,7 @@ void update_player(struct context *ctx)
 						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
 					}
 				} else if (obj == OBJ_WORKBENCH) {
-					world_set(ctx->w, p, SHAPE_WORKBENCH, 255, inventory(4));
+					world_set(ctx->w, p, SHAPE_WORKBENCH, 255, inventory(9));
 				} else if (obj == OBJ_CRATE) {
 					world_set(ctx->w, p, SHAPE_CRATE, 255, inventory(16));
 				}

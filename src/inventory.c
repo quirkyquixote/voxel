@@ -50,13 +50,14 @@ int inventory_add(struct inventory *i, int obj, int mat, int num)
 int inventory_add_to_slot(struct inventory *i, int slot, int obj, int mat, int num)
 {
 	if (i->slots[slot].obj == obj && i->slots[slot].mat == mat) {
-		if (num <= 64 - i->slots[slot].num) {
+		int acc = 64 - i->slots[slot].num;
+		if (num <= acc) {
 			i->slots[slot].num += num;
 			return num;
 		}
-		num -= 64 - i->slots[slot].num;
+		num -= acc;
 		i->slots[slot].num = 64;
-		return num;
+		return acc;
 	}
 	return 0;
 }
