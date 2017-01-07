@@ -12,105 +12,227 @@ void render_cursor(struct context *ctx)
 	GLfloat y = ctx->cur.p.y;
 	GLfloat z = ctx->cur.p.z;
 
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glTranslatef(x, y, z);
 	glColor3f(0, 0, 0);
 	glLineWidth(2);
 
 	glBegin(GL_LINE_LOOP);
-	glVertex3f(x, y, z);
-	glVertex3f(x, y, z + 1);
-	glVertex3f(x, y + 1, z + 1);
-	glVertex3f(x, y + 1, z);
+	glVertex3f(0, 0, 0);
+	glVertex3f(0, 0, 1);
+	glVertex3f(0, 1, 1);
+	glVertex3f(0, 1, 0);
 	glEnd();
 
 	glBegin(GL_LINE_LOOP);
-	glVertex3f(x + 1, y, z);
-	glVertex3f(x + 1, y, z + 1);
-	glVertex3f(x + 1, y + 1, z + 1);
-	glVertex3f(x + 1, y + 1, z);
+	glVertex3f(1, 0, 0);
+	glVertex3f(1, 0, 1);
+	glVertex3f(1, 1, 1);
+	glVertex3f(1, 1, 0);
 	glEnd();
 
 	glBegin(GL_LINE_LOOP);
-	glVertex3f(x, y, z);
-	glVertex3f(x, y, z + 1);
-	glVertex3f(x + 1, y, z + 1);
-	glVertex3f(x + 1, y, z);
+	glVertex3f(0, 0, 0);
+	glVertex3f(0, 0, 1);
+	glVertex3f(1, 0, 1);
+	glVertex3f(1, 0, 0);
 	glEnd();
 
 	glBegin(GL_LINE_LOOP);
-	glVertex3f(x, y + 1, z);
-	glVertex3f(x, y + 1, z + 1);
-	glVertex3f(x + 1, y + 1, z + 1);
-	glVertex3f(x + 1, y + 1, z);
+	glVertex3f(0, 1, 0);
+	glVertex3f(0, 1, 1);
+	glVertex3f(1, 1, 1);
+	glVertex3f(1, 1, 0);
 	glEnd();
 
 	glBegin(GL_LINE_LOOP);
-	glVertex3f(x, y, z);
-	glVertex3f(x + 1, y, z);
-	glVertex3f(x + 1, y + 1, z);
-	glVertex3f(x, y + 1, z);
+	glVertex3f(0, 0, 0);
+	glVertex3f(1, 0, 0);
+	glVertex3f(1, 1, 0);
+	glVertex3f(0, 1, 0);
 	glEnd();
 
 	glBegin(GL_LINE_LOOP);
-	glVertex3f(x, y, z + 1);
-	glVertex3f(x + 1, y, z + 1);
-	glVertex3f(x + 1, y + 1, z + 1);
-	glVertex3f(x, y + 1, z + 1);
+	glVertex3f(0, 0, 1);
+	glVertex3f(1, 0, 1);
+	glVertex3f(1, 1, 1);
+	glVertex3f(0, 1, 1);
 	glEnd();
+	glPopMatrix();
 }
 
 
-void render_obj(struct context *ctx, struct v3f p, GLfloat r, GLfloat alpha)
+void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 {
 	//glEnable(GL_TEXTURE_2D);
 	//glTexCoord2f(0.5, 0.5);
-	glColor4ub(192, 192, 192, alpha);
 	glBegin(GL_TRIANGLES);
 
-	glVertex3f(p.x, p.y, p.z);
-	glVertex3f(p.x, p.y, p.z + r);
-	glVertex3f(p.x, p.y + r, p.z);
-	glVertex3f(p.x, p.y + r, p.z);
-	glVertex3f(p.x, p.y, p.z + r);
-	glVertex3f(p.x, p.y + r, p.z + r);
-
-	glVertex3f(p.x + r, p.y + r, p.z + r);
-	glVertex3f(p.x + r, p.y, p.z + r);
-	glVertex3f(p.x + r, p.y + r, p.z);
-	glVertex3f(p.x + r, p.y + r, p.z);
-	glVertex3f(p.x + r, p.y, p.z + r);
-	glVertex3f(p.x + r, p.y, p.z);
-
-	glColor4ub(64, 64, 64, alpha);
-	glVertex3f(p.x + r, p.y, p.z + r);
-	glVertex3f(p.x, p.y, p.z + r);
-	glVertex3f(p.x + r, p.y, p.z);
-	glVertex3f(p.x + r, p.y, p.z);
-	glVertex3f(p.x, p.y, p.z + r);
-	glVertex3f(p.x, p.y, p.z);
-
-	glColor4ub(255, 255, 255, alpha);
-	glVertex3f(p.x, p.y + r, p.z);
-	glVertex3f(p.x, p.y + r, p.z + r);
-	glVertex3f(p.x + r, p.y + r, p.z);
-	glVertex3f(p.x + r, p.y + r, p.z);
-	glVertex3f(p.x, p.y + r, p.z + r);
-	glVertex3f(p.x + r, p.y + r, p.z + r);
-
-	glColor4ub(128, 128, 128, alpha);
-	glVertex3f(p.x, p.y, p.z);
-	glVertex3f(p.x, p.y + r, p.z);
-	glVertex3f(p.x + r, p.y, p.z);
-	glVertex3f(p.x + r, p.y, p.z);
-	glVertex3f(p.x, p.y + r, p.z);
-	glVertex3f(p.x + r, p.y + r, p.z);
-
-	glVertex3f(p.x + r, p.y + r, p.z + r);
-	glVertex3f(p.x, p.y + r, p.z + r);
-	glVertex3f(p.x + r, p.y, p.z + r);
-	glVertex3f(p.x + r, p.y, p.z + r);
-	glVertex3f(p.x, p.y + r, p.z + r);
-	glVertex3f(p.x, p.y, p.z + r);
-
+	if (obj == OBJ_BLOCK || obj == OBJ_WORKBENCH || obj == OBJ_CRATE) {
+		glColor4ub(192, 192, 192, alpha);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, 1, 0);
+		glVertex3f(0, 1, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, 1, 1);
+		glVertex3f(1, 1, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, 1, 0);
+		glVertex3f(1, 1, 0);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, 0, 0);
+		glColor4ub(64, 64, 64, alpha);
+		glVertex3f(1, 0, 1);
+		glVertex3f(0, 0, 1);
+		glVertex3f(1, 0, 0);
+		glVertex3f(1, 0, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, 0, 0);
+		glColor4ub(255, 255, 255, alpha);
+		glVertex3f(0, 1, 0);
+		glVertex3f(0, 1, 1);
+		glVertex3f(1, 1, 0);
+		glVertex3f(1, 1, 0);
+		glVertex3f(0, 1, 1);
+		glVertex3f(1, 1, 1);
+		glColor4ub(128, 128, 128, alpha);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, 1, 0);
+		glVertex3f(1, 0, 0);
+		glVertex3f(1, 0, 0);
+		glVertex3f(0, 1, 0);
+		glVertex3f(1, 1, 0);
+		glVertex3f(1, 1, 1);
+		glVertex3f(0, 1, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(0, 1, 1);
+		glVertex3f(0, 0, 1);
+	} else if (obj == OBJ_SLAB) {
+		glColor4ub(192, 192, 192, alpha);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, .5, 0);
+		glVertex3f(0, .5, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, .5, 1);
+		glVertex3f(1, .5, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, .5, 0);
+		glVertex3f(1, .5, 0);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, 0, 0);
+		glColor4ub(64, 64, 64, alpha);
+		glVertex3f(1, 0, 1);
+		glVertex3f(0, 0, 1);
+		glVertex3f(1, 0, 0);
+		glVertex3f(1, 0, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, 0, 0);
+		glColor4ub(255, 255, 255, alpha);
+		glVertex3f(0, .5, 0);
+		glVertex3f(0, .5, 1);
+		glVertex3f(1, .5, 0);
+		glVertex3f(1, .5, 0);
+		glVertex3f(0, .5, 1);
+		glVertex3f(1, .5, 1);
+		glColor4ub(128, 128, 128, alpha);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, .5, 0);
+		glVertex3f(1, 0, 0);
+		glVertex3f(1, 0, 0);
+		glVertex3f(0, .5, 0);
+		glVertex3f(1, .5, 0);
+		glVertex3f(1, .5, 1);
+		glVertex3f(0, .5, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(0, .5, 1);
+		glVertex3f(0, 0, 1);
+	} else if (obj == OBJ_STAIRS) {
+		glColor4ub(192, 192, 192, alpha);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, .5, 0);
+		glVertex3f(0, .5, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, .5, 1);
+		glVertex3f(1, .5, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, .5, 0);
+		glVertex3f(1, .5, 0);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, 0, 0);
+		glColor4ub(64, 64, 64, alpha);
+		glVertex3f(1, 0, 1);
+		glVertex3f(0, 0, 1);
+		glVertex3f(1, 0, 0);
+		glVertex3f(1, 0, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, 0, 0);
+		glColor4ub(255, 255, 255, alpha);
+		glVertex3f(0, .5, 0);
+		glVertex3f(0, .5, 1);
+		glVertex3f(1, .5, 0);
+		glVertex3f(1, .5, 0);
+		glVertex3f(0, .5, 1);
+		glVertex3f(1, .5, 1);
+		glColor4ub(128, 128, 128, alpha);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, .5, 0);
+		glVertex3f(1, 0, 0);
+		glVertex3f(1, 0, 0);
+		glVertex3f(0, .5, 0);
+		glVertex3f(1, .5, 0);
+		glVertex3f(1, .5, 1);
+		glVertex3f(0, .5, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(1, 0, 1);
+		glVertex3f(0, .5, 1);
+		glVertex3f(0, 0, 1);
+		glColor4ub(192, 192, 192, alpha);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, 1, 0);
+		glVertex3f(0, 1, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, 1, 1);
+		glVertex3f(.5, 1, 1);
+		glVertex3f(.5, 0, 1);
+		glVertex3f(.5, 1, 0);
+		glVertex3f(.5, 1, 0);
+		glVertex3f(.5, 0, 1);
+		glVertex3f(.5, 0, 0);
+		glColor4ub(64, 64, 64, alpha);
+		glVertex3f(.5, 0, 1);
+		glVertex3f(0, 0, 1);
+		glVertex3f(.5, 0, 0);
+		glVertex3f(.5, 0, 0);
+		glVertex3f(0, 0, 1);
+		glVertex3f(0, 0, 0);
+		glColor4ub(255, 255, 255, alpha);
+		glVertex3f(0, 1, 0);
+		glVertex3f(0, 1, 1);
+		glVertex3f(.5, 1, 0);
+		glVertex3f(.5, 1, 0);
+		glVertex3f(0, 1, 1);
+		glVertex3f(.5, 1, 1);
+		glColor4ub(128, 128, 128, alpha);
+		glVertex3f(0, 0, 0);
+		glVertex3f(0, 1, 0);
+		glVertex3f(.5, 0, 0);
+		glVertex3f(.5, 0, 0);
+		glVertex3f(0, 1, 0);
+		glVertex3f(.5, 1, 0);
+		glVertex3f(.5, 1, 1);
+		glVertex3f(0, 1, 1);
+		glVertex3f(.5, 0, 1);
+		glVertex3f(.5, 0, 1);
+		glVertex3f(0, 1, 1);
+		glVertex3f(0, 0, 1);
+	}
 	glEnd();
 	//glDisable(GL_TEXTURE_2D);
 }
@@ -119,30 +241,33 @@ void render_inventory(struct context *ctx, struct inventory *inv, struct v3ll p)
 {
 	int i, x, z;
 	int side = sqrt(inv->size);
-	struct v3f q;
 
+	GLfloat d = v3_dist(ctx->player->p, p);
+	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	i = 0;
 	for (x = 0; x < side; ++x) {
 		for (z = 0; z < side; ++z) {
-			q.x = p.x + (x + .125) / side;
-			q.y = p.y + 1;
-			q.z = p.z + (z + .125) / side;
-			GLfloat d = v3_dist(ctx->player->p, q);
-			GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
 			glColor4ub(0, 0, 0, alpha);
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glTranslatef(p.x + (x + .125) / side, p.y + 1.0001, p.z + (z +.125) / side);
+			glScalef(.75 / side, .75 / side, .75 / side);
 			glBegin(GL_LINE_LOOP);
-			glVertex3f(q.x, q.y + .0001, q.z);
-			glVertex3f(q.x, q.y + .0001, q.z + .75 / side);
-			glVertex3f(q.x + .75 / side, q.y + .0001, q.z + .75 / side);
-			glVertex3f(q.x + .75 / side, q.y + .0001, q.z);
+			glVertex3f(0, 0, 0);
+			glVertex3f(0, 0, 1);
+			glVertex3f(1, 0, 1);
+			glVertex3f(1, 0, 0);
 			glEnd();
+			glPopMatrix();
 			if (inv->slots[i].num > 0) {
-				q.x = p.x + (x + .25) / side;
-				q.y = p.y + 1;
-				q.z = p.z + (z + .25) / side;
-				render_obj(ctx, q, .5 / side, alpha);
+				glMatrixMode(GL_MODELVIEW);
+				glPushMatrix();
+				glTranslatef(p.x + (x + .25) / side, p.y + 1, p.z + (z +.25) / side);
+				glScalef(.5 / side, .5 / side, .5 / side);
+				render_obj(ctx, inv->slots[i].obj, inv->slots[i].mat, alpha);
+				glPopMatrix();
 			}
 			++i;
 		}
@@ -306,7 +431,7 @@ void update_camera(struct context *ctx)
 	body_set_velocity(ctx->player, v);
 
 	camera_set_fovy(ctx->cam, (ctx->cam->fovy + (ctx->run ? 70.f : 60.f)) * 0.5);
-	camera_set_position(ctx->cam, v3_add(ctx->player->p, v3f(0, .6, 0)));
+	camera_set_position(ctx->cam, v3_add(ctx->player->p, v3f(0, .8, 0)));
 	camera_set_rotation(ctx->cam, ctx->player->r);
 
 	ctx->rotx = (unsigned int)floor(0.5 + r.x / M_PI_2) & 3;
@@ -414,9 +539,9 @@ int roam_event(const SDL_Event *e, struct context *ctx)
 			--ctx->tool;
 			if (ctx->inv->slots[ctx->tool].num)
 				printf("Holding %d: %s %s %d\n", ctx->tool,
-					mat_names[ctx->inv->slots[ctx->tool].mat],
-					obj_names[ctx->inv->slots[ctx->tool].obj],
-					ctx->inv->slots[ctx->tool].num);
+						mat_names[ctx->inv->slots[ctx->tool].mat],
+						obj_names[ctx->inv->slots[ctx->tool].obj],
+						ctx->inv->slots[ctx->tool].num);
 			else
 				printf("Holding %d: nothing\n", ctx->tool);
 			return 1;
@@ -426,9 +551,9 @@ int roam_event(const SDL_Event *e, struct context *ctx)
 				ctx->tool = 0;
 			if (ctx->inv->slots[ctx->tool].num)
 				printf("Holding %d: %s %s %d\n", ctx->tool,
-					mat_names[ctx->inv->slots[ctx->tool].mat],
-					obj_names[ctx->inv->slots[ctx->tool].obj],
-					ctx->inv->slots[ctx->tool].num);
+						mat_names[ctx->inv->slots[ctx->tool].mat],
+						obj_names[ctx->inv->slots[ctx->tool].obj],
+						ctx->inv->slots[ctx->tool].num);
 			else
 				printf("Holding %d: nothing\n", ctx->tool);
 			return 1;
