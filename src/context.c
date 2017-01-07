@@ -570,11 +570,31 @@ void update_chunks(struct context *ctx)
 	int x, z, i, j, k;
 	struct chunk *c;
 	struct chunk *out_of_date[CHUNKS_PER_WORLD * CHUNKS_PER_WORLD];
+	struct aab2ll bb;
+	struct v3ll m;
+
+	bb.x0 = floor(ctx->player->p.x) - CHUNK_W * CHUNKS_PER_WORLD / 2;
+	bb.y0 = floor(ctx->player->p.z) - CHUNK_D * CHUNKS_PER_WORLD / 2;
+	bb.x1 = bb.x0 + CHUNK_W * CHUNKS_PER_WORLD;
+	bb.y1 = bb.y0 + CHUNK_D * CHUNKS_PER_WORLD;
+	m.x = CHUNK_W * CHUNKS_PER_WORLD * floor(bb.x1 / (CHUNK_W * CHUNKS_PER_WORLD));
+	m.y = CHUNK_D * CHUNKS_PER_WORLD * floor(bb.y1 / (CHUNK_D * CHUNKS_PER_WORLD));
 
 	i = 0;
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
 			c = ctx->w->chunks[x][z];
+			if (c->x < bb.x0 || c->x >= bb.x1 || c->z < bb.y0 || c->z >= bb.y1) {
+				c->up_to_date = 0;
+				c->x = m.x + x * CHUNK_W;
+				if (c->x >= bb.x1)
+					c->x -= CHUNK_W * CHUNKS_PER_WORLD;
+				c->z = m.y + z * CHUNK_D;
+				if (c->z >= bb.y1)
+					c->z -= CHUNK_D * CHUNKS_PER_WORLD;
+				if (load_chunk(c, ctx->dir) != 0)
+					terraform(0, c);
+			}
 			if (c->up_to_date == 0) {
 				c->priority = hypot((double)c->x - ctx->player->p.x,
 						(double)c->z - ctx->player->p.z);
