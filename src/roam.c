@@ -177,22 +177,35 @@ void update_player(struct context *ctx)
 			int mat2 = inv->slots[slot].mat;
 			int num2 = inv->slots[slot].num;
 			if (ctx->act == 1) {
-				if (num > 0) {
-					if (num2 == 0) {
-						inv->slots[slot].obj = obj;
-						inv->slots[slot].mat = mat;
-						inv->slots[slot].num = 1;
-						--ctx->inv->slots[ctx->tool].num;
-					} else if (obj == obj2 && mat == mat2) {
-						if (inventory_add_to_slot(inv, slot, obj, mat, 1))
-							--ctx->inv->slots[ctx->tool].num;
-					}
-				} else if (num2 > 0) {
-					ctx->inv->slots[ctx->tool].obj = obj2;
-					ctx->inv->slots[ctx->tool].mat = mat2;
-					ctx->inv->slots[ctx->tool].num = 1;
-					--inv->slots[slot].num;
+				if (num2)
+					printf("pick %s %s %d\n", mat_names[mat2], obj_names[obj2], num2);
+				if (num)
+					printf("left %s %s %d\n", mat_names[mat], obj_names[obj], num);
+				inv->slots[slot].obj = obj;
+				inv->slots[slot].mat = mat;
+				inv->slots[slot].num = num;
+				ctx->inv->slots[ctx->tool].obj = obj2;
+				ctx->inv->slots[ctx->tool].mat = mat2;
+				ctx->inv->slots[ctx->tool].num = num2;
+			} else if (ctx->use == 1) {
+				if (num == 0) {
+					printf("nothing to leave\n");
+					return;
 				}
+				if (num2 >= 64) {
+					printf("no space to leave\n");
+					return;
+				}
+				if (num2 == 0) {
+					inv->slots[slot].obj = obj;
+					inv->slots[slot].mat = mat;
+				} else if (obj != obj2 || mat != mat2) {
+					printf("not the same object\n");
+					return;
+				}
+				++inv->slots[slot].num;
+				--ctx->inv->slots[ctx->tool].num;
+				printf("left %s %s 1\n", mat_names[mat], obj_names[obj]);
 			}
 			return;
 		}
@@ -250,18 +263,6 @@ void update_player(struct context *ctx)
 	}
 	if (ctx->pick == 1) {
 	}
-	if (ctx->act > 0) {
-		if (++ctx->act >= 8)
-			ctx->act = 1;
-	}
-	if (ctx->use > 0) {
-		if (++ctx->use >= 8)
-			ctx->use = 1;
-	}
-	if (ctx->pick > 0) {
-		if (++ctx->pick >= 8)
-			ctx->pick = 1;
-	}
 }
 
 void update_camera(struct context *ctx)
@@ -310,6 +311,18 @@ void roam_update(struct context *ctx)
 {
 	update_player(ctx);
 	update_camera(ctx);
+	if (ctx->act > 0) {
+		if (++ctx->act >= 8)
+			ctx->act = 1;
+	}
+	if (ctx->use > 0) {
+		if (++ctx->use >= 8)
+			ctx->use = 1;
+	}
+	if (ctx->pick > 0) {
+		if (++ctx->pick >= 8)
+			ctx->pick = 1;
+	}
 }
 
 int roam_event(const SDL_Event *e, struct context *ctx)
