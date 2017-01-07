@@ -295,6 +295,18 @@ void roam_render(struct context *ctx)
 		if (inv != NULL)
 			render_inventory(ctx, inv, p);
 	}
+
+	if (ctx->inv->slots[ctx->tool].num > 0) {
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glTranslatef(ctx->cam->p.x, ctx->cam->p.y, ctx->cam->p.z);
+		glRotatef(180.0 * ctx->cam->r.y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
+		glTranslatef(.4, -.4, -.8);
+		glScalef(.125, .125, .125);
+		render_obj(ctx, ctx->inv->slots[ctx->tool].obj, ctx->inv->slots[ctx->tool].mat, 255);
+		glPopMatrix();
+	}
 }
 
 void update_player(struct context *ctx)
