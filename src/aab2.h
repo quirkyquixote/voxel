@@ -59,4 +59,8 @@ static inline struct aab2ll aab2ll(long long x0, long long y0, long long x1, lon
 #define aab2_overlap(b1, b2) \
 	(b2.x0 <= b1.x1 && b2.x1 >= b1.x0 &&  b2.y0 <= b1.y1 && b2.y1 >= b1.y0)
 
+#define aab2_foreach(_iter,_bbox) \
+	for (_iter.x = _bbox.x0; _iter.x < _bbox.x1; ++_iter.x) \
+	for (_iter.y = _bbox.y0; _iter.y < _bbox.y1; ++_iter.y)
+
 #endif

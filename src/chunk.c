@@ -168,7 +168,8 @@ int chunk_save(struct chunk *c, union sz_tag **root)
 {
 	int i;
 	union sz_tag *shards, *entities;
-	uint64_t x, y, z;
+	struct v3ll p;
+	struct aab3ll bb = { 0, 0, 0, CHUNK_W, CHUNK_H, CHUNK_D };
 	*root = sz_dict();
 	sz_dict_add(*root, "x", sz_i64(c->x));
 	sz_dict_add(*root, "z", sz_i64(c->z));
@@ -180,14 +181,10 @@ int chunk_save(struct chunk *c, union sz_tag **root)
 	}
 	sz_dict_add(*root, "shards", shards);
 	entities = sz_list();
-	for (x = 0; x < CHUNK_W; ++x) {
-		for (z = 0; z < CHUNK_D; ++z) {
-			for (y = 0; y < CHUNK_H; ++y) {
-				union sz_tag *tag;
-				if (entity_save(c, v3ll(x, y, z), &tag))
-					sz_list_add(entities, tag);
-			}
-		}
+	aab3_foreach(p, bb) {
+		union sz_tag *tag;
+		if (entity_save(c, p, &tag))
+			sz_list_add(entities, tag);
 	}
 	sz_dict_add(*root, "entities", entities);
 	return 0;

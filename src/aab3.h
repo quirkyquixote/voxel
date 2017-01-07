@@ -61,4 +61,9 @@ static inline struct aab3ll aab3ll(long long x0, long long y0, long long z0, lon
 	 b2.y0 <= b1.y1 && b2.y1 >= b1.y0 &&\
 	 b2.z0 <= b1.z1 && b2.z1 >= b1.z0)
 
+#define aab3_foreach(_iter,_bbox) \
+	for (_iter.x = _bbox.x0; _iter.x < _bbox.x1; ++_iter.x) \
+	for (_iter.y = _bbox.y0; _iter.y < _bbox.y1; ++_iter.y) \
+	for (_iter.z = _bbox.z0; _iter.z < _bbox.z1; ++_iter.z)
+
 #endif
