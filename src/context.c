@@ -647,7 +647,7 @@ void event(const SDL_Event *e, void *data)
 					if (inv->slots[i].num == 0)
 						printf("");
 					else
-						printf("%s %s x%d\n",
+						printf("%s %s %d",
 							mat_names[inv->slots[i].mat],
 							obj_names[inv->slots[i].obj],
 							inv->slots[i].num);

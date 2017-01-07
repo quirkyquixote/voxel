@@ -58,9 +58,105 @@ void render_cursor(struct context *ctx)
 	glEnd();
 }
 
+
+void render_obj(struct v3f p, GLfloat r)
+{
+	glTexCoord2f(1, 1);
+	glColor3b(192, 192, 192);
+	glBegin(GL_TRIANGLES);
+
+	glVertex3f(p.x, p.y, p.z);
+	glVertex3f(p.x, p.y, p.z + r);
+	glVertex3f(p.x, p.y + r, p.z);
+	glVertex3f(p.x, p.y + r, p.z);
+	glVertex3f(p.x, p.y, p.z + r);
+	glVertex3f(p.x, p.y + r, p.z + r);
+
+	glVertex3f(p.x + r, p.y + r, p.z + r);
+	glVertex3f(p.x + r, p.y, p.z + r);
+	glVertex3f(p.x + r, p.y + r, p.z);
+	glVertex3f(p.x + r, p.y + r, p.z);
+	glVertex3f(p.x + r, p.y, p.z + r);
+	glVertex3f(p.x + r, p.y, p.z);
+
+	glColor3b(64, 64, 64);
+	glVertex3f(p.x + r, p.y, p.z + r);
+	glVertex3f(p.x, p.y, p.z + r);
+	glVertex3f(p.x + r, p.y, p.z);
+	glVertex3f(p.x + r, p.y, p.z);
+	glVertex3f(p.x, p.y, p.z + r);
+	glVertex3f(p.x, p.y, p.z);
+
+	glColor3b(255, 255, 255);
+	glVertex3f(p.x, p.y + r, p.z);
+	glVertex3f(p.x, p.y + r, p.z + r);
+	glVertex3f(p.x + r, p.y + r, p.z);
+	glVertex3f(p.x + r, p.y + r, p.z);
+	glVertex3f(p.x, p.y + r, p.z + r);
+	glVertex3f(p.x + r, p.y + r, p.z + r);
+
+	glColor3b(128, 128, 128);
+	glVertex3f(p.x, p.y, p.z);
+	glVertex3f(p.x, p.y + r, p.z);
+	glVertex3f(p.x + r, p.y, p.z);
+	glVertex3f(p.x + r, p.y, p.z);
+	glVertex3f(p.x, p.y + r, p.z);
+	glVertex3f(p.x + r, p.y + r, p.z);
+
+	glVertex3f(p.x + r, p.y + r, p.z + r);
+	glVertex3f(p.x, p.y + r, p.z + r);
+	glVertex3f(p.x + r, p.y, p.z + r);
+	glVertex3f(p.x + r, p.y, p.z + r);
+	glVertex3f(p.x, p.y + r, p.z + r);
+	glVertex3f(p.x, p.y, p.z + r);
+
+	glEnd();
+}
+
+void render_inventory(struct context *ctx, struct inventory *inv, struct v3ll p)
+{
+	int i, x, z;
+	int side = sqrt(inv->size);
+	struct v3f q;
+
+	i = 0;
+	for (x = 0; x < side; ++x) {
+		for (z = 0; z < side; ++z) {
+			q.x = p.x + (x + .125) / side;
+			q.y = p.y + 1;
+			q.z = p.z + (z + .125) / side;
+			glBegin(GL_LINE_LOOP);
+			glVertex3f(q.x, q.y + .0001, q.z);
+			glVertex3f(q.x, q.y + .0001, q.z + .75 / side);
+			glVertex3f(q.x + .75 / side, q.y + .0001, q.z + .75 / side);
+			glVertex3f(q.x + .75 / side, q.y + .0001, q.z);
+			glEnd();
+			if (inv->slots[i].num > 0) {
+				render_obj(v3f(p.x + (x + .25) / side, p.y + 1, p.z + (z + .25) / side), .5 / side);
+			}
+			++i;
+		}
+	}
+}
+
 void roam_render(struct context *ctx)
 {
+	struct aab3ll bb;
+	struct v3ll p;
+
 	render_cursor(ctx);
+	bb.x0 = ctx->player->p.x - 4;
+	bb.y0 = ctx->player->p.y - 4;
+	bb.z0 = ctx->player->p.z - 4;
+	bb.x1 = ctx->player->p.x + 4;
+	bb.y1 = ctx->player->p.y + 4;
+	bb.z1 = ctx->player->p.z + 4;
+
+	aab3_foreach(p, bb) {
+		struct inventory *inv = WORLD_AT(ctx->w, data, p.x, p.y, p.z);
+		if (inv != NULL)
+			render_inventory(ctx, inv, p);
+	}
 }
 
 void update_player(struct context *ctx)
@@ -70,7 +166,37 @@ void update_player(struct context *ctx)
 	int f = ctx->cur.face;
 	int obj = ctx->inv->slots[ctx->tool].obj;
 	int mat = ctx->inv->slots[ctx->tool].mat;
+	int num = ctx->inv->slots[ctx->tool].num;
 
+	if (f == FACE_UP) {
+		struct inventory *inv = WORLD_AT(ctx->w, data, p.x, p.y, p.z);
+		if (inv != NULL) {
+			int side = sqrt(inv->size);
+			int slot = side * floor(q.x * side) + floor(q.z * side);
+			int obj2 = inv->slots[slot].obj;
+			int mat2 = inv->slots[slot].mat;
+			int num2 = inv->slots[slot].num;
+			if (ctx->act == 1) {
+				if (num > 0) {
+					if (num2 == 0) {
+						inv->slots[slot].obj = obj;
+						inv->slots[slot].mat = mat;
+						inv->slots[slot].num = 1;
+						--ctx->inv->slots[ctx->tool].num;
+					} else if (obj == obj2 && mat == mat2) {
+						if (inventory_add_to_slot(inv, slot, obj, mat, 1))
+							--ctx->inv->slots[ctx->tool].num;
+					}
+				} else if (num2 > 0) {
+					ctx->inv->slots[ctx->tool].obj = obj2;
+					ctx->inv->slots[ctx->tool].mat = mat2;
+					ctx->inv->slots[ctx->tool].num = 1;
+					--inv->slots[slot].num;
+				}
+			}
+			return;
+		}
+	}
 	if (ctx->act == 1) {
 		if (ctx->cur.face != -1) {
 			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) != 0)
@@ -78,10 +204,6 @@ void update_player(struct context *ctx)
 		}
 	}
 	if (ctx->use == 1) {
-		if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == SHAPE_WORKBENCH) {
-			ctx->mode == MODE_CRAFT;
-			return;
-		}
 		if (f != -1) {
 			if (f == FACE_LF)
 				p = v3_add(p, v3c(-1, 0, 0));
@@ -267,7 +389,7 @@ int roam_event(const SDL_Event *e, struct context *ctx)
 				ctx->tool = ctx->inv->size;
 			--ctx->tool;
 			if (ctx->inv->slots[ctx->tool].num)
-				printf("Holding %d: %s %s x%d\n", ctx->tool,
+				printf("Holding %d: %s %s %d\n", ctx->tool,
 					mat_names[ctx->inv->slots[ctx->tool].mat],
 					obj_names[ctx->inv->slots[ctx->tool].obj],
 					ctx->inv->slots[ctx->tool].num);
@@ -279,7 +401,7 @@ int roam_event(const SDL_Event *e, struct context *ctx)
 			if (ctx->tool == ctx->inv->size)
 				ctx->tool = 0;
 			if (ctx->inv->slots[ctx->tool].num)
-				printf("Holding %d: %s %s x%d\n", ctx->tool,
+				printf("Holding %d: %s %s %d\n", ctx->tool,
 					mat_names[ctx->inv->slots[ctx->tool].mat],
 					obj_names[ctx->inv->slots[ctx->tool].obj],
 					ctx->inv->slots[ctx->tool].num);
