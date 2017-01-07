@@ -59,10 +59,11 @@ void render_cursor(struct context *ctx)
 }
 
 
-void render_obj(struct v3f p, GLfloat r)
+void render_obj(struct context *ctx, struct v3f p, GLfloat r, GLfloat alpha)
 {
-	glTexCoord2f(1, 1);
-	glColor3b(192, 192, 192);
+	//glEnable(GL_TEXTURE_2D);
+	//glTexCoord2f(0.5, 0.5);
+	glColor4ub(192, 192, 192, alpha);
 	glBegin(GL_TRIANGLES);
 
 	glVertex3f(p.x, p.y, p.z);
@@ -79,7 +80,7 @@ void render_obj(struct v3f p, GLfloat r)
 	glVertex3f(p.x + r, p.y, p.z + r);
 	glVertex3f(p.x + r, p.y, p.z);
 
-	glColor3b(64, 64, 64);
+	glColor4ub(64, 64, 64, alpha);
 	glVertex3f(p.x + r, p.y, p.z + r);
 	glVertex3f(p.x, p.y, p.z + r);
 	glVertex3f(p.x + r, p.y, p.z);
@@ -87,7 +88,7 @@ void render_obj(struct v3f p, GLfloat r)
 	glVertex3f(p.x, p.y, p.z + r);
 	glVertex3f(p.x, p.y, p.z);
 
-	glColor3b(255, 255, 255);
+	glColor4ub(255, 255, 255, alpha);
 	glVertex3f(p.x, p.y + r, p.z);
 	glVertex3f(p.x, p.y + r, p.z + r);
 	glVertex3f(p.x + r, p.y + r, p.z);
@@ -95,7 +96,7 @@ void render_obj(struct v3f p, GLfloat r)
 	glVertex3f(p.x, p.y + r, p.z + r);
 	glVertex3f(p.x + r, p.y + r, p.z + r);
 
-	glColor3b(128, 128, 128);
+	glColor4ub(128, 128, 128, alpha);
 	glVertex3f(p.x, p.y, p.z);
 	glVertex3f(p.x, p.y + r, p.z);
 	glVertex3f(p.x + r, p.y, p.z);
@@ -111,6 +112,7 @@ void render_obj(struct v3f p, GLfloat r)
 	glVertex3f(p.x, p.y, p.z + r);
 
 	glEnd();
+	//glDisable(GL_TEXTURE_2D);
 }
 
 void render_inventory(struct context *ctx, struct inventory *inv, struct v3ll p)
@@ -119,12 +121,17 @@ void render_inventory(struct context *ctx, struct inventory *inv, struct v3ll p)
 	int side = sqrt(inv->size);
 	struct v3f q;
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	i = 0;
 	for (x = 0; x < side; ++x) {
 		for (z = 0; z < side; ++z) {
 			q.x = p.x + (x + .125) / side;
 			q.y = p.y + 1;
 			q.z = p.z + (z + .125) / side;
+			GLfloat d = v3_dist(ctx->player->p, q);
+			GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
+			glColor4ub(0, 0, 0, alpha);
 			glBegin(GL_LINE_LOOP);
 			glVertex3f(q.x, q.y + .0001, q.z);
 			glVertex3f(q.x, q.y + .0001, q.z + .75 / side);
@@ -132,11 +139,15 @@ void render_inventory(struct context *ctx, struct inventory *inv, struct v3ll p)
 			glVertex3f(q.x + .75 / side, q.y + .0001, q.z);
 			glEnd();
 			if (inv->slots[i].num > 0) {
-				render_obj(v3f(p.x + (x + .25) / side, p.y + 1, p.z + (z + .25) / side), .5 / side);
+				q.x = p.x + (x + .25) / side;
+				q.y = p.y + 1;
+				q.z = p.z + (z + .25) / side;
+				render_obj(ctx, q, .5 / side, alpha);
 			}
 			++i;
 		}
 	}
+	glDisable(GL_BLEND);
 }
 
 void roam_render(struct context *ctx)
@@ -145,12 +156,12 @@ void roam_render(struct context *ctx)
 	struct v3ll p;
 
 	render_cursor(ctx);
-	bb.x0 = ctx->player->p.x - 4;
-	bb.y0 = ctx->player->p.y - 4;
-	bb.z0 = ctx->player->p.z - 4;
-	bb.x1 = ctx->player->p.x + 4;
-	bb.y1 = ctx->player->p.y + 4;
-	bb.z1 = ctx->player->p.z + 4;
+	bb.x0 = floor(ctx->player->p.x - 4);
+	bb.y0 = floor(ctx->player->p.y - 4);
+	bb.z0 = floor(ctx->player->p.z - 4);
+	bb.x1 = ceil(ctx->player->p.x + 4);
+	bb.y1 = ceil(ctx->player->p.y + 4);
+	bb.z1 = ceil(ctx->player->p.z + 4);
 
 	aab3_foreach(p, bb) {
 		struct inventory *inv = WORLD_AT(ctx->w, data, p.x, p.y, p.z);
