@@ -58,6 +58,10 @@ const struct recipe recipes[] = {
 		OBJ_BLOCK, OBJ_BLOCK, OBJ_BLOCK,
 		OBJ_BLOCK, OBJ_BLOCK, -1,
 		OBJ_BLOCK, -1, -1,
+	} }, { OBJ_CRATE, 1, {
+		-1, OBJ_PANE, -1,
+		OBJ_PANE, OBJ_PANE, OBJ_PANE,
+		-1, OBJ_PANE, -1,
 	} }, { 0, 0, {} }
 };
 

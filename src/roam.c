@@ -234,6 +234,47 @@ void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 		glVertex3f(.5, 0, 1);
 		glVertex3f(0, 1, 1);
 		glVertex3f(0, 0, 1);
+	} else if (obj == OBJ_PANE) {
+		glColor4ub(192, 192, 192, alpha);
+		glVertex3f(.46875, 0, 0);
+		glVertex3f(.46875, 0, 1);
+		glVertex3f(.46875, 1, 0);
+		glVertex3f(.46875, 1, 0);
+		glVertex3f(.46875, 0, 1);
+		glVertex3f(.46875, 1, 1);
+		glVertex3f(.53125, 1, 1);
+		glVertex3f(.53125, 0, 1);
+		glVertex3f(.53125, 1, 0);
+		glVertex3f(.53125, 1, 0);
+		glVertex3f(.53125, 0, 1);
+		glVertex3f(.53125, 0, 0);
+		glColor4ub(64, 64, 64, alpha);
+		glVertex3f(.53125, 0, 1);
+		glVertex3f(.46875, 0, 1);
+		glVertex3f(.53125, 0, 0);
+		glVertex3f(.53125, 0, 0);
+		glVertex3f(.46875, 0, 1);
+		glVertex3f(.46875, 0, 0);
+		glColor4ub(255, 255, 255, alpha);
+		glVertex3f(.46875, 1, 0);
+		glVertex3f(.46875, 1, 1);
+		glVertex3f(.53125, 1, 0);
+		glVertex3f(.53125, 1, 0);
+		glVertex3f(.46875, 1, 1);
+		glVertex3f(.53125, 1, 1);
+		glColor4ub(128, 128, 128, alpha);
+		glVertex3f(.46875, 0, 0);
+		glVertex3f(.46875, 1, 0);
+		glVertex3f(.53125, 0, 0);
+		glVertex3f(.53125, 0, 0);
+		glVertex3f(.46875, 1, 0);
+		glVertex3f(.53125, 1, 0);
+		glVertex3f(.53125, 1, 1);
+		glVertex3f(.46875, 1, 1);
+		glVertex3f(.53125, 0, 1);
+		glVertex3f(.53125, 0, 1);
+		glVertex3f(.46875, 1, 1);
+		glVertex3f(.46875, 0, 1);
 	}
 	glEnd();
 	//glDisable(GL_TEXTURE_2D);
@@ -420,6 +461,11 @@ void update_player(struct context *ctx)
 					} else {
 						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
 					}
+				} else if (obj == OBJ_PANE) {
+					if (ctx->roty & 1)
+						world_set(ctx->w, p, SHAPE_PANE_X, 255, NULL);
+					else
+						world_set(ctx->w, p, SHAPE_PANE_Z, 255, NULL);
 				} else if (obj == OBJ_WORKBENCH) {
 					world_set(ctx->w, p, SHAPE_WORKBENCH, 255, inventory(9));
 				} else if (obj == OBJ_CRATE) {
