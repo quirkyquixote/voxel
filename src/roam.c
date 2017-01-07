@@ -369,35 +369,61 @@ void update_player(struct context *ctx)
 			int mat2 = inv->slots[slot].mat;
 			int num2 = inv->slots[slot].num;
 			if (ctx->act == 1) {
-				if (num2)
-					printf("pick %s %s %d\n", mat_names[mat2], obj_names[obj2], num2);
-				if (num)
-					printf("left %s %s %d\n", mat_names[mat], obj_names[obj], num);
-				inv->slots[slot].obj = obj;
-				inv->slots[slot].mat = mat;
-				inv->slots[slot].num = num;
-				ctx->inv->slots[ctx->tool].obj = obj2;
-				ctx->inv->slots[ctx->tool].mat = mat2;
-				ctx->inv->slots[ctx->tool].num = num2;
-			} else if (ctx->use == 1) {
-				if (num == 0) {
-					printf("nothing to leave\n");
-					return;
-				}
-				if (num2 >= 64) {
-					printf("no space to leave\n");
-					return;
-				}
-				if (num2 == 0) {
+				if (ctx->move.y0) {
+					if (num2 == 0) {
+						printf("nothing to take\n");
+						return;
+					}
+					int acc = inventory_add(ctx->inv, obj2, mat2, inv->slots[slot].num);
+					inv->slots[slot].num -= acc;
+					if (acc == 0)
+						printf("no space to take\n");
+					else
+						printf("take %s %s %d\n", mat_names[mat], obj_names[obj], acc);
+				} else {
+					if (num2)
+						printf("take %s %s %d\n", mat_names[mat2], obj_names[obj2], num2);
+					if (num)
+						printf("left %s %s %d\n", mat_names[mat], obj_names[obj], num);
 					inv->slots[slot].obj = obj;
 					inv->slots[slot].mat = mat;
-				} else if (obj != obj2 || mat != mat2) {
-					printf("not the same object\n");
-					return;
+					inv->slots[slot].num = num;
+					ctx->inv->slots[ctx->tool].obj = obj2;
+					ctx->inv->slots[ctx->tool].mat = mat2;
+					ctx->inv->slots[ctx->tool].num = num2;
 				}
-				++inv->slots[slot].num;
-				--ctx->inv->slots[ctx->tool].num;
-				printf("left %s %s 1\n", mat_names[mat], obj_names[obj]);
+			} else if (ctx->use == 1) {
+				if (ctx->move.y0) {
+					if (num2 == 0) {
+						printf("nothing to take\n");
+						return;
+					}
+					int acc = inventory_add(ctx->inv, obj2, mat2, 1);
+					inv->slots[slot].num -= acc;
+					if (acc == 0)
+						printf("no space to take\n");
+					else
+						printf("take %s %s 1\n", mat_names[mat], obj_names[obj], acc);
+				} else {
+					if (num == 0) {
+						printf("nothing to leave\n");
+						return;
+					}
+					if (num2 >= 64) {
+						printf("no space to leave\n");
+						return;
+					}
+					if (num2 == 0) {
+						inv->slots[slot].obj = obj;
+						inv->slots[slot].mat = mat;
+					} else if (obj != obj2 || mat != mat2) {
+						printf("not the same object\n");
+						return;
+					}
+					++inv->slots[slot].num;
+					--ctx->inv->slots[ctx->tool].num;
+					printf("left %s %s 1\n", mat_names[mat], obj_names[obj]);
+				}
 			}
 			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == SHAPE_WORKBENCH) {
 				const struct recipe *r;
@@ -410,7 +436,7 @@ void update_player(struct context *ctx)
 									--inv->slots[i].num;
 							}
 							inventory_add(ctx->inv, r->obj, 255, r->num);
-							printf("pick %s %s %d\n", mat_names[255], obj_names[r->obj], r->num);
+							printf("take %s %s %d\n", mat_names[255], obj_names[r->obj], r->num);
 						} while (recipe_match(r, inv));
 						break;
 					}
