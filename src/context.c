@@ -18,6 +18,7 @@ const char *obj_names[] = {
 	"pane",
 	"workbench",
 	"crate",
+	"fluid",
 };
 
 const char *mat_names[] = {
@@ -51,6 +52,22 @@ const char *shape_names[] = {
 	"stairs_ur",
 	"workbench",
 	"crate",
+	"fluid1",
+	"fluid2",
+	"fluid3",
+	"fluid4",
+	"fluid5",
+	"fluid6",
+	"fluid7",
+	"fluid8",
+	"fluid9",
+	"fluid10",
+	"fluid11",
+	"fluid12",
+	"fluid13",
+	"fluid14",
+	"fluid15",
+	"fluid16",
 };
 
 const char *face_names[] = {
@@ -539,6 +556,10 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.46875), 1, 0.0625, tc);
 		vertex3_buf_left(buf, v3f(x, y, z + 0.46875), 1, 0.0625, tc);
 		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.46875), 1, 0.0625, tc);
+	} else if (s >= SHAPE_FLUID1 && s <= SHAPE_FLUID16) {
+		m = WORLD_AT(ctx->w, mat, x, y, z);
+		tcoord_by_material(m, &tc);
+		vertex3_buf_up(buf, v3f(x, y + (s - SHAPE_FLUID1) / 16., z), 1, 1, tc);
 	}
 }
 

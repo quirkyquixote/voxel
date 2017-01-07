@@ -24,6 +24,7 @@ enum {
 	OBJ_PANE,	/* thin pane in the middle */
 	OBJ_WORKBENCH,	/* module for a workbench */
 	OBJ_CRATE,	/* basic container */
+	OBJ_FLUID,	/* object for fluids (debug only) */
 	OBJ_COUNT
 };
 

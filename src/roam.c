@@ -71,7 +71,8 @@ void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 	//glTexCoord2f(0.5, 0.5);
 	glBegin(GL_TRIANGLES);
 
-	if (obj == OBJ_BLOCK || obj == OBJ_WORKBENCH || obj == OBJ_CRATE) {
+	if (obj == OBJ_BLOCK || obj == OBJ_WORKBENCH || obj == OBJ_CRATE ||
+			obj == OBJ_FLUID) {
 		glColor4ub(192, 192, 192, alpha);
 		glVertex3f(0, 0, 0);
 		glVertex3f(0, 0, 1);
@@ -470,6 +471,8 @@ void update_player(struct context *ctx)
 					world_set(ctx->w, p, SHAPE_WORKBENCH, 255, inventory(9));
 				} else if (obj == OBJ_CRATE) {
 					world_set(ctx->w, p, SHAPE_CRATE, 255, inventory(16));
+				} else if (obj == OBJ_FLUID) {
+					world_set(ctx->w, p, SHAPE_FLUID15, 255, NULL);
 				}
 			}
 		}
