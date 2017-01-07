@@ -41,6 +41,7 @@ struct context {
 	struct query cur;
 	struct aab3c move;
 	struct inventory *inv;
+	struct list drops;
 	char mode;
 	char act;
 	char use;

@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "recipes.h"
+#include "drop.h"
 
 void render_cursor(struct context *ctx)
 {
@@ -323,6 +324,7 @@ void roam_render(struct context *ctx)
 {
 	struct aab3ll bb;
 	struct v3ll p;
+	struct drop *d;
 	int i;
 
 	render_cursor(ctx);
@@ -337,6 +339,15 @@ void roam_render(struct context *ctx)
 		struct inventory *inv = WORLD_AT(ctx->w, data, p.x, p.y, p.z);
 		if (inv != NULL)
 			render_inventory(ctx, inv, p);
+	}
+
+	list_foreach(d, &ctx->drops, list) {
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glTranslatef(d->body->p.x, d->body->p.y, d->body->p.z);
+		glScalef(.25, .25, .25);
+		render_obj(ctx, d->obj, d->mat, 255);
+		glPopMatrix();
 	}
 
 	if (ctx->inv->slots[ctx->tool].num > 0) {
@@ -617,6 +628,47 @@ int roam_event(const SDL_Event *e, struct context *ctx)
 		} else if (e->key.keysym.sym == SDLK_LCTRL) {
 			ctx->run = 1;
 			return 1;
+		} else if (e->key.keysym.sym == SDLK_1) {
+			ctx->tool = 0;
+			return 0;
+		} else if (e->key.keysym.sym == SDLK_2) {
+			ctx->tool = 1;
+			return 0;
+		} else if (e->key.keysym.sym == SDLK_3) {
+			ctx->tool = 2;
+			return 0;
+		} else if (e->key.keysym.sym == SDLK_4) {
+			ctx->tool = 3;
+			return 0;
+		} else if (e->key.keysym.sym == SDLK_5) {
+			ctx->tool = 4;
+			return 0;
+		} else if (e->key.keysym.sym == SDLK_6) {
+			ctx->tool = 5;
+			return 0;
+		} else if (e->key.keysym.sym == SDLK_7) {
+			ctx->tool = 6;
+			return 0;
+		} else if (e->key.keysym.sym == SDLK_8) {
+			ctx->tool = 7;
+			return 0;
+		} else if (e->key.keysym.sym == SDLK_9) {
+			ctx->tool = 8;
+			return 0;
+		} else if (e->key.keysym.sym == SDLK_q) {
+			if (ctx->inv->slots[ctx->tool].num > 0) {
+				struct drop *d = drop(ctx,
+						ctx->inv->slots[ctx->tool].obj,
+						ctx->inv->slots[ctx->tool].obj,
+						1);
+				body_set_position(d->body, ctx->cam->p);
+				struct v3f v = v3f(0, 0, -.5);
+				v = v3_rotx(v, ctx->cam->r.x);
+				v = v3_roty(v, ctx->cam->r.y);
+				body_set_velocity(d->body, v);
+				--ctx->inv->slots[ctx->tool].num;
+			}
+			return 0;
 		}
 	} else if (e->type == SDL_KEYUP) {
 		if (e->key.repeat) {

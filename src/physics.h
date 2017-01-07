@@ -38,6 +38,8 @@ struct body {
 	struct v3f v;
 	struct v2f s;
 	struct aab3f bb;
+	void (* cb_func)(struct body *b, void *data, int face);
+	void *cb_data;
 };
 
 struct space {
@@ -96,6 +98,13 @@ static inline void body_set_velocity(struct body *b, struct v3f v)
 static inline void body_set_size(struct body *b, struct v2f s)
 {
 	b->s = s;
+}
+
+static inline void body_set_callback(struct body *b,
+		void(*func)(struct body *, void *, int), void *data)
+{
+	b->cb_func = func;
+	b->cb_data = data;
 }
 
 struct space *space(struct world *w);

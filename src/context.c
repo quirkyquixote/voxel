@@ -176,6 +176,7 @@ int load_all(struct context *ctx)
 			inventory_add(ctx->inv, x, z, 64);
 		}
 	}
+	list_init(&ctx->drops);
 	return 0;
 }
 
