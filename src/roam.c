@@ -323,6 +323,7 @@ void roam_render(struct context *ctx)
 {
 	struct aab3ll bb;
 	struct v3ll p;
+	int i;
 
 	render_cursor(ctx);
 	bb.x0 = floor(ctx->player->p.x - 4);
@@ -347,6 +348,29 @@ void roam_render(struct context *ctx)
 		glTranslatef(.4, -.4, -.8);
 		glScalef(.125, .125, .125);
 		render_obj(ctx, ctx->inv->slots[ctx->tool].obj, ctx->inv->slots[ctx->tool].mat, 255);
+		glPopMatrix();
+	}
+
+	for (i = 0; i < 9; ++i) {
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glTranslatef(ctx->cam->p.x, ctx->cam->p.y, ctx->cam->p.z);
+		glRotatef(180.0 * ctx->cam->r.y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
+		glTranslatef(i * .06 - .30, -.4, -.8);
+		glScalef(.03125, .03125, .03125);
+		if (i == ctx->tool)
+			glColor3ub(255, 255, 255);
+		else
+			glColor3ub(64, 64, 64);
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(-.25, 0, -.25);
+		glVertex3f(-.25, 0, 1.25);
+		glVertex3f(1.25, 0, 1.25);
+		glVertex3f(1.25, 0, -.25);
+		glEnd();
+		if (ctx->inv->slots[i].num > 0)
+			render_obj(ctx, ctx->inv->slots[i].obj, ctx->inv->slots[i].mat, 255);
 		glPopMatrix();
 	}
 }
