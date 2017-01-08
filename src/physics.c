@@ -82,7 +82,7 @@ void move_xpos(struct space *s, struct body *b, float dt)
 	for (y = y0; y <= y1; ++y) {
 		for (z = z0; z <= z1; ++z) {
 			if (cell_at(s, shape_masks, x, y, z)) {
-				if (y == y0) {
+				if (y < y0 + b->step_size) {
 					step_up = 1;
 				} else {
 					b->v.x = 0;
@@ -95,7 +95,7 @@ void move_xpos(struct space *s, struct body *b, float dt)
 		}
 	}
 	if (step_up)
-		b->p.y = 0.5 * (y0 + 1) + b->s.y + s->impulse;
+		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + s->impulse;
 	b->p.x += b->v.x * dt;
 }
 
@@ -112,7 +112,7 @@ void move_xneg(struct space *s, struct body *b, float dt)
 	for (y = y0; y <= y1; ++y) {
 		for (z = z0; z <= z1; ++z) {
 			if (cell_at(s, shape_masks, x, y, z)) {
-				if (y == y0) {
+				if (y < y0 + b->step_size) {
 					step_up = 1;
 					continue;
 				}
@@ -125,7 +125,7 @@ void move_xneg(struct space *s, struct body *b, float dt)
 		}
 	}
 	if (step_up)
-		b->p.y = 0.5 * (y0 + 1) + b->s.y + s->impulse;
+		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + s->impulse;
 	b->p.x += b->v.x * dt;
 }
 
@@ -142,7 +142,7 @@ void move_zpos(struct space *s, struct body *b, float dt)
 	for (x = x0; x <= x1; ++x) {
 		for (y = y0; y <= y1; ++y) {
 			if (cell_at(s, shape_masks, x, y, z)) {
-				if (y == y0) {
+				if (y < y0 + b->step_size) {
 					step_up = 1;
 					continue;
 				}
@@ -155,7 +155,7 @@ void move_zpos(struct space *s, struct body *b, float dt)
 		}
 	}
 	if (step_up)
-		b->p.y = 0.5 * (y0 + 1) + b->s.y + s->impulse;
+		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + s->impulse;
 	b->p.z += b->v.z * dt;
 }
 
@@ -172,7 +172,7 @@ void move_zneg(struct space *s, struct body *b, float dt)
 	for (x = x0; x <= x1; ++x) {
 		for (y = y0; y <= y1; ++y) {
 			if (cell_at(s, shape_masks, x, y, z)) {
-				if (y == y0) {
+				if (y < y0 + b->step_size) {
 					step_up = 1;
 					continue;
 				}
@@ -185,7 +185,7 @@ void move_zneg(struct space *s, struct body *b, float dt)
 		}
 	}
 	if (step_up)
-		b->p.y = 0.5 * (y0 + 1) + b->s.y + s->impulse;
+		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + s->impulse;
 	b->p.z += b->v.z * dt;
 }
 

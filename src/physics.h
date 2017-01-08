@@ -38,6 +38,7 @@ struct body {
 	struct v3f v;
 	struct v2f s;
 	struct aab3f bb;
+	int step_size;
 	void (* cb_func)(struct body *b, void *data, int face);
 	void *cb_data;
 };
@@ -98,6 +99,11 @@ static inline void body_set_velocity(struct body *b, struct v3f v)
 static inline void body_set_size(struct body *b, struct v2f s)
 {
 	b->s = s;
+}
+
+static inline void body_set_step_size(struct body *b, int s)
+{
+	b->step_size = s;
 }
 
 static inline void body_set_callback(struct body *b,

@@ -261,6 +261,7 @@ int load_all(struct context *ctx)
 	ctx->player = body(ctx->space);
 	body_set_position(ctx->player, p);
 	body_set_size(ctx->player, v2f(0.325, 0.825));
+	body_set_step_size(ctx->player, 1);
 	ctx->inv = inventory(9);
 	ctx->tool = 0;
 	for (z = 255; z < 256; ++z) {
