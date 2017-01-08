@@ -1,9 +1,7 @@
 
 #include "lighting.h"
 
-#include <assert.h>
-#include <stdlib.h>
-#include <string.h>
+#include "stack.h"
 
 static const int opaque_shape[] = {
 	0,
@@ -18,52 +16,6 @@ static const int opaque_shape[] = {
 static inline int max(int a, int b)
 {
 	return a > b ? a : b;
-}
-
-struct stack {
-	size_t elem_size;
-	size_t alloc;
-	size_t size;
-	char *data;
-};
-
-struct stack *stack(size_t elem_size)
-{
-	struct stack *s = calloc(1, sizeof(*s));
-	s->elem_size = elem_size;
-	return s;
-}
-
-void stack_destroy(struct stack *s)
-{
-	if (s->data != NULL)
-		free(s->data);
-	free(s);
-}
-
-void stack_push(struct stack *s, void *e)
-{
-	if (s->size == s->alloc) {
-		if (s->alloc == 0)
-			s->alloc = 2;
-		else
-			s->alloc *= 2;
-		s->data = realloc(s->data, s->alloc * s->elem_size);
-	}
-	memcpy(s->data + s->size * s->elem_size, e, s->elem_size);
-	++s->size;
-}
-
-void stack_pop(struct stack *s, void *e)
-{
-	assert(s->size > 0);
-	--s->size;
-	memcpy(e, s->data + s->size * s->elem_size, s->elem_size);
-}
-
-int stack_size(struct stack *s)
-{
-	return s->size;
 }
 
 struct lighting {
