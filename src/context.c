@@ -263,7 +263,7 @@ int load_all(struct context *ctx)
 		}
 	}
 	if (from_scratch)
-		update_lighting(ctx->w, aab3ll(0, 0, 0, WORLD_W, WORLD_H, WORLD_D));
+		update_lighting(ctx->w, aab3ll(0, 0, 0, WORLD_W, WORLD_H, WORLD_D), NULL);
 	p.x = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	p.y = CHUNK_H;
 	p.z = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
@@ -537,6 +537,10 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 	} else if (s == SHAPE_SLAB_UP) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
+		lt[0] = texcoord_from_light(g);
+		lt[1] = texcoord_from_light(g);
+		lt[2] = texcoord_from_light(g);
+		lt[3] = texcoord_from_light(g);
 		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 1, 1, lt);
 		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, lt);
 		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, lt);
@@ -832,12 +836,6 @@ void update_chunks(struct context *ctx)
 			/* load this chunk */
 			c->flags ^= CHUNK_UNLOADED;
 		}
-		if ((c->flags & CHUNK_UNLIT) != 0) {
-			printf("; update lighting");
-			update_lighting(ctx->w, aab3ll(c->x, 0, c->z,
-						c->x + CHUNK_W, CHUNK_H, c->z + CHUNK_D));
-			c->flags ^= CHUNK_UNLIT;
-		}
 		if ((c->flags & CHUNK_UNRENDERED) != 0) {
 			printf("; update vertex buffers");
 			for (k = 0; k < SHARDS_PER_CHUNK; ++k)
@@ -877,6 +875,17 @@ void event(const SDL_Event *e, void *data)
 		} else if (e->key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE START ===\n");
 			profile_manager_reset(ctx->prof_mgr);
+		} else if (e->key.keysym.sym == SDLK_l) {
+			struct aab3ll bb, bb2;
+			bb.x0 = ctx->w->x;
+			bb.y0 = WORLD_H - 1;
+			bb.z0 = ctx->w->z;
+			bb.x1 = bb.x0 + WORLD_W;
+			bb.y1 = bb.y0 + 1;
+			bb.z1 = bb.z0 + WORLD_W;
+			update_lighting(ctx->w, bb, &bb2);
+			world_set_flags(ctx->w, bb2, CHUNK_UNRENDERED);
+			return ;
 		}
 	} else if (e->type == SDL_KEYUP) {
 		if (e->key.repeat) {

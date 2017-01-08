@@ -9,7 +9,7 @@ static inline int max(int a, int b)
 	return a > b ? a : b;
 }
 
-void update_lighting(struct world *w, struct aab3ll bb);
+void update_lighting(struct world *w, struct aab3ll bb, struct aab3ll *rbb);
 
 #endif
 

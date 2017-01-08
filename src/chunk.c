@@ -240,21 +240,24 @@ int world_save(struct world *w, union sz_tag **root)
 
 void world_set(struct world *w, struct v3ll p, int shape, int mat, void *data)
 {
-	int x;
-	int z;
+	struct aab3ll bb;
 	WORLD_AT(w, shape, p.x, p.y, p.z) = shape;
 	WORLD_AT(w, mat, p.x, p.y, p.z) = mat;
 	WORLD_AT(w, data, p.x, p.y, p.z) = data;
-	update_lighting(w, aab3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1));
-	x = (p.x >> 4) & 0xf;
-	z = (p.z >> 4) & 0xf;
-	w->chunks[x][z]->flags |= CHUNK_UNRENDERED;
-	if ((p.x & 0xf) == 0)
-		w->chunks[x - 1][z]->flags |= CHUNK_UNRENDERED;
-	if ((p.z & 0xf) == 0)
-		w->chunks[x][z - 1]->flags |= CHUNK_UNRENDERED;
-	if ((p.x & 0xf) == 0xf)
-		w->chunks[x + 1][z]->flags |= CHUNK_UNRENDERED;
-	if ((p.z & 0xf) == 0xf)
-		w->chunks[x][z + 1]->flags |= CHUNK_UNRENDERED;
+	update_lighting(w, aab3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
+	world_set_flags(w, bb, CHUNK_UNRENDERED);
+}
+
+void world_set_flags(struct world *w, struct aab3ll bb, int flags)
+{
+	int x, z;
+	bb.x0 = (bb.x0 >> 4) & 0xf;
+	bb.z0 = (bb.z0 >> 4) & 0xf;
+	bb.x1 = (bb.x1 >> 4) & 0xf;
+	bb.z1 = (bb.z1 >> 4) & 0xf;
+	for (x = bb.x0; x <= bb.x1; ++x) {
+		for (z = bb.z0; z <= bb.z1; ++z) {
+			w->chunks[x][z]->flags |= flags;
+		}
+	}
 }

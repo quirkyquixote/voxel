@@ -129,6 +129,7 @@ void world_destroy(struct world *w);
 int world_load(struct world *w, union sz_tag *root);
 int world_save(struct world *w, union sz_tag **root);
 void world_set(struct world *w, struct v3ll p, int shape, int mat, void *data);
+void world_set_flags(struct world *w, struct aab3ll bb, int flags);
 
 #endif
 
