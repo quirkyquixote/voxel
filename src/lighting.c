@@ -57,6 +57,16 @@ static inline void lit_up(struct lighting *l, struct v3ll p, int k, int f1, int 
 	}
 }
 
+void copy_value(struct world *w, struct v3ll p, int *k)
+{
+	int k2;
+	if (opaque_shape[WORLD_AT(w, shape, p.x, p.y, p.z)])
+		return;
+	k2 = WORLD_AT(w, light, p.x, p.y, p.z);
+	if (*k < k2)
+		*k = k2;
+}
+
 void update_lighting(struct world *w, struct aab3ll bb)
 {
 	struct lighting *l;
@@ -115,96 +125,112 @@ void update_lighting(struct world *w, struct aab3ll bb)
 
 	aab3_foreach(p, bb) {
 		int s = WORLD_AT(w, shape, p.x, p.y, p.z);
-		if (s == SHAPE_SLAB_DN)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-							max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-								max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-									WORLD_AT(w, light, p.x, p.y + 1, p.z)))));
-		else if (s == SHAPE_SLAB_UP)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-							max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-								max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-									WORLD_AT(w, light, p.x, p.y - 1, p.z)))));
-		else if (s == SHAPE_SLAB_LF)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-							max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-								max(WORLD_AT(w, light, p.x, p.y - 1, p.z),
-									WORLD_AT(w, light, p.x, p.y + 1, p.z)))));
-		else if (s == SHAPE_SLAB_RT)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-							max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-								max(WORLD_AT(w, light, p.x, p.y - 1, p.z),
-									WORLD_AT(w, light, p.x, p.y + 1, p.z)))));
-		else if (s == SHAPE_SLAB_BK)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-							max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-								max(WORLD_AT(w, light, p.x, p.y - 1, p.z),
-									WORLD_AT(w, light, p.x, p.y + 1, p.z)))));
-		else if (s == SHAPE_SLAB_FT)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-							max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-								max(WORLD_AT(w, light, p.x, p.y - 1, p.z),
-									WORLD_AT(w, light, p.x, p.y + 1, p.z)))));
-		else if (s == SHAPE_STAIRS_DF)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-							max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-								WORLD_AT(w, light, p.x, p.y - 1, p.z))));
-		else if (s == SHAPE_STAIRS_DB)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-							max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-								WORLD_AT(w, light, p.x, p.y - 1, p.z))));
-		else if (s == SHAPE_STAIRS_DL)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-							max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-								WORLD_AT(w, light, p.x, p.y - 1, p.z))));
-		else if (s == SHAPE_STAIRS_DR)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-							max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-								WORLD_AT(w, light, p.x, p.y - 1, p.z))));
-		else if (s == SHAPE_STAIRS_UF)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-							max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-								WORLD_AT(w, light, p.x, p.y + 1, p.z))));
-		else if (s == SHAPE_STAIRS_UB)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-							max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-								WORLD_AT(w, light, p.x, p.y + 1, p.z))));
-		else if (s == SHAPE_STAIRS_UL)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-							max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-								WORLD_AT(w, light, p.x, p.y + 1, p.z))));
-		else if (s == SHAPE_STAIRS_UR)
-			WORLD_AT(w, light, p.x, p.y, p.z) =
-				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
-						max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
-							max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
-								WORLD_AT(w, light, p.x, p.y + 1, p.z))));
+		if (s == SHAPE_SLAB_DN) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y + 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_SLAB_UP) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y - 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_SLAB_LF) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y - 1, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y + 1, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_SLAB_RT) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y - 1, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y + 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_SLAB_BK) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y - 1, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y + 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_SLAB_FT) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y - 1, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y + 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_STAIRS_DF) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y + 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_STAIRS_DB) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y + 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_STAIRS_DL) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y + 1, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_STAIRS_DR) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y + 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_STAIRS_UF) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y - 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_STAIRS_UB) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y - 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_STAIRS_UL) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y - 1, p.z), &k);
+			copy_value(w, v3ll(p.x + 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		} else if (s == SHAPE_STAIRS_UR) {
+			k = WORLD_AT(w, light, p.x, p.y, p.z);
+			copy_value(w, v3ll(p.x, p.y - 1, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y + 1, p.z), &k);
+			copy_value(w, v3ll(p.x - 1, p.y, p.z), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z - 1), &k);
+			copy_value(w, v3ll(p.x, p.y, p.z + 1), &k);
+			WORLD_AT(w, light, p.x, p.y, p.z) = k;
+		}
 	}
 }
 
