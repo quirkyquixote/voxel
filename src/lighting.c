@@ -13,11 +13,6 @@ static const int opaque_shape[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static inline int max(int a, int b)
-{
-	return a > b ? a : b;
-}
-
 struct lighting {
 	struct world *w;
 	struct stack *s1;

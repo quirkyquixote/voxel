@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "lighting.h"
+
 void vertex2_update_vbo(const void *data, size_t size);
 void vertex2_enable_client_states(void);
 void vertex2_disable_client_states(void);
@@ -101,7 +103,8 @@ void vertex3_buf_push(struct vertex3_buf *buf, struct v3f p, struct v2f t, struc
 
 void vertex3_buf_left(struct vertex3_buf *buf, struct v3f p, GLfloat h, GLfloat d, struct aab2f t, int l)
 {
-	struct v4c c = v4c(l << 3, l << 3, l << 3, 255);
+	GLubyte a = max((l << 4) - 32, 0);
+	struct v4c c = v4c(a, a, a, 255);
 	struct v3f p0 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p1 = v3_add(p, v3f(0, 0, d));
 	struct v3f p2 = v3_add(p, v3f(0, h, 0));
@@ -120,7 +123,8 @@ void vertex3_buf_left(struct vertex3_buf *buf, struct v3f p, GLfloat h, GLfloat 
 
 void vertex3_buf_right(struct vertex3_buf *buf, struct v3f p, GLfloat h, GLfloat d, struct aab2f t, int l)
 {
-	struct v4c c = v4c(l << 3, l << 3, l << 3, 255);
+	GLubyte a = max((l << 4) - 32, 0);
+	struct v4c c = v4c(a, a, a, 255);
 	struct v3f p0 = v3_add(p, v3f(0, h, d));
 	struct v3f p1 = v3_add(p, v3f(0, 0, d));
 	struct v3f p2 = v3_add(p, v3f(0, h, 0));
@@ -139,7 +143,8 @@ void vertex3_buf_right(struct vertex3_buf *buf, struct v3f p, GLfloat h, GLfloat
 
 void vertex3_buf_down(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat d, struct aab2f t, int l)
 {
-	struct v4c c = v4c(l << 1, l << 1, l << 1, 255);
+	GLubyte a = max((l << 4) - 96, 0);
+	struct v4c c = v4c(a, a, a, 255);
 	struct v3f p0 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, 0, d));
@@ -158,7 +163,8 @@ void vertex3_buf_down(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat 
 
 void vertex3_buf_up(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat d, struct aab2f t, int l)
 {
-	struct v4c c = v4c(l << 4, l << 4, l << 4, 255);
+	GLubyte a = l << 4;
+	struct v4c c = v4c(a, a, a, 255);
 	struct v3f p0 = v3_add(p, v3f(w, 0, d));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, 0, d));
@@ -177,7 +183,8 @@ void vertex3_buf_up(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat d,
 
 void vertex3_buf_back(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat h, struct aab2f t, int l)
 {
-	struct v4c c = v4c(l << 2, l << 2, l << 2, 255);
+	GLubyte a = max((l << 4) - 64, 0);
+	struct v4c c = v4c(a, a, a, 255);
 	struct v3f p0 = v3_add(p, v3f(w, h, 0));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, h, 0));
@@ -196,7 +203,8 @@ void vertex3_buf_back(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat 
 
 void vertex3_buf_front(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat h, struct aab2f t, int l)
 {
-	struct v4c c = v4c(l << 2, l << 2, l << 2, 255);
+	GLubyte a = max((l << 4) - 64, 0);
+	struct v4c c = v4c(a, a, a, 255);
 	struct v3f p0 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, h, 0));
