@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "sz.h"
+#include "lighting.h"
 
 struct shard *shard(int id, int y)
 {
@@ -244,15 +245,16 @@ void world_set(struct world *w, struct v3ll p, int shape, int mat, void *data)
 	WORLD_AT(w, shape, p.x, p.y, p.z) = shape;
 	WORLD_AT(w, mat, p.x, p.y, p.z) = mat;
 	WORLD_AT(w, data, p.x, p.y, p.z) = data;
+	update_lighting(w, aab3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1));
 	x = (p.x >> 4) & 0xf;
 	z = (p.z >> 4) & 0xf;
-	w->chunks[x][z]->flags |= CHUNK_UNLIT | CHUNK_UNRENDERED;
+	w->chunks[x][z]->flags |= CHUNK_UNRENDERED;
 	if ((p.x & 0xf) == 0)
-		w->chunks[x - 1][z]->flags |= CHUNK_UNLIT | CHUNK_UNRENDERED;
+		w->chunks[x - 1][z]->flags |= CHUNK_UNRENDERED;
 	if ((p.z & 0xf) == 0)
-		w->chunks[x][z - 1]->flags |= CHUNK_UNLIT | CHUNK_UNRENDERED;
+		w->chunks[x][z - 1]->flags |= CHUNK_UNRENDERED;
 	if ((p.x & 0xf) == 0xf)
-		w->chunks[x + 1][z]->flags |= CHUNK_UNLIT | CHUNK_UNRENDERED;
+		w->chunks[x + 1][z]->flags |= CHUNK_UNRENDERED;
 	if ((p.z & 0xf) == 0xf)
-		w->chunks[x][z + 1]->flags |= CHUNK_UNLIT | CHUNK_UNRENDERED;
+		w->chunks[x][z + 1]->flags |= CHUNK_UNRENDERED;
 }

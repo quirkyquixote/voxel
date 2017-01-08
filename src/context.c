@@ -194,7 +194,7 @@ int main(int argc, char *argv[])
 	ctx->dir = "foo";
 	ctx->w = world();
 	ctx->prof_mgr = profile_manager();
-	ctx->chunks_per_tick = 4;
+	ctx->chunks_per_tick = 1;
 
 	/* Setup main loop */
 	ctx->ml = main_loop(30);
