@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-struct stack {
+struct slot {
 	uint8_t obj;
 	uint8_t mat;
 	uint8_t num;
@@ -13,7 +13,7 @@ struct stack {
 
 struct inventory {
 	size_t size;
-	struct stack *slots;
+	struct slot *slots;
 };
 
 struct inventory *inventory(size_t size);
