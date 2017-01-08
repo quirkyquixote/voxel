@@ -241,10 +241,9 @@ int load_all(struct context *ctx)
 	int x, z;
 	struct chunk *c;
 	struct v3f p;
+	int from_scratch;
 
-	if (load_world(ctx->w, ctx->dir) != 0) {
-		/* initialize from scratch */
-	}
+	from_scratch = load_world(ctx->w, ctx->dir);
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
 			c = ctx->w->chunks[x][z];
@@ -254,7 +253,8 @@ int load_all(struct context *ctx)
 				terraform(0, c);
 		}
 	}
-	update_lighting(ctx->w, aab3ll(0, 0, 0, WORLD_W, WORLD_H, WORLD_D));
+	if (from_scratch)
+		update_lighting(ctx->w, aab3ll(0, 0, 0, WORLD_W, WORLD_H, WORLD_D));
 	p.x = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	p.y = CHUNK_H;
 	p.z = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
