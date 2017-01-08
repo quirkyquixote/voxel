@@ -5,6 +5,7 @@
 #include <SDL2/SDL_opengl.h>
 
 #include "v3.h"
+#include "v2.h"
 
 struct tone_mapper {
 	float k;               /* luminosity adjustment in one step */
@@ -35,5 +36,10 @@ struct tone_mapper {
 struct tone_mapper *tone_mapper(float dt, size_t samples);
 void tone_mapper_destroy(struct tone_mapper *t);
 void tone_mapper_update(struct tone_mapper *t, float sky, float spot);
+
+static inline struct v2f texcoord_from_light(int l)
+{
+	return v2f((l & 0xf) / 15., (l >> 4) / 15.);
+}
 
 #endif
