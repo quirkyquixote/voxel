@@ -62,6 +62,10 @@ const struct recipe recipes[] = {
 		-1, OBJ_PANE, -1,
 		OBJ_PANE, OBJ_PANE, OBJ_PANE,
 		-1, OBJ_PANE, -1,
+	} }, { OBJ_PIPE, 1, {
+		-1, OBJ_PANE, -1,
+		OBJ_PANE, -1, OBJ_PANE,
+		-1, OBJ_PANE, -1,
 	} }, { 0, 0, {} }
 };
 

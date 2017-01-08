@@ -39,6 +39,10 @@ void update_lighting(struct world *w, struct aab3ll bb)
 	struct v3ll p;
 	int l;
 
+	aab3_foreach(p, bb) {
+		WORLD_AT(w, light, p.x, p.y, p.z) = 0;
+	}
+
 	pv = calloc((bb.x1 - bb.x0) * (bb.y1 - bb.y0) * (bb.z1 - bb.z0), sizeof(*pv));
 	p.y = bb.y1 - 1;
 	pc = 0;

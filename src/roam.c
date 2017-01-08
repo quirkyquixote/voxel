@@ -78,7 +78,7 @@ void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 	glBegin(GL_TRIANGLES);
 
 	if (obj == OBJ_BLOCK || obj == OBJ_WORKBENCH || obj == OBJ_CRATE ||
-			obj == OBJ_FLUID) {
+			obj == OBJ_FLUID || obj == OBJ_PIPE) {
 		glColor4ub(192, 192, 192, alpha);
 		glVertex3f(0, 0, 0);
 		glVertex3f(0, 0, 1);
@@ -505,7 +505,9 @@ void update_player(struct context *ctx)
 				p = v3_add(p, v3c(0, 0, -1));
 			else if (f == FACE_FT)
 				p = v3_add(p, v3c(0, 0, 1));
-			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == 0 || WORLD_AT(ctx->w, shape, p.x, p.y, p.z) >= SHAPE_FLUID1) {
+			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == 0 ||
+				(WORLD_AT(ctx->w, shape, p.x, p.y, p.z) >= SHAPE_FLUID1 &&
+				 WORLD_AT(ctx->w, shape, p.x, p.y, p.z) <= SHAPE_FLUID16)) {
 				if (obj == OBJ_BLOCK) {
 					world_set(ctx->w, p, SHAPE_BLOCK_DN, 255, NULL);
 				} else if (obj == OBJ_SLAB) {
@@ -539,6 +541,13 @@ void update_player(struct context *ctx)
 					world_set(ctx->w, p, SHAPE_CRATE, 255, inventory(16));
 				} else if (obj == OBJ_FLUID) {
 					world_set(ctx->w, p, SHAPE_FLUID15, 255, NULL);
+				} else if (obj == OBJ_PIPE) {
+					if (f == FACE_LF || f == FACE_RT)
+						world_set(ctx->w, p, SHAPE_PIPE_X, 255, inventory(1));
+					else if (f == FACE_UP || f == FACE_DN)
+						world_set(ctx->w, p, SHAPE_PIPE_Y, 255, inventory(1));
+					else if (f == FACE_BK || f == FACE_FT)
+						world_set(ctx->w, p, SHAPE_PIPE_Z, 255, inventory(1));
 				}
 			}
 		}

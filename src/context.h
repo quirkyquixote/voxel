@@ -25,6 +25,7 @@ enum {
 	OBJ_WORKBENCH,	/* module for a workbench */
 	OBJ_CRATE,	/* basic container */
 	OBJ_FLUID,	/* object for fluids (debug only) */
+	OBJ_PIPE,	/* a pipe */
 	OBJ_COUNT
 };
 

@@ -56,6 +56,7 @@ struct chunk *chunk(int id)
 	c->id = id;
 	for (i = 0; i < SHARDS_PER_CHUNK; ++i)
 		c->shards[i] = shard(id * SHARDS_PER_CHUNK + i, i);
+	c->flags = CHUNK_UNLOADED;
 	return c;
 }
 
@@ -137,6 +138,7 @@ int chunk_load(struct chunk *c, union sz_tag *root)
 			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
 		}
 	}
+	c->flags = CHUNK_UNRENDERED;
 	return 0;
 }
 
@@ -244,13 +246,13 @@ void world_set(struct world *w, struct v3ll p, int shape, int mat, void *data)
 	WORLD_AT(w, data, p.x, p.y, p.z) = data;
 	x = (p.x >> 4) & 0xf;
 	z = (p.z >> 4) & 0xf;
-	w->chunks[x][z]->up_to_date = 0;
+	w->chunks[x][z]->flags |= CHUNK_UNLIT | CHUNK_UNRENDERED;
 	if ((p.x & 0xf) == 0)
-		w->chunks[x - 1][z]->up_to_date = 0;
+		w->chunks[x - 1][z]->flags |= CHUNK_UNLIT | CHUNK_UNRENDERED;
 	if ((p.z & 0xf) == 0)
-		w->chunks[x][z - 1]->up_to_date = 0;
+		w->chunks[x][z - 1]->flags |= CHUNK_UNLIT | CHUNK_UNRENDERED;
 	if ((p.x & 0xf) == 0xf)
-		w->chunks[x + 1][z]->up_to_date = 0;
+		w->chunks[x + 1][z]->flags |= CHUNK_UNLIT | CHUNK_UNRENDERED;
 	if ((p.z & 0xf) == 0xf)
-		w->chunks[x][z + 1]->up_to_date = 0;
+		w->chunks[x][z + 1]->flags |= CHUNK_UNLIT | CHUNK_UNRENDERED;
 }

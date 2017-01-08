@@ -80,7 +80,16 @@ enum {
 	SHAPE_FLUID14,
 	SHAPE_FLUID15,
 	SHAPE_FLUID16,
+	SHAPE_PIPE_X,
+	SHAPE_PIPE_Y,
+	SHAPE_PIPE_Z,
 	SHAPE_COUNT,
+};
+
+enum {
+	CHUNK_UNLOADED = 1 << 0,
+	CHUNK_UNLIT = 1 << 1,
+	CHUNK_UNRENDERED = 1 << 2,
 };
 
 struct shard {
@@ -94,7 +103,7 @@ struct shard {
 
 struct chunk {
 	int id;
-	int up_to_date;
+	int flags;
 	int priority;
 	int64_t x, z;
 	struct shard *shards[SHARDS_PER_CHUNK];

@@ -20,7 +20,7 @@ const char *obj_names[] = {
 	"workbench",
 	"crate",
 	"fluid",
-	"obj07",
+	"pipe",
 	"obj08", "obj09", "obj0A", "obj0B", "obj0C", "obj0D", "obj0E", "obj0F",
 	"obj10", "obj11", "obj12", "obj13", "obj14", "obj15", "obj16", "obj17",
 	"obj18", "obj19", "obj1A", "obj1B", "obj1C", "obj1D", "obj1E", "obj1F",
@@ -132,7 +132,10 @@ const char *shape_names[] = {
 	"fluid14",
 	"fluid15",
 	"fluid16",
-			  "sha2A", "sha2B", "sha2C", "sha2D", "sha2E", "sha2F",
+        "pipe_x",
+	"pipe_y",
+	"pipe_z",
+	"sha2D", "sha2E", "sha2F",
 	"sha30", "sha31", "sha32", "sha33", "sha34", "sha35", "sha36", "sha37",
 	"sha38", "sha39", "sha3A", "sha3B", "sha3C", "sha3D", "sha3E", "sha3F",
 	"sha40", "sha41", "sha42", "sha43", "sha44", "sha45", "sha46", "sha47",
@@ -249,8 +252,10 @@ int load_all(struct context *ctx)
 			c = ctx->w->chunks[x][z];
 			c->x = ctx->w->x + x * CHUNK_W;
 			c->z = ctx->w->z + z * CHUNK_D;
-			if (load_chunk(c, ctx->dir) != 0)
+			if (load_chunk(c, ctx->dir) != 0) {
 				terraform(0, c);
+				c->flags |= CHUNK_UNLIT;
+			}
 		}
 	}
 	if (from_scratch)
@@ -424,27 +429,27 @@ void tcoord_by_material(uint8_t m, struct aab2f *tc)
 }
 
 static const char has_left_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1
+	0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
 };
 
 static const char has_right_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1
+	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
 };
 
 static const char has_down_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1
+	0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
 };
 
 static const char has_up_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1
+	0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
 };
 
 static const char has_back_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1
+	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
 };
 
 static const char has_front_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1
+	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
 };
 
 
@@ -734,7 +739,7 @@ void update_chunks(struct context *ctx)
 				if (load_chunk(c, ctx->dir) != 0)
 					terraform(0, c);
 			}*/
-			if (c->up_to_date == 0) {
+			if (c->flags != 0) {
 				c->priority = hypot((double)c->x - ctx->player->p.x,
 						(double)c->z - ctx->player->p.z);
 				out_of_date[i++] = c;
@@ -747,11 +752,25 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-//		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
-		for (k = 0; k < SHARDS_PER_CHUNK; ++k)
-			update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
-//		fprintf(stdout, "\n");
-		c->up_to_date = 1;
+		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
+		if ((c->flags & CHUNK_UNLOADED) != 0) {
+			printf("; load from file");
+			/* load this chunk */
+			c->flags ^= CHUNK_UNLOADED;
+		}
+		if ((c->flags & CHUNK_UNLIT) != 0) {
+			printf("; update lighting");
+			update_lighting(ctx->w, aab3ll(c->x, 0, c->z,
+						c->x + CHUNK_W, CHUNK_H, c->z + CHUNK_D));
+			c->flags ^= CHUNK_UNLIT;
+		}
+		if ((c->flags & CHUNK_UNRENDERED) != 0) {
+			printf("; update vertex buffers");
+			for (k = 0; k < SHARDS_PER_CHUNK; ++k)
+				update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
+			c->flags ^= CHUNK_UNRENDERED;
+		}
+		fprintf(stdout, "\n");
 	}
 }
 
@@ -792,12 +811,12 @@ void event(const SDL_Event *e, void *data)
 			if (ctx->cur.face == -1)
 				return;
 			printf("looking at %d,%d,%d; %.02g,%.02g,%.02g; %s; %s %s; light %d\n",
-				ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z,
-				ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z,
-				face_names[ctx->cur.face],
-				mat_names[WORLD_AT(ctx->w, mat, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)],
-				shape_names[WORLD_AT(ctx->w, shape, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)],
-				WORLD_AT(ctx->w, light, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z));
+					ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z,
+					ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z,
+					face_names[ctx->cur.face],
+					mat_names[WORLD_AT(ctx->w, mat, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)],
+					shape_names[WORLD_AT(ctx->w, shape, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)],
+					WORLD_AT(ctx->w, light, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z));
 			struct inventory *inv = WORLD_AT(ctx->w, data, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z);
 			if (inv != NULL) {
 				printf("inventory: [");
@@ -808,17 +827,17 @@ void event(const SDL_Event *e, void *data)
 						printf("");
 					else
 						printf("%s %s %d",
-							mat_names[inv->slots[i].mat],
-							obj_names[inv->slots[i].obj],
-							inv->slots[i].num);
+								mat_names[inv->slots[i].mat],
+								obj_names[inv->slots[i].obj],
+								inv->slots[i].num);
 				}
 				printf("]\n");
 			}
 		} else if (e->key.keysym.sym == SDLK_p) {
 			printf("at %g,%g,%g; rot %g,%g; facing %d,%s\n",
-				ctx->player->p.x, ctx->player->p.y, ctx->player->p.x,
-				ctx->player->r.x, ctx->player->r.y,
-				ctx->rotx, face_names[ctx->roty]);
+					ctx->player->p.x, ctx->player->p.y, ctx->player->p.x,
+					ctx->player->r.x, ctx->player->r.y,
+					ctx->rotx, face_names[ctx->roty]);
 		}
 	}
 }
