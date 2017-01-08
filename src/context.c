@@ -221,6 +221,9 @@ int main(int argc, char *argv[])
 	/* Create renderers */
 	ctx->shard_renderer = renderer(SHARDS_PER_WORLD, &vertex3_traits);
 
+	/* Create tone mapper */
+	ctx->tone_mapper = tone_mapper(1. / 30., 16);
+
 	/* Load world */
 	load_all(ctx);
 
@@ -234,6 +237,7 @@ int main(int argc, char *argv[])
 	world_destroy(ctx->w);
 	main_loop_destroy(ctx->ml);
 	renderer_destroy(ctx->shard_renderer);
+	tone_mapper_destroy(ctx->tone_mapper);
 	profile_manager_destroy(ctx->prof_mgr);
 	free(ctx);
 	return 0;
@@ -780,6 +784,7 @@ void update(void *data)
 	space_run(ctx->space);
 	roam_update(ctx);
 	update_chunks(ctx);
+	tone_mapper_update(ctx->tone_mapper, ctx->cam->p);
 }
 
 void event(const SDL_Event *e, void *data)

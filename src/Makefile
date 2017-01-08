@@ -22,6 +22,7 @@ voxel_objs += renderer.o
 voxel_objs += roam.o
 voxel_objs += sz.o
 voxel_objs += terraform.o
+voxel_objs += tone_mapper.o
 
 szcat_objs += sz.o
 

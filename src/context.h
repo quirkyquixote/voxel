@@ -8,6 +8,7 @@
 #include "physics.h"
 #include "profile.h"
 #include "renderer.h"
+#include "tone_mapper.h"
 #include "camera.h"
 #include "media.h"
 #include "inventory.h"
@@ -35,6 +36,7 @@ struct context {
 	struct world *w;
 	struct profile_manager *prof_mgr;
 	struct renderer *shard_renderer;
+	struct tone_mapper *tone_mapper;
 	struct camera *cam;
 	GLuint tex_terrain;
 	struct space *space;
