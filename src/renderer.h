@@ -26,11 +26,9 @@ struct vertex2 {
 };
 
 struct vertex3 {
-	GLfloat x;
-	GLfloat y;
-	GLfloat z;
-	GLfloat u;
-	GLfloat v;
+	GLfloat x, y, z;
+	GLfloat u0, v0;
+	GLfloat u1, v1;
 	GLubyte r;
 	GLubyte g;
 	GLubyte b;

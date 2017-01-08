@@ -56,7 +56,8 @@ void vertex3_enable_client_states(void)
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 	glVertexPointer(3, GL_FLOAT, sizeof(struct vertex3), (char *)0);
-	glTexCoordPointer(2, GL_FLOAT, sizeof(struct vertex3), (char *)offsetof(struct vertex3, u));
+	glTexCoordPointer(2, GL_FLOAT, sizeof(struct vertex3), (char *)offsetof(struct vertex3, u0));
+	//glTexCoordPointer(2, GL_FLOAT, sizeof(struct vertex3), (char *)offsetof(struct vertex3, u1));
 	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(struct vertex3), (char *)offsetof(struct vertex3, r));
 }
 
@@ -92,8 +93,10 @@ void vertex3_buf_push(struct vertex3_buf *buf, struct v3f p, struct v2f t, struc
 	buf->data[buf->size].x = p.x;
 	buf->data[buf->size].y = p.y;
 	buf->data[buf->size].z = p.z;
-	buf->data[buf->size].u = t.x;
-	buf->data[buf->size].v = t.y;
+	buf->data[buf->size].u0 = t.x;
+	buf->data[buf->size].v0 = t.y;
+	buf->data[buf->size].u1 = 0;
+	buf->data[buf->size].v1 = 0;
 	buf->data[buf->size].r = c.x;
 	buf->data[buf->size].g = c.y;
 	buf->data[buf->size].b = c.z;

@@ -2,6 +2,7 @@
 
 #include "context.h"
 
+#include <assert.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -220,9 +221,8 @@ int main(int argc, char *argv[])
 
 	/* Create renderers */
 	ctx->shard_renderer = renderer(SHARDS_PER_WORLD, &vertex3_traits);
-
-	/* Create tone mapper */
 	ctx->tone_mapper = tone_mapper(1. / 30., 16);
+	ctx->shader = shader("data/shader.vert", "data/shader.frag");
 
 	/* Load world */
 	load_all(ctx);
@@ -392,8 +392,15 @@ void render(void *data)
 	//	glEnable(GL_BLEND);
 	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
-//	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
+	shader_enable(ctx->shader);
+	assert(glGetError() == GL_NO_ERROR);
+	glActiveTexture(GL_TEXTURE0);
+	int tl = glGetUniformLocation(ctx->shader->pobj, "light_texture");
+	assert(glGetError() == GL_NO_ERROR);
+	glUniform1i(tl, 0);
+	assert(glGetError() == GL_NO_ERROR);
 	glBindTexture(GL_TEXTURE_2D, ctx->tone_mapper->texture);
+	assert(glGetError() == GL_NO_ERROR);
 	renderer_begin(ctx->shard_renderer);
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
@@ -413,6 +420,7 @@ void render(void *data)
 		}
 	}
 	renderer_end(ctx->shard_renderer);
+	shader_enable(NULL);
 	glDisable(GL_TEXTURE_2D);
 	roam_render(ctx);
 }
@@ -830,19 +838,19 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
+//		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
 		if ((c->flags & CHUNK_UNLOADED) != 0) {
-			printf("; load from file");
+//			printf("; load from file");
 			/* load this chunk */
 			c->flags ^= CHUNK_UNLOADED;
 		}
 		if ((c->flags & CHUNK_UNRENDERED) != 0) {
-			printf("; update vertex buffers");
+//			printf("; update vertex buffers");
 			for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 				update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
 			c->flags ^= CHUNK_UNRENDERED;
 		}
-		fprintf(stdout, "\n");
+//		fprintf(stdout, "\n");
 	}
 }
 

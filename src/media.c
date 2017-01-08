@@ -2,7 +2,10 @@
 #include "media.h"
 
 #include <SDL2/SDL_image.h>
-#include <SDL2/SDL_opengl.h>
+#define GL_GLEXT_PROTOTYPES 1
+#include "SDL2/SDL_opengl.h"
+#include "GL/glext.h"
+#undef GL_GLEXT_PROTOTYPES
 
 GLuint texture(const char *path)
 {

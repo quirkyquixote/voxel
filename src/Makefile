@@ -20,6 +20,7 @@ voxel_objs += simplex.o
 voxel_objs += recipes.o
 voxel_objs += renderer.o
 voxel_objs += roam.o
+voxel_objs += shader.o
 voxel_objs += sz.o
 voxel_objs += terraform.o
 voxel_objs += tone_mapper.o

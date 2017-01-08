@@ -2,7 +2,10 @@
 #ifndef VOXEL_TONE_MAPPER_H_
 #define VOXEL_TONE_MAPPER_H_
 
-#include <SDL2/SDL_opengl.h>
+#define GL_GLEXT_PROTOTYPES 1
+#include "SDL2/SDL_opengl.h"
+#include "GL/glext.h"
+#undef GL_GLEXT_PROTOTYPES
 
 #include "v3.h"
 #include "v2.h"
