@@ -101,124 +101,105 @@ void vertex3_buf_push(struct vertex3_buf *buf, struct v3f p, struct v2f t, struc
 	++buf->size;
 }
 
-void vertex3_buf_left(struct vertex3_buf *buf, struct v3f p, GLfloat h, GLfloat d, struct aab2f t, int l)
+static inline struct v2f texcoord_from_light(int l)
 {
-	GLubyte a = max((l << 4) - 32, 0);
-	struct v4c c = v4c(a, a, a, 255);
+	return v2f((l & 0xf) / 15., (l >> 4) / 15.);
+}
+
+void vertex3_buf_left(struct vertex3_buf *buf, struct v3f p, GLfloat h, GLfloat d, struct aab2f mt, int l)
+{
+	struct v4c c = v4c(224, 224, 224, 255);
 	struct v3f p0 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p1 = v3_add(p, v3f(0, 0, d));
 	struct v3f p2 = v3_add(p, v3f(0, h, 0));
 	struct v3f p3 = v3_add(p, v3f(0, h, d));
-	struct v2f t0 = v2f(t.x1, t.y1);
-	struct v2f t1 = v2f(t.x0, t.y1);
-	struct v2f t2 = v2f(t.x1, t.y0);
-	struct v2f t3 = v2f(t.x0, t.y0);
-	vertex3_buf_push(buf, p0, t0, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p3, t3, c);
+	struct v2f t = texcoord_from_light(l);
+	vertex3_buf_push(buf, p0, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p3, t, c);
 }
 
-void vertex3_buf_right(struct vertex3_buf *buf, struct v3f p, GLfloat h, GLfloat d, struct aab2f t, int l)
+void vertex3_buf_right(struct vertex3_buf *buf, struct v3f p, GLfloat h, GLfloat d, struct aab2f mt, int l)
 {
-	GLubyte a = max((l << 4) - 32, 0);
-	struct v4c c = v4c(a, a, a, 255);
+	struct v4c c = v4c(224, 224, 224, 255);
 	struct v3f p0 = v3_add(p, v3f(0, h, d));
 	struct v3f p1 = v3_add(p, v3f(0, 0, d));
 	struct v3f p2 = v3_add(p, v3f(0, h, 0));
 	struct v3f p3 = v3_add(p, v3f(0, 0, 0));
-	struct v2f t0 = v2f(t.x0, t.y0);
-	struct v2f t1 = v2f(t.x0, t.y1);
-	struct v2f t2 = v2f(t.x1, t.y0);
-	struct v2f t3 = v2f(t.x1, t.y1);
-	vertex3_buf_push(buf, p0, t0, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p3, t3, c);
+	struct v2f t = texcoord_from_light(l);
+	vertex3_buf_push(buf, p0, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p3, t, c);
 }
 
-void vertex3_buf_down(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat d, struct aab2f t, int l)
+void vertex3_buf_down(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat d, struct aab2f mt, int l)
 {
-	GLubyte a = max((l << 4) - 96, 0);
-	struct v4c c = v4c(a, a, a, 255);
+	struct v4c c = v4c(160, 160, 160, 255);
 	struct v3f p0 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, 0, d));
 	struct v3f p3 = v3_add(p, v3f(w, 0, d));
-	struct v2f t0 = v2f(t.x1, t.y1);
-	struct v2f t1 = v2f(t.x0, t.y1);
-	struct v2f t2 = v2f(t.x1, t.y0);
-	struct v2f t3 = v2f(t.x0, t.y0);
-	vertex3_buf_push(buf, p0, t0, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p3, t3, c);
+	struct v2f t = texcoord_from_light(l);
+	vertex3_buf_push(buf, p0, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p3, t, c);
 }
 
-void vertex3_buf_up(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat d, struct aab2f t, int l)
+void vertex3_buf_up(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat d, struct aab2f mt, int l)
 {
-	GLubyte a = l << 4;
-	struct v4c c = v4c(a, a, a, 255);
+	struct v4c c = v4c(255, 255, 255, 255);
 	struct v3f p0 = v3_add(p, v3f(w, 0, d));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, 0, d));
 	struct v3f p3 = v3_add(p, v3f(0, 0, 0));
-	struct v2f t0 = v2f(t.x1, t.y1);
-	struct v2f t1 = v2f(t.x0, t.y1);
-	struct v2f t2 = v2f(t.x1, t.y0);
-	struct v2f t3 = v2f(t.x0, t.y0);
-	vertex3_buf_push(buf, p0, t0, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p3, t3, c);
+	struct v2f t = texcoord_from_light(l);
+	vertex3_buf_push(buf, p0, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p3, t, c);
 }
 
-void vertex3_buf_back(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat h, struct aab2f t, int l)
+void vertex3_buf_back(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat h, struct aab2f mt, int l)
 {
-	GLubyte a = max((l << 4) - 64, 0);
-	struct v4c c = v4c(a, a, a, 255);
+	struct v4c c = v4c(192, 192, 192, 255);
 	struct v3f p0 = v3_add(p, v3f(w, h, 0));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, h, 0));
 	struct v3f p3 = v3_add(p, v3f(0, 0, 0));
-	struct v2f t0 = v2f(t.x0, t.y0);
-	struct v2f t1 = v2f(t.x0, t.y1);
-	struct v2f t2 = v2f(t.x1, t.y0);
-	struct v2f t3 = v2f(t.x1, t.y1);
-	vertex3_buf_push(buf, p0, t0, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p3, t3, c);
+	struct v2f t = texcoord_from_light(l);
+	vertex3_buf_push(buf, p0, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p3, t, c);
 }
 
-void vertex3_buf_front(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat h, struct aab2f t, int l)
+void vertex3_buf_front(struct vertex3_buf *buf, struct v3f p, GLfloat w, GLfloat h, struct aab2f mt, int l)
 {
-	GLubyte a = max((l << 4) - 64, 0);
-	struct v4c c = v4c(a, a, a, 255);
+	struct v4c c = v4c(192, 192, 192, 255);
 	struct v3f p0 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, h, 0));
 	struct v3f p3 = v3_add(p, v3f(w, h, 0));
-	struct v2f t0 = v2f(t.x1, t.y1);
-	struct v2f t1 = v2f(t.x0, t.y1);
-	struct v2f t2 = v2f(t.x1, t.y0);
-	struct v2f t3 = v2f(t.x0, t.y0);
-	vertex3_buf_push(buf, p0, t0, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p2, t2, c);
-	vertex3_buf_push(buf, p1, t1, c);
-	vertex3_buf_push(buf, p3, t3, c);
+	struct v2f t = texcoord_from_light(l);
+	vertex3_buf_push(buf, p0, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p2, t, c);
+	vertex3_buf_push(buf, p1, t, c);
+	vertex3_buf_push(buf, p3, t, c);
 }
 
 struct renderer *renderer(int vbo_count, const struct vertex_traits *traits)

@@ -34,6 +34,6 @@ struct tone_mapper {
 
 struct tone_mapper *tone_mapper(float dt, size_t samples);
 void tone_mapper_destroy(struct tone_mapper *t);
-void tone_mapper_update(struct tone_mapper *t, struct v3f p);
+void tone_mapper_update(struct tone_mapper *t, float sky, float spot);
 
 #endif

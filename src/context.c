@@ -392,7 +392,8 @@ void render(void *data)
 	//	glEnable(GL_BLEND);
 	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
+//	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
+	glBindTexture(GL_TEXTURE_2D, ctx->tone_mapper->texture);
 	renderer_begin(ctx->shard_renderer);
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
@@ -781,10 +782,14 @@ void update_chunks(struct context *ctx)
 void update(void *data)
 {
 	struct context *ctx = data;
+	long long x, y, z;
+	x = floor(ctx->cam->p.x);
+	y = floor(ctx->cam->p.y);
+	z = floor(ctx->cam->p.z);
 	space_run(ctx->space);
 	roam_update(ctx);
 	update_chunks(ctx);
-	tone_mapper_update(ctx->tone_mapper, ctx->cam->p);
+	tone_mapper_update(ctx->tone_mapper, (WORLD_AT(ctx->w, light, x, y, z) << 4) / 255., 0);
 }
 
 void event(const SDL_Event *e, void *data)
