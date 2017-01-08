@@ -63,13 +63,13 @@ static inline struct vertex3 vertex3(GLfloat x, GLfloat y, GLfloat z, GLfloat u,
 
 struct vertex3_buf *vertex3_buf(void);
 void vertex3_buf_destroy(struct vertex3_buf *b);
-void vertex3_buf_push(struct vertex3_buf *buf, struct v3f v, struct v2f t, struct v4c c);
-void vertex3_buf_left(struct vertex3_buf *buf, struct v3f, GLfloat h, GLfloat d, struct v2f *tl);
-void vertex3_buf_right(struct vertex3_buf *buf, struct v3f, GLfloat h, GLfloat d, struct v2f *tl);
-void vertex3_buf_down(struct vertex3_buf *buf, struct v3f, GLfloat w, GLfloat d, struct v2f *tl);
-void vertex3_buf_up(struct vertex3_buf *buf, struct v3f, GLfloat w, GLfloat d, struct v2f *tl);
-void vertex3_buf_back(struct vertex3_buf *buf, struct v3f, GLfloat w, GLfloat h, struct v2f *tl);
-void vertex3_buf_front(struct vertex3_buf *buf, struct v3f, GLfloat w, GLfloat h, struct v2f *tl);
+void vertex3_buf_push(struct vertex3_buf *buf, struct v3f v, struct v2f t0, struct v2f t1, struct v4c c);
+void vertex3_buf_left(struct vertex3_buf *buf, struct v3f, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt);
+void vertex3_buf_right(struct vertex3_buf *buf, struct v3f, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt);
+void vertex3_buf_down(struct vertex3_buf *buf, struct v3f, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt);
+void vertex3_buf_up(struct vertex3_buf *buf, struct v3f, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt);
+void vertex3_buf_back(struct vertex3_buf *buf, struct v3f, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt);
+void vertex3_buf_front(struct vertex3_buf *buf, struct v3f, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt);
 
 struct renderer *renderer(int nbufs, const struct vertex_traits *traits);
 void renderer_destroy(struct renderer *r);

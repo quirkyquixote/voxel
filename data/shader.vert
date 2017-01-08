@@ -1,11 +1,11 @@
 
-varying vec2 light_texcoord;
-varying vec2 material_texcoord;
+varying vec2 texcoord0;
+varying vec2 texcoord1;
 
 void main()
 {
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-	light_texcoord = vec2(gl_MultiTexCoord0);
-	material_texcoord = vec2(gl_MultiTexCoord1);
+	texcoord0 = gl_MultiTexCoord0.xy;
+	texcoord1 = gl_MultiTexCoord0.zw;
 	gl_FrontColor = gl_Color;
 }

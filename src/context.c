@@ -391,16 +391,20 @@ void render(void *data)
 	glColor3f(1, 1, 1);
 	//	glEnable(GL_BLEND);
 	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_TEXTURE_2D);
+//	glEnable(GL_TEXTURE_2D);
 	shader_enable(ctx->shader);
-	assert(glGetError() == GL_NO_ERROR);
+
 	glActiveTexture(GL_TEXTURE0);
-	int tl = glGetUniformLocation(ctx->shader->pobj, "light_texture");
-	assert(glGetError() == GL_NO_ERROR);
-	glUniform1i(tl, 0);
-	assert(glGetError() == GL_NO_ERROR);
+	int tl0 = glGetUniformLocation(ctx->shader->pobj, "Texture0");
+	glUniform1i(tl0, 0);
 	glBindTexture(GL_TEXTURE_2D, ctx->tone_mapper->texture);
-	assert(glGetError() == GL_NO_ERROR);
+
+	glActiveTexture(GL_TEXTURE1);
+	int tl1 = glGetUniformLocation(ctx->shader->pobj, "Texture1");
+	glUniform1i(tl1, 1);
+	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
+
+	glActiveTexture(GL_TEXTURE0);
 	renderer_begin(ctx->shard_renderer);
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
@@ -421,7 +425,7 @@ void render(void *data)
 	}
 	renderer_end(ctx->shard_renderer);
 	shader_enable(NULL);
-	glDisable(GL_TEXTURE_2D);
+//	glDisable(GL_TEXTURE_2D);
 	roam_render(ctx);
 }
 
@@ -465,6 +469,17 @@ static const char has_front_side[256] = {
 	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
 };
 
+void texcoord_from_material(int mat, struct v2f *tc)
+{
+	GLfloat x0 = (mat & 0xf) / 16.;
+	GLfloat y0 = (mat >> 4) / 16.;
+	GLfloat x1 = x0 + 1 / 16.;
+	GLfloat y1 = y0 + 1 / 16.;
+	tc[0] = v2f(x0, y0);
+	tc[1] = v2f(x1, y0);
+	tc[2] = v2f(x0, y1);
+	tc[3] = v2f(x1, y1);
+}
 
 void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_t y, int64_t z)
 {
@@ -483,7 +498,8 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_down(buf, v3f(x, y, z), 1, 1, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_down(buf, v3f(x, y, z), 1, 1, lt, mt);
 	}
 	if (has_up_side[d] && !has_down_side[s]) {
 		m = WORLD_AT(ctx->w, mat, x, y - 1, z);
@@ -492,7 +508,8 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_up(buf, v3f(x, y, z), 1, 1, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_up(buf, v3f(x, y, z), 1, 1, lt, mt);
 	}
 	if (has_left_side[s] && !has_right_side[l]) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
@@ -501,7 +518,8 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_left(buf, v3f(x, y, z), 1, 1, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_left(buf, v3f(x, y, z), 1, 1, lt, mt);
 	}
 	if (has_right_side[l] && !has_left_side[s]) {
 		m = WORLD_AT(ctx->w, mat, x - 1, y, z);
@@ -510,7 +528,8 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_right(buf, v3f(x, y, z), 1, 1, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_right(buf, v3f(x, y, z), 1, 1, lt, mt);
 	}
 	if (has_back_side[s] && !has_front_side[b]) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
@@ -519,7 +538,8 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_back(buf, v3f(x, y, z), 1, 1, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 1, lt, mt);
 	}
 	if (has_front_side[b] && !has_back_side[s]) {
 		m = WORLD_AT(ctx->w, mat, x, y, z - 1);
@@ -528,7 +548,8 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_front(buf, v3f(x, y, z), 1, 1, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_front(buf, v3f(x, y, z), 1, 1, lt, mt);
 	}
 	if (s == SHAPE_SLAB_DN) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
@@ -537,11 +558,12 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 1, 1, lt);
-		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, lt);
-		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 1, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, lt, mt);
 	} else if (s == SHAPE_SLAB_UP) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -549,11 +571,12 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 1, 1, lt);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 1, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, lt, mt);
 	} else if (s == SHAPE_STAIRS_DF) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -561,14 +584,15 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.5), 1, 0.5, lt);
-		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 1, 0.5, lt);
-		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, lt);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z + 0.5), 0.5, 0.5, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z + 0.5), 0.5, 0.5, lt);
-		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, lt);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.5), 1, 0.5, lt, mt);
+		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 1, 0.5, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z + 0.5), 0.5, 0.5, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z + 0.5), 0.5, 0.5, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, lt, mt);
 	} else if (s == SHAPE_STAIRS_DL) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -576,14 +600,15 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_up(buf, v3f(x, y + 1, z), 0.5, 1, lt);
-		vertex3_buf_up(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, lt);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 0.5, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 0.5, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_up(buf, v3f(x, y + 1, z), 0.5, 1, lt, mt);
+		vertex3_buf_up(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 0.5, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 0.5, 0.5, lt, mt);
 	} else if (s == SHAPE_STAIRS_DB) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -591,14 +616,15 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_up(buf, v3f(x, y + 1, z), 1, 0.5, lt);
-		vertex3_buf_up(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, lt);
-		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, lt);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 0.5, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_up(buf, v3f(x, y + 1, z), 1, 0.5, lt, mt);
+		vertex3_buf_up(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 0.5, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, lt, mt);
 	} else if (s == SHAPE_STAIRS_DR) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -606,14 +632,15 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_up(buf, v3f(x + 0.5, y + 1, z), 0.5, 1, lt);
-		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, lt);
-		vertex3_buf_left(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, lt);
-		vertex3_buf_back(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x + 0.5, y + 0.5, z + 1), 0.5, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_up(buf, v3f(x + 0.5, y + 1, z), 0.5, 1, lt, mt);
+		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, lt, mt);
+		vertex3_buf_back(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x + 0.5, y + 0.5, z + 1), 0.5, 0.5, lt, mt);
 	} else if (s == SHAPE_STAIRS_UF) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -621,14 +648,15 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_down(buf, v3f(x, y, z + 0.5), 1, 0.5, lt);
-		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 1, 0.5, lt);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_left(buf, v3f(x, y, z + 0.5), 0.5, 0.5, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.5), 0.5, 0.5, lt);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, lt);
-		vertex3_buf_back(buf, v3f(x, y, z + 0.5), 1, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_down(buf, v3f(x, y, z + 0.5), 1, 0.5, lt, mt);
+		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 1, 0.5, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y, z + 0.5), 0.5, 0.5, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.5), 0.5, 0.5, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y, z + 0.5), 1, 0.5, lt, mt);
 	} else if (s == SHAPE_STAIRS_UL) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -636,14 +664,15 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_down(buf, v3f(x, y, z), 0.5, 1, lt);
-		vertex3_buf_down(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 0.5, y, z), 0.5, 1, lt);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, lt);
-		vertex3_buf_back(buf, v3f(x, y, z), 0.5, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 0.5, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_down(buf, v3f(x, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_down(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 0.5, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y, z), 0.5, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 0.5, 0.5, lt, mt);
 	} else if (s == SHAPE_STAIRS_UB) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -651,14 +680,15 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_down(buf, v3f(x, y, z), 1, 0.5, lt);
-		vertex3_buf_down(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, lt);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 0.5, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y, z + 0.5), 1, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_down(buf, v3f(x, y, z), 1, 0.5, lt, mt);
+		vertex3_buf_down(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 0.5, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y, z + 0.5), 1, 0.5, lt, mt);
 	} else if (s == SHAPE_STAIRS_UR) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -666,14 +696,15 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_down(buf, v3f(x + 0.5, y, z), 0.5, 1, lt);
-		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, lt);
-		vertex3_buf_left(buf, v3f(x + 0.5, y, z), 0.5, 1, lt);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, lt);
-		vertex3_buf_back(buf, v3f(x + 0.5, y, z), 0.5, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, lt);
-		vertex3_buf_front(buf, v3f(x + 0.5, y, z + 1), 0.5, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_down(buf, v3f(x + 0.5, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x + 0.5, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, lt, mt);
+		vertex3_buf_back(buf, v3f(x + 0.5, y, z), 0.5, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, lt, mt);
+		vertex3_buf_front(buf, v3f(x + 0.5, y, z + 1), 0.5, 0.5, lt, mt);
 	} else if (s == SHAPE_SLAB_LF) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -681,11 +712,12 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_right(buf, v3f(x + 0.5, y, z), 1, 1, lt);
-		vertex3_buf_down(buf, v3f(x, y, z), 0.5, 1, lt);
-		vertex3_buf_up(buf, v3f(x, y + 1, z), 0.5, 1, lt);
-		vertex3_buf_back(buf, v3f(x, y, z), 0.5, 1, lt);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 0.5, 1, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_right(buf, v3f(x + 0.5, y, z), 1, 1, lt, mt);
+		vertex3_buf_down(buf, v3f(x, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_up(buf, v3f(x, y + 1, z), 0.5, 1, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 0.5, 1, lt, mt);
 	} else if (s == SHAPE_SLAB_RT) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -693,11 +725,12 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_left(buf, v3f(x + 0.5, y, z), 1, 1, lt);
-		vertex3_buf_down(buf, v3f(x + 0.5, y, z), 0.5, 1, lt);
-		vertex3_buf_up(buf, v3f(x + 0.5, y + 1, z), 0.5, 1, lt);
-		vertex3_buf_back(buf, v3f(x + 0.5, y, z), 0.5, 1, lt);
-		vertex3_buf_front(buf, v3f(x + 0.5, y, z + 1), 0.5, 1, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_left(buf, v3f(x + 0.5, y, z), 1, 1, lt, mt);
+		vertex3_buf_down(buf, v3f(x + 0.5, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_up(buf, v3f(x + 0.5, y + 1, z), 0.5, 1, lt, mt);
+		vertex3_buf_back(buf, v3f(x + 0.5, y, z), 0.5, 1, lt, mt);
+		vertex3_buf_front(buf, v3f(x + 0.5, y, z + 1), 0.5, 1, lt, mt);
 	} else if (s == SHAPE_SLAB_BK) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -705,11 +738,12 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_front(buf, v3f(x, y, z + 0.5), 1, 1, lt);
-		vertex3_buf_down(buf, v3f(x, y, z), 1, 0.5, lt);
-		vertex3_buf_up(buf, v3f(x, y + 1, z), 1, 0.5, lt);
-		vertex3_buf_left(buf, v3f(x, y, z), 1, 0.5, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 1, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_front(buf, v3f(x, y, z + 0.5), 1, 1, lt, mt);
+		vertex3_buf_down(buf, v3f(x, y, z), 1, 0.5, lt, mt);
+		vertex3_buf_up(buf, v3f(x, y + 1, z), 1, 0.5, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y, z), 1, 0.5, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 1, 0.5, lt, mt);
 	} else if (s == SHAPE_SLAB_FT) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -717,11 +751,12 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_back(buf, v3f(x, y, z + 0.5), 1, 1, lt);
-		vertex3_buf_down(buf, v3f(x, y, z + 0.5), 1, 0.5, lt);
-		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.5), 1, 0.5, lt);
-		vertex3_buf_left(buf, v3f(x, y, z + 0.5), 1, 0.5, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.5), 1, 0.5, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_back(buf, v3f(x, y, z + 0.5), 1, 1, lt, mt);
+		vertex3_buf_down(buf, v3f(x, y, z + 0.5), 1, 0.5, lt, mt);
+		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.5), 1, 0.5, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y, z + 0.5), 1, 0.5, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.5), 1, 0.5, lt, mt);
 	} else if (s == SHAPE_PANE_Y) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -729,12 +764,13 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_down(buf, v3f(x, y + 0.46875, z), 1, 1, lt);
-		vertex3_buf_up(buf, v3f(x, y + 0.53125, z), 1, 1, lt);
-		vertex3_buf_left(buf, v3f(x, y + 0.46875, z), 0.0625, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.46875, z), 0.0625, 1, lt);
-		vertex3_buf_back(buf, v3f(x, y + 0.46875, z), 1, 0.0625, lt);
-		vertex3_buf_front(buf, v3f(x, y + 0.46875, z + 1), 1, 0.0625, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_down(buf, v3f(x, y + 0.46875, z), 1, 1, lt, mt);
+		vertex3_buf_up(buf, v3f(x, y + 0.53125, z), 1, 1, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y + 0.46875, z), 0.0625, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.46875, z), 0.0625, 1, lt, mt);
+		vertex3_buf_back(buf, v3f(x, y + 0.46875, z), 1, 0.0625, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y + 0.46875, z + 1), 1, 0.0625, lt, mt);
 	} else if (s == SHAPE_PANE_X) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -742,12 +778,13 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_left(buf, v3f(x + 0.46875, y, z), 1, 1, lt);
-		vertex3_buf_right(buf, v3f(x + 0.53125, y, z), 1, 1, lt);
-		vertex3_buf_down(buf, v3f(x + 0.46875, y, z), 0.0625, 1, lt);
-		vertex3_buf_up(buf, v3f(x + 0.46875, y + 1, z), 0.0625, 1, lt);
-		vertex3_buf_back(buf, v3f(x + 0.46875, y, z), 0.0625, 1, lt);
-		vertex3_buf_front(buf, v3f(x + 0.46875, y, z + 1), 0.0625, 1, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_left(buf, v3f(x + 0.46875, y, z), 1, 1, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 0.53125, y, z), 1, 1, lt, mt);
+		vertex3_buf_down(buf, v3f(x + 0.46875, y, z), 0.0625, 1, lt, mt);
+		vertex3_buf_up(buf, v3f(x + 0.46875, y + 1, z), 0.0625, 1, lt, mt);
+		vertex3_buf_back(buf, v3f(x + 0.46875, y, z), 0.0625, 1, lt, mt);
+		vertex3_buf_front(buf, v3f(x + 0.46875, y, z + 1), 0.0625, 1, lt, mt);
 	} else if (s == SHAPE_PANE_Z) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -755,12 +792,13 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_back(buf, v3f(x, y, z + 0.46875), 1, 1, lt);
-		vertex3_buf_front(buf, v3f(x, y, z + 0.53125), 1, 1, lt);
-		vertex3_buf_down(buf, v3f(x, y, z + 0.46875), 1, 0.0625, lt);
-		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.46875), 1, 0.0625, lt);
-		vertex3_buf_left(buf, v3f(x, y, z + 0.46875), 1, 0.0625, lt);
-		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.46875), 1, 0.0625, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_back(buf, v3f(x, y, z + 0.46875), 1, 1, lt, mt);
+		vertex3_buf_front(buf, v3f(x, y, z + 0.53125), 1, 1, lt, mt);
+		vertex3_buf_down(buf, v3f(x, y, z + 0.46875), 1, 0.0625, lt, mt);
+		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.46875), 1, 0.0625, lt, mt);
+		vertex3_buf_left(buf, v3f(x, y, z + 0.46875), 1, 0.0625, lt, mt);
+		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.46875), 1, 0.0625, lt, mt);
 	} else if (s >= SHAPE_FLUID1 && s <= SHAPE_FLUID16) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
@@ -768,7 +806,8 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		vertex3_buf_up(buf, v3f(x, y + (s - SHAPE_FLUID1) / 16., z), 1, 1, lt);
+		texcoord_from_material(m, mt);
+		vertex3_buf_up(buf, v3f(x, y + (s - SHAPE_FLUID1) / 16., z), 1, 1, lt, mt);
 	}
 }
 

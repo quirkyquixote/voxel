@@ -1,11 +1,13 @@
-varying vec2 light_texcoord;
-varying vec2 material_texcoord;
 
-uniform sampler2D light_texture;
-uniform sampler2D material_texture;
+varying vec2 texcoord0;
+varying vec2 texcoord1;
+
+uniform sampler2D Texture0;
+uniform sampler2D Texture1;
 
 void main()
 {
-	vec4 light = texture2D(light_texture, light_texcoord);
-	gl_FragColor = light * gl_Color;
+	vec4 texel0 = texture2D(Texture0, texcoord0);
+	vec4 texel1 = texture2D(Texture1, texcoord1);
+	gl_FragColor = texel0 * texel1 * gl_Color;
 }
