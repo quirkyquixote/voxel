@@ -86,6 +86,34 @@ void update_lighting(struct world *w, struct aab3ll bb)
 				max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
 				max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
 				    WORLD_AT(w, light, p.x, p.y - 1, p.z)))));
+		else if (s == SHAPE_SLAB_LF)
+			WORLD_AT(w, light, p.x, p.y, p.z) =
+				max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
+				max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
+				max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
+				max(WORLD_AT(w, light, p.x, p.y - 1, p.z),
+				    WORLD_AT(w, light, p.x, p.y + 1, p.z)))));
+		else if (s == SHAPE_SLAB_RT)
+			WORLD_AT(w, light, p.x, p.y, p.z) =
+				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
+				max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
+				max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
+				max(WORLD_AT(w, light, p.x, p.y - 1, p.z),
+				    WORLD_AT(w, light, p.x, p.y + 1, p.z)))));
+		else if (s == SHAPE_SLAB_BK)
+			WORLD_AT(w, light, p.x, p.y, p.z) =
+				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
+				max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
+				max(WORLD_AT(w, light, p.x, p.y, p.z + 1),
+				max(WORLD_AT(w, light, p.x, p.y - 1, p.z),
+				    WORLD_AT(w, light, p.x, p.y + 1, p.z)))));
+		else if (s == SHAPE_SLAB_FT)
+			WORLD_AT(w, light, p.x, p.y, p.z) =
+				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
+				max(WORLD_AT(w, light, p.x + 1, p.y, p.z),
+				max(WORLD_AT(w, light, p.x, p.y, p.z - 1),
+				max(WORLD_AT(w, light, p.x, p.y - 1, p.z),
+				    WORLD_AT(w, light, p.x, p.y + 1, p.z)))));
 		else if (s == SHAPE_STAIRS_DF)
 			WORLD_AT(w, light, p.x, p.y, p.z) =
 				max(WORLD_AT(w, light, p.x - 1, p.y, p.z),
