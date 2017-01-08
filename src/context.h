@@ -7,7 +7,7 @@
 #include "main_loop.h"
 #include "physics.h"
 #include "profile.h"
-#include "renderer.h"
+#include "vertex_buffer.h"
 #include "tone_mapper.h"
 #include "shader.h"
 #include "camera.h"
@@ -36,7 +36,7 @@ struct context {
 	struct main_loop *ml;
 	struct world *w;
 	struct profile_manager *prof_mgr;
-	struct renderer *shard_renderer;
+	struct vertex_buffer *shard_vertex_buffer;
 	struct tone_mapper *tone_mapper;
 	struct shader *shader;
 	struct camera *cam;
