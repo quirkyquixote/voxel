@@ -11,9 +11,14 @@ void render_cursor(struct context *ctx)
 {
 	if (ctx->cur.face == -1)
 		return;
+
 	GLfloat x = ctx->cur.p.x;
 	GLfloat y = ctx->cur.p.y;
 	GLfloat z = ctx->cur.p.z;
+
+	if (ctx->cur.face == FACE_UP &&
+		WORLD_AT(ctx->w, data, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z) != NULL)
+		return;
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
