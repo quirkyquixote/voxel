@@ -31,7 +31,7 @@ int shard_load(struct shard *s, union sz_tag *root)
 		} else if (strcmp(key, "shape") == 0) {
 			memcpy(s->shape, val->raw.data, val->raw.size);
 		} else if (strcmp(key, "light") == 0) {
-			memcpy(s->light, val->raw.data, val->raw.size);
+//			memcpy(s->light, val->raw.data, val->raw.size);
 		} else {
 			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
 		}

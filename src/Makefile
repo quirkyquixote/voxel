@@ -11,6 +11,7 @@ voxel_objs += context.o
 voxel_objs += drop.o
 voxel_objs += fps_manager.o
 voxel_objs += inventory.o
+voxel_objs += lighting.o
 voxel_objs += main_loop.o
 voxel_objs += media.o
 voxel_objs += physics.o

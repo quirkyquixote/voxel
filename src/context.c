@@ -10,6 +10,7 @@
 #include <stdlib.h>
 
 #include "roam.h"
+#include "lighting.h"
 
 const char *obj_names[] = {
 	"block",
@@ -253,6 +254,7 @@ int load_all(struct context *ctx)
 				terraform(0, c);
 		}
 	}
+	update_lighting(ctx->w, aab3ll(0, 0, 0, WORLD_W, WORLD_H, WORLD_D));
 	p.x = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	p.y = CHUNK_H;
 	p.z = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
@@ -447,7 +449,7 @@ static const char has_front_side[256] = {
 
 void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_t y, int64_t z)
 {
-	int8_t s, l, d, b, m;
+	int8_t s, l, d, b, m, g;
 	struct aab2f tc;
 
 	s = WORLD_AT(ctx->w, shape, x, y, z);
@@ -456,201 +458,225 @@ void update_cell(struct context *ctx, struct vertex3_buf *buf, int64_t x, int64_
 	b = WORLD_AT(ctx->w, shape, x, y, z - 1);
 	if (has_down_side[s] && !has_up_side[d]) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y - 1, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_down(buf, v3f(x, y, z), 1, 1, tc);
+		vertex3_buf_down(buf, v3f(x, y, z), 1, 1, tc, g);
 	}
 	if (has_up_side[d] && !has_down_side[s]) {
 		m = WORLD_AT(ctx->w, mat, x, y - 1, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_up(buf, v3f(x, y, z), 1, 1, tc);
+		vertex3_buf_up(buf, v3f(x, y, z), 1, 1, tc, g);
 	}
 	if (has_left_side[s] && !has_right_side[l]) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x - 1, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_left(buf, v3f(x, y, z), 1, 1, tc);
+		vertex3_buf_left(buf, v3f(x, y, z), 1, 1, tc, g);
 	}
 	if (has_right_side[l] && !has_left_side[s]) {
 		m = WORLD_AT(ctx->w, mat, x - 1, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_right(buf, v3f(x, y, z), 1, 1, tc);
+		vertex3_buf_right(buf, v3f(x, y, z), 1, 1, tc, g);
 	}
 	if (has_back_side[s] && !has_front_side[b]) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z - 1);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_back(buf, v3f(x, y, z), 1, 1, tc);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 1, tc, g);
 	}
 	if (has_front_side[b] && !has_back_side[s]) {
 		m = WORLD_AT(ctx->w, mat, x, y, z - 1);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_front(buf, v3f(x, y, z), 1, 1, tc);
+		vertex3_buf_front(buf, v3f(x, y, z), 1, 1, tc, g);
 	}
 	if (s == SHAPE_SLAB_DN) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 1, 1, tc);
-		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, tc);
-		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, tc);
+		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 1, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, tc, g);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, tc, g);
 	} else if (s == SHAPE_SLAB_UP) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 1, 1, tc);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, tc);
+		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 1, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, tc, g);
 	} else if (s == SHAPE_STAIRS_DF) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.5), 1, 0.5, tc);
-		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 1, 0.5, tc);
-		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, tc);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z + 0.5), 0.5, 0.5, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z + 0.5), 0.5, 0.5, tc);
-		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, tc);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, tc);
+		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.5), 1, 0.5, tc, g);
+		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 1, 0.5, tc, g);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z + 0.5), 0.5, 0.5, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z + 0.5), 0.5, 0.5, tc, g);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, tc, g);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, tc, g);
 	} else if (s == SHAPE_STAIRS_DL) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_up(buf, v3f(x, y + 1, z), 0.5, 1, tc);
-		vertex3_buf_up(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, tc);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 0.5, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 0.5, 0.5, tc);
+		vertex3_buf_up(buf, v3f(x, y + 1, z), 0.5, 1, tc, g);
+		vertex3_buf_up(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, tc, g);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 0.5, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 0.5, 0.5, tc, g);
 	} else if (s == SHAPE_STAIRS_DB) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_up(buf, v3f(x, y + 1, z), 1, 0.5, tc);
-		vertex3_buf_up(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, tc);
-		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, tc);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 0.5, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, tc);
+		vertex3_buf_up(buf, v3f(x, y + 1, z), 1, 0.5, tc, g);
+		vertex3_buf_up(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, tc, g);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 0.5, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, tc, g);
 	} else if (s == SHAPE_STAIRS_DR) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_up(buf, v3f(x + 0.5, y + 1, z), 0.5, 1, tc);
-		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, tc);
-		vertex3_buf_left(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, tc);
-		vertex3_buf_back(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x + 0.5, y + 0.5, z + 1), 0.5, 0.5, tc);
+		vertex3_buf_up(buf, v3f(x + 0.5, y + 1, z), 0.5, 1, tc, g);
+		vertex3_buf_up(buf, v3f(x, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_back(buf, v3f(x, y, z), 1, 0.5, tc, g);
+		vertex3_buf_back(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 1, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x + 0.5, y + 0.5, z + 1), 0.5, 0.5, tc, g);
 	} else if (s == SHAPE_STAIRS_UF) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_down(buf, v3f(x, y, z + 0.5), 1, 0.5, tc);
-		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 1, 0.5, tc);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_left(buf, v3f(x, y, z + 0.5), 0.5, 0.5, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.5), 0.5, 0.5, tc);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, tc);
-		vertex3_buf_back(buf, v3f(x, y, z + 0.5), 1, 0.5, tc);
+		vertex3_buf_down(buf, v3f(x, y, z + 0.5), 1, 0.5, tc, g);
+		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 1, 0.5, tc, g);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x, y, z + 0.5), 0.5, 0.5, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.5), 0.5, 0.5, tc, g);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, tc, g);
+		vertex3_buf_back(buf, v3f(x, y, z + 0.5), 1, 0.5, tc, g);
 	} else if (s == SHAPE_STAIRS_UL) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_down(buf, v3f(x, y, z), 0.5, 1, tc);
-		vertex3_buf_down(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 0.5, y, z), 0.5, 1, tc);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, tc);
-		vertex3_buf_back(buf, v3f(x, y, z), 0.5, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 0.5, 0.5, tc);
+		vertex3_buf_down(buf, v3f(x, y, z), 0.5, 1, tc, g);
+		vertex3_buf_down(buf, v3f(x + 0.5, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 0.5, y, z), 0.5, 1, tc, g);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, tc, g);
+		vertex3_buf_back(buf, v3f(x, y, z), 0.5, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 0.5, 0.5, tc, g);
 	} else if (s == SHAPE_STAIRS_UB) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_down(buf, v3f(x, y, z), 1, 0.5, tc);
-		vertex3_buf_down(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, tc);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 0.5, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y, z + 0.5), 1, 0.5, tc);
+		vertex3_buf_down(buf, v3f(x, y, z), 1, 0.5, tc, g);
+		vertex3_buf_down(buf, v3f(x, y + 0.5, z + 0.5), 1, 0.5, tc, g);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x, y, z), 0.5, 0.5, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 0.5, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y, z + 0.5), 1, 0.5, tc, g);
 	} else if (s == SHAPE_STAIRS_UR) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_down(buf, v3f(x + 0.5, y, z), 0.5, 1, tc);
-		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, tc);
-		vertex3_buf_left(buf, v3f(x + 0.5, y, z), 0.5, 1, tc);
-		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, tc);
-		vertex3_buf_back(buf, v3f(x + 0.5, y, z), 0.5, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, tc);
-		vertex3_buf_front(buf, v3f(x + 0.5, y, z + 1), 0.5, 0.5, tc);
+		vertex3_buf_down(buf, v3f(x + 0.5, y, z), 0.5, 1, tc, g);
+		vertex3_buf_down(buf, v3f(x, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x, y + 0.5, z), 0.5, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x + 0.5, y, z), 0.5, 1, tc, g);
+		vertex3_buf_back(buf, v3f(x, y + 0.5, z), 1, 0.5, tc, g);
+		vertex3_buf_back(buf, v3f(x + 0.5, y, z), 0.5, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x, y + 0.5, z + 1), 1, 0.5, tc, g);
+		vertex3_buf_front(buf, v3f(x + 0.5, y, z + 1), 0.5, 0.5, tc, g);
 	} else if (s == SHAPE_SLAB_LF) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_right(buf, v3f(x + 0.5, y, z), 1, 1, tc);
-		vertex3_buf_down(buf, v3f(x, y, z), 0.5, 1, tc);
-		vertex3_buf_up(buf, v3f(x, y + 1, z), 0.5, 1, tc);
-		vertex3_buf_back(buf, v3f(x, y, z), 0.5, 1, tc);
-		vertex3_buf_front(buf, v3f(x, y, z + 1), 0.5, 1, tc);
+		vertex3_buf_right(buf, v3f(x + 0.5, y, z), 1, 1, tc, g);
+		vertex3_buf_down(buf, v3f(x, y, z), 0.5, 1, tc, g);
+		vertex3_buf_up(buf, v3f(x, y + 1, z), 0.5, 1, tc, g);
+		vertex3_buf_back(buf, v3f(x, y, z), 0.5, 1, tc, g);
+		vertex3_buf_front(buf, v3f(x, y, z + 1), 0.5, 1, tc, g);
 	} else if (s == SHAPE_SLAB_RT) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_left(buf, v3f(x + 0.5, y, z), 1, 1, tc);
-		vertex3_buf_down(buf, v3f(x + 0.5, y, z), 0.5, 1, tc);
-		vertex3_buf_up(buf, v3f(x + 0.5, y + 1, z), 0.5, 1, tc);
-		vertex3_buf_back(buf, v3f(x + 0.5, y, z), 0.5, 1, tc);
-		vertex3_buf_front(buf, v3f(x + 0.5, y, z + 1), 0.5, 1, tc);
+		vertex3_buf_left(buf, v3f(x + 0.5, y, z), 1, 1, tc, g);
+		vertex3_buf_down(buf, v3f(x + 0.5, y, z), 0.5, 1, tc, g);
+		vertex3_buf_up(buf, v3f(x + 0.5, y + 1, z), 0.5, 1, tc, g);
+		vertex3_buf_back(buf, v3f(x + 0.5, y, z), 0.5, 1, tc, g);
+		vertex3_buf_front(buf, v3f(x + 0.5, y, z + 1), 0.5, 1, tc, g);
 	} else if (s == SHAPE_SLAB_BK) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_front(buf, v3f(x, y, z + 0.5), 1, 1, tc);
-		vertex3_buf_down(buf, v3f(x, y, z), 1, 0.5, tc);
-		vertex3_buf_up(buf, v3f(x, y + 1, z), 1, 0.5, tc);
-		vertex3_buf_left(buf, v3f(x, y, z), 1, 0.5, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y, z), 1, 0.5, tc);
+		vertex3_buf_front(buf, v3f(x, y, z + 0.5), 1, 1, tc, g);
+		vertex3_buf_down(buf, v3f(x, y, z), 1, 0.5, tc, g);
+		vertex3_buf_up(buf, v3f(x, y + 1, z), 1, 0.5, tc, g);
+		vertex3_buf_left(buf, v3f(x, y, z), 1, 0.5, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y, z), 1, 0.5, tc, g);
 	} else if (s == SHAPE_SLAB_FT) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_back(buf, v3f(x, y, z + 0.5), 1, 1, tc);
-		vertex3_buf_down(buf, v3f(x, y, z + 0.5), 1, 0.5, tc);
-		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.5), 1, 0.5, tc);
-		vertex3_buf_left(buf, v3f(x, y, z + 0.5), 1, 0.5, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.5), 1, 0.5, tc);
+		vertex3_buf_back(buf, v3f(x, y, z + 0.5), 1, 1, tc, g);
+		vertex3_buf_down(buf, v3f(x, y, z + 0.5), 1, 0.5, tc, g);
+		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.5), 1, 0.5, tc, g);
+		vertex3_buf_left(buf, v3f(x, y, z + 0.5), 1, 0.5, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.5), 1, 0.5, tc, g);
 	} else if (s == SHAPE_PANE_Y) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_down(buf, v3f(x, y + 0.46875, z), 1, 1, tc);
-		vertex3_buf_up(buf, v3f(x, y + 0.53125, z), 1, 1, tc);
-		vertex3_buf_left(buf, v3f(x, y + 0.46875, z), 0.0625, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y + 0.46875, z), 0.0625, 1, tc);
-		vertex3_buf_back(buf, v3f(x, y + 0.46875, z), 1, 0.0625, tc);
-		vertex3_buf_front(buf, v3f(x, y + 0.46875, z + 1), 1, 0.0625, tc);
+		vertex3_buf_down(buf, v3f(x, y + 0.46875, z), 1, 1, tc, g);
+		vertex3_buf_up(buf, v3f(x, y + 0.53125, z), 1, 1, tc, g);
+		vertex3_buf_left(buf, v3f(x, y + 0.46875, z), 0.0625, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y + 0.46875, z), 0.0625, 1, tc, g);
+		vertex3_buf_back(buf, v3f(x, y + 0.46875, z), 1, 0.0625, tc, g);
+		vertex3_buf_front(buf, v3f(x, y + 0.46875, z + 1), 1, 0.0625, tc, g);
 	} else if (s == SHAPE_PANE_X) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_left(buf, v3f(x + 0.46875, y, z), 1, 1, tc);
-		vertex3_buf_right(buf, v3f(x + 0.53125, y, z), 1, 1, tc);
-		vertex3_buf_down(buf, v3f(x + 0.46875, y, z), 0.0625, 1, tc);
-		vertex3_buf_up(buf, v3f(x + 0.46875, y + 1, z), 0.0625, 1, tc);
-		vertex3_buf_back(buf, v3f(x + 0.46875, y, z), 0.0625, 1, tc);
-		vertex3_buf_front(buf, v3f(x + 0.46875, y, z + 1), 0.0625, 1, tc);
+		vertex3_buf_left(buf, v3f(x + 0.46875, y, z), 1, 1, tc, g);
+		vertex3_buf_right(buf, v3f(x + 0.53125, y, z), 1, 1, tc, g);
+		vertex3_buf_down(buf, v3f(x + 0.46875, y, z), 0.0625, 1, tc, g);
+		vertex3_buf_up(buf, v3f(x + 0.46875, y + 1, z), 0.0625, 1, tc, g);
+		vertex3_buf_back(buf, v3f(x + 0.46875, y, z), 0.0625, 1, tc, g);
+		vertex3_buf_front(buf, v3f(x + 0.46875, y, z + 1), 0.0625, 1, tc, g);
 	} else if (s == SHAPE_PANE_Z) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_back(buf, v3f(x, y, z + 0.46875), 1, 1, tc);
-		vertex3_buf_front(buf, v3f(x, y, z + 0.53125), 1, 1, tc);
-		vertex3_buf_down(buf, v3f(x, y, z + 0.46875), 1, 0.0625, tc);
-		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.46875), 1, 0.0625, tc);
-		vertex3_buf_left(buf, v3f(x, y, z + 0.46875), 1, 0.0625, tc);
-		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.46875), 1, 0.0625, tc);
+		vertex3_buf_back(buf, v3f(x, y, z + 0.46875), 1, 1, tc, g);
+		vertex3_buf_front(buf, v3f(x, y, z + 0.53125), 1, 1, tc, g);
+		vertex3_buf_down(buf, v3f(x, y, z + 0.46875), 1, 0.0625, tc, g);
+		vertex3_buf_up(buf, v3f(x, y + 1, z + 0.46875), 1, 0.0625, tc, g);
+		vertex3_buf_left(buf, v3f(x, y, z + 0.46875), 1, 0.0625, tc, g);
+		vertex3_buf_right(buf, v3f(x + 1, y, z + 0.46875), 1, 0.0625, tc, g);
 	} else if (s >= SHAPE_FLUID1 && s <= SHAPE_FLUID16) {
 		m = WORLD_AT(ctx->w, mat, x, y, z);
+		g = WORLD_AT(ctx->w, light, x, y, z);
 		tcoord_by_material(m, &tc);
-		vertex3_buf_up(buf, v3f(x, y + (s - SHAPE_FLUID1) / 16., z), 1, 1, tc);
+		vertex3_buf_up(buf, v3f(x, y + (s - SHAPE_FLUID1) / 16., z), 1, 1, tc, g);
 	}
 }
 
@@ -695,7 +721,7 @@ void update_chunks(struct context *ctx)
 	i = 0;
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
-			c = ctx->w->chunks[x][z];
+			c = ctx->w->chunks[x][z];/*
 			if (c->x < bb.x0 || c->x >= bb.x1 || c->z < bb.y0 || c->z >= bb.y1) {
 				c->up_to_date = 0;
 				c->x = m.x + x * CHUNK_W;
@@ -706,7 +732,7 @@ void update_chunks(struct context *ctx)
 					c->z -= CHUNK_D * CHUNKS_PER_WORLD;
 				if (load_chunk(c, ctx->dir) != 0)
 					terraform(0, c);
-			}
+			}*/
 			if (c->up_to_date == 0) {
 				c->priority = hypot((double)c->x - ctx->player->p.x,
 						(double)c->z - ctx->player->p.z);
@@ -764,12 +790,13 @@ void event(const SDL_Event *e, void *data)
 		} else if (e->key.keysym.sym == SDLK_q) {
 			if (ctx->cur.face == -1)
 				return;
-			printf("looking at %d,%d,%d; %.02g,%.02g,%.02g; %s; %s %s\n",
+			printf("looking at %d,%d,%d; %.02g,%.02g,%.02g; %s; %s %s; light %d\n",
 				ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z,
 				ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z,
 				face_names[ctx->cur.face],
 				mat_names[WORLD_AT(ctx->w, mat, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)],
-				shape_names[WORLD_AT(ctx->w, shape, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)]);
+				shape_names[WORLD_AT(ctx->w, shape, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)],
+				WORLD_AT(ctx->w, light, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z));
 			struct inventory *inv = WORLD_AT(ctx->w, data, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z);
 			if (inv != NULL) {
 				printf("inventory: [");
@@ -786,10 +813,10 @@ void event(const SDL_Event *e, void *data)
 				}
 				printf("]\n");
 			}
-		} else if (e->key.keysym.sym == SDLK_c) {
+		} else if (e->key.keysym.sym == SDLK_p) {
 			printf("at %g,%g,%g; rot %g,%g; facing %d,%s\n",
-				ctx->cam->p.x, ctx->cam->p.y, ctx->cam->p.x,
-				ctx->cam->r.x, ctx->cam->r.y,
+				ctx->player->p.x, ctx->player->p.y, ctx->player->p.x,
+				ctx->player->r.x, ctx->player->r.y,
 				ctx->rotx, face_names[ctx->roty]);
 		}
 	}

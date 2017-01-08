@@ -505,7 +505,7 @@ void update_player(struct context *ctx)
 				p = v3_add(p, v3c(0, 0, -1));
 			else if (f == FACE_FT)
 				p = v3_add(p, v3c(0, 0, 1));
-			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == 0) {
+			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == 0 || WORLD_AT(ctx->w, shape, p.x, p.y, p.z) >= SHAPE_FLUID1) {
 				if (obj == OBJ_BLOCK) {
 					world_set(ctx->w, p, SHAPE_BLOCK_DN, 255, NULL);
 				} else if (obj == OBJ_SLAB) {
