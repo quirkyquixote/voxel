@@ -410,7 +410,95 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 	vertex_array_destroy(buf);
 }
 
-void update_player(struct context *ctx)
+void use_inventory(struct context *ctx, struct inventory *inv)
+{
+	struct v3ll p = ctx->cur.p;
+	struct v3f q = ctx->cur.q;
+	int obj = ctx->inv->slots[ctx->tool].obj;
+	int mat = ctx->inv->slots[ctx->tool].mat;
+	int num = ctx->inv->slots[ctx->tool].num;
+	int side = sqrt(inv->size);
+	int slot = side * floor(q.x * side) + floor(q.z * side);
+	int obj2 = inv->slots[slot].obj;
+	int mat2 = inv->slots[slot].mat;
+	int num2 = inv->slots[slot].num;
+	if (ctx->act == 1) {
+		if (ctx->move.y0) {
+			if (num2 == 0) {
+				printf("nothing to take\n");
+				return;
+			}
+			int acc = inventory_add(ctx->inv, obj2, mat2, inv->slots[slot].num);
+			inv->slots[slot].num -= acc;
+			if (acc == 0)
+				printf("no space to take\n");
+			else
+				printf("take %s %s %d\n", mat_names[mat], obj_names[obj], acc);
+		} else {
+			if (num2)
+				printf("take %s %s %d\n", mat_names[mat2], obj_names[obj2], num2);
+			if (num)
+				printf("left %s %s %d\n", mat_names[mat], obj_names[obj], num);
+			inv->slots[slot].obj = obj;
+			inv->slots[slot].mat = mat;
+			inv->slots[slot].num = num;
+			ctx->inv->slots[ctx->tool].obj = obj2;
+			ctx->inv->slots[ctx->tool].mat = mat2;
+			ctx->inv->slots[ctx->tool].num = num2;
+		}
+	} else if (ctx->use == 1) {
+		if (ctx->move.y0) {
+			if (num2 == 0) {
+				printf("nothing to take\n");
+				return;
+			}
+			int acc = inventory_add(ctx->inv, obj2, mat2, 1);
+			inv->slots[slot].num -= acc;
+			if (acc == 0)
+				printf("no space to take\n");
+			else
+				printf("take %s %s 1\n", mat_names[mat], obj_names[obj], acc);
+		} else {
+			if (num == 0) {
+				printf("nothing to leave\n");
+				return;
+			}
+			if (num2 >= 64) {
+				printf("no space to leave\n");
+				return;
+			}
+			if (num2 == 0) {
+				inv->slots[slot].obj = obj;
+				inv->slots[slot].mat = mat;
+			} else if (obj != obj2 || mat != mat2) {
+				printf("not the same object\n");
+				return;
+			}
+			++inv->slots[slot].num;
+			--ctx->inv->slots[ctx->tool].num;
+			printf("left %s %s 1\n", mat_names[mat], obj_names[obj]);
+		}
+	}
+	if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == SHAPE_WORKBENCH) {
+		const struct recipe *r;
+		int i;
+		for (r = recipes; r->num != 0; ++r) {
+			if (recipe_match(r, inv)) {
+				do {
+					for (i = 0; i < 9; ++i) {
+						if (inv->slots[i].num)
+							--inv->slots[i].num;
+					}
+					inventory_add(ctx->inv, r->obj, 255, r->num);
+					printf("take %s %s %d\n", mat_names[255], obj_names[r->obj], r->num);
+				} while (recipe_match(r, inv));
+				break;
+			}
+		}
+	}
+}
+
+void use_tool(struct context *ctx)
 {
 	struct v3ll p = ctx->cur.p;
 	struct v3f q = ctx->cur.q;
@@ -419,88 +507,73 @@ void update_player(struct context *ctx)
 	int mat = ctx->inv->slots[ctx->tool].mat;
 	int num = ctx->inv->slots[ctx->tool].num;
 
-	if (f == FACE_UP) {
+	if (f == FACE_LF)
+		p = v3_add(p, v3c(-1, 0, 0));
+	else if (f == FACE_RT)
+		p = v3_add(p, v3c(1, 0, 0));
+	else if (f == FACE_DN)
+		p = v3_add(p, v3c(0, -1, 0));
+	else if (f == FACE_UP)
+		p = v3_add(p, v3c(0, 1, 0));
+	else if (f == FACE_BK)
+		p = v3_add(p, v3c(0, 0, -1));
+	else if (f == FACE_FT)
+		p = v3_add(p, v3c(0, 0, 1));
+	if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) != 0 &&
+		(WORLD_AT(ctx->w, shape, p.x, p.y, p.z) < SHAPE_FLUID1 ||
+		 WORLD_AT(ctx->w, shape, p.x, p.y, p.z) > SHAPE_FLUID16))
+		return;
+	if (obj == OBJ_BLOCK) {
+		world_set(ctx->w, p, SHAPE_BLOCK_DN, 255, NULL);
+	} else if (obj == OBJ_SLAB) {
+		if (f == FACE_UP) {
+			world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
+		} else if (f == FACE_DN) {
+			world_set(ctx->w, p, SHAPE_SLAB_UP, 255, NULL);
+		} else if (q.y > 0.5) {
+			world_set(ctx->w, p, SHAPE_SLAB_UP, 255, NULL);
+		} else {
+			world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
+		}
+	} else if (obj == OBJ_STAIRS) {
+		if (f == FACE_UP) {
+			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
+		} else if (f == FACE_DN) {
+			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255, NULL);
+		} else if (q.y > 0.5) {
+			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255, NULL);
+		} else {
+			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
+		}
+	} else if (obj == OBJ_PANE) {
+		if (ctx->roty & 1)
+			world_set(ctx->w, p, SHAPE_PANE_X, 255, NULL);
+		else
+			world_set(ctx->w, p, SHAPE_PANE_Z, 255, NULL);
+	} else if (obj == OBJ_WORKBENCH) {
+		world_set(ctx->w, p, SHAPE_WORKBENCH, 255, inventory(9));
+	} else if (obj == OBJ_CRATE) {
+		world_set(ctx->w, p, SHAPE_CRATE, 255, inventory(16));
+	} else if (obj == OBJ_FLUID) {
+		world_set(ctx->w, p, SHAPE_FLUID15, 255, NULL);
+	} else if (obj == OBJ_PIPE) {
+		if (f == FACE_LF || f == FACE_RT)
+			world_set(ctx->w, p, SHAPE_PIPE_X, 255, inventory(1));
+		else if (f == FACE_UP || f == FACE_DN)
+			world_set(ctx->w, p, SHAPE_PIPE_Y, 255, inventory(1));
+		else if (f == FACE_BK || f == FACE_FT)
+			world_set(ctx->w, p, SHAPE_PIPE_Z, 255, inventory(1));
+	}
+}
+
+void update_player(struct context *ctx)
+{
+	struct v3ll p = ctx->cur.p;
+
+	if (ctx->cur.face == FACE_UP) {
 		struct inventory *inv = WORLD_AT(ctx->w, data, p.x, p.y, p.z);
 		if (inv != NULL) {
-			int side = sqrt(inv->size);
-			int slot = side * floor(q.x * side) + floor(q.z * side);
-			int obj2 = inv->slots[slot].obj;
-			int mat2 = inv->slots[slot].mat;
-			int num2 = inv->slots[slot].num;
-			if (ctx->act == 1) {
-				if (ctx->move.y0) {
-					if (num2 == 0) {
-						printf("nothing to take\n");
-						return;
-					}
-					int acc = inventory_add(ctx->inv, obj2, mat2, inv->slots[slot].num);
-					inv->slots[slot].num -= acc;
-					if (acc == 0)
-						printf("no space to take\n");
-					else
-						printf("take %s %s %d\n", mat_names[mat], obj_names[obj], acc);
-				} else {
-					if (num2)
-						printf("take %s %s %d\n", mat_names[mat2], obj_names[obj2], num2);
-					if (num)
-						printf("left %s %s %d\n", mat_names[mat], obj_names[obj], num);
-					inv->slots[slot].obj = obj;
-					inv->slots[slot].mat = mat;
-					inv->slots[slot].num = num;
-					ctx->inv->slots[ctx->tool].obj = obj2;
-					ctx->inv->slots[ctx->tool].mat = mat2;
-					ctx->inv->slots[ctx->tool].num = num2;
-				}
-			} else if (ctx->use == 1) {
-				if (ctx->move.y0) {
-					if (num2 == 0) {
-						printf("nothing to take\n");
-						return;
-					}
-					int acc = inventory_add(ctx->inv, obj2, mat2, 1);
-					inv->slots[slot].num -= acc;
-					if (acc == 0)
-						printf("no space to take\n");
-					else
-						printf("take %s %s 1\n", mat_names[mat], obj_names[obj], acc);
-				} else {
-					if (num == 0) {
-						printf("nothing to leave\n");
-						return;
-					}
-					if (num2 >= 64) {
-						printf("no space to leave\n");
-						return;
-					}
-					if (num2 == 0) {
-						inv->slots[slot].obj = obj;
-						inv->slots[slot].mat = mat;
-					} else if (obj != obj2 || mat != mat2) {
-						printf("not the same object\n");
-						return;
-					}
-					++inv->slots[slot].num;
-					--ctx->inv->slots[ctx->tool].num;
-					printf("left %s %s 1\n", mat_names[mat], obj_names[obj]);
-				}
-			}
-			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == SHAPE_WORKBENCH) {
-				const struct recipe *r;
-				int i;
-				for (r = recipes; r->num != 0; ++r) {
-					if (recipe_match(r, inv)) {
-						do {
-							for (i = 0; i < 9; ++i) {
-								if (inv->slots[i].num)
-									--inv->slots[i].num;
-							}
-							inventory_add(ctx->inv, r->obj, 255, r->num);
-							printf("take %s %s %d\n", mat_names[255], obj_names[r->obj], r->num);
-						} while (recipe_match(r, inv));
-						break;
-					}
-				}
-			}
+			use_inventory(ctx, inv);
 			return;
 		}
 	}
@@ -511,64 +584,8 @@ void update_player(struct context *ctx)
 		}
 	}
 	if (ctx->use == 1) {
-		if (f != -1) {
-			if (f == FACE_LF)
-				p = v3_add(p, v3c(-1, 0, 0));
-			else if (f == FACE_RT)
-				p = v3_add(p, v3c(1, 0, 0));
-			else if (f == FACE_DN)
-				p = v3_add(p, v3c(0, -1, 0));
-			else if (f == FACE_UP)
-				p = v3_add(p, v3c(0, 1, 0));
-			else if (f == FACE_BK)
-				p = v3_add(p, v3c(0, 0, -1));
-			else if (f == FACE_FT)
-				p = v3_add(p, v3c(0, 0, 1));
-			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == 0 ||
-				(WORLD_AT(ctx->w, shape, p.x, p.y, p.z) >= SHAPE_FLUID1 &&
-				 WORLD_AT(ctx->w, shape, p.x, p.y, p.z) <= SHAPE_FLUID16)) {
-				if (obj == OBJ_BLOCK) {
-					world_set(ctx->w, p, SHAPE_BLOCK_DN, 255, NULL);
-				} else if (obj == OBJ_SLAB) {
-					if (f == FACE_UP) {
-						world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
-					} else if (f == FACE_DN) {
-						world_set(ctx->w, p, SHAPE_SLAB_UP, 255, NULL);
-					} else if (q.y > 0.5) {
-						world_set(ctx->w, p, SHAPE_SLAB_UP, 255, NULL);
-					} else {
-						world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
-					}
-				} else if (obj == OBJ_STAIRS) {
-					if (f == FACE_UP) {
-						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
-					} else if (f == FACE_DN) {
-						world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255, NULL);
-					} else if (q.y > 0.5) {
-						world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255, NULL);
-					} else {
-						world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
-					}
-				} else if (obj == OBJ_PANE) {
-					if (ctx->roty & 1)
-						world_set(ctx->w, p, SHAPE_PANE_X, 255, NULL);
-					else
-						world_set(ctx->w, p, SHAPE_PANE_Z, 255, NULL);
-				} else if (obj == OBJ_WORKBENCH) {
-					world_set(ctx->w, p, SHAPE_WORKBENCH, 255, inventory(9));
-				} else if (obj == OBJ_CRATE) {
-					world_set(ctx->w, p, SHAPE_CRATE, 255, inventory(16));
-				} else if (obj == OBJ_FLUID) {
-					world_set(ctx->w, p, SHAPE_FLUID15, 255, NULL);
-				} else if (obj == OBJ_PIPE) {
-					if (f == FACE_LF || f == FACE_RT)
-						world_set(ctx->w, p, SHAPE_PIPE_X, 255, inventory(1));
-					else if (f == FACE_UP || f == FACE_DN)
-						world_set(ctx->w, p, SHAPE_PIPE_Y, 255, inventory(1));
-					else if (f == FACE_BK || f == FACE_FT)
-						world_set(ctx->w, p, SHAPE_PIPE_Z, 255, inventory(1));
-				}
-			}
+		if (ctx->cur.face != -1) {
+			use_tool(ctx);
 		}
 	}
 	if (ctx->pick == 1) {
@@ -636,17 +653,17 @@ void update_chunks(struct context *ctx)
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
 			c = ctx->w->chunks[x][z];/*
-			if (c->x < bb.x0 || c->x >= bb.x1 || c->z < bb.y0 || c->z >= bb.y1) {
-				c->up_to_date = 0;
-				c->x = m.x + x * CHUNK_W;
-				if (c->x >= bb.x1)
-					c->x -= CHUNK_W * CHUNKS_PER_WORLD;
-				c->z = m.y + z * CHUNK_D;
-				if (c->z >= bb.y1)
-					c->z -= CHUNK_D * CHUNKS_PER_WORLD;
-				if (load_chunk(c, ctx->dir) != 0)
-					terraform(0, c);
-			}*/
+						    if (c->x < bb.x0 || c->x >= bb.x1 || c->z < bb.y0 || c->z >= bb.y1) {
+						    c->up_to_date = 0;
+						    c->x = m.x + x * CHUNK_W;
+						    if (c->x >= bb.x1)
+						    c->x -= CHUNK_W * CHUNKS_PER_WORLD;
+						    c->z = m.y + z * CHUNK_D;
+						    if (c->z >= bb.y1)
+						    c->z -= CHUNK_D * CHUNKS_PER_WORLD;
+						    if (load_chunk(c, ctx->dir) != 0)
+						    terraform(0, c);
+						    }*/
 			if (c->flags != 0) {
 				c->priority = hypot((double)c->x - ctx->player->p.x,
 						(double)c->z - ctx->player->p.z);
@@ -660,19 +677,19 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-//		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
+		//		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
 		if ((c->flags & CHUNK_UNLOADED) != 0) {
-//			printf("; load from file");
+			//			printf("; load from file");
 			/* load this chunk */
 			c->flags ^= CHUNK_UNLOADED;
 		}
 		if ((c->flags & CHUNK_UNRENDERED) != 0) {
-//			printf("; update vertex buffers");
+			//			printf("; update vertex buffers");
 			for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 				update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
 			c->flags ^= CHUNK_UNRENDERED;
 		}
-//		fprintf(stdout, "\n");
+		//		fprintf(stdout, "\n");
 	}
 }
 
