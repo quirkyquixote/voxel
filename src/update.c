@@ -376,6 +376,8 @@ void update_cell(struct context *ctx, struct vertex_array *buf, int64_t x, int64
 		vertex_array_left(buf, v3f(x, y, z + 0.46875), 1, 0.0625, lt, mt);
 		vertex_array_right(buf, v3f(x + 1, y, z + 0.46875), 1, 0.0625, lt, mt);
 	} else if (s >= SHAPE_FLUID1 && s <= SHAPE_FLUID16) {
+		if (d == SHAPE_NONE || (d >= SHAPE_FLUID1 && d <= SHAPE_FLUID15))
+			return;
 		m = WORLD_AT(ctx->w, mat, x, y, z);
 		g = WORLD_AT(ctx->w, light, x, y, z);
 		lt[0] = texcoord_from_light(g);
@@ -502,6 +504,7 @@ void use_tool(struct context *ctx)
 {
 	struct v3ll p = ctx->cur.p;
 	struct v3f q = ctx->cur.q;
+	int s;
 	int f = ctx->cur.face;
 	int obj = ctx->inv->slots[ctx->tool].obj;
 	int mat = ctx->inv->slots[ctx->tool].mat;
@@ -519,12 +522,12 @@ void use_tool(struct context *ctx)
 		p = v3_add(p, v3c(0, 0, -1));
 	else if (f == FACE_FT)
 		p = v3_add(p, v3c(0, 0, 1));
-	if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) != 0 &&
-		(WORLD_AT(ctx->w, shape, p.x, p.y, p.z) < SHAPE_FLUID1 ||
-		 WORLD_AT(ctx->w, shape, p.x, p.y, p.z) > SHAPE_FLUID16))
+	s = WORLD_AT(ctx->w, shape, p.x, p.y, p.z);
+	if (!(s == SHAPE_NONE || (s >= SHAPE_FLUID1 && s <= SHAPE_FLUID16)))
 		return;
 	if (obj == OBJ_BLOCK) {
 		world_set(ctx->w, p, SHAPE_BLOCK_DN, 255, NULL);
+		flowsim_add_head(ctx->flowsim, p);
 	} else if (obj == OBJ_SLAB) {
 		if (f == FACE_UP) {
 			world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
@@ -535,6 +538,7 @@ void use_tool(struct context *ctx)
 		} else {
 			world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
 		}
+		flowsim_add_head(ctx->flowsim, p);
 	} else if (obj == OBJ_STAIRS) {
 		if (f == FACE_UP) {
 			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
@@ -545,17 +549,25 @@ void use_tool(struct context *ctx)
 		} else {
 			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
 		}
+		flowsim_add_head(ctx->flowsim, p);
 	} else if (obj == OBJ_PANE) {
 		if (ctx->roty & 1)
 			world_set(ctx->w, p, SHAPE_PANE_X, 255, NULL);
 		else
 			world_set(ctx->w, p, SHAPE_PANE_Z, 255, NULL);
+		flowsim_add_head(ctx->flowsim, p);
 	} else if (obj == OBJ_WORKBENCH) {
 		world_set(ctx->w, p, SHAPE_WORKBENCH, 255, inventory(9));
 	} else if (obj == OBJ_CRATE) {
 		world_set(ctx->w, p, SHAPE_CRATE, 255, inventory(16));
 	} else if (obj == OBJ_FLUID) {
-		world_set(ctx->w, p, SHAPE_FLUID15, 255, NULL);
+		if (s >= SHAPE_FLUID1 && s <= SHAPE_FLUID8)
+			world_set(ctx->w, p, s + 8, 255, NULL);
+		else if (s >= SHAPE_FLUID9 && s <= SHAPE_FLUID16)
+			world_set(ctx->w, p, SHAPE_FLUID16, 255, NULL);
+		else
+			world_set(ctx->w, p, SHAPE_FLUID8, 255, NULL);
+		flowsim_add_head(ctx->flowsim, p);
 	} else if (obj == OBJ_PIPE) {
 		if (f == FACE_LF || f == FACE_RT)
 			world_set(ctx->w, p, SHAPE_PIPE_X, 255, inventory(1));
@@ -563,6 +575,7 @@ void use_tool(struct context *ctx)
 			world_set(ctx->w, p, SHAPE_PIPE_Y, 255, inventory(1));
 		else if (f == FACE_BK || f == FACE_FT)
 			world_set(ctx->w, p, SHAPE_PIPE_Z, 255, inventory(1));
+		flowsim_add_head(ctx->flowsim, p);
 	}
 }
 
@@ -579,8 +592,10 @@ void update_player(struct context *ctx)
 	}
 	if (ctx->act == 1) {
 		if (ctx->cur.face != -1) {
-			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) != 0)
+			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) != 0) {
 				world_set(ctx->w, p, 0, 0, NULL);
+				flowsim_add_head(ctx->flowsim, p);
+			}
 		}
 	}
 	if (ctx->use == 1) {
@@ -678,19 +693,19 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-		//		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
+		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
 		if ((c->flags & CHUNK_UNLOADED) != 0) {
-			//			printf("; load from file");
+			printf("; load from file");
 			/* load this chunk */
 			c->flags ^= CHUNK_UNLOADED;
 		}
 		if ((c->flags & CHUNK_UNRENDERED) != 0) {
-			//			printf("; update vertex buffers");
+			printf("; update vertex buffers");
 			for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 				update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
 			c->flags ^= CHUNK_UNRENDERED;
 		}
-		//		fprintf(stdout, "\n");
+		fprintf(stdout, "\n");
 	}
 }
 
@@ -702,6 +717,8 @@ void update(void *data)
 	y = floor(ctx->cam->p.y);
 	z = floor(ctx->cam->p.z);
 	space_run(ctx->space);
+	if ((ctx->tick & 1) == 0)
+		flowsim_step(ctx->flowsim);
 	update_player(ctx);
 	update_camera(ctx);
 	if (ctx->act > 0) {
@@ -718,5 +735,6 @@ void update(void *data)
 	}
 	update_chunks(ctx);
 	tone_mapper_update(ctx->tone_mapper, (WORLD_AT(ctx->w, light, x, y, z) << 4) / 255., 0);
+	++ctx->tick;
 }
 

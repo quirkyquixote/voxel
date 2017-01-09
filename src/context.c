@@ -93,9 +93,9 @@ const char *shape_names[] = {
 	"stairs_df", "stairs_dl", "stairs_db", "stairs_dr",
 	"stairs_uf", "stairs_ul", "stairs_ub", "stairs_ur",
 	"workbench", "crate",
-	"fluid1", "fluid2", "fluid3", "fluid4", "fluid5", "fluid6", "fluid7",
-	"fluid8", "fluid9", "fluid10", "fluid11", "fluid12", "fluid13",
-	"fluid14", "fluid15", "fluid16",
+	"flowsim1", "flowsim2", "flowsim3", "flowsim4", "flowsim5", "flowsim6", "flowsim7",
+	"flowsim8", "flowsim9", "flowsim10", "flowsim11", "flowsim12", "flowsim13",
+	"flowsim14", "flowsim15", "flowsim16",
         "pipe_x", "pipe_y", "pipe_z",
 	"sha2D", "sha2E", "sha2F",
 	"sha30", "sha31", "sha32", "sha33", "sha34", "sha35", "sha36", "sha37",
@@ -170,6 +170,9 @@ int main(int argc, char *argv[])
 	space_set_iterations(ctx->space, 2);
 	space_set_impulse(ctx->space, 0.001);
 	space_set_terminal_speed(ctx->space, 1);
+
+	/* Initialize flowsim */
+	ctx->flowsim = flowsim(ctx->w);
 
 	/* Setup camera */
 	ctx->cam = camera();
