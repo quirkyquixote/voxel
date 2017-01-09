@@ -5,7 +5,8 @@
 
 struct cell {
 	struct v3ll p;
-	int v;
+	int v0, v1;
+	int has_floor;
 };
 
 static const int vol_from_shape[] = {
@@ -52,6 +53,10 @@ struct flowsim *flowsim(struct world *w)
 
 void flowsim_destroy(struct flowsim *f)
 {
+	stack_destroy(f->heads);
+	stack_destroy(f->heads2);
+	stack_destroy(f->s);
+	stack_destroy(f->gs);
 	free(f);
 }
 
@@ -64,6 +69,7 @@ void find_boundary(struct flowsim *f, struct v3ll p, int g)
 	if (*m != 0)
 		return; /* this should not happen! */
 	int s = WORLD_AT(f->w, shape, f->w->x + p.x, p.y, f->w->z + p.z);
+	int s1 = WORLD_AT(f->w, shape, f->w->x + p.x, p.y - 1, f->w->z + p.z);
 	int *v = &f->vol[p.x][p.y][p.z];
 	*v = vol_from_shape[s];
 	printf("%lld,%lld,%lld", p.x, p.y, p.z);
@@ -81,24 +87,47 @@ void find_boundary(struct flowsim *f, struct v3ll p, int g)
 	} else {
 		printf(" (boundary)\n");
 	}
-	struct cell c = { p, *v };
+	struct cell c = { p, *v, *v, vol_from_shape[s1] == -1 };
 	stack_push(f->gs, &c);
 }
 
-static inline void move_flowsim(struct flowsim *f, struct cell c1, struct cell c2)
-{
-	world_set(f->w, v3_add(c1.p, v3ll(f->w->x, 0, f->w->z)),
-			shape_from_vol[++c1.v], 255, NULL);
-	world_set(f->w, v3_add(c2.p, v3ll(f->w->x, 0, f->w->z)),
-			shape_from_vol[--c2.v], 255, NULL);
-}
-
-int cells_by_volume(const void *p1, const void *p2)
+int compare_cells(const void *p1, const void *p2)
 {
 	const struct cell *c1, *c2;
 	c1 = p1;
 	c2 = p2;
-	return (c1->v + 16 * c1->p.y) - (c2->v + 16 * c2->p.y);
+	return (c1->v1 + 16 * c1->has_floor + 32 * c1->p.y)
+		- (c2->v1 + 16 * c1->has_floor + 32 * c2->p.y);
+}
+
+int step_group(struct flowsim *f)
+{
+	int changed = 0;
+	struct cell *c0 = (void *)f->gs->data;
+	struct cell *c1 = c0 + f->gs->size - 1;
+	qsort(c0, f->gs->size, sizeof(struct cell), compare_cells);
+	for (; c0 < c1; ++c0, --c1) {
+		while (c0->v1 == 16) {
+			++c0;
+			if (c0 >= c1)
+				return changed;
+		}
+		while (c1->v1 == 0) {
+			--c1;
+			if (c0 >= c1)
+				return changed;
+		}
+		if (c0->p.y == c1->p.y && c1->v1 <= c0->v1 + 1) {
+			printf("end reached\n");
+			return changed;
+		}
+		printf("move: %lld,%lld,%lld << %lld,%lld,%lld\n",
+				 c0->p.x, c0->p.y, c0->p.z,
+				 c1->p.x, c1->p.y, c1->p.z);
+		++c0->v1;
+		--c1->v1;
+		changed = 1;
+	}
 }
 
 int flowsim_step(struct flowsim *f)
@@ -131,40 +160,28 @@ int flowsim_step(struct flowsim *f)
 			printf("EMPTY!\n");
 			continue;
 		}
-		int group_changed = 0;
 		printf("STEP GROUP\n");
-		struct cell *mid = (void *)f->gs->data;
-		qsort(mid, f->gs->size, sizeof(struct cell), cells_by_volume);
-		int j0 = 0;
-		int j1 = f->gs->size - 1;
-		for (;;) {
-			while (mid[j0].v == 16) {
-				++j0;
-				if (mid[j0].p.y == mid[j1].p.y && abs(mid[j0].v - mid[j1].v) <= 1)
-					goto cleanup;
+		int changed = 0;
+		for (int k = 0; k < 4; ++k)
+			changed |= step_group(f);
+		struct cell *c = (void *)f->gs->data;
+		struct cell *c1 = c + f->gs->size - 1;
+		while (c <= c1) {
+			if (c->v0 != c->v1) {
+				world_set(f->w, v3_add(c->p, v3ll(f->w->x, 0, f->w->z)),
+						shape_from_vol[c->v1], 255, NULL);
 			}
-			while (mid[j1].v == 0) {
-				--j1;
-				if (mid[j0].p.y == mid[j1].p.y && abs(mid[j0].v - mid[j1].v) <= 1)
-					goto cleanup;
-			}
-			if (group_changed == 0) {
-				printf("NEW HEAD: %lld,%lld,%lld\n",
-						mid[j0].p.x, mid[j0].p.y, mid[j0].p.z);
-				stack_push(f->heads2, &mid[j0].p);
-				group_changed = 1;
-			}
-			printf("%d << %d\n", j0, j1);
-			move_flowsim(f, mid[j0], mid[j1]);
-			++j0;
-			--j1;
-			if (j0 > j1 || (mid[j0].p.y == mid[j1].p.y && abs(mid[j0].v - mid[j1].v) <= 1))
-				goto cleanup;
+			++c;
 		}
-cleanup:
+		if (changed) {
+			c = (void *)f->gs->data;
+			printf("NEW HEAD: %lld,%lld,%lld\n", c->p.x, c->p.y, c->p.z);
+			stack_push(f->heads2, &c->p);
+		}
 		f->gs->size = 0;
 	}
 	void *tmp = f->heads;
 	f->heads = f->heads2;
 	f->heads2 = tmp;
 }
+

@@ -384,8 +384,8 @@ void update_cell(struct context *ctx, struct vertex_array *buf, int64_t x, int64
 		lt[1] = texcoord_from_light(g);
 		lt[2] = texcoord_from_light(g);
 		lt[3] = texcoord_from_light(g);
-		texcoord_from_material(m, mt);
-		vertex_array_up(buf, v3f(x, y + (s - SHAPE_FLUID1) / 16., z), 1, 1, lt, mt);
+		texcoord_from_material(0, mt);
+		vertex_array_up(buf, v3f(x, y + (s - SHAPE_FLUID1 + 1) / 16., z), 1, 1, lt, mt);
 	}
 }
 
@@ -527,7 +527,6 @@ void use_tool(struct context *ctx)
 		return;
 	if (obj == OBJ_BLOCK) {
 		world_set(ctx->w, p, SHAPE_BLOCK_DN, 255, NULL);
-		flowsim_add_head(ctx->flowsim, p);
 	} else if (obj == OBJ_SLAB) {
 		if (f == FACE_UP) {
 			world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
@@ -538,7 +537,6 @@ void use_tool(struct context *ctx)
 		} else {
 			world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
 		}
-		flowsim_add_head(ctx->flowsim, p);
 	} else if (obj == OBJ_STAIRS) {
 		if (f == FACE_UP) {
 			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
@@ -549,13 +547,11 @@ void use_tool(struct context *ctx)
 		} else {
 			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
 		}
-		flowsim_add_head(ctx->flowsim, p);
 	} else if (obj == OBJ_PANE) {
 		if (ctx->roty & 1)
 			world_set(ctx->w, p, SHAPE_PANE_X, 255, NULL);
 		else
 			world_set(ctx->w, p, SHAPE_PANE_Z, 255, NULL);
-		flowsim_add_head(ctx->flowsim, p);
 	} else if (obj == OBJ_WORKBENCH) {
 		world_set(ctx->w, p, SHAPE_WORKBENCH, 255, inventory(9));
 	} else if (obj == OBJ_CRATE) {
@@ -575,7 +571,6 @@ void use_tool(struct context *ctx)
 			world_set(ctx->w, p, SHAPE_PIPE_Y, 255, inventory(1));
 		else if (f == FACE_BK || f == FACE_FT)
 			world_set(ctx->w, p, SHAPE_PIPE_Z, 255, inventory(1));
-		flowsim_add_head(ctx->flowsim, p);
 	}
 }
 
