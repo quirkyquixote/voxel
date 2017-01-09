@@ -152,12 +152,12 @@ void vertex_buffer_destroy(struct vertex_buffer *r)
 	free(r);
 }
 
-void vertex_buffer_begin(struct vertex_buffer *r)
+void vertex_buffer_enable(struct vertex_buffer *r)
 {
 	assert(glGetError() == GL_NO_ERROR);
 }
 
-void vertex_buffer_buffer(struct vertex_buffer *r, GLenum mode, size_t buf)
+void vertex_buffer_draw(struct vertex_buffer *r, GLenum mode, size_t buf)
 {
 	assert(buf < r->vbo_count);
 	glBindBuffer(GL_ARRAY_BUFFER, r->vbo_names[buf]);
@@ -174,7 +174,7 @@ void vertex_buffer_buffer(struct vertex_buffer *r, GLenum mode, size_t buf)
 	assert(glGetError() == GL_NO_ERROR);
 }
 
-void vertex_buffer_end(struct vertex_buffer *r)
+void vertex_buffer_disable(struct vertex_buffer *r)
 {
 	assert(glGetError() == GL_NO_ERROR);
 }

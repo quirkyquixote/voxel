@@ -413,7 +413,7 @@ void render(void *data)
 	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
 
 	glActiveTexture(GL_TEXTURE0);
-	vertex_buffer_begin(ctx->shard_vertex_buffer);
+	vertex_buffer_enable(ctx->shard_vertex_buffer);
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
 			c = ctx->w->chunks[x][z];
@@ -426,12 +426,12 @@ void render(void *data)
 				p.y = (s->y + 0.5) * SHARD_W;
 				if (camera_visible(ctx->cam, p, SHARD_W) == 0)
 					continue;
-				vertex_buffer_buffer(ctx->shard_vertex_buffer, GL_TRIANGLES, s->id);
+				vertex_buffer_draw(ctx->shard_vertex_buffer, GL_TRIANGLES, s->id);
 				++shards_rendered;
 			}
 		}
 	}
-	vertex_buffer_end(ctx->shard_vertex_buffer);
+	vertex_buffer_disable(ctx->shard_vertex_buffer);
 	shader_enable(NULL);
 	roam_render(ctx);
 }

@@ -46,9 +46,9 @@ void vertex_array_front(struct vertex_array *buf, struct v3f, GLfloat w, GLfloat
 
 struct vertex_buffer *vertex_buffer(int nbufs);
 void vertex_buffer_destroy(struct vertex_buffer *r);
-void vertex_buffer_begin(struct vertex_buffer *r);
-void vertex_buffer_buffer(struct vertex_buffer *r, GLenum mode, size_t buf);
-void vertex_buffer_end(struct vertex_buffer *r);
+void vertex_buffer_enable(struct vertex_buffer *r);
+void vertex_buffer_draw(struct vertex_buffer *r, GLenum mode, size_t buf);
+void vertex_buffer_disable(struct vertex_buffer *r);
 void vertex_buffer_update(struct vertex_buffer *r, size_t buf, const void *data, size_t size);
 
 #endif
