@@ -254,7 +254,7 @@ int save_all(struct context *ctx)
 
 int load_world(struct world *w, const char *dir)
 {
-	union sz_tag root;
+	union sz_tag *root;
 	char path[256];
 	int fd;
 
@@ -267,9 +267,9 @@ int load_world(struct world *w, const char *dir)
 	if (sz_read(fd, &root) != 0)
 		return -1;
 	close(fd);
-	if (world_load(w, &root) != 0)
+	if (world_load(w, root) != 0)
 		return -1;
-	//sz_destroy(root);
+	sz_destroy(root);
 	return 0;
 }
 
@@ -298,7 +298,7 @@ int load_chunk(struct chunk *c, const char *dir)
 {
 	char path[256];
 	int fd;
-	union sz_tag root;
+	union sz_tag *root;
 
 	snprintf(path, sizeof(path), "%s/%06x%06x.dat", dir, c->x / CHUNK_W, c->z / CHUNK_D);
 	fd = open(path, O_RDONLY, 0400);
@@ -307,9 +307,9 @@ int load_chunk(struct chunk *c, const char *dir)
 	if (sz_read(fd, &root) != 0)
 		return -1;
 	close(fd);
-	if (chunk_load(c, &root) != 0)
+	if (chunk_load(c, root) != 0)
 		return -1;
-	//	sz_destroy(root);
+	sz_destroy(root);
 	return 0;
 }
 

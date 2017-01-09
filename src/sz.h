@@ -114,7 +114,7 @@ for (int _i = 0; (_i < _list->list.size) && (_iter = _list->list.vals[_i]); ++_i
 #define sz_dict_foreach(_key,_val,_dict) \
 for (int _i = 0; (_i < _dict->dict.size) && (_key = _dict->dict.keys[_i]) && (_val = _dict->dict.vals[_i]); ++_i)
 
-int sz_read(int fd, union sz_tag *root);
+int sz_read(int fd, union sz_tag **root);
 int sz_write(int fd, union sz_tag *root);
 
 #endif

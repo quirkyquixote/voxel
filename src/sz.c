@@ -219,7 +219,7 @@ int next_power_of_2(int x)
 int read_list(int fd, union sz_tag *root)
 {
 	int i;
-	union sz_tag tag;
+	union sz_tag *tag;
 
 	if (read_atom(fd, &root->list.size) != 0)
 		PROPAGATE_ERROR();
@@ -228,7 +228,7 @@ int read_list(int fd, union sz_tag *root)
 	for (i = 0; i < root->list.size; ++i) {
 		if (sz_read(fd, &tag) != 0)
 			PROPAGATE_ERROR();
-		root->list.vals[i] = sz_dup(&tag);
+		root->list.vals[i] = tag;
 	}
 	return 0;
 }
@@ -237,7 +237,7 @@ int read_dict(int fd, union sz_tag *root)
 {
 	int i;
 	char *key;
-	union sz_tag tag;
+	union sz_tag *tag;
 
 	if (read_atom(fd, &root->dict.size) != 0)
 		PROPAGATE_ERROR();
@@ -250,39 +250,75 @@ int read_dict(int fd, union sz_tag *root)
 		if (sz_read(fd, &tag) != 0)
 			PROPAGATE_ERROR();
 		root->dict.keys[i] = key;
-		root->dict.vals[i] = sz_dup(&tag);
+		root->dict.vals[i] = tag;
 	}
 	return 0;
 }
 
-int sz_read(int fd, union sz_tag *tag)
+int sz_read(int fd, union sz_tag **rval)
 {
-	if (read_atom(fd, &tag->tag) != 0)
+	uint8_t tag;
+	if (read_atom(fd, &tag) != 0)
 		PROPAGATE_ERROR();
-	if (tag->tag == SZ_NULL) {
+	if (tag == SZ_NULL) {
 		return 0;
-	} else if (tag->tag == SZ_I8) {
-		return read_atom(fd, &tag->i8.data);
-	} else if (tag->tag == SZ_I16) {
-		return read_atom(fd, &tag->i16.data);
-	} else if (tag->tag == SZ_I32) {
-		return read_atom(fd, &tag->i32.data);
-	} else if (tag->tag == SZ_I64) {
-		return read_atom(fd, &tag->i64.data);
-	} else if (tag->tag == SZ_F32) {
-		return read_atom(fd, &tag->f32.data);
-	} else if (tag->tag == SZ_F64) {
-		return read_atom(fd, &tag->f64.data);
-	} else if (tag->tag == SZ_STR) {
-		return read_str(fd, &tag->str.data, &tag->str.size);
-	} else if (tag->tag == SZ_RAW) {
-		return read_raw(fd, &tag->raw.data, &tag->raw.size);
-	} else if (tag->tag == SZ_LIST) {
-		return read_list(fd, tag);
-	} else if (tag->tag == SZ_DICT) {
-		return read_dict(fd, tag);
+	} else if (tag == SZ_I8) {
+		int8_t data;
+		if (read_atom(fd, &data) != 0)
+			return -1;
+		*rval = sz_i8(data);
+		return 0;
+	} else if (tag == SZ_I16) {
+		int16_t data;
+		if (read_atom(fd, &data) != 0)
+			return -1;
+		*rval = sz_i16(data);
+		return 0;
+	} else if (tag == SZ_I32) {
+		int32_t data;
+		if (read_atom(fd, &data) != 0)
+			return -1;
+		*rval = sz_i32(data);
+		return 0;
+	} else if (tag == SZ_I64) {
+		int64_t data;
+		if (read_atom(fd, &data) != 0)
+			return -1;
+		*rval = sz_i64(data);
+		return 0;
+	} else if (tag == SZ_F32) {
+		float data;
+		if (read_atom(fd, &data) != 0)
+			return -1;
+		*rval = sz_f32(data);
+		return 0;
+	} else if (tag == SZ_F64) {
+		double data;
+		if (read_atom(fd, &data) != 0)
+			return -1;
+		*rval = sz_f64(data);
+		return 0;
+	} else if (tag == SZ_STR) {
+		char *data;
+		if (read_str(fd, &data, NULL) != 0)
+			return -1;
+		*rval = sz_str(data);
+		return 0;
+	} else if (tag == SZ_RAW) {
+		void *data;
+		int32_t size;
+		if (read_raw(fd, &data, &size) != 0)
+			return -1;
+		*rval = sz_raw(data, size);
+		return 0;
+	} else if (tag == SZ_LIST) {
+		*rval = sz_list();
+		return read_list(fd, *rval);
+	} else if (tag == SZ_DICT) {
+		*rval = sz_dict();
+		return read_dict(fd, *rval);
 	}
-	fprintf(stderr, "%s: bad tag %02x\n", __func__, tag->tag);
+	fprintf(stderr, "%s: bad tag %02x\n", __func__, tag);
 	PROPAGATE_ERROR();
 }
 

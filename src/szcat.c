@@ -64,14 +64,15 @@ int sz_print(union sz_tag *tag, int depth)
 
 int main(int argc, char *argv[])
 {
-	union sz_tag tag;
+	union sz_tag *tag;
 	int i;
 	int fd;
 
 	if (argc < 2) {
 		if (sz_read(STDIN_FILENO, &tag) != 0)
 			return -1;
-		sz_print(&tag, 0);
+		sz_print(tag, 0);
+		sz_destroy(tag);
 		return 0;
 	}
 
@@ -83,7 +84,8 @@ int main(int argc, char *argv[])
 		}
 		if (sz_read(fd, &tag) != 0)
 			return -1;
-		sz_print(&tag, 0);
+		sz_print(tag, 0);
+		sz_destroy(tag);
 	}
 
 	return 0;
