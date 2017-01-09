@@ -620,6 +620,7 @@ void update_camera(struct context *ctx)
 	v.z = (ctx->move.z1 - ctx->move.z0) * (ctx->run ? .18 : 0.15);
 	v = v3_roty(v, r.y);
 	body_set_velocity(ctx->player, v);
+	body_set_step_size(ctx->player, 1 + ctx->run);
 
 	camera_set_fovy(ctx->cam, (ctx->cam->fovy + (ctx->run ? 70.f : 60.f)) * 0.5);
 	camera_set_position(ctx->cam, v3_add(ctx->player->p, v3f(0, .8, 0)));
