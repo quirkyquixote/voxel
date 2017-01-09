@@ -61,5 +61,6 @@ struct context {
 extern const char *obj_names[];
 extern const char *mat_names[];
 extern const char *face_names[];
+extern const char *shape_names[];
 
 #endif

@@ -9,6 +9,7 @@ voxel_objs += camera.o
 voxel_objs += chunk.o
 voxel_objs += context.o
 voxel_objs += drop.o
+voxel_objs += event.o
 voxel_objs += fps_manager.o
 voxel_objs += inventory.o
 voxel_objs += lighting.o
@@ -18,12 +19,13 @@ voxel_objs += physics.o
 voxel_objs += profile.o
 voxel_objs += simplex.o
 voxel_objs += recipes.o
+voxel_objs += render.o
 voxel_objs += vertex_buffer.o
-voxel_objs += roam.o
 voxel_objs += shader.o
 voxel_objs += sz.o
 voxel_objs += terraform.o
 voxel_objs += tone_mapper.o
+voxel_objs += update.o
 
 szcat_objs += sz.o
 
