@@ -557,13 +557,7 @@ void use_tool(struct context *ctx)
 	} else if (obj == OBJ_CRATE) {
 		world_set(ctx->w, p, SHAPE_CRATE, 255, inventory(16));
 	} else if (obj == OBJ_FLUID) {
-		if (s >= SHAPE_FLUID1 && s <= SHAPE_FLUID8)
-			world_set(ctx->w, p, s + 8, 255, NULL);
-		else if (s >= SHAPE_FLUID9 && s <= SHAPE_FLUID16)
-			world_set(ctx->w, p, SHAPE_FLUID16, 255, NULL);
-		else
-			world_set(ctx->w, p, SHAPE_FLUID8, 255, NULL);
-		flowsim_add_head(ctx->flowsim, p);
+		flowsim_add(ctx->flowsim, p, 1);
 	} else if (obj == OBJ_PIPE) {
 		if (f == FACE_LF || f == FACE_RT)
 			world_set(ctx->w, p, SHAPE_PIPE_X, 255, inventory(1));
@@ -577,19 +571,18 @@ void use_tool(struct context *ctx)
 void update_player(struct context *ctx)
 {
 	struct v3ll p = ctx->cur.p;
+	int s = WORLD_AT(ctx->w, shape, p.x, p.y, p.z);
 
 	if (ctx->cur.face == FACE_UP) {
-		struct inventory *inv = WORLD_AT(ctx->w, data, p.x, p.y, p.z);
-		if (inv != NULL) {
-			use_inventory(ctx, inv);
+		if (s == SHAPE_WORKBENCH || s == SHAPE_CRATE) {
+			use_inventory(ctx, WORLD_AT(ctx->w, data, p.x, p.y, p.z));
 			return;
 		}
 	}
 	if (ctx->act == 1) {
 		if (ctx->cur.face != -1) {
-			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) != 0) {
+			if (s != SHAPE_NONE) {
 				world_set(ctx->w, p, 0, 0, NULL);
-				flowsim_add_head(ctx->flowsim, p);
 			}
 		}
 	}

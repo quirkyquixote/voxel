@@ -1,32 +1,45 @@
 
 
-#ifndef VOXEL_FLUID_H_
-#define VOXEL_FLUID_H_
+#ifndef VOXEL_FLOWSIM_H_
+#define VOXEL_FLOWSIM_H_
 
 #include "v3.h"
 #include "chunk.h"
 #include "stack.h"
-
-#define MAX_GROUPS 1024
+#include "list.h"
 
 struct flowsim {
 	struct world *w;
-	struct stack *heads;
-	struct stack *heads2;
-	struct stack *s;
-	int vol[WORLD_W][WORLD_H][WORLD_D];
-	int gmask[WORLD_W][WORLD_H][WORLD_D];
-	struct stack *gs;
+	struct list volumes;
 };
+
+struct fs_volume {
+	struct world *w;
+	struct list volumes;
+	struct list top_layers;
+	float roaming;
+};
+
+struct fs_layer {
+	struct list top_layers;
+	struct fs_volume *v;
+	struct stack *cells;
+	struct stack *falls;
+	float bottom;
+	float top;
+	int is_top;
+};
+
+struct fs_layer *fs_layer(struct fs_volume *v, struct v3ll p);
+void fs_layer_destroy(struct fs_layer *l);
+
+struct fs_volume *fs_volume(struct world *w);
+void fs_volume_destroy(struct fs_volume *v);
+void fs_volume_step(struct fs_volume *v);
 
 struct flowsim *flowsim(struct world *w);
 void flowsim_destroy(struct flowsim *f);
-int flowsim_step(struct flowsim *f);
-
-static inline void flowsim_add_head(struct flowsim *f, struct v3ll p)
-{
-	stack_push(f->heads, &p);
-}
+void flowsim_step(struct flowsim *f);
+int flowsim_add(struct flowsim *f, struct v3ll p, float v);
 
 #endif
-

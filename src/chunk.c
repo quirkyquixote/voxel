@@ -153,18 +153,21 @@ int inventory_save(struct inventory *i, union sz_tag **root)
 
 int entity_save(struct chunk *c, struct v3ll p, union sz_tag **root)
 {
+	int s;
 	struct inventory *inv;
 	union sz_tag *tag;
-	inv = CHUNK_AT(c, data, p.x, p.y, p.z);
-	if (inv == NULL)
-		return 0;
-	*root = sz_dict();
-	sz_dict_add(*root, "x", sz_i64(p.x));
-	sz_dict_add(*root, "y", sz_i64(p.y));
-	sz_dict_add(*root, "z", sz_i64(p.z));
-	inventory_save(inv, &tag);
-	sz_dict_add(*root, "items", tag);
-	return 1;
+	s = CHUNK_AT(c, shape, p.x, p.y, p.z);
+	if (s == SHAPE_WORKBENCH || s == SHAPE_CRATE) {
+		inv = CHUNK_AT(c, data, p.x, p.y, p.z);
+		*root = sz_dict();
+		sz_dict_add(*root, "x", sz_i64(p.x));
+		sz_dict_add(*root, "y", sz_i64(p.y));
+		sz_dict_add(*root, "z", sz_i64(p.z));
+		inventory_save(inv, &tag);
+		sz_dict_add(*root, "items", tag);
+		return 1;
+	}
+	return 0;
 }
 
 int chunk_save(struct chunk *c, union sz_tag **root)

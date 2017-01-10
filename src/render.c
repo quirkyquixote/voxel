@@ -5,6 +5,32 @@
 #include "context.h"
 #include "drop.h"
 
+void render_flowsim(struct context *ctx)
+{
+	struct fs_volume *v;
+	struct fs_layer *l;
+	struct v3ll p;
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(0, 0, 0, .5);
+	glBegin(GL_TRIANGLES);
+	list_foreach(v, &ctx->flowsim->volumes, volumes) {
+		list_foreach(l, &v->top_layers, top_layers) {
+			stack_foreach(p, l->cells) {
+				glVertex3f(p.x + 1, l->top, p.z + 1);
+				glVertex3f(p.x + 1, l->top, p.z);
+				glVertex3f(p.x, l->top, p.z + 1);
+				glVertex3f(p.x, l->top, p.z + 1);
+				glVertex3f(p.x + 1, l->top, p.z);
+				glVertex3f(p.x, l->top, p.z);
+			}
+		}
+	}
+	glEnd();
+	glDisable(GL_BLEND);
+}
+
 void render_cursor(struct context *ctx)
 {
 	if (ctx->cur.face == -1)
@@ -328,7 +354,7 @@ void roam_render(struct context *ctx)
 	struct aab3ll bb;
 	struct v3ll p;
 	struct drop *d;
-	int i;
+	int s, i;
 
 	render_cursor(ctx);
 	bb.x0 = floor(ctx->player->p.x - 4);
@@ -339,9 +365,9 @@ void roam_render(struct context *ctx)
 	bb.z1 = ceil(ctx->player->p.z + 4);
 
 	aab3_foreach(p, bb) {
-		struct inventory *inv = WORLD_AT(ctx->w, data, p.x, p.y, p.z);
-		if (inv != NULL)
-			render_inventory(ctx, inv, p);
+		s = WORLD_AT(ctx->w, shape, p.x, p.y, p.z);
+		if (s == SHAPE_WORKBENCH || s == SHAPE_CRATE)
+			render_inventory(ctx, WORLD_AT(ctx->w, data, p.x, p.y, p.z), p);
 	}
 
 	list_foreach(d, &ctx->drops, list) {
@@ -433,6 +459,7 @@ void render(void *data)
 	}
 	vertex_buffer_disable(ctx->shard_vertex_buffer);
 	shader_enable(NULL);
+	render_flowsim(ctx);
 	roam_render(ctx);
 }
 

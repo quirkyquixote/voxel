@@ -1,187 +1,209 @@
 
 #include "flowsim.h"
 
-#include <stdio.h>
+#include <stdio.h> 
 
-struct cell {
+
+static inline void check_boundary(struct fs_layer *l, struct stack *s, struct v3ll p)
+{
+	struct fs_layer *l2;
+	if (WORLD_AT(l->v->w, shape, p.x, p.y, p.z) != SHAPE_NONE)
+		return;
+	if (WORLD_AT(l->v->w, data, p.x, p.y, p.z) == l)
+		return;
+	if (WORLD_AT(l->v->w, shape, p.x, p.y - 1, p.z) == SHAPE_NONE) {
+		l2 = WORLD_AT(l->v->w, data, p.x, p.y - 1, p.z);
+		if (l2 == NULL || l2->top - l2->bottom < 1) {
+			stack_push(l->falls, &p);
+			return;
+		}
+		l2->is_top = 0;
+	}
+	if (WORLD_AT(l->v->w, data, p.x, p.y, p.z) != NULL) {
+		/* merge layers */
+		return;
+	}
+	WORLD_AT(l->v->w, data, p.x, p.y, p.z) = l;
+	stack_push(s, &p);
+	stack_push(l->cells, &p);
+}
+
+static inline void calculate_boundary(struct fs_layer *l, struct v3ll p)
+{
+	struct stack *s = stack(sizeof(struct v3ll));
+	check_boundary(l, s, p);
+	while (stack_size(s)) {
+		stack_pop(s, &p);
+		check_boundary(l, s, v3ll(p.x - 1, p.y, p.z));
+		check_boundary(l, s, v3ll(p.x + 1, p.y, p.z));
+		check_boundary(l, s, v3ll(p.x, p.y, p.z - 1));
+		check_boundary(l, s, v3ll(p.x, p.y, p.z + 1));
+	}
+}
+
+struct fs_layer *fs_layer(struct fs_volume *v, struct v3ll p)
+{
+	struct fs_layer *l = calloc(1, sizeof(*l));
+	l->v = v;
+	l->cells = stack(sizeof(struct v3ll));
+	l->falls = stack(sizeof(struct v3ll));
+	calculate_boundary(l, p);
+	l->is_top = 1;
+	l->bottom = p.y;
+	l->top = p.y;
+	list_prepend(&v->top_layers, &l->top_layers);
+	printf("%s %p\n", __func__, l);
+	return l;
+}
+
+void fs_layer_destroy(struct fs_layer *l)
+{
+	printf("%s %p\n", __func__, l);
+	stack_destroy(l->cells);
+	stack_destroy(l->falls);
+	free(l);
+}
+
+struct fs_volume *fs_volume(struct world *w)
+{
+	struct fs_volume *v = calloc(1, sizeof(*v));
+	v->w = w;
+	list_init(&v->top_layers);
+	printf("%s %p\n", __func__, v);
+	return v;
+}
+
+void fs_volume_destroy(struct fs_volume *v)
+{
+	printf("%s %p\n", __func__, v);
+	free(v);
+}
+
+/* unlink this top layers search new ones over it */
+static void push_layer(struct fs_volume *v, struct fs_layer *l)
+{
 	struct v3ll p;
-	int v0, v1;
-	int has_floor;
-};
+	struct fs_layer *ll;
+	list_unlink(&l->top_layers);
+	stack_foreach(p, l->cells) {
+		++p.y;
+		if (WORLD_AT(v->w, shape, p.x, p.y, p.z) == SHAPE_NONE) {
+			ll = WORLD_AT(v->w, data, p.x, p.y, p.z);
+			if (ll != NULL) {
+				if (ll->v != l->v) {
+					/* merge ll->v and l->v */
+				}
+			} else {
+				ll = fs_layer(v, p);
+			}
+		}
+	}
+}
 
-static const int vol_from_shape[] = {
-	0,
-	-1, -1, -1, -1, -1, -1,
-	-1, -1, -1, -1, -1, -1,
-	-1, -1, -1,
-	-1, -1, -1, -1, -1, -1, -1, -1,
-	-1, -1,
-	1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
-	-1, -1, -1
-};
+/* unlink and destroy this top layer and search for new ones below it */
+static void pop_layer(struct fs_volume *v, struct fs_layer *l)
+{
+	struct v3ll p;
+	struct fs_layer *ll;
+	list_unlink(&l->top_layers);
+	stack_foreach(p, l->cells) {
+		WORLD_AT(v->w, data, p.x, p.y, p.z) = NULL;
+		--p.y;
+		if (WORLD_AT(v->w, shape, p.x, p.y, p.z) == SHAPE_NONE) {
+			ll = WORLD_AT(v->w, data, p.x, p.y, p.z);
+			if (ll != NULL && !ll->is_top) {
+				ll->is_top = 1;
+				list_prepend(&v->top_layers, &l->top_layers);
+			}
+		}
+	}
+	fs_layer_destroy(l);
+}
 
-static const int shape_from_vol[] = {
-	SHAPE_NONE,
-	SHAPE_FLUID1,
-	SHAPE_FLUID2,
-	SHAPE_FLUID3,
-	SHAPE_FLUID4,
-	SHAPE_FLUID5,
-	SHAPE_FLUID6,
-	SHAPE_FLUID7,
-	SHAPE_FLUID8,
-	SHAPE_FLUID9,
-	SHAPE_FLUID10,
-	SHAPE_FLUID11,
-	SHAPE_FLUID12,
-	SHAPE_FLUID13,
-	SHAPE_FLUID14,
-	SHAPE_FLUID15,
-	SHAPE_FLUID16,
-};
+void fs_volume_step(struct fs_volume *v)
+{
+	struct fs_layer *l, *next;
+	float area, vol, height;
+	area = 0;
+	vol = v->roaming;
+	v->roaming = 0;
+	list_foreach(l, &v->top_layers, top_layers) {
+		area += stack_size(l->cells);
+		vol += stack_size(l->cells) * l->top;
+	}
+	height = vol / area;
+	list_foreach_safe(l, next, &v->top_layers, top_layers) {
+		l->top = height;
+		if (l->top > l->bottom + 1) {
+			printf("%g > %g + 1: push layer\n", l->top, l->bottom);
+			v->roaming += l->top - l->bottom - 1;
+			push_layer(v, l);
+		} else if (l->top <= l->bottom) {
+			printf("%g <= %g: pop layer\n", l->top, l->bottom);
+			pop_layer(v, l);
+		}
+	}
+}
 
 struct flowsim *flowsim(struct world *w)
 {
 	struct flowsim *f = calloc(1, sizeof(*f));
 	f->w = w;
-	f->heads = stack(sizeof(struct v3ll));
-	f->heads2 = stack(sizeof(struct v3ll));
-	f->s = stack(sizeof(struct v3ll));
-	f->gs = stack(sizeof(struct cell));
+	list_init(&f->volumes);
 	return f;
 }
 
 void flowsim_destroy(struct flowsim *f)
 {
-	stack_destroy(f->heads);
-	stack_destroy(f->heads2);
-	stack_destroy(f->s);
-	stack_destroy(f->gs);
 	free(f);
 }
 
-
-void find_boundary(struct flowsim *f, struct v3ll p, int g)
+void flowsim_step(struct flowsim *f)
 {
-	int *m = &f->gmask[p.x][p.y][p.z];
-	if (*m == g)
-		return;
-	if (*m != 0)
-		return; /* this should not happen! */
-	int s = WORLD_AT(f->w, shape, f->w->x + p.x, p.y, f->w->z + p.z);
-	int s1 = WORLD_AT(f->w, shape, f->w->x + p.x, p.y - 1, f->w->z + p.z);
-	int *v = &f->vol[p.x][p.y][p.z];
-	*v = vol_from_shape[s];
-	printf("%lld,%lld,%lld", p.x, p.y, p.z);
-	if (*v < 0) {
-		printf(" (solid)\n");
-		return;
+	struct fs_volume *v;
+	struct fs_layer *l;
+	struct v3ll p;
+	list_foreach(v, &f->volumes, volumes) {
+		list_foreach(l, &v->top_layers, top_layers) {
+			float a = stack_size(l->falls) * .1;
+			float b = stack_size(l->cells) * (l->top - l->bottom);
+			if (a > b)
+				a = b;
+			b = a / stack_size(l->falls);
+			stack_foreach(p, l->falls)
+				flowsim_add(f, p, b);
+			l->top -= a / stack_size(l->cells);
+		}
 	}
-	*m = g;
-	if (stack_size(f->gs) == 0) {
-		printf(" (root)\n");
-		stack_push(f->s, &p);
-	} else if (*v > 0) {
-		printf(" (inner)\n");
-		stack_push(f->s, &p);
-	} else {
-		printf(" (boundary)\n");
-	}
-	struct cell c = { p, *v, *v, vol_from_shape[s1] == -1 };
-	stack_push(f->gs, &c);
+
+	list_foreach(v, &f->volumes, volumes)
+		fs_volume_step(v);
 }
 
-int compare_cells(const void *p1, const void *p2)
+int flowsim_add(struct flowsim *f, struct v3ll p, float k)
 {
-	const struct cell *c1, *c2;
-	c1 = p1;
-	c2 = p2;
-	return (c1->v1 + 16 * c1->has_floor + 32 * c1->p.y)
-		- (c2->v1 + 16 * c1->has_floor + 32 * c2->p.y);
-}
-
-int step_group(struct flowsim *f)
-{
-	int changed = 0;
-	struct cell *c0 = (void *)f->gs->data;
-	struct cell *c1 = c0 + f->gs->size - 1;
-	qsort(c0, f->gs->size, sizeof(struct cell), compare_cells);
-	for (; c0 < c1; ++c0, --c1) {
-		while (c0->v1 == 16) {
-			++c0;
-			if (c0 >= c1)
-				return changed;
-		}
-		while (c1->v1 == 0) {
-			--c1;
-			if (c0 >= c1)
-				return changed;
-		}
-		if (c0->p.y == c1->p.y && c1->v1 <= c0->v1 + 1) {
-			printf("end reached\n");
-			return changed;
-		}
-		printf("move: %lld,%lld,%lld << %lld,%lld,%lld\n",
-				 c0->p.x, c0->p.y, c0->p.z,
-				 c1->p.x, c1->p.y, c1->p.z);
-		++c0->v1;
-		--c1->v1;
-		changed = 1;
-	}
-}
-
-int flowsim_step(struct flowsim *f)
-{
-	struct v3ll p, q;
-	int i, g, s;
-
-	if (stack_size(f->heads) == 0)
+	struct fs_layer *l;
+	struct fs_volume *v;
+	if (k == 0)
 		return 0;
-
-	g = 0;
-	memset(f->gmask, 0, sizeof(f->gmask));
-	while (stack_size(f->heads)) {
-		stack_pop(f->heads, &p);
-		if (f->gmask[p.x][p.y][p.z] != 0)
-			continue;
-		printf("BUILD GROUP\n");
-		++g;
-		find_boundary(f, p, g);
-		while (stack_size(f->s)) {
-			stack_pop(f->s, &p);
-			find_boundary(f, v3ll(p.x - 1, p.y, p.z), g);
-			find_boundary(f, v3ll(p.x + 1, p.y, p.z), g);
-			find_boundary(f, v3ll(p.x, p.y - 1, p.z), g);
-			find_boundary(f, v3ll(p.x, p.y + 1, p.z), g);
-			find_boundary(f, v3ll(p.x, p.y, p.z - 1), g);
-			find_boundary(f, v3ll(p.x, p.y, p.z + 1), g);
-		}
-		if (f->gs->size == 0) {
-			printf("EMPTY!\n");
-			continue;
-		}
-		printf("STEP GROUP\n");
-		int changed = 0;
-		for (int k = 0; k < 4; ++k)
-			changed |= step_group(f);
-		struct cell *c = (void *)f->gs->data;
-		struct cell *c1 = c + f->gs->size - 1;
-		while (c <= c1) {
-			if (c->v0 != c->v1) {
-				world_set(f->w, v3_add(c->p, v3ll(f->w->x, 0, f->w->z)),
-						shape_from_vol[c->v1], 255, NULL);
+	if (WORLD_AT(f->w, shape, p.x, p.y, p.z) != SHAPE_NONE)
+		return 0;
+	do {
+		l = WORLD_AT(f->w, data, p.x, p.y, p.z);
+		if (l != NULL) {
+			if (!l->is_top) {
+				return 0;
 			}
-			++c;
+			l->top += k / stack_size(l->cells);
+			return 1;
 		}
-		if (changed) {
-			c = (void *)f->gs->data;
-			printf("NEW HEAD: %lld,%lld,%lld\n", c->p.x, c->p.y, c->p.z);
-			stack_push(f->heads2, &c->p);
-		}
-		f->gs->size = 0;
-	}
-	void *tmp = f->heads;
-	f->heads = f->heads2;
-	f->heads2 = tmp;
+		--p.y;
+	} while (WORLD_AT(f->w, shape, p.x, p.y, p.z) == SHAPE_NONE);
+	++p.y;
+	v = fs_volume(f->w);
+	list_append(&f->volumes, &v->volumes);
+	l = fs_layer(v, p);
+	l->top += k / stack_size(l->cells);
+	return 1;
 }
 
