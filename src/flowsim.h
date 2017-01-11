@@ -17,7 +17,7 @@ struct fs_volume {
 	int id;
 	struct world *w;
 	struct list volumes;
-	struct stack *top_layers;
+	struct stack *layers;
 	float roaming;
 };
 

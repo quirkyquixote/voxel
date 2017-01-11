@@ -16,15 +16,17 @@ void render_flowsim(struct context *ctx)
 	glColor4f(0, 0, 0, .5);
 	glBegin(GL_TRIANGLES);
 	list_foreach(v, &ctx->flowsim->volumes, volumes) {
-		stack_foreach(l, v->top_layers) {
-			stack_foreach(p, l->cells) {
-				float y = l->top + .001;
-				glVertex3f(p.x + 1, y, p.z + 1);
-				glVertex3f(p.x + 1, y, p.z);
-				glVertex3f(p.x, y, p.z + 1);
-				glVertex3f(p.x, y, p.z + 1);
-				glVertex3f(p.x + 1, y, p.z);
-				glVertex3f(p.x, y, p.z);
+		stack_foreach(l, v->layers) {
+			if (l->is_top) {
+				stack_foreach(p, l->cells) {
+					float y = l->top + .001;
+					glVertex3f(p.x + 1, y, p.z + 1);
+					glVertex3f(p.x + 1, y, p.z);
+					glVertex3f(p.x, y, p.z + 1);
+					glVertex3f(p.x, y, p.z + 1);
+					glVertex3f(p.x + 1, y, p.z);
+					glVertex3f(p.x, y, p.z);
+				}
 			}
 		}
 	}
@@ -42,7 +44,7 @@ void render_cursor(struct context *ctx)
 	GLfloat z = ctx->cur.p.z;
 
 	if (ctx->cur.face == FACE_UP &&
-		WORLD_AT(ctx->w, data, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z) != NULL)
+			WORLD_AT(ctx->w, data, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z) != NULL)
 		return;
 
 	glMatrixMode(GL_MODELVIEW);
