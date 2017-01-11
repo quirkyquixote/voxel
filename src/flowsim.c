@@ -225,9 +225,9 @@ void fs_volume_step(struct fs_volume *v)
 	top = 0;
 	bottom = 0;
 	stack_foreach(l, v->layers) {
+		expand_layer(l);
+		calculate_falls(l);
 		if (l->is_top) {
-			expand_layer(l);
-			calculate_falls(l);
 			top += stack_size(l->cells);
 		} else {
 			bottom += stack_size(l->cells);
@@ -285,7 +285,7 @@ void flowsim_step(struct flowsim *f)
 					a = b;
 				b = a / stack_size(l->falls);
 				stack_foreach(p, l->falls)
-				    flowsim_add(f, p, b);
+					flowsim_add(f, p, b);
 				l->v->v -= a;
 			}
 		}
