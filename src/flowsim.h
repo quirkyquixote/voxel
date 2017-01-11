@@ -18,7 +18,8 @@ struct fs_volume {
 	struct world *w;
 	struct list volumes;
 	struct stack *layers;
-	float roaming;
+	float v;
+	float top;
 };
 
 struct fs_layer {
@@ -26,7 +27,6 @@ struct fs_layer {
 	struct fs_volume *v;
 	struct stack *cells;
 	struct stack *falls;
-	float top;
 	int y;
 	int is_top;
 };
