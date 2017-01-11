@@ -26,8 +26,8 @@ struct fs_layer {
 	struct fs_volume *v;
 	struct stack *cells;
 	struct stack *falls;
-	float bottom;
 	float top;
+	int y;
 	int is_top;
 };
 

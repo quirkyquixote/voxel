@@ -14,7 +14,7 @@ static inline void check_boundary(struct fs_layer *l, struct stack *s, struct v3
 		return;
 	if (WORLD_AT(l->v->w, shape, p.x, p.y - 1, p.z) == SHAPE_NONE) {
 		l2 = WORLD_AT(l->v->w, data, p.x, p.y - 1, p.z);
-		if (l2 == NULL || l2->top - l2->bottom < 1) {
+		if (l2 == NULL || l2->top - l2->y < 1) {
 			stack_push(l->falls, &p);
 			return;
 		}
@@ -49,7 +49,7 @@ struct fs_layer *fs_layer(struct fs_volume *v, struct v3ll p)
 	l->cells = stack(sizeof(struct v3ll));
 	l->falls = stack(sizeof(struct v3ll));
 	calculate_boundary(l, p);
-	l->bottom = p.y;
+	l->y = p.y;
 	l->top = p.y;
 	l->id = object_id++;
 	printf("%s %d\n", __func__, l->id);
@@ -141,11 +141,11 @@ void fs_volume_step(struct fs_volume *v)
 	v->top_layers = stack(sizeof(struct fs_layer *));
 	stack_foreach(l, tmp) {
 		l->top = height;
-		if (l->top > l->bottom + 1) {
-			v->roaming += l->top - l->bottom - 1;
-			l->top = l->bottom + 1;
+		if (l->top > l->y + 1) {
+			v->roaming += l->top - l->y - 1;
+			l->top = l->y + 1;
 			push_layer(v, l);
-		} else if (l->top <= l->bottom) {
+		} else if (l->top <= l->y) {
 			pop_layer(v, l);
 		} else {
 			stack_push(v->top_layers, &l);
@@ -175,7 +175,7 @@ void flowsim_step(struct flowsim *f)
 	list_foreach(v, &f->volumes, volumes) {
 		stack_foreach(l, v->top_layers) {
 			float a = stack_size(l->falls) / 16.;
-			float b = stack_size(l->cells) * (l->top - l->bottom);
+			float b = stack_size(l->cells) * (l->top - l->y);
 			if (a > b)
 				a = b;
 			b = a / stack_size(l->falls);
