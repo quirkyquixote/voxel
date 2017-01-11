@@ -31,7 +31,7 @@ struct fs_layer {
 	int is_top;
 };
 
-struct fs_layer *fs_layer(struct fs_volume *v, struct v3ll p);
+struct fs_layer *fs_layer(struct fs_volume *v, int y);
 void fs_layer_destroy(struct fs_layer *l);
 
 struct fs_volume *fs_volume(struct world *w);
