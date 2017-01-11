@@ -14,14 +14,15 @@ struct flowsim {
 };
 
 struct fs_volume {
+	int id;
 	struct world *w;
 	struct list volumes;
-	struct list top_layers;
+	struct stack *top_layers;
 	float roaming;
 };
 
 struct fs_layer {
-	struct list top_layers;
+	int id;
 	struct fs_volume *v;
 	struct stack *cells;
 	struct stack *falls;

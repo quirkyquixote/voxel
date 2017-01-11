@@ -1,8 +1,9 @@
 
 #include "flowsim.h"
 
-#include <stdio.h> 
+#include <stdio.h>
 
+static int object_id = 0;
 
 static inline void check_boundary(struct fs_layer *l, struct stack *s, struct v3ll p)
 {
@@ -48,17 +49,16 @@ struct fs_layer *fs_layer(struct fs_volume *v, struct v3ll p)
 	l->cells = stack(sizeof(struct v3ll));
 	l->falls = stack(sizeof(struct v3ll));
 	calculate_boundary(l, p);
-	l->is_top = 1;
 	l->bottom = p.y;
 	l->top = p.y;
-	list_prepend(&v->top_layers, &l->top_layers);
-	printf("%s %p\n", __func__, l);
+	l->id = object_id++;
+	printf("%s %d\n", __func__, l->id);
 	return l;
 }
 
 void fs_layer_destroy(struct fs_layer *l)
 {
-	printf("%s %p\n", __func__, l);
+	printf("%s %d\n", __func__, l->id);
 	stack_destroy(l->cells);
 	stack_destroy(l->falls);
 	free(l);
@@ -68,14 +68,16 @@ struct fs_volume *fs_volume(struct world *w)
 {
 	struct fs_volume *v = calloc(1, sizeof(*v));
 	v->w = w;
-	list_init(&v->top_layers);
-	printf("%s %p\n", __func__, v);
+	v->top_layers = stack(sizeof(struct fs_layer *));
+	v->id = object_id++;
+	printf("%s %d\n", __func__, v->id);
 	return v;
 }
 
 void fs_volume_destroy(struct fs_volume *v)
 {
-	printf("%s %p\n", __func__, v);
+	printf("%s %d\n", __func__, v->id);
+	stack_destroy(v->top_layers);
 	free(v);
 }
 
@@ -84,7 +86,7 @@ static void push_layer(struct fs_volume *v, struct fs_layer *l)
 {
 	struct v3ll p;
 	struct fs_layer *ll;
-	list_unlink(&l->top_layers);
+	printf("%s %d\n", __func__, v->id);
 	stack_foreach(p, l->cells) {
 		++p.y;
 		if (WORLD_AT(v->w, shape, p.x, p.y, p.z) == SHAPE_NONE) {
@@ -95,6 +97,8 @@ static void push_layer(struct fs_volume *v, struct fs_layer *l)
 				}
 			} else {
 				ll = fs_layer(v, p);
+				ll->is_top = 1;
+				stack_push(v->top_layers, &ll);
 			}
 		}
 	}
@@ -105,7 +109,7 @@ static void pop_layer(struct fs_volume *v, struct fs_layer *l)
 {
 	struct v3ll p;
 	struct fs_layer *ll;
-	list_unlink(&l->top_layers);
+	printf("%s %d\n", __func__, l->id);
 	stack_foreach(p, l->cells) {
 		WORLD_AT(v->w, data, p.x, p.y, p.z) = NULL;
 		--p.y;
@@ -113,7 +117,7 @@ static void pop_layer(struct fs_volume *v, struct fs_layer *l)
 			ll = WORLD_AT(v->w, data, p.x, p.y, p.z);
 			if (ll != NULL && !ll->is_top) {
 				ll->is_top = 1;
-				list_prepend(&v->top_layers, &l->top_layers);
+				stack_push(v->top_layers, &ll);
 			}
 		}
 	}
@@ -122,27 +126,32 @@ static void pop_layer(struct fs_volume *v, struct fs_layer *l)
 
 void fs_volume_step(struct fs_volume *v)
 {
-	struct fs_layer *l, *next;
+	struct fs_layer *l;
 	float area, vol, height;
+	struct stack *tmp;
 	area = 0;
 	vol = v->roaming;
 	v->roaming = 0;
-	list_foreach(l, &v->top_layers, top_layers) {
+	stack_foreach(l, v->top_layers) {
 		area += stack_size(l->cells);
 		vol += stack_size(l->cells) * l->top;
 	}
 	height = vol / area;
-	list_foreach_safe(l, next, &v->top_layers, top_layers) {
+	tmp = v->top_layers;
+	v->top_layers = stack(sizeof(struct fs_layer *));
+	stack_foreach(l, tmp) {
 		l->top = height;
 		if (l->top > l->bottom + 1) {
-			printf("%g > %g + 1: push layer\n", l->top, l->bottom);
 			v->roaming += l->top - l->bottom - 1;
+			l->top = l->bottom + 1;
 			push_layer(v, l);
 		} else if (l->top <= l->bottom) {
-			printf("%g <= %g: pop layer\n", l->top, l->bottom);
 			pop_layer(v, l);
+		} else {
+			stack_push(v->top_layers, &l);
 		}
 	}
+	stack_destroy(tmp);
 }
 
 struct flowsim *flowsim(struct world *w)
@@ -164,8 +173,8 @@ void flowsim_step(struct flowsim *f)
 	struct fs_layer *l;
 	struct v3ll p;
 	list_foreach(v, &f->volumes, volumes) {
-		list_foreach(l, &v->top_layers, top_layers) {
-			float a = stack_size(l->falls) * .1;
+		stack_foreach(l, v->top_layers) {
+			float a = stack_size(l->falls) / 16.;
 			float b = stack_size(l->cells) * (l->top - l->bottom);
 			if (a > b)
 				a = b;
@@ -203,6 +212,8 @@ int flowsim_add(struct flowsim *f, struct v3ll p, float k)
 	v = fs_volume(f->w);
 	list_append(&f->volumes, &v->volumes);
 	l = fs_layer(v, p);
+	l->is_top = 1;
+	stack_push(v->top_layers, &l);
 	l->top += k / stack_size(l->cells);
 	return 1;
 }

@@ -58,9 +58,4 @@ static inline void list_prepend(struct list *l, struct list *x)
 			&pos->member != (list); \
 			pos = list_next(pos, member))
 
-#define list_foreach_safe(pos,next,list,member) \
-	for (pos = list_head(list, typeof(*pos), member); \
-		next = list_next(pos, member), &pos->member != (list); \
-		pos = next)
-
 #endif
