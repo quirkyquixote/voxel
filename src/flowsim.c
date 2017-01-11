@@ -7,6 +7,7 @@ static int object_id = 0;
 
 void merge_volumes(struct fs_volume *v1, struct fs_volume *v2)
 {
+	printf("%s %d %d\n", __func__, v1->id, v2->id);
 	struct fs_layer *l;
 	stack_foreach(l, v2->layers) {
 		stack_push(v1->layers, &l);
@@ -15,6 +16,59 @@ void merge_volumes(struct fs_volume *v1, struct fs_volume *v2)
 	v1->roaming += v2->roaming;
 	list_unlink(&v2->volumes);
 	fs_volume_destroy(v2);
+}
+
+void merge_layers(struct fs_layer *l1, struct fs_layer *l2)
+{
+	printf("%s %d %d\n", __func__, l1->id, l2->id);
+	struct v3ll p;
+	float vol;
+
+	vol = (l1->top - l1->y) * stack_size(l1->cells)
+		+ (l2->top - l2->y) * stack_size(l2->cells);
+	stack_foreach(p, l2->cells)
+		stack_push(l1->cells, &p);
+	l1->top = l1->y + vol / stack_size(l1->cells);
+	if (l1->v != l2->v)
+		merge_volumes(l1->v, l2->v);
+	struct stack *tmp = stack(sizeof(struct fs_layer *));
+	struct fs_layer *l;
+	stack_foreach(l, l1->v->layers) {
+		if (l != l2)
+			stack_push(tmp, &l);
+	}
+	stack_destroy(l1->v->layers);
+	l1->v->layers = tmp;
+	fs_layer_destroy(l2);
+}
+
+static inline void check_boundary(struct fs_layer *l, struct fs_layer *l2,
+    struct stack *s, struct v3ll p)
+{
+	if (WORLD_AT(l->v->w, shape, p.x, p.y, p.z) != SHAPE_NONE)
+		return;
+	if (WORLD_AT(l->v->w, data, p.x, p.y, p.z) == l)
+		return;
+	if (WORLD_AT(l->v->w, data, p.x, p.y - 1, p.z) != l2)
+		return;
+	WORLD_AT(l->v->w, data, p.x, p.y, p.z) = l;
+	stack_push(s, &p);
+	stack_push(l->cells, &p);
+}
+
+static void layer_from_layer(struct fs_layer *l, struct fs_layer *l2,
+    struct v3ll p)
+{
+	printf("%s %d\n", __func__, l->id);
+	struct stack *s = stack(sizeof(struct v3ll));
+	check_boundary(l, l2, s, p);
+	while (stack_size(s)) {
+		stack_pop(s, &p);
+		check_boundary(l, l2, s, v3ll(p.x - 1, p.y, p.z));
+		check_boundary(l, l2, s, v3ll(p.x + 1, p.y, p.z));
+		check_boundary(l, l2, s, v3ll(p.x, p.y, p.z - 1));
+		check_boundary(l, l2, s, v3ll(p.x, p.y, p.z + 1));
+	}
 }
 
 static inline void test_fall(struct fs_layer *l, struct v3ll p)
@@ -30,7 +84,7 @@ static inline void test_fall(struct fs_layer *l, struct v3ll p)
 
 static void calculate_falls(struct fs_layer *l)
 {
-//	printf("%s %d\n", __func__, l->id);
+//      printf("%s %d\n", __func__, l->id);
 	struct v3ll p;
 	stack_clear(l->falls);
 	stack_foreach(p, l->cells) {
@@ -39,7 +93,7 @@ static void calculate_falls(struct fs_layer *l)
 		test_fall(l, v3ll(p.x, p.y, p.z - 1));
 		test_fall(l, v3ll(p.x, p.y, p.z + 1));
 	}
-//	printf("#falls=%u\n", stack_size(l->falls));
+//      printf("#falls=%u\n", stack_size(l->falls));
 }
 
 static inline void test_cell(struct fs_layer *l, struct v3ll p)
@@ -51,22 +105,18 @@ static inline void test_cell(struct fs_layer *l, struct v3ll p)
 	if (l2 == l)
 		return;
 	if (l2 != NULL) {
-		/* merge layers */
+		merge_layers(l, l2);
 		return;
 	}
-	if (WORLD_AT(l->v->w, shape, p.x, p.y - 1, p.z) == SHAPE_NONE) {
-		l2 = WORLD_AT(l->v->w, data, p.x, p.y - 1, p.z);
-		if (l2->top <= l2->y + 1)
-			return;
-		/* merge volumes */
-	}
+	if (WORLD_AT(l->v->w, shape, p.x, p.y - 1, p.z) == SHAPE_NONE)
+		return;
 	WORLD_AT(l->v->w, data, p.x, p.y, p.z) = l;
 	stack_push(l->cells, &p);
 }
 
 static void expand_layer(struct fs_layer *l)
 {
-//	printf("%s %d\n", __func__, l->id);
+//      printf("%s %d\n", __func__, l->id);
 	struct v3ll p;
 	struct stack *tmp = l->cells;
 	float vol = (l->top - l->y) * stack_size(l->cells);
@@ -80,34 +130,7 @@ static void expand_layer(struct fs_layer *l)
 	}
 	stack_destroy(tmp);
 	l->top = l->y + vol / stack_size(l->cells);
-//	printf("#cells=%u\n", stack_size(l->cells));
-}
-
-static inline void check_boundary(struct fs_layer *l, struct fs_layer *l2, struct stack *s, struct v3ll p)
-{
-	if (WORLD_AT(l->v->w, shape, p.x, p.y, p.z) != SHAPE_NONE)
-		return;
-	if (WORLD_AT(l->v->w, data, p.x, p.y, p.z) == l)
-		return;
-	if (WORLD_AT(l->v->w, data, p.x, p.y - 1, p.z) != l2)
-		return;
-	WORLD_AT(l->v->w, data, p.x, p.y, p.z) = l;
-	stack_push(s, &p);
-	stack_push(l->cells, &p);
-}
-
-static void layer_from_layer(struct fs_layer *l, struct fs_layer *l2, struct v3ll p)
-{
-	printf("%s %d\n", __func__, l->id);
-	struct stack *s = stack(sizeof(struct v3ll));
-	check_boundary(l, l2, s, p);
-	while (stack_size(s)) {
-		stack_pop(s, &p);
-		check_boundary(l, l2, s, v3ll(p.x - 1, p.y, p.z));
-		check_boundary(l, l2, s, v3ll(p.x + 1, p.y, p.z));
-		check_boundary(l, l2, s, v3ll(p.x, p.y, p.z - 1));
-		check_boundary(l, l2, s, v3ll(p.x, p.y, p.z + 1));
-	}
+//      printf("#cells=%u\n", stack_size(l->cells));
 }
 
 struct fs_layer *fs_layer(struct fs_volume *v, int y)
@@ -126,6 +149,9 @@ struct fs_layer *fs_layer(struct fs_volume *v, int y)
 void fs_layer_destroy(struct fs_layer *l)
 {
 	printf("%s %d\n", __func__, l->id);
+	struct v3ll p;
+	stack_foreach(p, l->cells)
+		WORLD_AT(l->v->w, data, p.x, p.y, p.z) = NULL;
 	stack_destroy(l->cells);
 	stack_destroy(l->falls);
 	free(l);
@@ -223,12 +249,10 @@ void fs_volume_step(struct fs_volume *v)
 				push_layer(v, l);
 			} else if (l->top <= l->y) {
 				pop_layer(v, l);
-			} else {
-				stack_push(v->layers, &l);
+				continue;
 			}
-		} else {
-			stack_push(v->layers, &l);
 		}
+		stack_push(v->layers, &l);
 	}
 	stack_destroy(tmp);
 }
@@ -255,19 +279,20 @@ void flowsim_step(struct flowsim *f)
 		stack_foreach(l, v->layers) {
 			if (l->is_top) {
 				float a = stack_size(l->falls) / 16.;
-				float b = stack_size(l->cells) * (l->top - l->y);
+				float b =
+				    stack_size(l->cells) * (l->top - l->y);
 				if (a > b)
 					a = b;
 				b = a / stack_size(l->falls);
 				stack_foreach(p, l->falls)
-					flowsim_add(f, p, b);
+				    flowsim_add(f, p, b);
 				l->top -= a / stack_size(l->cells);
 			}
 		}
 	}
 
 	list_foreach(v, &f->volumes, volumes)
-		fs_volume_step(v);
+	    fs_volume_step(v);
 }
 
 int flowsim_add(struct flowsim *f, struct v3ll p, float k)
@@ -300,4 +325,3 @@ int flowsim_add(struct flowsim *f, struct v3ll p, float k)
 	l->top += k / stack_size(l->cells);
 	return 1;
 }
-
