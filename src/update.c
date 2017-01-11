@@ -557,13 +557,7 @@ void use_tool(struct context *ctx)
 	} else if (obj == OBJ_CRATE) {
 		world_set(ctx->w, p, SHAPE_CRATE, 255, inventory(16));
 	} else if (obj == OBJ_FLUID) {
-		if (s >= SHAPE_FLUID1 && s <= SHAPE_FLUID8)
-			world_set(ctx->w, p, s + 8, 255, NULL);
-		else if (s >= SHAPE_FLUID9 && s <= SHAPE_FLUID16)
-			world_set(ctx->w, p, SHAPE_FLUID16, 255, NULL);
-		else
-			world_set(ctx->w, p, SHAPE_FLUID8, 255, NULL);
-		flowsim_add_head(ctx->flowsim, p);
+		flowsim_add(ctx->flowsim, p, 1);
 	} else if (obj == OBJ_PIPE) {
 		if (f == FACE_LF || f == FACE_RT)
 			world_set(ctx->w, p, SHAPE_PIPE_X, 255, inventory(1));
@@ -577,19 +571,18 @@ void use_tool(struct context *ctx)
 void update_player(struct context *ctx)
 {
 	struct v3ll p = ctx->cur.p;
+	int s = WORLD_AT(ctx->w, shape, p.x, p.y, p.z);
 
 	if (ctx->cur.face == FACE_UP) {
-		struct inventory *inv = WORLD_AT(ctx->w, data, p.x, p.y, p.z);
-		if (inv != NULL) {
-			use_inventory(ctx, inv);
+		if (s == SHAPE_WORKBENCH || s == SHAPE_CRATE) {
+			use_inventory(ctx, WORLD_AT(ctx->w, data, p.x, p.y, p.z));
 			return;
 		}
 	}
 	if (ctx->act == 1) {
 		if (ctx->cur.face != -1) {
-			if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) != 0) {
+			if (s != SHAPE_NONE) {
 				world_set(ctx->w, p, 0, 0, NULL);
-				flowsim_add_head(ctx->flowsim, p);
 			}
 		}
 	}
@@ -688,19 +681,19 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
+//		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
 		if ((c->flags & CHUNK_UNLOADED) != 0) {
-			printf("; load from file");
+//			printf("; load from file");
 			/* load this chunk */
 			c->flags ^= CHUNK_UNLOADED;
 		}
 		if ((c->flags & CHUNK_UNRENDERED) != 0) {
-			printf("; update vertex buffers");
+//			printf("; update vertex buffers");
 			for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 				update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
 			c->flags ^= CHUNK_UNRENDERED;
 		}
-		fprintf(stdout, "\n");
+//		fprintf(stdout, "\n");
 	}
 }
 

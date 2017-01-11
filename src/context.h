@@ -66,4 +66,6 @@ extern const char *mat_names[];
 extern const char *face_names[];
 extern const char *shape_names[];
 
+unsigned long long next_id(void);
+
 #endif

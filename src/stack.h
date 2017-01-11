@@ -40,16 +40,36 @@ static inline void stack_push(struct stack *s, void *e)
 	++s->size;
 }
 
-static inline void stack_pop(struct stack *s, void *e)
+static inline void *stack_pop(struct stack *s, void *e)
 {
 	assert(s->size > 0);
 	--s->size;
-	memcpy(e, s->data + s->size * s->elem_size, s->elem_size);
+	return memcpy(e, s->data + s->size * s->elem_size, s->elem_size);
+}
+
+static inline void *stack_top(struct stack *s, void *e)
+{
+	assert(s->size > 0);
+	return memcpy(e, s->data + (s->size - 1) * s->elem_size, s->elem_size);
+}
+
+static inline void *stack_at(struct stack *s, size_t i, void *e)
+{
+	assert(i < s->size);
+	return memcpy(e, s->data + i * s->elem_size, s->elem_size);
 }
 
 static inline int stack_size(struct stack *s)
 {
 	return s->size;
 }
+
+static inline void stack_clear(struct stack *s)
+{
+	s->size = 0;
+}
+
+#define stack_foreach(_iter,_cont) \
+for (int i = 0; i < stack_size(_cont) && stack_at(_cont, i, &_iter); ++i)
 
 #endif
