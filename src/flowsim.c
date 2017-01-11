@@ -244,6 +244,7 @@ void fs_volume_step(struct fs_volume *v)
 			stack_push(v->layers, &l);
 		}
 		stack_destroy(tmp);
+		--v->top;
 	} else if (v->top < 0) {
 		tmp = v->layers;
 		v->layers = stack(sizeof(struct fs_layer *));
@@ -254,6 +255,7 @@ void fs_volume_step(struct fs_volume *v)
 				stack_push(v->layers, &l);
 		}
 		stack_destroy(tmp);
+		++v->top;
 	}
 }
 
