@@ -337,3 +337,9 @@ int save_chunk(struct chunk *c, const char *dir)
 	return 0;
 }
 
+unsigned long long next_id(void)
+{
+	static unsigned long long id = 0;
+	return id++;
+}
+

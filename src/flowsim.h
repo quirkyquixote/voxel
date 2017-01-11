@@ -14,7 +14,7 @@ struct flowsim {
 };
 
 struct fs_volume {
-	int id;
+	unsigned long long id;
 	struct world *w;
 	struct list volumes;
 	struct stack *layers;
@@ -22,7 +22,7 @@ struct fs_volume {
 };
 
 struct fs_layer {
-	int id;
+	unsigned long long id;
 	struct fs_volume *v;
 	struct stack *cells;
 	struct stack *falls;
