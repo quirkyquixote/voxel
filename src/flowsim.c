@@ -195,19 +195,18 @@ int flowsim_add(struct flowsim *f, struct v3ll p, float k)
 	struct fs_volume *v;
 	if (k == 0)
 		return 0;
-	if (WORLD_AT(f->w, shape, p.x, p.y, p.z) != SHAPE_NONE)
-		return 0;
-	do {
+	while (WORLD_AT(f->w, shape, p.x, p.y, p.z) == SHAPE_NONE) {
 		l = WORLD_AT(f->w, data, p.x, p.y, p.z);
 		if (l != NULL) {
 			if (!l->is_top) {
-				return 0;
+				l->v->roaming += k;
+				return 1;
 			}
 			l->top += k / stack_size(l->cells);
 			return 1;
 		}
 		--p.y;
-	} while (WORLD_AT(f->w, shape, p.x, p.y, p.z) == SHAPE_NONE);
+	}
 	++p.y;
 	v = fs_volume(f->w);
 	list_append(&f->volumes, &v->volumes);
