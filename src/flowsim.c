@@ -255,6 +255,10 @@ void fs_volume_step(struct fs_volume *v)
 		stack_push(v->layers, &l);
 	}
 	stack_destroy(tmp);
+	if (stack_size(v->layers) == 0) {
+		list_unlink(&v->volumes);
+		fs_volume_destroy(v);
+	}
 }
 
 struct flowsim *flowsim(struct world *w)
@@ -292,7 +296,7 @@ void flowsim_step(struct flowsim *f)
 	}
 
 	list_foreach(v, &f->volumes, volumes)
-	    fs_volume_step(v);
+		fs_volume_step(v);
 }
 
 int flowsim_add(struct flowsim *f, struct v3ll p, float k)
