@@ -155,9 +155,11 @@ static void push_layer(struct fs_volume *v, struct fs_layer *l)
 				layer_from_layer(ll, l, p);
 				ll->is_top = 1;
 				stack_push(v->top_layers, &ll);
+				printf("%d.is_top=1\n", ll->id);
 			}
 		}
 	}
+	l->is_top = 0;
 }
 
 /* unlink and destroy this top layer and search for new ones below it */
@@ -174,6 +176,7 @@ static void pop_layer(struct fs_volume *v, struct fs_layer *l)
 			if (ll != NULL && !ll->is_top) {
 				ll->is_top = 1;
 				stack_push(v->top_layers, &ll);
+				printf("%d.is_top=1\n", ll->id);
 			}
 		}
 	}
