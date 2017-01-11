@@ -13,7 +13,25 @@ void render_flowsim(struct context *ctx)
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor4f(0, 0, 0, .5);
+	glColor4f(1, 0, 0, .5);
+	glBegin(GL_TRIANGLES);
+	list_foreach(v, &ctx->flowsim->volumes, volumes) {
+		stack_foreach(l, v->layers) {
+			if (!l->is_top) {
+				stack_foreach(p, l->cells) {
+					float y = l->top + .001;
+					glVertex3f(p.x + 1, y, p.z + 1);
+					glVertex3f(p.x + 1, y, p.z);
+					glVertex3f(p.x, y, p.z + 1);
+					glVertex3f(p.x, y, p.z + 1);
+					glVertex3f(p.x + 1, y, p.z);
+					glVertex3f(p.x, y, p.z);
+				}
+			}
+		}
+	}
+	glEnd();
+	glColor4f(0, 0, 1, .5);
 	glBegin(GL_TRIANGLES);
 	list_foreach(v, &ctx->flowsim->volumes, volumes) {
 		stack_foreach(l, v->layers) {
