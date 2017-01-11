@@ -201,17 +201,16 @@ static void push_layer(struct fs_volume *v, struct fs_layer *l)
 static void pop_layer(struct fs_volume *v, struct fs_layer *l)
 {
 	struct v3ll p;
-	struct fs_layer *ll;
+	struct fs_layer *l2;
 	printf("%s %llu\n", __func__, l->id);
 	stack_foreach(p, l->cells) {
-		WORLD_AT(v->w, data, p.x, p.y, p.z) = NULL;
 		--p.y;
 		if (WORLD_AT(v->w, shape, p.x, p.y, p.z) == SHAPE_NONE) {
-			ll = WORLD_AT(v->w, data, p.x, p.y, p.z);
-			if (ll != NULL && !ll->is_top) {
-				ll->is_top = 1;
-				stack_push(v->layers, &ll);
-				printf("%d.is_top=1\n", ll->id);
+			l2 = WORLD_AT(v->w, data, p.x, p.y, p.z);
+			if (l2 != NULL && !l2->is_top) {
+				l2->is_top = 1;
+				stack_push(v->layers, &l2);
+				printf("%d.is_top=1\n", l2->id);
 			}
 		}
 	}
