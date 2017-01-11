@@ -225,8 +225,6 @@ void fs_volume_step(struct fs_volume *v)
 	top = 0;
 	bottom = 0;
 	stack_foreach(l, v->layers) {
-		expand_layer(l);
-		calculate_falls(l);
 		if (l->is_top) {
 			top += stack_size(l->cells);
 		} else {
@@ -234,6 +232,11 @@ void fs_volume_step(struct fs_volume *v)
 		}
 	}
 	v->top = (v->v - bottom) / top;
+	stack_foreach(l, v->layers) {
+		if (!l->is_top || v->top > (1. / 64.))
+			expand_layer(l);
+		calculate_falls(l);
+	}
 	if (v->top > 1) {
 		tmp = v->layers;
 		v->layers = stack(sizeof(struct fs_layer *));
