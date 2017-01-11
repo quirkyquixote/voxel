@@ -67,5 +67,6 @@ extern const char *face_names[];
 extern const char *shape_names[];
 
 unsigned long long next_id(void);
+unsigned long long max_id(void);
 
 #endif

@@ -16,7 +16,7 @@ void render_flowsim(struct context *ctx)
 	glColor4f(1, 0, 0, .5);
 	glBegin(GL_TRIANGLES);
 	list_foreach(v, &ctx->flowsim->volumes, volumes) {
-		stack_foreach(l, v->layers) {
+		list_foreach(l, &v->layers, layers) {
 			if (!l->is_top) {
 				stack_foreach(p, l->cells) {
 					float y = l->y + 1;
@@ -34,7 +34,7 @@ void render_flowsim(struct context *ctx)
 	glColor4f(0, 0, 1, .5);
 	glBegin(GL_TRIANGLES);
 	list_foreach(v, &ctx->flowsim->volumes, volumes) {
-		stack_foreach(l, v->layers) {
+		list_foreach(l, &v->layers, layers) {
 			if (l->is_top) {
 				stack_foreach(p, l->cells) {
 					float y = v->top + l->y + .001;

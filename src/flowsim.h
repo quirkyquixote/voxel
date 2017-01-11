@@ -17,7 +17,7 @@ struct fs_volume {
 	unsigned long long id;
 	struct world *w;
 	struct list volumes;
-	struct stack *layers;
+	struct list layers;
 	float v;
 	float top;
 };
@@ -25,6 +25,7 @@ struct fs_volume {
 struct fs_layer {
 	unsigned long long id;
 	struct fs_volume *v;
+	struct list layers;
 	struct stack *cells;
 	struct stack *falls;
 	int y;

@@ -41,6 +41,17 @@ static inline void list_prepend(struct list *l, struct list *x)
 	list_link(l->next, x);
 }
 
+static inline void list_merge(struct list *l1, struct list *l2)
+{
+	if (list_empty(l2))
+		return;
+	l1->prev->next = l2->next;
+	l2->next->prev = l1->prev;
+	l2->prev->next = l1;
+	l1->prev = l2->prev;
+	list_init(l2);
+}
+
 #define list_entry(l,type,member) \
 	((type *)((char *)(l) - (unsigned long)(&((type *)0)->member)))
 
@@ -57,5 +68,11 @@ static inline void list_prepend(struct list *l, struct list *x)
 	for (pos = list_head(list, typeof(*pos), member); \
 			&pos->member != (list); \
 			pos = list_next(pos, member))
+
+#define list_foreach_safe(_elem,_list,_memb) \
+	for (struct list *_iter = (_list)->next, *_next; \
+		_iter != (_list) && (_next = _iter->next) \
+			&& (_elem = list_entry(_iter,typeof(*_elem),_memb)); \
+		_iter = _next)
 
 #endif
