@@ -27,23 +27,23 @@ void event(const SDL_Event *e, void *data)
 		} else if (e->key.keysym.sym == SDLK_LCTRL) {
 			ctx->run = 1;
 		} else if (e->key.keysym.sym == SDLK_1) {
-			ctx->tool = 0;
+			ctx->inv->slots[ctx->tool].mat = 0;
 		} else if (e->key.keysym.sym == SDLK_2) {
-			ctx->tool = 1;
+			ctx->inv->slots[ctx->tool].mat = 1;
 		} else if (e->key.keysym.sym == SDLK_3) {
-			ctx->tool = 2;
+			ctx->inv->slots[ctx->tool].mat = 2;
 		} else if (e->key.keysym.sym == SDLK_4) {
-			ctx->tool = 3;
+			ctx->inv->slots[ctx->tool].mat = 3;
 		} else if (e->key.keysym.sym == SDLK_5) {
-			ctx->tool = 4;
+			ctx->inv->slots[ctx->tool].mat = 4;
 		} else if (e->key.keysym.sym == SDLK_6) {
-			ctx->tool = 5;
+			ctx->inv->slots[ctx->tool].mat = 5;
 		} else if (e->key.keysym.sym == SDLK_7) {
-			ctx->tool = 6;
+			ctx->inv->slots[ctx->tool].mat = 6;
 		} else if (e->key.keysym.sym == SDLK_8) {
-			ctx->tool = 7;
+			ctx->inv->slots[ctx->tool].mat = 7;
 		} else if (e->key.keysym.sym == SDLK_9) {
-			ctx->tool = 8;
+			ctx->inv->slots[ctx->tool].mat = 8;
 		} else if (e->key.keysym.sym == SDLK_q) {
 			if (ctx->inv->slots[ctx->tool].num > 0) {
 				struct drop *d = drop(ctx,

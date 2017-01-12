@@ -51,10 +51,10 @@ void texcoord_from_material(int mat, struct v2f *tc)
 	GLfloat y0 = (mat >> 4) / 16.;
 	GLfloat x1 = x0 + 1 / 16.;
 	GLfloat y1 = y0 + 1 / 16.;
-	tc[0] = v2f(x0, y0);
-	tc[1] = v2f(x1, y0);
-	tc[2] = v2f(x0, y1);
-	tc[3] = v2f(x1, y1);
+	tc[0] = v2f(x0, y1);
+	tc[1] = v2f(x1, y1);
+	tc[2] = v2f(x0, y0);
+	tc[3] = v2f(x1, y0);
 }
 
 void update_cell(struct context *ctx, struct vertex_array *buf, int64_t x, int64_t y, int64_t z)
@@ -526,45 +526,45 @@ void use_tool(struct context *ctx)
 	if (!(s == SHAPE_NONE || (s >= SHAPE_FLUID1 && s <= SHAPE_FLUID16)))
 		return;
 	if (obj == OBJ_BLOCK) {
-		world_set(ctx->w, p, SHAPE_BLOCK_DN, 255, NULL);
+		world_set(ctx->w, p, SHAPE_BLOCK_DN, mat, NULL);
 	} else if (obj == OBJ_SLAB) {
 		if (f == FACE_UP) {
-			world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
+			world_set(ctx->w, p, SHAPE_SLAB_DN, mat, NULL);
 		} else if (f == FACE_DN) {
-			world_set(ctx->w, p, SHAPE_SLAB_UP, 255, NULL);
+			world_set(ctx->w, p, SHAPE_SLAB_UP, mat, NULL);
 		} else if (q.y > 0.5) {
-			world_set(ctx->w, p, SHAPE_SLAB_UP, 255, NULL);
+			world_set(ctx->w, p, SHAPE_SLAB_UP, mat, NULL);
 		} else {
-			world_set(ctx->w, p, SHAPE_SLAB_DN, 255, NULL);
+			world_set(ctx->w, p, SHAPE_SLAB_DN, mat, NULL);
 		}
 	} else if (obj == OBJ_STAIRS) {
 		if (f == FACE_UP) {
-			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, mat, NULL);
 		} else if (f == FACE_DN) {
-			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, mat, NULL);
 		} else if (q.y > 0.5) {
-			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, 255, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, mat, NULL);
 		} else {
-			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, 255, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, mat, NULL);
 		}
 	} else if (obj == OBJ_PANE) {
 		if (ctx->roty & 1)
-			world_set(ctx->w, p, SHAPE_PANE_X, 255, NULL);
+			world_set(ctx->w, p, SHAPE_PANE_X, mat, NULL);
 		else
-			world_set(ctx->w, p, SHAPE_PANE_Z, 255, NULL);
+			world_set(ctx->w, p, SHAPE_PANE_Z, mat, NULL);
 	} else if (obj == OBJ_WORKBENCH) {
-		world_set(ctx->w, p, SHAPE_WORKBENCH, 255, inventory(9));
+		world_set(ctx->w, p, SHAPE_WORKBENCH, mat, inventory(9));
 	} else if (obj == OBJ_CRATE) {
-		world_set(ctx->w, p, SHAPE_CRATE, 255, inventory(16));
+		world_set(ctx->w, p, SHAPE_CRATE, mat, inventory(16));
 	} else if (obj == OBJ_FLUID) {
 		flowsim_add(ctx->flowsim, p, 1);
 	} else if (obj == OBJ_PIPE) {
 		if (f == FACE_LF || f == FACE_RT)
-			world_set(ctx->w, p, SHAPE_PIPE_X, 255, inventory(1));
+			world_set(ctx->w, p, SHAPE_PIPE_X, mat, inventory(1));
 		else if (f == FACE_UP || f == FACE_DN)
-			world_set(ctx->w, p, SHAPE_PIPE_Y, 255, inventory(1));
+			world_set(ctx->w, p, SHAPE_PIPE_Y, mat, inventory(1));
 		else if (f == FACE_BK || f == FACE_FT)
-			world_set(ctx->w, p, SHAPE_PIPE_Z, 255, inventory(1));
+			world_set(ctx->w, p, SHAPE_PIPE_Z, mat, inventory(1));
 	}
 }
 

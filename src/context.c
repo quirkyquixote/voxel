@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 	window_set_render_callback(ctx->ml->windows, render, ctx);
 
 	/* Load textures */
-	ctx->tex_terrain = texture("data/gradient.png");
+	ctx->tex_terrain = texture("data/materials.png");
 
 	/* Initialize physics */
 	ctx->space = space(ctx->w);
