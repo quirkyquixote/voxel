@@ -344,19 +344,22 @@ void render_inventory(struct context *ctx, struct inventory *inv, struct v3ll p)
 	i = 0;
 	for (x = 0; x < side; ++x) {
 		for (z = 0; z < side; ++z) {
-			glColor4ub(0, 0, 0, alpha);
+			glColor4ub(0, 0, 0, alpha / 2);
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glTranslatef(p.x + (x + .125) / side, p.y + 1.0001, p.z + (z +.125) / side);
 			glScalef(.75 / side, .75 / side, .75 / side);
-			glBegin(GL_LINE_LOOP);
+			glBegin(GL_TRIANGLES);
 			glVertex3f(0, 0, 0);
 			glVertex3f(0, 0, 1);
-			glVertex3f(1, 0, 1);
 			glVertex3f(1, 0, 0);
+			glVertex3f(1, 0, 0);
+			glVertex3f(0, 0, 1);
+			glVertex3f(1, 0, 1);
 			glEnd();
 			glPopMatrix();
 			if (inv->slots[i].num > 0) {
+				glColor4ub(0, 0, 0, alpha);
 				glMatrixMode(GL_MODELVIEW);
 				glPushMatrix();
 				glTranslatef(p.x + (x + .25) / side, p.y + 1, p.z + (z +.25) / side);
