@@ -11,6 +11,7 @@
 #include "v3.h"
 #include "v4.h"
 #include "aab2.h"
+#include "stack.h"
 
 struct vertex {
 	GLfloat x, y, z;
@@ -22,27 +23,19 @@ struct vertex {
 	GLubyte a;
 };
 
-struct vertex_array {
-	struct vertex *data;
-	size_t size;
-	size_t alloc;
-};
-
 struct vertex_buffer {
 	size_t vbo_count;
 	GLuint *vbo_names;
 	size_t *vbo_sizes;
 };
 
-struct vertex_array *vertex_array(void);
-void vertex_array_destroy(struct vertex_array *b);
-void vertex_array_push(struct vertex_array *buf, struct v3f v, struct v2f t0, struct v2f t1, struct v4c c);
-void vertex_array_left(struct vertex_array *buf, struct v3f, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt);
-void vertex_array_right(struct vertex_array *buf, struct v3f, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt);
-void vertex_array_down(struct vertex_array *buf, struct v3f, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt);
-void vertex_array_up(struct vertex_array *buf, struct v3f, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt);
-void vertex_array_back(struct vertex_array *buf, struct v3f, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt);
-void vertex_array_front(struct vertex_array *buf, struct v3f, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt);
+void vertices_push(struct stack *buf, struct v3f v, struct v2f t0, struct v2f t1, struct v4c c);
+void vertices_left(struct stack *buf, struct v3f, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt);
+void vertices_right(struct stack *buf, struct v3f, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt);
+void vertices_down(struct stack *buf, struct v3f, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt);
+void vertices_up(struct stack *buf, struct v3f, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt);
+void vertices_back(struct stack *buf, struct v3f, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt);
+void vertices_front(struct stack *buf, struct v3f, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt);
 
 struct vertex_buffer *vertex_buffer(int nbufs);
 void vertex_buffer_destroy(struct vertex_buffer *r);

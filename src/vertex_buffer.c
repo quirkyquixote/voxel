@@ -1,135 +1,115 @@
 
 #include "vertex_buffer.h"
 
-#include <stdlib.h>
 #include <assert.h>
 
 #include "lighting.h"
 
-struct vertex_array *vertex_array(void)
+void vertices_push(struct stack *buf, struct v3f p, struct v2f t0, struct v2f t1, struct v4c c)
 {
-	struct vertex_array *b = calloc(1, sizeof(*b));
-	return b;
+	struct vertex v;
+	v.x = p.x;
+	v.y = p.y;
+	v.z = p.z;
+	v.u0 = t0.x;
+	v.v0 = t0.y;
+	v.u1 = t1.x;
+	v.v1 = t1.y;
+	v.r = c.x;
+	v.g = c.y;
+	v.b = c.z;
+	v.a = c.w;
+	stack_push(buf, &v);
 }
 
-void vertex_array_destroy(struct vertex_array *b)
-{
-	if (b->data != NULL)
-		free(b->data);
-	free(b);
-}
-
-void vertex_array_push(struct vertex_array *buf, struct v3f p, struct v2f t0, struct v2f t1, struct v4c c)
-{
-	if (buf->size == buf->alloc) {
-		if (buf->alloc == 0)
-			buf->alloc = 2;
-		else
-			buf->alloc *= 2;
-		buf->data = realloc(buf->data, buf->alloc * sizeof(*buf->data));
-	}
-	buf->data[buf->size].x = p.x;
-	buf->data[buf->size].y = p.y;
-	buf->data[buf->size].z = p.z;
-	buf->data[buf->size].u0 = t0.x;
-	buf->data[buf->size].v0 = t0.y;
-	buf->data[buf->size].u1 = t1.x;
-	buf->data[buf->size].v1 = t1.y;
-	buf->data[buf->size].r = c.x;
-	buf->data[buf->size].g = c.y;
-	buf->data[buf->size].b = c.z;
-	buf->data[buf->size].a = c.w;
-	++buf->size;
-}
-
-void vertex_array_left(struct vertex_array *buf, struct v3f p, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt)
+void vertices_left(struct stack *buf, struct v3f p, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt)
 {
 	struct v4c c = v4c(224, 224, 224, 255);
 	struct v3f p0 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p1 = v3_add(p, v3f(0, 0, d));
 	struct v3f p2 = v3_add(p, v3f(0, h, 0));
 	struct v3f p3 = v3_add(p, v3f(0, h, d));
-	vertex_array_push(buf, p0, lt[0], mt[0], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p3, lt[3], mt[3], c);
+	vertices_push(buf, p0, lt[0], mt[0], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p3, lt[3], mt[3], c);
 }
 
-void vertex_array_right(struct vertex_array *buf, struct v3f p, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt)
+void vertices_right(struct stack *buf, struct v3f p, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt)
 {
 	struct v4c c = v4c(224, 224, 224, 255);
 	struct v3f p0 = v3_add(p, v3f(0, 0, d));
 	struct v3f p1 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, h, d));
 	struct v3f p3 = v3_add(p, v3f(0, h, 0));
-	vertex_array_push(buf, p0, lt[0], mt[0], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p3, lt[3], mt[3], c);
+	vertices_push(buf, p0, lt[0], mt[0], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p3, lt[3], mt[3], c);
 }
 
-void vertex_array_down(struct vertex_array *buf, struct v3f p, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt)
+void vertices_down(struct stack *buf, struct v3f p, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt)
 {
 	struct v4c c = v4c(160, 160, 160, 255);
 	struct v3f p0 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, 0, d));
 	struct v3f p3 = v3_add(p, v3f(w, 0, d));
-	vertex_array_push(buf, p0, lt[0], mt[0], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p3, lt[3], mt[3], c);
+	vertices_push(buf, p0, lt[0], mt[0], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p3, lt[3], mt[3], c);
 }
 
-void vertex_array_up(struct vertex_array *buf, struct v3f p, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt)
+void vertices_up(struct stack *buf, struct v3f p, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt)
 {
 	struct v4c c = v4c(255, 255, 255, 255);
 	struct v3f p0 = v3_add(p, v3f(w, 0, d));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, 0, d));
 	struct v3f p3 = v3_add(p, v3f(0, 0, 0));
-	vertex_array_push(buf, p0, lt[0], mt[0], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p3, lt[3], mt[3], c);
+	vertices_push(buf, p0, lt[0], mt[0], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p3, lt[3], mt[3], c);
 }
 
-void vertex_array_back(struct vertex_array *buf, struct v3f p, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt)
+void vertices_back(struct stack *buf, struct v3f p, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt)
 {
 	struct v4c c = v4c(192, 192, 192, 255);
 	struct v3f p0 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p1 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(w, h, 0));
 	struct v3f p3 = v3_add(p, v3f(0, h, 0));
-	vertex_array_push(buf, p0, lt[0], mt[0], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p3, lt[3], mt[3], c);
+	vertices_push(buf, p0, lt[0], mt[0], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p3, lt[3], mt[3], c);
 }
 
-void vertex_array_front(struct vertex_array *buf, struct v3f p, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt)
+void vertices_front(struct stack *buf, struct v3f p, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt)
 {
 	struct v4c c = v4c(192, 192, 192, 255);
 	struct v3f p0 = v3_add(p, v3f(0, 0, 0));
 	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
 	struct v3f p2 = v3_add(p, v3f(0, h, 0));
 	struct v3f p3 = v3_add(p, v3f(w, h, 0));
-	vertex_array_push(buf, p0, lt[0], mt[0], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p2, lt[2], mt[2], c);
-	vertex_array_push(buf, p1, lt[1], mt[1], c);
-	vertex_array_push(buf, p3, lt[3], mt[3], c);
+	vertices_push(buf, p0, lt[0], mt[0], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p2, lt[2], mt[2], c);
+	vertices_push(buf, p1, lt[1], mt[1], c);
+	vertices_push(buf, p3, lt[3], mt[3], c);
 }
 
 struct vertex_buffer *vertex_buffer(int vbo_count)
