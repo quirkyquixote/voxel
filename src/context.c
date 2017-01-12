@@ -16,7 +16,8 @@
 #include "event.h"
 
 const char *obj_names[] = {
-	"block", "slab", "stairs", "pane", "workbench", "crate", "fluid", "pipe",
+	"block", "slab", "stairs", "pane", "fluid (debug)",
+	"mat05", "mat06", "mat07",
 	"obj08", "obj09", "obj0A", "obj0B", "obj0C", "obj0D", "obj0E", "obj0F",
 	"obj10", "obj11", "obj12", "obj13", "obj14", "obj15", "obj16", "obj17",
 	"obj18", "obj19", "obj1A", "obj1B", "obj1C", "obj1D", "obj1E", "obj1F",
@@ -51,8 +52,9 @@ const char *obj_names[] = {
 };
 
 const char *mat_names[] = {
-	"mat00", "mat01", "mat02", "mat03", "mat04", "mat05", "mat06", "mat07",
-	"mat08", "mat09", "mat0A", "mat0B", "mat0C", "mat0D", "mat0E", "mat0F",
+	"limestone", "dirt", "wood", "cobble", "grass", "stonebrick",
+	"workbench", "crate", "pipe",
+	"mat09", "mat0A", "mat0B", "mat0C", "mat0D", "mat0E", "mat0F",
 	"mat10", "mat11", "mat12", "mat13", "mat14", "mat15", "mat16", "mat17",
 	"mat18", "mat19", "mat1A", "mat1B", "mat1C", "mat1D", "mat1E", "mat1F",
 	"mat20", "mat21", "mat22", "mat23", "mat24", "mat25", "mat26", "mat27",
@@ -92,12 +94,8 @@ const char *shape_names[] = {
 	"pane_x", "pane_y", "pane_z",
 	"stairs_df", "stairs_dl", "stairs_db", "stairs_dr",
 	"stairs_uf", "stairs_ul", "stairs_ub", "stairs_ur",
-	"workbench", "crate",
-	"flowsim1", "flowsim2", "flowsim3", "flowsim4", "flowsim5", "flowsim6", "flowsim7",
-	"flowsim8", "flowsim9", "flowsim10", "flowsim11", "flowsim12", "flowsim13",
-	"flowsim14", "flowsim15", "flowsim16",
-        "pipe_x", "pipe_y", "pipe_z",
-	"sha2D", "sha2E", "sha2F",
+	"sha24", "sha25", "sha26", "sha27",
+	"sha28", "sha29", "sha2A", "sha2B", "sha2C", "sha2D", "sha2E", "sha2F",
 	"sha30", "sha31", "sha32", "sha33", "sha34", "sha35", "sha36", "sha37",
 	"sha38", "sha39", "sha3A", "sha3B", "sha3C", "sha3D", "sha3E", "sha3F",
 	"sha40", "sha41", "sha42", "sha43", "sha44", "sha45", "sha46", "sha47",

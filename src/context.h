@@ -25,10 +25,7 @@ enum {
 	OBJ_SLAB,	/* half block */
 	OBJ_STAIRS,	/* stairs */
 	OBJ_PANE,	/* thin pane in the middle */
-	OBJ_WORKBENCH,	/* module for a workbench */
-	OBJ_CRATE,	/* basic container */
 	OBJ_FLUID,	/* object for flowsims (debug only) */
-	OBJ_PIPE,	/* a pipe */
 	OBJ_COUNT
 };
 

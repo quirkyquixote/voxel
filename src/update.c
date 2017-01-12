@@ -13,6 +13,19 @@ int chunks_by_priority(const void *p1, const void *p2)
 	return c1->priority - c2->priority;
 }
 
+static const struct v2f texcoord_from_mat[][3] = {
+	{ { 0 / 16., 0 / 16. }, { 0 / 16., 1 / 16. }, { 0 / 16., 2 / 16. } },
+	{ { 1 / 16., 0 / 16. }, { 1 / 16., 1 / 16. }, { 1 / 16., 2 / 16. } },
+	{ { 2 / 16., 0 / 16. }, { 2 / 16., 1 / 16. }, { 2 / 16., 2 / 16. } },
+	{ { 3 / 16., 0 / 16. }, { 3 / 16., 1 / 16. }, { 3 / 16., 2 / 16. } },
+	{ { 4 / 16., 0 / 16. }, { 4 / 16., 1 / 16. }, { 4 / 16., 2 / 16. } },
+	{ { 5 / 16., 0 / 16. }, { 5 / 16., 1 / 16. }, { 5 / 16., 2 / 16. } },
+	{ { 6 / 16., 0 / 16. }, { 6 / 16., 1 / 16. }, { 6 / 16., 2 / 16. } },
+	{ { 7 / 16., 0 / 16. }, { 7 / 16., 1 / 16. }, { 7 / 16., 2 / 16. } },
+	{ { 8 / 16., 0 / 16. }, { 8 / 16., 1 / 16. }, { 8 / 16., 2 / 16. } },
+	{ { 9 / 16., 0 / 16. }, { 9 / 16., 1 / 16. }, { 9 / 16., 2 / 16. } },
+};
+
 static const char has_left_side[256] = {
 	0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
 };
@@ -41,24 +54,25 @@ struct vertex_desc {
 	GLfloat x, y, z;
 	GLfloat u, v;
 	GLfloat r, g, b;
+	int side;
 };
 
 struct vertex_desc face_dn[] = {
-	{ 0., 0., 0., 0., 1., .7, .7, .7 },
-	{ 1., 0., 0., 1., 1., .7, .7, .7 },
-	{ 0., 0., 1., 0., 0., .7, .7, .7 },
-	{ 0., 0., 1., 0., 0., .7, .7, .7 },
-	{ 1., 0., 0., 1., 1., .7, .7, .7 },
-	{ 1., 0., 1., 1., 0., .7, .7, .7 },
+	{ 0., 0., 0., 0., 1., .7, .7, .7, 2 },
+	{ 1., 0., 0., 1., 1., .7, .7, .7, 2 },
+	{ 0., 0., 1., 0., 0., .7, .7, .7, 2 },
+	{ 0., 0., 1., 0., 0., .7, .7, .7, 2 },
+	{ 1., 0., 0., 1., 1., .7, .7, .7, 2 },
+	{ 1., 0., 1., 1., 0., .7, .7, .7, 2 },
 };
 
 struct vertex_desc face_up[] = {
-	{ 1., 0., 1., 0., 1., 1., 1., 1. },
-	{ 1., 0., 0., 1., 1., 1., 1., 1. },
-	{ 0., 0., 1., 0., 0., 1., 1., 1. },
-	{ 0., 0., 1., 0., 0., 1., 1., 1. },
-	{ 1., 0., 0., 1., 1., 1., 1., 1. },
-	{ 0., 0., 0., 1., 0., 1., 1., 1. },
+	{ 1., 0., 1., 0., 1., 1., 1., 1., 1 },
+	{ 1., 0., 0., 1., 1., 1., 1., 1., 1 },
+	{ 0., 0., 1., 0., 0., 1., 1., 1., 1 },
+	{ 0., 0., 1., 0., 0., 1., 1., 1., 1 },
+	{ 1., 0., 0., 1., 1., 1., 1., 1., 1 },
+	{ 0., 0., 0., 1., 0., 1., 1., 1., 1 },
 };
 
 struct vertex_desc face_lf[] = {
@@ -787,8 +801,8 @@ struct vertex_desc pane_z[] = {
 	{ 1., 1., .53125, 1., 0., .8, .8, .8 },
 };
 
-static inline void vertices_add(struct stack *s, struct vertex_desc *buf, size_t len,
-	struct v3f p, struct v2f t1, struct aab2f t2)
+static inline void vertices_add(struct stack *s, const struct vertex_desc *buf, size_t len,
+	struct v3f p, struct v2f t1, const struct v2f *t2)
 {
 	int i;
 	struct vertex v;
@@ -798,8 +812,8 @@ static inline void vertices_add(struct stack *s, struct vertex_desc *buf, size_t
 		v.z = buf[i].z + p.z;
 		v.u0 = t1.x;
 		v.v0 = t1.y;
-		v.u1 = t2.x0 + t2.x1 * buf[i].u;
-		v.v1 = t2.y0 + t2.y1 * buf[i].v;
+		v.u1 = t2[buf[i].side].x + buf[i].u / 16.;
+		v.v1 = t2[buf[i].side].y + buf[i].v / 16.;
 		v.r = buf[i].r * 255;
 		v.g = buf[i].g * 255;
 		v.b = buf[i].b * 255;
@@ -808,133 +822,112 @@ static inline void vertices_add(struct stack *s, struct vertex_desc *buf, size_t
 	}
 }
 
-static inline struct aab2f texcoord_from_mat(int m)
-{
-	return aab2f((m & 0xf) / 16., (m >> 4) / 16., 1. / 16., 1. / 16.);
-}
-
 void update_cell(struct context *ctx, struct stack *buf, int64_t x, int64_t y, int64_t z)
 {
 	int8_t s, l, d, b;
 	struct v2f lt;
-	struct aab2f mt;
+	const struct v2f *mt;
 
 	s = WORLD_AT(ctx->w, shape, x, y, z);
 	l = WORLD_AT(ctx->w, shape, x - 1, y, z);
 	d = y == 0 ? 0 : WORLD_AT(ctx->w, shape, x, y - 1, z);
 	b = WORLD_AT(ctx->w, shape, x, y, z - 1);
 	if (has_down_side[s] && !has_up_side[d]) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y - 1, z));
-		if (s == SHAPE_PIPE_Y)
-			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_dn, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_up_side[d] && !has_down_side[s]) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y - 1, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y - 1, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
-		if (d == SHAPE_CRATE)
-			mt.y0 += 3 / 16.;
-		else if (d == SHAPE_WORKBENCH)
-			mt.y0 += 4 / 16.;
-		else if (d == SHAPE_PIPE_Y)
-			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_up, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_left_side[s] && !has_right_side[l]) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x - 1, y, z));
-		if (s == SHAPE_PIPE_X)
-			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_lf, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_right_side[l] && !has_left_side[s]) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x - 1, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x - 1, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
-		if (l == SHAPE_PIPE_X)
-			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_rt, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_back_side[s] && !has_front_side[b]) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z - 1));
-		if (s == SHAPE_PIPE_Z)
-			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_bk, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_front_side[b] && !has_back_side[s]) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z - 1));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z - 1)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
-		if (b == SHAPE_PIPE_Z)
-			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_ft, 6, v3f(x, y, z), lt, mt);
 	}
 	if (s == SHAPE_SLAB_DN) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, slab_dn, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_SLAB_UP) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, slab_up, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_SLAB_LF) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, slab_lf, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_SLAB_RT) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, slab_rt, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_SLAB_BK) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, slab_bk, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_SLAB_FT) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, slab_ft, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_DF) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, stairs_df, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_DL) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, stairs_dl, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_DB) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, stairs_db, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_DR) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, stairs_dr, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_UF) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, stairs_uf, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_UL) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, stairs_ul, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_UB) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, stairs_ub, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_UR) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, stairs_ur, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_PANE_Y) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, pane_y, 36, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_PANE_X) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, pane_x, 36, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_PANE_Z) {
-		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
+		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
 		vertices_add(buf, pane_z, 36, v3f(x, y, z), lt, mt);
 	}
@@ -965,6 +958,10 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 
 void use_inventory(struct context *ctx, struct inventory *inv)
 {
+	if (inv == NULL) {
+		fprintf(stderr, "No inventory found\n");
+		return;
+	}
 	struct v3ll p = ctx->cur.p;
 	struct v3f q = ctx->cur.q;
 	int obj = ctx->inv->slots[ctx->tool].obj;
@@ -1032,7 +1029,7 @@ void use_inventory(struct context *ctx, struct inventory *inv)
 			printf("left %s %s 1\n", mat_names[mat], obj_names[obj]);
 		}
 	}
-	if (WORLD_AT(ctx->w, shape, p.x, p.y, p.z) == SHAPE_WORKBENCH) {
+	if (WORLD_AT(ctx->w, mat, p.x, p.y, p.z) == MAT_WORKBENCH) {
 		const struct recipe *r;
 		int i;
 		for (r = recipes; r->num != 0; ++r) {
@@ -1074,10 +1071,15 @@ void use_tool(struct context *ctx)
 	else if (f == FACE_FT)
 		p = v3_add(p, v3c(0, 0, 1));
 	s = WORLD_AT(ctx->w, shape, p.x, p.y, p.z);
-	if (!(s == SHAPE_NONE || (s >= SHAPE_FLUID1 && s <= SHAPE_FLUID16)))
+	if (s != SHAPE_NONE)
 		return;
 	if (obj == OBJ_BLOCK) {
-		world_set(ctx->w, p, SHAPE_BLOCK_DN, mat, NULL);
+		if (mat == MAT_WORKBENCH)
+			world_set(ctx->w, p, SHAPE_BLOCK_DN, mat, inventory(9));
+		else if (mat == MAT_CRATE)
+			world_set(ctx->w, p, SHAPE_BLOCK_DN, mat, inventory(16));
+		else
+			world_set(ctx->w, p, SHAPE_BLOCK_DN, mat, NULL);
 	} else if (obj == OBJ_SLAB) {
 		if (f == FACE_UP) {
 			world_set(ctx->w, p, SHAPE_SLAB_DN, mat, NULL);
@@ -1103,19 +1105,8 @@ void use_tool(struct context *ctx)
 			world_set(ctx->w, p, SHAPE_PANE_X, mat, NULL);
 		else
 			world_set(ctx->w, p, SHAPE_PANE_Z, mat, NULL);
-	} else if (obj == OBJ_WORKBENCH) {
-		world_set(ctx->w, p, SHAPE_WORKBENCH, mat, inventory(9));
-	} else if (obj == OBJ_CRATE) {
-		world_set(ctx->w, p, SHAPE_CRATE, mat, inventory(16));
 	} else if (obj == OBJ_FLUID) {
 		flowsim_add(ctx->flowsim, p, 1);
-	} else if (obj == OBJ_PIPE) {
-		if (f == FACE_LF || f == FACE_RT)
-			world_set(ctx->w, p, SHAPE_PIPE_X, mat, inventory(1));
-		else if (f == FACE_UP || f == FACE_DN)
-			world_set(ctx->w, p, SHAPE_PIPE_Y, mat, inventory(1));
-		else if (f == FACE_BK || f == FACE_FT)
-			world_set(ctx->w, p, SHAPE_PIPE_Z, mat, inventory(1));
 	}
 }
 
@@ -1123,9 +1114,10 @@ void update_player(struct context *ctx)
 {
 	struct v3ll p = ctx->cur.p;
 	int s = WORLD_AT(ctx->w, shape, p.x, p.y, p.z);
+	int m = WORLD_AT(ctx->w, mat, p.x, p.y, p.z);
 
 	if (ctx->cur.face == FACE_UP) {
-		if (s == SHAPE_WORKBENCH || s == SHAPE_CRATE) {
+		if (m == MAT_WORKBENCH || m == MAT_CRATE) {
 			use_inventory(ctx, WORLD_AT(ctx->w, data, p.x, p.y, p.z));
 			return;
 		}
@@ -1232,19 +1224,19 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-//		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
+		//		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
 		if ((c->flags & CHUNK_UNLOADED) != 0) {
-//			printf("; load from file");
+			//			printf("; load from file");
 			/* load this chunk */
 			c->flags ^= CHUNK_UNLOADED;
 		}
 		if ((c->flags & CHUNK_UNRENDERED) != 0) {
-//			printf("; update vertex buffers");
+			//			printf("; update vertex buffers");
 			for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 				update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
 			c->flags ^= CHUNK_UNRENDERED;
 		}
-//		fprintf(stdout, "\n");
+		//		fprintf(stdout, "\n");
 	}
 }
 

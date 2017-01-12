@@ -122,8 +122,7 @@ void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 	//glTexCoord2f(0.5, 0.5);
 	glBegin(GL_TRIANGLES);
 
-	if (obj == OBJ_BLOCK || obj == OBJ_WORKBENCH || obj == OBJ_CRATE ||
-			obj == OBJ_FLUID || obj == OBJ_PIPE) {
+	if (obj == OBJ_BLOCK) {
 		glColor4ub(192, 192, 192, alpha);
 		glVertex3f(0, 0, 0);
 		glVertex3f(0, 0, 1);
@@ -378,7 +377,7 @@ void roam_render(struct context *ctx)
 	struct aab3ll bb;
 	struct v3ll p;
 	struct drop *d;
-	int s, i;
+	int s, m, i;
 
 	render_cursor(ctx);
 	bb.x0 = floor(ctx->player->p.x - 4);
@@ -389,8 +388,8 @@ void roam_render(struct context *ctx)
 	bb.z1 = ceil(ctx->player->p.z + 4);
 
 	aab3_foreach(p, bb) {
-		s = WORLD_AT(ctx->w, shape, p.x, p.y, p.z);
-		if (s == SHAPE_WORKBENCH || s == SHAPE_CRATE)
+		m = WORLD_AT(ctx->w, mat, p.x, p.y, p.z);
+		if (m == MAT_WORKBENCH || m == MAT_CRATE)
 			render_inventory(ctx, WORLD_AT(ctx->w, data, p.x, p.y, p.z), p);
 	}
 
