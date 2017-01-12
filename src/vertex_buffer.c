@@ -60,10 +60,10 @@ void vertex_array_left(struct vertex_array *buf, struct v3f p, GLfloat h, GLfloa
 void vertex_array_right(struct vertex_array *buf, struct v3f p, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt)
 {
 	struct v4c c = v4c(224, 224, 224, 255);
-	struct v3f p0 = v3_add(p, v3f(0, h, d));
-	struct v3f p1 = v3_add(p, v3f(0, 0, d));
-	struct v3f p2 = v3_add(p, v3f(0, h, 0));
-	struct v3f p3 = v3_add(p, v3f(0, 0, 0));
+	struct v3f p0 = v3_add(p, v3f(0, 0, d));
+	struct v3f p1 = v3_add(p, v3f(0, 0, 0));
+	struct v3f p2 = v3_add(p, v3f(0, h, d));
+	struct v3f p3 = v3_add(p, v3f(0, h, 0));
 	vertex_array_push(buf, p0, lt[0], mt[0], c);
 	vertex_array_push(buf, p1, lt[1], mt[1], c);
 	vertex_array_push(buf, p2, lt[2], mt[2], c);
@@ -105,10 +105,10 @@ void vertex_array_up(struct vertex_array *buf, struct v3f p, GLfloat w, GLfloat 
 void vertex_array_back(struct vertex_array *buf, struct v3f p, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt)
 {
 	struct v4c c = v4c(192, 192, 192, 255);
-	struct v3f p0 = v3_add(p, v3f(w, h, 0));
-	struct v3f p1 = v3_add(p, v3f(w, 0, 0));
-	struct v3f p2 = v3_add(p, v3f(0, h, 0));
-	struct v3f p3 = v3_add(p, v3f(0, 0, 0));
+	struct v3f p0 = v3_add(p, v3f(w, 0, 0));
+	struct v3f p1 = v3_add(p, v3f(0, 0, 0));
+	struct v3f p2 = v3_add(p, v3f(w, h, 0));
+	struct v3f p3 = v3_add(p, v3f(0, h, 0));
 	vertex_array_push(buf, p0, lt[0], mt[0], c);
 	vertex_array_push(buf, p1, lt[1], mt[1], c);
 	vertex_array_push(buf, p2, lt[2], mt[2], c);
