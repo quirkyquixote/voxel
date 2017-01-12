@@ -826,31 +826,47 @@ void update_cell(struct context *ctx, struct stack *buf, int64_t x, int64_t y, i
 	if (has_down_side[s] && !has_up_side[d]) {
 		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y - 1, z));
+		if (s == SHAPE_PIPE_Y)
+			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_dn, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_up_side[d] && !has_down_side[s]) {
 		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y - 1, z));
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		if (d == SHAPE_CRATE)
+			mt.y0 += 3 / 16.;
+		else if (d == SHAPE_WORKBENCH)
+			mt.y0 += 4 / 16.;
+		else if (d == SHAPE_PIPE_Y)
+			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_up, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_left_side[s] && !has_right_side[l]) {
 		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x - 1, y, z));
+		if (s == SHAPE_PIPE_X)
+			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_lf, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_right_side[l] && !has_left_side[s]) {
 		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x - 1, y, z));
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		if (l == SHAPE_PIPE_X)
+			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_rt, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_back_side[s] && !has_front_side[b]) {
 		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z));
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z - 1));
+		if (s == SHAPE_PIPE_Z)
+			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_bk, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_front_side[b] && !has_back_side[s]) {
 		mt = texcoord_from_mat(WORLD_AT(ctx->w, mat, x, y, z - 1));
 		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		if (b == SHAPE_PIPE_Z)
+			mt.y0 += 3 / 16.;
 		vertices_add(buf, face_ft, 6, v3f(x, y, z), lt, mt);
 	}
 	if (s == SHAPE_SLAB_DN) {
