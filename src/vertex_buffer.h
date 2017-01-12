@@ -11,7 +11,6 @@
 #include "v3.h"
 #include "v4.h"
 #include "aab2.h"
-#include "stack.h"
 
 struct vertex {
 	GLfloat x, y, z;
@@ -28,14 +27,6 @@ struct vertex_buffer {
 	GLuint *vbo_names;
 	size_t *vbo_sizes;
 };
-
-void vertices_push(struct stack *buf, struct v3f v, struct v2f t0, struct v2f t1, struct v4c c);
-void vertices_left(struct stack *buf, struct v3f, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt);
-void vertices_right(struct stack *buf, struct v3f, GLfloat h, GLfloat d, struct v2f *lt, struct v2f *mt);
-void vertices_down(struct stack *buf, struct v3f, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt);
-void vertices_up(struct stack *buf, struct v3f, GLfloat w, GLfloat d, struct v2f *lt, struct v2f *mt);
-void vertices_back(struct stack *buf, struct v3f, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt);
-void vertices_front(struct stack *buf, struct v3f, GLfloat w, GLfloat h, struct v2f *lt, struct v2f *mt);
 
 struct vertex_buffer *vertex_buffer(int nbufs);
 void vertex_buffer_destroy(struct vertex_buffer *r);
