@@ -268,6 +268,8 @@ void roam_render(struct context *ctx)
 			render_inventory(ctx, world_get_data(ctx->w, p), p);
 	}
 
+	glDisable(GL_DEPTH_TEST);
+
 	list_foreach(d, &ctx->drops, list) {
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
@@ -322,6 +324,7 @@ void roam_render(struct context *ctx)
 		}
 		glPopMatrix();
 	}
+	glEnable(GL_DEPTH_TEST);
 }
 
 void render(void *data)
