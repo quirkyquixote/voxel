@@ -150,6 +150,9 @@ void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 {
 	//glEnable(GL_TEXTURE_2D);
 	//glTexCoord2f(0.5, 0.5);
+	
+	if (mat >= MAT_COUNT)
+		mat = 0;
 
 	shader_enable(ctx->shader);
 
