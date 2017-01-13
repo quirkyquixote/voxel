@@ -36,6 +36,8 @@ struct vertex_buffer {
 	size_t *vbo_sizes;
 };
 
+extern const struct v2f texcoord_from_mat[][3];
+
 extern struct vertex_desc vertices_face_dn[];
 extern struct vertex_desc vertices_face_up[];
 extern struct vertex_desc vertices_face_lf[];
@@ -65,6 +67,8 @@ struct vertex_buffer *vertex_buffer(int nbufs);
 void vertex_buffer_destroy(struct vertex_buffer *r);
 void vertex_buffer_enable(struct vertex_buffer *r);
 void vertex_buffer_draw(struct vertex_buffer *r, GLenum mode, size_t buf);
+void vertex_buffer_draw_slice(struct vertex_buffer *r, GLenum mode, size_t buf,
+		size_t first, size_t count);
 void vertex_buffer_disable(struct vertex_buffer *r);
 void vertex_buffer_update(struct vertex_buffer *r, size_t buf, const void *data, size_t size);
 

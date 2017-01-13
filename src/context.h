@@ -26,6 +26,7 @@ struct context {
 	struct world *w;
 	struct profile_manager *prof_mgr;
 	struct vertex_buffer *shard_vertex_buffer;
+	struct vertex_buffer *obj_vertex_buffer;
 	struct tone_mapper *tone_mapper;
 	struct shader *shader;
 	struct camera *cam;

@@ -13,19 +13,6 @@ int chunks_by_priority(const void *p1, const void *p2)
 	return c1->priority - c2->priority;
 }
 
-static const struct v2f texcoord_from_mat[][3] = {
-	{ { 0 / 16., 0 / 16. }, { 0 / 16., 1 / 16. }, { 0 / 16., 2 / 16. } },
-	{ { 1 / 16., 0 / 16. }, { 1 / 16., 1 / 16. }, { 1 / 16., 2 / 16. } },
-	{ { 2 / 16., 0 / 16. }, { 2 / 16., 1 / 16. }, { 2 / 16., 2 / 16. } },
-	{ { 3 / 16., 0 / 16. }, { 3 / 16., 1 / 16. }, { 3 / 16., 2 / 16. } },
-	{ { 4 / 16., 0 / 16. }, { 4 / 16., 1 / 16. }, { 4 / 16., 2 / 16. } },
-	{ { 5 / 16., 0 / 16. }, { 5 / 16., 1 / 16. }, { 5 / 16., 2 / 16. } },
-	{ { 6 / 16., 0 / 16. }, { 6 / 16., 1 / 16. }, { 6 / 16., 2 / 16. } },
-	{ { 7 / 16., 0 / 16. }, { 7 / 16., 1 / 16. }, { 7 / 16., 2 / 16. } },
-	{ { 8 / 16., 0 / 16. }, { 8 / 16., 1 / 16. }, { 8 / 16., 2 / 16. } },
-	{ { 9 / 16., 0 / 16. }, { 9 / 16., 1 / 16. }, { 9 / 16., 2 / 16. } },
-};
-
 static const char has_left_side[256] = {
 	0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
 };
@@ -260,8 +247,8 @@ void use_inventory(struct context *ctx, struct array *inv)
 						if (j)
 							inventory_set_num(inv, i, j - 1);
 					}
-					inventory_add(ctx->inv, slot(r->obj, 255, r->num));
-					printf("take %s %s %d\n", mat_names[255], obj_names[r->obj], r->num);
+					inventory_add(ctx->inv, slot(r->obj, 0, r->num));
+					printf("take %s %s %d\n", mat_names[0], obj_names[r->obj], r->num);
 				} while (recipe_match(r, inv));
 				break;
 			}

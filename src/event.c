@@ -165,12 +165,6 @@ void event(const SDL_Event *e, void *data)
 					ctx->tool = 0;
 			}
 		}
-		struct slot s = inventory_get(ctx->inv, ctx->tool);
-		if (s.num)
-			printf("Holding %d: %s %s %d\n", ctx->tool,
-					mat_names[s.mat], obj_names[s.obj], s.num);
-		else
-			printf("Holding %d: nothing\n", ctx->tool);
 	}
 	return;
 }

@@ -4,6 +4,19 @@
 #include <assert.h>
 #include <stdlib.h>
 
+const struct v2f texcoord_from_mat[][3] = {
+	{ { 0 / 16., 0 / 16. }, { 0 / 16., 1 / 16. }, { 0 / 16., 2 / 16. } },
+	{ { 1 / 16., 0 / 16. }, { 1 / 16., 1 / 16. }, { 1 / 16., 2 / 16. } },
+	{ { 2 / 16., 0 / 16. }, { 2 / 16., 1 / 16. }, { 2 / 16., 2 / 16. } },
+	{ { 3 / 16., 0 / 16. }, { 3 / 16., 1 / 16. }, { 3 / 16., 2 / 16. } },
+	{ { 4 / 16., 0 / 16. }, { 4 / 16., 1 / 16. }, { 4 / 16., 2 / 16. } },
+	{ { 5 / 16., 0 / 16. }, { 5 / 16., 1 / 16. }, { 5 / 16., 2 / 16. } },
+	{ { 6 / 16., 0 / 16. }, { 6 / 16., 1 / 16. }, { 6 / 16., 2 / 16. } },
+	{ { 7 / 16., 0 / 16. }, { 7 / 16., 1 / 16. }, { 7 / 16., 2 / 16. } },
+	{ { 8 / 16., 0 / 16. }, { 8 / 16., 1 / 16. }, { 8 / 16., 2 / 16. } },
+	{ { 9 / 16., 0 / 16. }, { 9 / 16., 1 / 16. }, { 9 / 16., 2 / 16. } },
+};
+
 struct vertex_desc vertices_face_dn[] = {
 	{ 0., 0., 0., 0., 1., .7, .7, .7, 2 },
 	{ 1., 0., 0., 1., 1., .7, .7, .7, 2 },
@@ -773,9 +786,11 @@ void vertex_buffer_enable(struct vertex_buffer *r)
 	assert(glGetError() == GL_NO_ERROR);
 }
 
-void vertex_buffer_draw(struct vertex_buffer *r, GLenum mode, size_t buf)
+void vertex_buffer_draw_slice(struct vertex_buffer *r, GLenum mode, size_t buf,
+		size_t first, size_t count)
 {
 	assert(buf < r->vbo_count);
+	assert(first + count <= r->vbo_sizes[buf]);
 	glBindBuffer(GL_ARRAY_BUFFER, r->vbo_names[buf]);
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -783,11 +798,16 @@ void vertex_buffer_draw(struct vertex_buffer *r, GLenum mode, size_t buf)
 	glVertexPointer(3, GL_FLOAT, sizeof(struct vertex), (char *)0);
 	glTexCoordPointer(4, GL_FLOAT, sizeof(struct vertex), (char *)offsetof(struct vertex, u0));
 	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(struct vertex), (char *)offsetof(struct vertex, r));
-	glDrawArrays(mode, 0, r->vbo_sizes[buf]);
+	glDrawArrays(mode, first, count);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
 	assert(glGetError() == GL_NO_ERROR);
+}
+
+void vertex_buffer_draw(struct vertex_buffer *r, GLenum mode, size_t buf)
+{
+	vertex_buffer_draw_slice(r, mode, buf, 0, r->vbo_sizes[buf]);
 }
 
 void vertex_buffer_disable(struct vertex_buffer *r)
