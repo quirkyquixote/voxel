@@ -231,11 +231,8 @@ int load_all(struct context *ctx)
 	body_set_step_size(ctx->player, 1);
 	ctx->inv = inventory(9);
 	ctx->tool = 0;
-	for (z = 255; z < 256; ++z) {
-		for (x = 0; x < OBJ_COUNT; ++x) {
-			inventory_add(ctx->inv, x, z, 64);
-		}
-	}
+	for (x = 0; x < OBJ_COUNT; ++x)
+		inventory_add(ctx->inv, x, MAT_LIMESTONE, 64);
 	list_init(&ctx->drops);
 	return 0;
 }
