@@ -114,7 +114,7 @@ int load_all(struct context *ctx)
 	ctx->inv = inventory(9);
 	ctx->tool = 0;
 	for (x = 0; x < OBJ_COUNT; ++x)
-		inventory_add(ctx->inv, x, MAT_LIMESTONE, 64);
+		inventory_set(ctx->inv, x, slot(x, MAT_LIMESTONE, 64));
 	list_init(&ctx->drops);
 	return 0;
 }

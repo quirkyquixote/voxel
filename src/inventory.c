@@ -4,86 +4,110 @@
 
 #include <string.h>
 
-struct inventory *inventory(size_t size)
+int inventory_add(struct array *a, struct slot s)
 {
-	struct inventory *i = calloc(1, sizeof(*i));
-	inventory_resize(i, size);
-	return i;
-}
+	int i, acc, max;
+	struct slot s2;
 
-void inventory_destroy(struct inventory *i)
-{
-	if (i->slots != NULL)
-		free(i);
-	free(i);
-}
-
-int inventory_resize(struct inventory *i, size_t size)
-{
-	i->slots = realloc(i->slots, sizeof(*i->slots) * size);
-	if (size > i->size)
-		memset(i->slots + i->size, 0, sizeof(*i->slots) * (size - i->size));
-	i->size = size;
-	return 0;
-}
-
-int inventory_add(struct inventory *i, int obj, int mat, int num)
-{
-	int slot = 0, acc = 0;
-	while (slot < i->size && acc < num) {
-		acc += inventory_add_to_slot(i, slot, obj, mat, num - acc);
-		++slot;
-	}
-	slot = 0;
-	while (slot < i->size && acc < num) {
-		if (i->slots[slot].num == 0) {
-			i->slots[slot].obj = obj;
-			i->slots[slot].mat = mat;
-			i->slots[slot].num = num - acc;
-			acc = num;
+	acc = 0;
+	for (i = 0; i < a->size; ++i) {
+		array_get(a, i, &s2);
+		if (s2.num > 0 && s2.mat == s.mat && s2.obj == s.obj) {
+			max = 64 - s2.num;
+			if (s.num <= max) {
+				acc += s.num;
+				s2.num += s.num;
+				array_set(a, i, &s2);
+				return acc;
+			} else {
+				acc += max;
+				s2.num += max;
+				array_set(a, i, &s2);
+				s.num -= max;
+			}
 		}
-		++slot;
+	}
+	for (i = 0; i < a->size; ++i) {
+		array_get(a, i, &s2);
+		if (s2.num == 0) {
+			acc += s.num;
+			array_set(a, i, &s);
+			return acc;
+		}
 	}
 	return acc;
 }
 
-int inventory_add_to_slot(struct inventory *i, int slot, int obj, int mat, int num)
+int inventory_add_to_slot(struct array *a, int i, struct slot s)
 {
-	if (i->slots[slot].obj == obj && i->slots[slot].mat == mat) {
-		int acc = 64 - i->slots[slot].num;
-		if (num <= acc) {
-			i->slots[slot].num += num;
-			return num;
+	int max;
+	struct slot s2;
+
+	array_get(a, i, &s2);
+	if (s2.num == 0) {
+		array_set(a, i, &s);
+		return s.num;
+	} else if (s2.mat == s.mat && s2.obj == s.obj) {
+		max = 64 - s2.num;
+		if (s.num <= max) {
+			s2.num += s.num;
+			array_set(a, i, &s2);
+			return s.num;
+		} else {
+			s2.num += max;
+			array_set(a, i, &s2);
+			return max;
 		}
-		num -= acc;
-		i->slots[slot].num = 64;
-		return acc;
+	} else {
+		return 0;
 	}
-	return 0;
 }
 
-int inventory_remove(struct inventory *i, int obj, int mat, int num)
+int inventory_remove(struct array *a, struct slot s)
 {
-	int slot = 0, acc = 0;
-	while (slot < i->size && acc < num) {
-		acc += inventory_remove_from_slot(i, slot, obj, mat, num - acc);
-		++slot;
+	int i, acc, max;
+	struct slot s2;
+
+	for (i = 0; i < a->size; ++i) {
+		array_get(a, i, &s2);
+		if (s2.num > 0 && s2.mat == s.mat && s2.obj == s.obj) {
+			max = s2.num;
+			if (s.num <= max) {
+				acc += s.num;
+				s2.num -= s.num;
+				array_set(a, i, &s2);
+				return acc;
+			} else {
+				acc += max;
+				s2.num -= max;
+				array_set(a, i, &s2);
+				s.num -= max;
+			}
+		}
 	}
 	return acc;
 }
 
-int inventory_remove_from_slot(struct inventory  *i, int slot, int obj, int mat, int num)
+int inventory_remove_from_slot(struct array *a, int i, struct slot s)
 {
-	if (i->slots[slot].obj == obj && i->slots[slot].mat == mat) {
-		if (i->slots[slot].num >= num) {
-			i->slots[slot].num -= num;
-			return num;
+	int max;
+	struct slot s2;
+
+	array_get(a, i, &s2);
+	if (s2.num > 0 && s2.mat == s.mat && s2.obj == s.obj) {
+		max = s2.num;
+		if (s.num <= max) {
+			s2.num -= s.num;
+			array_set(a, i, &s2);
+			return s.num;
+		} else {
+			s2.num -= max;
+			array_set(a, i, &s2);
+			return max;
 		}
-		num += i->slots[slot].num;
-		i->slots[slot].num = 0;
-		return num;
+	} else {
+		return 0;
 	}
-	return 0;
 }
 
 

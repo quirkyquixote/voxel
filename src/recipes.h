@@ -15,7 +15,7 @@ struct recipe {
 
 extern const struct recipe recipes[];
 
-int recipe_match(const struct recipe *r, struct inventory *inv);
+int recipe_match(const struct recipe *r, struct array *inv);
 
 #endif
 

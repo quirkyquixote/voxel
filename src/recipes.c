@@ -45,15 +45,17 @@ const struct recipe recipes[] = {
 	} }, { 0, 0, {} }
 };
 
-int recipe_match(const struct recipe *r, struct inventory *inv)
+int recipe_match(const struct recipe *r, struct array *inv)
 {
 	int i;
+	struct slot s;
 	for (i = 0; i < 9; ++i)	{
+		s = inventory_get(inv, i);
 		if (r->pattern[i] < 0) {
-			if (inv->slots[i].num > 0)
+			if (s.num > 0)
 				return 0;
 		} else {
-			if (inv->slots[i].num == 0 || r->pattern[i] != inv->slots[i].obj)
+			if (s.num == 0 || r->pattern[i] != s.obj)
 				return 0;
 		}
 	}

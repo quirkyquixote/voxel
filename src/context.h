@@ -35,7 +35,7 @@ struct context {
 	struct body *player;
 	struct query cur;
 	struct box3c move;
-	struct inventory *inv;
+	struct array *inv;
 	struct list drops;
 	char mode;
 	char act;

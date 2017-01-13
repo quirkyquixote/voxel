@@ -27,35 +27,33 @@ void event(const SDL_Event *e, void *data)
 		} else if (e->key.keysym.sym == SDLK_LCTRL) {
 			ctx->run = 1;
 		} else if (e->key.keysym.sym == SDLK_1) {
-			ctx->inv->slots[ctx->tool].mat = 0;
+			ctx->tool = 0;
 		} else if (e->key.keysym.sym == SDLK_2) {
-			ctx->inv->slots[ctx->tool].mat = 1;
+			ctx->tool = 1;
 		} else if (e->key.keysym.sym == SDLK_3) {
-			ctx->inv->slots[ctx->tool].mat = 2;
+			ctx->tool = 2;
 		} else if (e->key.keysym.sym == SDLK_4) {
-			ctx->inv->slots[ctx->tool].mat = 3;
+			ctx->tool = 3;
 		} else if (e->key.keysym.sym == SDLK_5) {
-			ctx->inv->slots[ctx->tool].mat = 4;
+			ctx->tool = 4;
 		} else if (e->key.keysym.sym == SDLK_6) {
-			ctx->inv->slots[ctx->tool].mat = 5;
+			ctx->tool = 5;
 		} else if (e->key.keysym.sym == SDLK_7) {
-			ctx->inv->slots[ctx->tool].mat = 6;
+			ctx->tool = 6;
 		} else if (e->key.keysym.sym == SDLK_8) {
-			ctx->inv->slots[ctx->tool].mat = 7;
+			ctx->tool = 7;
 		} else if (e->key.keysym.sym == SDLK_9) {
-			ctx->inv->slots[ctx->tool].mat = 8;
+			ctx->tool = 8;
 		} else if (e->key.keysym.sym == SDLK_q) {
-			if (ctx->inv->slots[ctx->tool].num > 0) {
-				struct drop *d = drop(ctx,
-						ctx->inv->slots[ctx->tool].obj,
-						ctx->inv->slots[ctx->tool].obj,
-						1);
+			struct slot s = inventory_get(ctx->inv, ctx->tool);
+			if (s.num > 0) {
+				struct drop *d = drop(ctx, s.obj, s.mat, 1);
 				body_set_position(d->body, ctx->cam->p);
 				struct v3f v = v3f(0, 0, -.5);
 				v = v3_rotx(v, ctx->cam->r.x);
 				v = v3_roty(v, ctx->cam->r.y);
 				body_set_velocity(d->body, v);
-				--ctx->inv->slots[ctx->tool].num;
+				inventory_set_num(ctx->inv, ctx->tool, s.num - 1);
 			}
 		} else if (e->key.keysym.sym == SDLK_ESCAPE) {
 			main_loop_kill(ctx->ml);
@@ -105,19 +103,19 @@ void event(const SDL_Event *e, void *data)
 					mat_names[world_get_mat(ctx->w, ctx->cur.p)],
 					shape_names[world_get_shape(ctx->w, ctx->cur.p)],
 					world_get_light(ctx->w, ctx->cur.p));
-			struct inventory *inv = world_get_data(ctx->w, ctx->cur.p);
+			struct array *inv = world_get_data(ctx->w, ctx->cur.p);
 			if (inv != NULL) {
 				printf("inventory: [");
-				for (int i = 0; i < inv->size; ++i) {
-					if (i > 0)
-						printf(",");
-					if (inv->slots[i].num == 0)
-						printf("");
+				struct slot s;
+				int is_first = 1;
+				array_foreach(s, inv) {
+					if (is_first)
+						is_first = 0;
 					else
-						printf("%s %s %d",
-								mat_names[inv->slots[i].mat],
-								obj_names[inv->slots[i].obj],
-								inv->slots[i].num);
+						printf(",");
+					if (s.num > 0)
+						printf("%s %s %d", mat_names[s.mat],
+								obj_names[s.obj], s.num);
 				}
 				printf("]\n");
 			}
@@ -145,35 +143,34 @@ void event(const SDL_Event *e, void *data)
 		}
 	} else if (e->type == SDL_MOUSEWHEEL) {
 		if (ctx->move.y0) {
-		if (e->wheel.y > 0) {
-			if (ctx->inv->slots[ctx->tool].mat == 0)
-				ctx->inv->slots[ctx->tool].mat = MAT_COUNT;
-			--ctx->inv->slots[ctx->tool].mat;
-		} else if (e->wheel.y < 0) {
-			++ctx->inv->slots[ctx->tool].mat;
-			if (ctx->inv->slots[ctx->tool].mat == MAT_COUNT)
-				ctx->inv->slots[ctx->tool].mat = 0;
-			if (ctx->tool == ctx->inv->size)
-				ctx->tool = 0;
-		}
+			int mat = inventory_get_mat(ctx->inv, ctx->tool);
+			if (e->wheel.y > 0) {
+				if (mat == 0)
+					mat = MAT_COUNT;
+				--mat;
+			} else if (e->wheel.y < 0) {
+				++mat;
+				if (mat == MAT_COUNT)
+					mat = 0;
+			}
+			inventory_set_mat(ctx->inv, ctx->tool, mat);
 		} else {
-		if (e->wheel.y > 0) {
-			if (ctx->tool == 0)
-				ctx->tool = ctx->inv->size;
-			--ctx->tool;
-		} else if (e->wheel.y < 0) {
-			++ctx->tool;
-			if (ctx->tool == ctx->inv->size)
-				ctx->tool = 0;
+			if (e->wheel.y > 0) {
+				if (ctx->tool == 0)
+					ctx->tool = ctx->inv->size;
+				--ctx->tool;
+			} else if (e->wheel.y < 0) {
+				++ctx->tool;
+				if (ctx->tool == ctx->inv->size)
+					ctx->tool = 0;
+			}
 		}
-		}
-			if (ctx->inv->slots[ctx->tool].num)
-				printf("Holding %d: %s %s %d\n", ctx->tool,
-						mat_names[ctx->inv->slots[ctx->tool].mat],
-						obj_names[ctx->inv->slots[ctx->tool].obj],
-						ctx->inv->slots[ctx->tool].num);
-			else
-				printf("Holding %d: nothing\n", ctx->tool);
+		struct slot s = inventory_get(ctx->inv, ctx->tool);
+		if (s.num)
+			printf("Holding %d: %s %s %d\n", ctx->tool,
+					mat_names[s.mat], obj_names[s.obj], s.num);
+		else
+			printf("Holding %d: nothing\n", ctx->tool);
 	}
 	return;
 }

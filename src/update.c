@@ -956,90 +956,83 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 	array_destroy(buf);
 }
 
-void use_inventory(struct context *ctx, struct inventory *inv)
+void use_inventory(struct context *ctx, struct array *inv)
 {
 	if (inv == NULL) {
-		fprintf(stderr, "No inventory found\n");
+		fprintf(stderr, "WARNING: no inventory found\n");
 		return;
 	}
 	struct v3ll p = ctx->cur.p;
 	struct v3f q = ctx->cur.q;
-	int obj = ctx->inv->slots[ctx->tool].obj;
-	int mat = ctx->inv->slots[ctx->tool].mat;
-	int num = ctx->inv->slots[ctx->tool].num;
 	int side = sqrt(inv->size);
-	int slot = side * floor(q.x * side) + floor(q.z * side);
-	int obj2 = inv->slots[slot].obj;
-	int mat2 = inv->slots[slot].mat;
-	int num2 = inv->slots[slot].num;
+	int i = side * floor(q.x * side) + floor(q.z * side);
+	struct slot s1 = inventory_get(ctx->inv, ctx->tool);
+	struct slot s2 = inventory_get(inv, i);
 	if (ctx->act == 1) {
 		if (ctx->move.y0) {
-			if (num2 == 0) {
+			if (s2.num == 0) {
 				printf("nothing to take\n");
 				return;
 			}
-			int acc = inventory_add(ctx->inv, obj2, mat2, inv->slots[slot].num);
-			inv->slots[slot].num -= acc;
+			int acc = inventory_add(ctx->inv, s2);
+			inventory_set_num(inv, i, s2.num - acc);
 			if (acc == 0)
 				printf("no space to take\n");
 			else
-				printf("take %s %s %d\n", mat_names[mat], obj_names[obj], acc);
+				printf("take %s %s %d\n", mat_names[s1.mat], obj_names[s1.obj], acc);
 		} else {
-			if (num2)
-				printf("take %s %s %d\n", mat_names[mat2], obj_names[obj2], num2);
-			if (num)
-				printf("left %s %s %d\n", mat_names[mat], obj_names[obj], num);
-			inv->slots[slot].obj = obj;
-			inv->slots[slot].mat = mat;
-			inv->slots[slot].num = num;
-			ctx->inv->slots[ctx->tool].obj = obj2;
-			ctx->inv->slots[ctx->tool].mat = mat2;
-			ctx->inv->slots[ctx->tool].num = num2;
+			if (s2.num)
+				printf("take %s %s %d\n", mat_names[s2.mat], obj_names[s2.obj], s2.num);
+			if (s1.num)
+				printf("left %s %s %d\n", mat_names[s1.mat], obj_names[s1.obj], s1.num);
+			inventory_set(inv, i, s1);
+			inventory_set(ctx->inv, ctx->tool, s2);
 		}
 	} else if (ctx->use == 1) {
 		if (ctx->move.y0) {
-			if (num2 == 0) {
+			if (s2.num == 0) {
 				printf("nothing to take\n");
 				return;
 			}
-			int acc = inventory_add(ctx->inv, obj2, mat2, 1);
-			inv->slots[slot].num -= acc;
+			int acc = inventory_add(ctx->inv, slot(s2.obj, s2.mat, 1));
+			inventory_set_num(inv, i, s2.num - acc);
 			if (acc == 0)
 				printf("no space to take\n");
 			else
-				printf("take %s %s 1\n", mat_names[mat], obj_names[obj], acc);
+				printf("take %s %s 1\n", mat_names[s1.mat], obj_names[s1.obj], acc);
 		} else {
-			if (num == 0) {
+			if (s1.num == 0) {
 				printf("nothing to leave\n");
 				return;
 			}
-			if (num2 >= 64) {
+			if (s2.num >= 64) {
 				printf("no space to leave\n");
 				return;
 			}
-			if (num2 == 0) {
-				inv->slots[slot].obj = obj;
-				inv->slots[slot].mat = mat;
-			} else if (obj != obj2 || mat != mat2) {
+			if (s2.num == 0) {
+				inventory_set_obj(inv, i, s1.obj);
+				inventory_set_mat(inv, i, s1.mat);
+			} else if (s1.obj != s2.obj || s1.mat != s2.mat) {
 				printf("not the same object\n");
 				return;
 			}
-			++inv->slots[slot].num;
-			--ctx->inv->slots[ctx->tool].num;
-			printf("left %s %s 1\n", mat_names[mat], obj_names[obj]);
+			inventory_set_num(inv, i, s2.num + 1);
+			inventory_set_num(ctx->inv, ctx->tool, s1.num - 1);
+			printf("left %s %s 1\n", mat_names[s1.mat], obj_names[s1.obj]);
 		}
 	}
-	if (world_get_mat(ctx->w, v3ll(p.x, p.y, p.z)) == MAT_WORKBENCH) {
+	if (world_get_mat(ctx->w, p) == MAT_WORKBENCH) {
 		const struct recipe *r;
 		int i;
 		for (r = recipes; r->num != 0; ++r) {
-			if (recipe_match(r, inv)) {
+			while (recipe_match(r, inv)) {
 				do {
 					for (i = 0; i < 9; ++i) {
-						if (inv->slots[i].num)
-							--inv->slots[i].num;
+						int j = inventory_get_num(inv, i);
+						if (j)
+							inventory_set_num(inv, i, j - 1);
 					}
-					inventory_add(ctx->inv, r->obj, 255, r->num);
+					inventory_add(ctx->inv, slot(r->obj, 255, r->num));
 					printf("take %s %s %d\n", mat_names[255], obj_names[r->obj], r->num);
 				} while (recipe_match(r, inv));
 				break;
@@ -1052,11 +1045,8 @@ void use_tool(struct context *ctx)
 {
 	struct v3ll p = ctx->cur.p;
 	struct v3f q = ctx->cur.q;
-	int s;
 	int f = ctx->cur.face;
-	int obj = ctx->inv->slots[ctx->tool].obj;
-	int mat = ctx->inv->slots[ctx->tool].mat;
-	int num = ctx->inv->slots[ctx->tool].num;
+	struct slot s = inventory_get(ctx->inv, ctx->tool);
 
 	if (f == FACE_LF)
 		p = v3_add(p, v3c(-1, 0, 0));
@@ -1070,42 +1060,41 @@ void use_tool(struct context *ctx)
 		p = v3_add(p, v3c(0, 0, -1));
 	else if (f == FACE_FT)
 		p = v3_add(p, v3c(0, 0, 1));
-	s = world_get_shape(ctx->w, v3ll(p.x, p.y, p.z));
-	if (s != SHAPE_NONE)
+	if (world_get_shape(ctx->w, p) != SHAPE_NONE)
 		return;
-	if (obj == OBJ_BLOCK) {
-		if (mat == MAT_WORKBENCH)
-			world_set(ctx->w, p, SHAPE_BLOCK_DN, mat, inventory(9));
-		else if (mat == MAT_CRATE)
-			world_set(ctx->w, p, SHAPE_BLOCK_DN, mat, inventory(16));
+	if (s.obj == OBJ_BLOCK) {
+		if (s.mat == MAT_WORKBENCH)
+			world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat, inventory(9));
+		else if (s.mat == MAT_CRATE)
+			world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat, inventory(16));
 		else
-			world_set(ctx->w, p, SHAPE_BLOCK_DN, mat, NULL);
-	} else if (obj == OBJ_SLAB) {
+			world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat, NULL);
+	} else if (s.obj == OBJ_SLAB) {
 		if (f == FACE_UP) {
-			world_set(ctx->w, p, SHAPE_SLAB_DN, mat, NULL);
+			world_set(ctx->w, p, SHAPE_SLAB_DN, s.mat, NULL);
 		} else if (f == FACE_DN) {
-			world_set(ctx->w, p, SHAPE_SLAB_UP, mat, NULL);
+			world_set(ctx->w, p, SHAPE_SLAB_UP, s.mat, NULL);
 		} else if (q.y > 0.5) {
-			world_set(ctx->w, p, SHAPE_SLAB_UP, mat, NULL);
+			world_set(ctx->w, p, SHAPE_SLAB_UP, s.mat, NULL);
 		} else {
-			world_set(ctx->w, p, SHAPE_SLAB_DN, mat, NULL);
+			world_set(ctx->w, p, SHAPE_SLAB_DN, s.mat, NULL);
 		}
-	} else if (obj == OBJ_STAIRS) {
+	} else if (s.obj == OBJ_STAIRS) {
 		if (f == FACE_UP) {
-			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, mat, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, s.mat, NULL);
 		} else if (f == FACE_DN) {
-			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, mat, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, s.mat, NULL);
 		} else if (q.y > 0.5) {
-			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, mat, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, s.mat, NULL);
 		} else {
-			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, mat, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, s.mat, NULL);
 		}
-	} else if (obj == OBJ_PANE) {
+	} else if (s.obj == OBJ_PANE) {
 		if (ctx->roty & 1)
-			world_set(ctx->w, p, SHAPE_PANE_X, mat, NULL);
+			world_set(ctx->w, p, SHAPE_PANE_X, s.mat, NULL);
 		else
-			world_set(ctx->w, p, SHAPE_PANE_Z, mat, NULL);
-	} else if (obj == OBJ_FLUID) {
+			world_set(ctx->w, p, SHAPE_PANE_Z, s.mat, NULL);
+	} else if (s.obj == OBJ_FLUID) {
 		flowsim_add(ctx->flowsim, p, 1);
 	}
 }
@@ -1113,12 +1102,12 @@ void use_tool(struct context *ctx)
 void update_player(struct context *ctx)
 {
 	struct v3ll p = ctx->cur.p;
-	int s = world_get_shape(ctx->w, v3ll(p.x, p.y, p.z));
-	int m = world_get_mat(ctx->w, v3ll(p.x, p.y, p.z));
+	int s = world_get_shape(ctx->w, p);
+	int m = world_get_mat(ctx->w, p);
 
 	if (ctx->cur.face == FACE_UP) {
 		if (m == MAT_WORKBENCH || m == MAT_CRATE) {
-			use_inventory(ctx, world_get_data(ctx->w, v3ll(p.x, p.y, p.z)));
+			use_inventory(ctx, world_get_data(ctx->w, p));
 			return;
 		}
 	}

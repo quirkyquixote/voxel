@@ -331,10 +331,11 @@ void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 	//glDisable(GL_TEXTURE_2D);
 }
 
-void render_inventory(struct context *ctx, struct inventory *inv, struct v3ll p)
+void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
 {
 	int i, x, z;
 	int side = sqrt(inv->size);
+	struct slot s;
 
 	GLfloat d = v3_dist(ctx->player->p, p);
 	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
@@ -357,13 +358,14 @@ void render_inventory(struct context *ctx, struct inventory *inv, struct v3ll p)
 			glVertex3f(1, 0, 1);
 			glEnd();
 			glPopMatrix();
-			if (inv->slots[i].num > 0) {
+			struct slot s = inventory_get(inv, i);
+			if (s.num > 0) {
 				glColor4ub(0, 0, 0, alpha);
 				glMatrixMode(GL_MODELVIEW);
 				glPushMatrix();
 				glTranslatef(p.x + (x + .25) / side, p.y + 1, p.z + (z +.25) / side);
 				glScalef(.5 / side, .5 / side, .5 / side);
-				render_obj(ctx, inv->slots[i].obj, inv->slots[i].mat, alpha);
+				render_obj(ctx, s.obj, s.mat, alpha);
 				glPopMatrix();
 			}
 			++i;
@@ -377,7 +379,8 @@ void roam_render(struct context *ctx)
 	struct box3ll bb;
 	struct v3ll p;
 	struct drop *d;
-	int s, m, i;
+	int m, i;
+	struct slot s;
 
 	render_cursor(ctx);
 	bb.x0 = floor(ctx->player->p.x - 4);
@@ -402,7 +405,8 @@ void roam_render(struct context *ctx)
 		glPopMatrix();
 	}
 
-	if (ctx->inv->slots[ctx->tool].num > 0) {
+	s = inventory_get(ctx->inv, ctx->tool);
+	if (s.num > 0) {
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
 		glTranslatef(ctx->cam->p.x, ctx->cam->p.y, ctx->cam->p.z);
@@ -410,7 +414,7 @@ void roam_render(struct context *ctx)
 		glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
 		glTranslatef(.4, -.4, -.8);
 		glScalef(.125, .125, .125);
-		render_obj(ctx, ctx->inv->slots[ctx->tool].obj, ctx->inv->slots[ctx->tool].mat, 255);
+		render_obj(ctx, s.obj, s.mat, 255);
 		glPopMatrix();
 	}
 
@@ -432,8 +436,9 @@ void roam_render(struct context *ctx)
 		glVertex3f(1.25, 0, 1.25);
 		glVertex3f(1.25, 0, -.25);
 		glEnd();
-		if (ctx->inv->slots[i].num > 0)
-			render_obj(ctx, ctx->inv->slots[i].obj, ctx->inv->slots[i].mat, 255);
+		s = inventory_get(ctx->inv, i);
+		if (s.num > 0)
+			render_obj(ctx, s.obj, s.mat, 255);
 		glPopMatrix();
 	}
 }
