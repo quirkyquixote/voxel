@@ -34,7 +34,7 @@ struct context {
 	struct flowsim *flowsim;
 	struct body *player;
 	struct query cur;
-	struct aab3c move;
+	struct box3c move;
 	struct inventory *inv;
 	struct list drops;
 	char mode;

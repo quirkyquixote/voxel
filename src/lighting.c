@@ -2,7 +2,7 @@
 #include "lighting.h"
 
 #include "stack.h"
-#include "aab2.h"
+#include "box2.h"
 #include "v2.h"
 #include "types.h"
 
@@ -65,7 +65,7 @@ void copy_value(struct world *w, struct v3ll p, int *k)
 		*k = k2;
 }
 
-void update_lighting(struct world *w, struct aab3ll bb, struct aab3ll *rbb)
+void update_lighting(struct world *w, struct box3ll bb, struct box3ll *rbb)
 {
 	struct lighting *l;
 	struct v3ll p;
@@ -76,7 +76,7 @@ void update_lighting(struct world *w, struct aab3ll bb, struct aab3ll *rbb)
 	l->s1 = stack(sizeof(struct v3ll));
 	l->s2 = stack(sizeof(struct v3ll));
 
-	aab3_foreach(p, bb) {
+	box3_foreach(p, bb) {
 		stack_push(l->s1, &p);
 		stack_push(l->s2, &p);
 	}
@@ -94,9 +94,9 @@ void update_lighting(struct world *w, struct aab3ll bb, struct aab3ll *rbb)
 	}
 
 	if (bb.y1 == WORLD_H) {
-		struct aab2ll top = aab2ll(bb.x0, bb.z0, bb.x1, bb.z1);
+		struct box2ll top = box2ll(bb.x0, bb.z0, bb.x1, bb.z1);
 		struct v2ll q;
-		aab2_foreach(q, top)
+		box2_foreach(q, top)
 			world_set_light(w, v3ll(q.x, WORLD_H - 1, q.y), 15);
 	}
 
@@ -127,7 +127,7 @@ void update_lighting(struct world *w, struct aab3ll bb, struct aab3ll *rbb)
 	stack_destroy(l->s2);
 	free(l);
 
-	aab3_foreach(p, bb) {
+	box3_foreach(p, bb) {
 		int s = world_get_shape(w, p);
 		if (s == SHAPE_SLAB_DN) {
 			k = world_get_light(w, p);

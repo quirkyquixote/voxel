@@ -10,7 +10,7 @@
 #include "v2.h"
 #include "v3.h"
 #include "v4.h"
-#include "aab2.h"
+#include "box2.h"
 
 struct vertex {
 	GLfloat x, y, z;

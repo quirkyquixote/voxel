@@ -1186,7 +1186,7 @@ void update_chunks(struct context *ctx)
 	int x, z, i, j, k;
 	struct chunk *c;
 	struct chunk *out_of_date[CHUNKS_PER_WORLD * CHUNKS_PER_WORLD];
-	struct aab2ll bb;
+	struct box2ll bb;
 	struct v3ll m;
 
 	bb.x0 = floor(ctx->player->p.x) - CHUNK_W * CHUNKS_PER_WORLD / 2;

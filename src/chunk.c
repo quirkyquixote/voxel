@@ -181,7 +181,7 @@ int chunk_save(struct chunk *c, union sz_tag **root)
 	int i;
 	union sz_tag *shards, *entities;
 	struct v3ll p;
-	struct aab3ll bb = { 0, 0, 0, CHUNK_W, CHUNK_H, CHUNK_D };
+	struct box3ll bb = { 0, 0, 0, CHUNK_W, CHUNK_H, CHUNK_D };
 	*root = sz_dict();
 	sz_dict_add(*root, "x", sz_i64(c->x));
 	sz_dict_add(*root, "z", sz_i64(c->z));
@@ -193,7 +193,7 @@ int chunk_save(struct chunk *c, union sz_tag **root)
 	}
 	sz_dict_add(*root, "shards", shards);
 	entities = sz_list();
-	aab3_foreach(p, bb) {
+	box3_foreach(p, bb) {
 		union sz_tag *tag;
 		if (entity_save(c, p, &tag))
 			sz_list_add(entities, tag);
@@ -249,15 +249,15 @@ int world_save(struct world *w, union sz_tag **root)
 
 void world_set(struct world *w, struct v3ll p, int shape, int mat, void *data)
 {
-	struct aab3ll bb;
+	struct box3ll bb;
 	world_set_shape(w, p, shape);
 	world_set_mat(w, p, mat);
 	world_set_data(w, p, data);
-	update_lighting(w, aab3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
+	update_lighting(w, box3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
 	world_set_flags(w, bb, CHUNK_UNRENDERED);
 }
 
-void world_set_flags(struct world *w, struct aab3ll bb, int flags)
+void world_set_flags(struct world *w, struct box3ll bb, int flags)
 {
 	int x, z;
 	bb.x0 = (bb.x0 >> 4) & 0xf;

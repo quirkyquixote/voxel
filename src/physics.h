@@ -8,7 +8,7 @@
 #include "list.h"
 #include "v2.h"
 #include "v3.h"
-#include "aab3.h"
+#include "box3.h"
 #include "chunk.h"
 
 enum {
@@ -28,7 +28,7 @@ struct body {
 	struct v3f r;
 	struct v3f v;
 	struct v2f s;
-	struct aab3f bb;
+	struct box3f bb;
 	int step_size;
 	void (* cb_func)(struct body *b, void *data, int face);
 	void *cb_data;

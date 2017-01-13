@@ -374,7 +374,7 @@ void render_inventory(struct context *ctx, struct inventory *inv, struct v3ll p)
 
 void roam_render(struct context *ctx)
 {
-	struct aab3ll bb;
+	struct box3ll bb;
 	struct v3ll p;
 	struct drop *d;
 	int s, m, i;
@@ -387,7 +387,7 @@ void roam_render(struct context *ctx)
 	bb.y1 = ceil(ctx->player->p.y + 4);
 	bb.z1 = ceil(ctx->player->p.z + 4);
 
-	aab3_foreach(p, bb) {
+	box3_foreach(p, bb) {
 		m = world_get_mat(ctx->w, p);
 		if (m == MAT_WORKBENCH || m == MAT_CRATE)
 			render_inventory(ctx, world_get_data(ctx->w, p), p);

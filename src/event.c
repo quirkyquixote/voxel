@@ -65,7 +65,7 @@ void event(const SDL_Event *e, void *data)
 			fprintf(stdout, "=== PROFILE START ===\n");
 			profile_manager_reset(ctx->prof_mgr);
 		} else if (e->key.keysym.sym == SDLK_l) {
-			struct aab3ll bb, bb2;
+			struct box3ll bb, bb2;
 			bb.x0 = ctx->w->x;
 			bb.y0 = WORLD_H - 1;
 			bb.z0 = ctx->w->z;
