@@ -6,6 +6,7 @@
 
 #include "sz.h"
 #include "lighting.h"
+#include "inventory.h"
 
 struct shard *shard(int id, int y)
 {

@@ -20,15 +20,6 @@ enum {
 	MODE_CRAFT,
 };
 
-enum {
-	OBJ_BLOCK,	/* full block */
-	OBJ_SLAB,	/* half block */
-	OBJ_STAIRS,	/* stairs */
-	OBJ_PANE,	/* thin pane in the middle */
-	OBJ_FLUID,	/* object for flowsims (debug only) */
-	OBJ_COUNT
-};
-
 struct context {
 	char *dir;
 	struct main_loop *ml;
@@ -57,11 +48,6 @@ struct context {
 	int chunks_per_tick;
 	uint64_t tick;
 };
-
-extern const char *obj_names[];
-extern const char *mat_names[];
-extern const char *face_names[];
-extern const char *shape_names[];
 
 unsigned long long next_id(void);
 unsigned long long max_id(void);

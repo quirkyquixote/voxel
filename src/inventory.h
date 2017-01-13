@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "types.h"
+
 struct slot {
 	uint8_t obj;
 	uint8_t mat;

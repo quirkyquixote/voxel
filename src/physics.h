@@ -12,15 +12,6 @@
 #include "chunk.h"
 
 enum {
-	FACE_FT,
-	FACE_LF,
-	FACE_BK,
-	FACE_RT,
-	FACE_UP,
-	FACE_DN,
-};
-
-enum {
 	CELL_LDB = 1 << 0,
 	CELL_LDF = 1 << 1,
 	CELL_LUB = 1 << 2,

@@ -4,6 +4,7 @@
 #include "stack.h"
 #include "aab2.h"
 #include "v2.h"
+#include "types.h"
 
 static const int opaque_shape[] = {
 	0,

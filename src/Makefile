@@ -26,6 +26,7 @@ voxel_objs += shader.o
 voxel_objs += sz.o
 voxel_objs += terraform.o
 voxel_objs += tone_mapper.o
+voxel_objs += types.o
 voxel_objs += update.o
 
 szcat_objs += sz.o
