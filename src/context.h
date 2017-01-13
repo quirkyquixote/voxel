@@ -30,6 +30,7 @@ struct context {
 	struct shader *shader;
 	struct camera *cam;
 	GLuint tex_terrain;
+	GLuint tex_font;
 	struct space *space;
 	struct flowsim *flowsim;
 	struct body *player;

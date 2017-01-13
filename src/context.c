@@ -43,6 +43,11 @@ int main(int argc, char *argv[])
 
 	/* Load textures */
 	ctx->tex_terrain = texture("data/materials.png");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	ctx->tex_font = texture("data/font.png");
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	/* Initialize physics */
 	ctx->space = space(ctx->w);

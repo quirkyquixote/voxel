@@ -5,6 +5,36 @@
 #include "context.h"
 #include "drop.h"
 
+void render_string(struct context *ctx, char *str)
+{
+	GLfloat u0, v0, u1, v1;
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, ctx->tex_font);
+	while (*str != 0) {
+		u0 = (*str % 16) / 16.;
+		v0 = (*str / 16) / 16.;
+		u1 = u0 + 1 / 16.;
+		v1 = v0 + 1 / 16.;
+		glBegin(GL_TRIANGLES);
+		glTexCoord2d(u1, v0);
+		glVertex3f(.5, 1, 0);
+		glTexCoord2d(u0, v0);
+		glVertex3f(0, 1, 0);
+		glTexCoord2d(u1, v1);
+		glVertex3f(.5, 0, 0);
+		glTexCoord2d(u1, v1);
+		glVertex3f(.5, 0, 0);
+		glTexCoord2d(u0, v0);
+		glVertex3f(0, 1, 0);
+		glTexCoord2d(u0, v1);
+		glVertex3f(0, 0, 0);
+		glEnd();
+		glTranslatef(.5, 0, 0);
+		++str;
+	}
+	glDisable(GL_TEXTURE_2D);
+}
+
 void render_flowsim(struct context *ctx)
 {
 	struct fs_volume *v;
@@ -347,7 +377,9 @@ void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
 			glColor4ub(0, 0, 0, alpha / 2);
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
-			glTranslatef(p.x + (x + .125) / side, p.y + 1.0001, p.z + (z +.125) / side);
+			glTranslatef(p.x + (GLfloat)x / side, p.y + 1.0001, p.z + (GLfloat)z / side);
+			glPushMatrix();
+			glTranslatef(.125 / side, 0, .125 / side);
 			glScalef(.75 / side, .75 / side, .75 / side);
 			glBegin(GL_TRIANGLES);
 			glVertex3f(0, 0, 0);
@@ -361,13 +393,26 @@ void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
 			struct slot s = inventory_get(inv, i);
 			if (s.num > 0) {
 				glColor4ub(0, 0, 0, alpha);
-				glMatrixMode(GL_MODELVIEW);
 				glPushMatrix();
-				glTranslatef(p.x + (x + .25) / side, p.y + 1, p.z + (z +.25) / side);
+				glTranslatef(.25 / side, 0, .25 / side);
 				glScalef(.5 / side, .5 / side, .5 / side);
 				render_obj(ctx, s.obj, s.mat, alpha);
 				glPopMatrix();
 			}
+			if (s.num > 1) {
+				glColor4ub(255, 255, 255, alpha);
+				glMatrixMode(GL_MODELVIEW);
+				glPushMatrix();
+				glTranslatef(.5 / side, .5 / side, .5 / side);
+				glRotatef(180.0 * ctx->cam->r.y / M_PI, 0, -1, 0);
+				glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
+				glScalef(.05, .05, .05);
+				char buf[3];
+				snprintf(buf, sizeof(buf), "%02d", s.num);
+				render_string(ctx, buf);
+				glPopMatrix();
+			}
+			glPopMatrix();
 			++i;
 		}
 	}
@@ -439,6 +484,15 @@ void roam_render(struct context *ctx)
 		s = inventory_get(ctx->inv, i);
 		if (s.num > 0)
 			render_obj(ctx, s.obj, s.mat, 255);
+		if (s.num > 1) {
+			glEnable(GL_BLEND);
+			glColor3f(1, 1, 1);
+			glTranslatef(0, -1.5, 0);
+			char buf[3];
+			snprintf(buf, sizeof(buf), "%02d", s.num);
+			render_string(ctx, buf);
+			glDisable(GL_BLEND);
+		}
 		glPopMatrix();
 	}
 }
