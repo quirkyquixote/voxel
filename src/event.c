@@ -28,31 +28,22 @@ void event(const SDL_Event *e, void *data)
 			ctx->run = 1;
 		} else if (e->key.keysym.sym == SDLK_1) {
 			ctx->inv->slots[ctx->tool].mat = 0;
-			goto print_tool;
 		} else if (e->key.keysym.sym == SDLK_2) {
 			ctx->inv->slots[ctx->tool].mat = 1;
-			goto print_tool;
 		} else if (e->key.keysym.sym == SDLK_3) {
 			ctx->inv->slots[ctx->tool].mat = 2;
-			goto print_tool;
 		} else if (e->key.keysym.sym == SDLK_4) {
 			ctx->inv->slots[ctx->tool].mat = 3;
-			goto print_tool;
 		} else if (e->key.keysym.sym == SDLK_5) {
 			ctx->inv->slots[ctx->tool].mat = 4;
-			goto print_tool;
 		} else if (e->key.keysym.sym == SDLK_6) {
 			ctx->inv->slots[ctx->tool].mat = 5;
-			goto print_tool;
 		} else if (e->key.keysym.sym == SDLK_7) {
 			ctx->inv->slots[ctx->tool].mat = 6;
-			goto print_tool;
 		} else if (e->key.keysym.sym == SDLK_8) {
 			ctx->inv->slots[ctx->tool].mat = 7;
-			goto print_tool;
 		} else if (e->key.keysym.sym == SDLK_9) {
 			ctx->inv->slots[ctx->tool].mat = 8;
-			goto print_tool;
 		} else if (e->key.keysym.sym == SDLK_q) {
 			if (ctx->inv->slots[ctx->tool].num > 0) {
 				struct drop *d = drop(ctx,
@@ -153,21 +144,29 @@ void event(const SDL_Event *e, void *data)
 			ctx->pick = 0;
 		}
 	} else if (e->type == SDL_MOUSEWHEEL) {
+		if (ctx->move.y0) {
+		if (e->wheel.y > 0) {
+			if (ctx->inv->slots[ctx->tool].mat == 0)
+				ctx->inv->slots[ctx->tool].mat = MAT_COUNT;
+			--ctx->inv->slots[ctx->tool].mat;
+		} else if (e->wheel.y < 0) {
+			++ctx->inv->slots[ctx->tool].mat;
+			if (ctx->inv->slots[ctx->tool].mat == MAT_COUNT)
+				ctx->inv->slots[ctx->tool].mat = 0;
+			if (ctx->tool == ctx->inv->size)
+				ctx->tool = 0;
+		}
+		} else {
 		if (e->wheel.y > 0) {
 			if (ctx->tool == 0)
 				ctx->tool = ctx->inv->size;
 			--ctx->tool;
-			goto print_tool;
 		} else if (e->wheel.y < 0) {
 			++ctx->tool;
 			if (ctx->tool == ctx->inv->size)
 				ctx->tool = 0;
-			goto print_tool;
 		}
-	}
-	return;
-
-print_tool:
+		}
 			if (ctx->inv->slots[ctx->tool].num)
 				printf("Holding %d: %s %s %d\n", ctx->tool,
 						mat_names[ctx->inv->slots[ctx->tool].mat],
@@ -175,6 +174,7 @@ print_tool:
 						ctx->inv->slots[ctx->tool].num);
 			else
 				printf("Holding %d: nothing\n", ctx->tool);
-
+	}
+	return;
 }
 
