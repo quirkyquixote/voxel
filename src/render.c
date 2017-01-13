@@ -62,7 +62,7 @@ void render_cursor(struct context *ctx)
 	GLfloat z = ctx->cur.p.z;
 
 	if (ctx->cur.face == FACE_UP &&
-			WORLD_AT(ctx->w, data, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z) != NULL)
+			world_get_data(ctx->w, ctx->cur.p) != NULL)
 		return;
 
 	glMatrixMode(GL_MODELVIEW);
@@ -388,9 +388,9 @@ void roam_render(struct context *ctx)
 	bb.z1 = ceil(ctx->player->p.z + 4);
 
 	aab3_foreach(p, bb) {
-		m = WORLD_AT(ctx->w, mat, p.x, p.y, p.z);
+		m = world_get_mat(ctx->w, p);
 		if (m == MAT_WORKBENCH || m == MAT_CRATE)
-			render_inventory(ctx, WORLD_AT(ctx->w, data, p.x, p.y, p.z), p);
+			render_inventory(ctx, world_get_data(ctx->w, p), p);
 	}
 
 	list_foreach(d, &ctx->drops, list) {

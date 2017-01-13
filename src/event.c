@@ -102,10 +102,10 @@ void event(const SDL_Event *e, void *data)
 					ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z,
 					ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z,
 					face_names[ctx->cur.face],
-					mat_names[WORLD_AT(ctx->w, mat, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)],
-					shape_names[WORLD_AT(ctx->w, shape, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z)],
-					WORLD_AT(ctx->w, light, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z));
-			struct inventory *inv = WORLD_AT(ctx->w, data, ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z);
+					mat_names[world_get_mat(ctx->w, ctx->cur.p)],
+					shape_names[world_get_shape(ctx->w, ctx->cur.p)],
+					world_get_light(ctx->w, ctx->cur.p));
+			struct inventory *inv = world_get_data(ctx->w, ctx->cur.p);
 			if (inv != NULL) {
 				printf("inventory: [");
 				for (int i = 0; i < inv->size; ++i) {

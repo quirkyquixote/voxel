@@ -100,7 +100,7 @@ int entity_load(struct chunk *c, union sz_tag *root)
 		} else if (strcmp(key, "items") == 0) {
 			struct inventory *inv = inventory(0);
 			inventory_load(inv, val);
-			CHUNK_AT(c, data, p.x, p.y, p.z) = inv;
+			chunk_set_data(c, p, inv);
 		} else {
 			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
 		}
@@ -156,10 +156,10 @@ int entity_save(struct chunk *c, struct v3ll p, union sz_tag **root)
 	int s, m;
 	struct inventory *inv;
 	union sz_tag *tag;
-	s = CHUNK_AT(c, shape, p.x, p.y, p.z);
-	m = CHUNK_AT(c, mat, p.x, p.y, p.z);
+	s = chunk_get_shape(c, p);
+	m = chunk_get_mat(c, p);
 	if (m == MAT_WORKBENCH || m == MAT_CRATE) {
-		inv = CHUNK_AT(c, data, p.x, p.y, p.z);
+		inv = chunk_get_data(c, p);
 		if (inv == NULL) {
 			fprintf(stderr, "WARNING: no inventory found\n");
 			return 0;
@@ -249,9 +249,9 @@ int world_save(struct world *w, union sz_tag **root)
 void world_set(struct world *w, struct v3ll p, int shape, int mat, void *data)
 {
 	struct aab3ll bb;
-	WORLD_AT(w, shape, p.x, p.y, p.z) = shape;
-	WORLD_AT(w, mat, p.x, p.y, p.z) = mat;
-	WORLD_AT(w, data, p.x, p.y, p.z) = data;
+	world_set_shape(w, p, shape);
+	world_set_mat(w, p, mat);
+	world_set_data(w, p, data);
 	update_lighting(w, aab3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
 	world_set_flags(w, bb, CHUNK_UNRENDERED);
 }

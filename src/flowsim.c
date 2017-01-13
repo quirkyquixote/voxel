@@ -30,13 +30,13 @@ void merge_layers(struct fs_layer *l1, struct fs_layer *l2)
 static inline void check_boundary(struct fs_layer *l, struct fs_layer *l2,
     struct stack *s, struct v3ll p)
 {
-	if (WORLD_AT(l->v->w, shape, p.x, p.y, p.z) != SHAPE_NONE)
+	if (world_get_shape(l->v->w, p) != SHAPE_NONE)
 		return;
-	if (WORLD_AT(l->v->w, data, p.x, p.y, p.z) == l)
+	if (world_get_data(l->v->w, p) == l)
 		return;
-	if (WORLD_AT(l->v->w, data, p.x, p.y - 1, p.z) != l2)
+	if (world_get_data(l->v->w, v3ll(p.x, p.y - 1, p.z)) != l2)
 		return;
-	WORLD_AT(l->v->w, data, p.x, p.y, p.z) = l;
+	world_set_data(l->v->w, p, l);
 	stack_push(s, &p);
 	stack_push(l->cells, &p);
 }
@@ -58,11 +58,11 @@ static void layer_from_layer(struct fs_layer *l, struct fs_layer *l2,
 
 static inline void test_fall(struct fs_layer *l, struct v3ll p)
 {
-	if (WORLD_AT(l->v->w, shape, p.x, p.y, p.z) != SHAPE_NONE)
+	if (world_get_shape(l->v->w, p) != SHAPE_NONE)
 		return;
-	if (WORLD_AT(l->v->w, data, p.x, p.y, p.z) == l)
+	if (world_get_data(l->v->w, p) == l)
 		return;
-	if (WORLD_AT(l->v->w, shape, p.x, p.y - 1, p.z) != SHAPE_NONE)
+	if (world_get_shape(l->v->w, v3ll(p.x, p.y - 1, p.z)) != SHAPE_NONE)
 		return;
 	stack_push(l->falls, &p);
 }
@@ -84,18 +84,18 @@ static void calculate_falls(struct fs_layer *l)
 static inline void test_cell(struct fs_layer *l, struct v3ll p)
 {
 	struct fs_layer *l2;
-	if (WORLD_AT(l->v->w, shape, p.x, p.y, p.z) != SHAPE_NONE)
+	if (world_get_shape(l->v->w, p) != SHAPE_NONE)
 		return;
-	l2 = WORLD_AT(l->v->w, data, p.x, p.y, p.z);
+	l2 = world_get_data(l->v->w, p);
 	if (l2 == l)
 		return;
 	if (l2 != NULL) {
 		merge_layers(l, l2);
 		return;
 	}
-	if (WORLD_AT(l->v->w, shape, p.x, p.y - 1, p.z) == SHAPE_NONE)
+	if (world_get_shape(l->v->w, v3ll(p.x, p.y - 1, p.z)) == SHAPE_NONE)
 		return;
-	WORLD_AT(l->v->w, data, p.x, p.y, p.z) = l;
+	world_set_data(l->v->w, p, l);
 	stack_push(l->cells, &p);
 }
 
@@ -133,7 +133,7 @@ void fs_layer_destroy(struct fs_layer *l)
 	printf("%s %llu\n", __func__, l->id);
 	struct v3ll p;
 	stack_foreach(p, l->cells)
-		WORLD_AT(l->v->w, data, p.x, p.y, p.z) = NULL;
+		world_set_data(l->v->w, p,  NULL);
 	stack_destroy(l->cells);
 	stack_destroy(l->falls);
 	free(l);
@@ -166,8 +166,8 @@ static void push_layer(struct fs_volume *v, struct fs_layer *l)
 	printf("%s %llu\n", __func__, v->id);
 	stack_foreach(p, l->cells) {
 		++p.y;
-		if (WORLD_AT(v->w, shape, p.x, p.y, p.z) == SHAPE_NONE) {
-			l2 = WORLD_AT(v->w, data, p.x, p.y, p.z);
+		if (world_get_shape(v->w, p) == SHAPE_NONE) {
+			l2 = world_get_data(v->w, p);
 			if (l2 != NULL) {
 				if (l->v != l2->v)
 					merge_volumes(l->v, l2->v);
@@ -191,8 +191,8 @@ static void pop_layer(struct fs_volume *v, struct fs_layer *l)
 	printf("%s %llu\n", __func__, l->id);
 	stack_foreach(p, l->cells) {
 		--p.y;
-		if (WORLD_AT(v->w, shape, p.x, p.y, p.z) == SHAPE_NONE) {
-			l2 = WORLD_AT(v->w, data, p.x, p.y, p.z);
+		if (world_get_shape(v->w, p) == SHAPE_NONE) {
+			l2 = world_get_data(v->w, p);
 			if (l2 != NULL && !l2->is_top) {
 				l2->is_top = 1;
 				list_prepend(&v->layers, &l2->layers);
@@ -288,8 +288,8 @@ int flowsim_add(struct flowsim *f, struct v3ll p, float k)
 	struct fs_volume *v;
 	if (k == 0)
 		return 0;
-	while (WORLD_AT(f->w, shape, p.x, p.y, p.z) == SHAPE_NONE) {
-		l = WORLD_AT(f->w, data, p.x, p.y, p.z);
+	while (world_get_shape(f->w, p) == SHAPE_NONE) {
+		l = world_get_data(f->w, p);
 		if (l != NULL) {
 			l->v->v += k;
 			return 1;
@@ -301,7 +301,7 @@ int flowsim_add(struct flowsim *f, struct v3ll p, float k)
 	list_append(&f->volumes, &v->volumes);
 	l = fs_layer(v, p.y);
 	stack_push(l->cells, &p);
-	WORLD_AT(f->w, data, p.x, p.y, p.z) = l;
+	world_set_data(f->w, p, l);
 	calculate_falls(l);
 	l->is_top = 1;
 	list_prepend(&v->layers, &l->layers);

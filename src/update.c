@@ -828,107 +828,107 @@ void update_cell(struct context *ctx, struct stack *buf, int64_t x, int64_t y, i
 	struct v2f lt;
 	const struct v2f *mt;
 
-	s = WORLD_AT(ctx->w, shape, x, y, z);
-	l = WORLD_AT(ctx->w, shape, x - 1, y, z);
-	d = y == 0 ? 0 : WORLD_AT(ctx->w, shape, x, y - 1, z);
-	b = WORLD_AT(ctx->w, shape, x, y, z - 1);
+	s = world_get_shape(ctx->w, v3ll(x, y, z));
+	l = world_get_shape(ctx->w, v3ll(x - 1, y, z));
+	d = y == 0 ? 0 : world_get_shape(ctx->w, v3ll(x, y - 1, z));
+	b = world_get_shape(ctx->w, v3ll(x, y, z - 1));
 	if (has_down_side[s] && !has_up_side[d]) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y - 1, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y - 1, z)));
 		vertices_add(buf, face_dn, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_up_side[d] && !has_down_side[s]) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y - 1, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y - 1, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, face_up, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_left_side[s] && !has_right_side[l]) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x - 1, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x - 1, y, z)));
 		vertices_add(buf, face_lf, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_right_side[l] && !has_left_side[s]) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x - 1, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x - 1, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, face_rt, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_back_side[s] && !has_front_side[b]) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z - 1));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z - 1)));
 		vertices_add(buf, face_bk, 6, v3f(x, y, z), lt, mt);
 	}
 	if (has_front_side[b] && !has_back_side[s]) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z - 1)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z - 1))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, face_ft, 6, v3f(x, y, z), lt, mt);
 	}
 	if (s == SHAPE_SLAB_DN) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, slab_dn, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_SLAB_UP) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, slab_up, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_SLAB_LF) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, slab_lf, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_SLAB_RT) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, slab_rt, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_SLAB_BK) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, slab_bk, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_SLAB_FT) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, slab_ft, 30, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_DF) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, stairs_df, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_DL) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, stairs_dl, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_DB) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, stairs_db, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_DR) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, stairs_dr, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_UF) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, stairs_uf, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_UL) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, stairs_ul, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_UB) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, stairs_ub, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_STAIRS_UR) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, stairs_ur, 42, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_PANE_Y) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, pane_y, 36, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_PANE_X) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, pane_x, 36, v3f(x, y, z), lt, mt);
 	} else if (s == SHAPE_PANE_Z) {
-		mt = texcoord_from_mat[WORLD_AT(ctx->w, mat, x, y, z)];
-		lt = texcoord_from_light(WORLD_AT(ctx->w, light, x, y, z));
+		mt = texcoord_from_mat[world_get_mat(ctx->w, v3ll(x, y, z))];
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, pane_z, 36, v3f(x, y, z), lt, mt);
 	}
 }
@@ -1029,7 +1029,7 @@ void use_inventory(struct context *ctx, struct inventory *inv)
 			printf("left %s %s 1\n", mat_names[mat], obj_names[obj]);
 		}
 	}
-	if (WORLD_AT(ctx->w, mat, p.x, p.y, p.z) == MAT_WORKBENCH) {
+	if (world_get_mat(ctx->w, v3ll(p.x, p.y, p.z)) == MAT_WORKBENCH) {
 		const struct recipe *r;
 		int i;
 		for (r = recipes; r->num != 0; ++r) {
@@ -1070,7 +1070,7 @@ void use_tool(struct context *ctx)
 		p = v3_add(p, v3c(0, 0, -1));
 	else if (f == FACE_FT)
 		p = v3_add(p, v3c(0, 0, 1));
-	s = WORLD_AT(ctx->w, shape, p.x, p.y, p.z);
+	s = world_get_shape(ctx->w, v3ll(p.x, p.y, p.z));
 	if (s != SHAPE_NONE)
 		return;
 	if (obj == OBJ_BLOCK) {
@@ -1113,12 +1113,12 @@ void use_tool(struct context *ctx)
 void update_player(struct context *ctx)
 {
 	struct v3ll p = ctx->cur.p;
-	int s = WORLD_AT(ctx->w, shape, p.x, p.y, p.z);
-	int m = WORLD_AT(ctx->w, mat, p.x, p.y, p.z);
+	int s = world_get_shape(ctx->w, v3ll(p.x, p.y, p.z));
+	int m = world_get_mat(ctx->w, v3ll(p.x, p.y, p.z));
 
 	if (ctx->cur.face == FACE_UP) {
 		if (m == MAT_WORKBENCH || m == MAT_CRATE) {
-			use_inventory(ctx, WORLD_AT(ctx->w, data, p.x, p.y, p.z));
+			use_inventory(ctx, world_get_data(ctx->w, v3ll(p.x, p.y, p.z)));
 			return;
 		}
 	}
@@ -1243,10 +1243,10 @@ void update_chunks(struct context *ctx)
 void update(void *data)
 {
 	struct context *ctx = data;
-	long long x, y, z;
-	x = floor(ctx->cam->p.x);
-	y = floor(ctx->cam->p.y);
-	z = floor(ctx->cam->p.z);
+	struct v3ll p;
+	p.x = floor(ctx->cam->p.x);
+	p.y = floor(ctx->cam->p.y);
+	p.z = floor(ctx->cam->p.z);
 	space_run(ctx->space);
 	if ((ctx->tick & 1) == 0)
 		flowsim_step(ctx->flowsim);
@@ -1265,7 +1265,7 @@ void update(void *data)
 			ctx->pick = 1;
 	}
 	update_chunks(ctx);
-	tone_mapper_update(ctx->tone_mapper, (WORLD_AT(ctx->w, light, x, y, z) << 4) / 255., 0);
+	tone_mapper_update(ctx->tone_mapper, (world_get_light(ctx->w, p) << 4) / 255., 0);
 	++ctx->tick;
 }
 

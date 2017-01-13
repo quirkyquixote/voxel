@@ -83,7 +83,7 @@ static const int shape_masks[] = {
 int cell_at(struct space *s, const int *masks, int64_t x, int64_t y, int64_t z)
 {
 	int shape, mask;
-	shape = WORLD_AT(s->world, shape, x >> 1, y >> 1, z >> 1);
+	shape = world_get_shape(s->world, v3ll(x >> 1, y >> 1, z >> 1));
 	mask = (1 << (((x & 1) * 4) + ((y & 1) * 2) + (z & 1)));
 	return masks[shape] & mask;
 }
