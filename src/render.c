@@ -18,7 +18,7 @@ void render_flowsim(struct context *ctx)
 	list_foreach(v, &ctx->flowsim->volumes, volumes) {
 		list_foreach(l, &v->layers, layers) {
 			if (!l->is_top) {
-				stack_foreach(p, l->cells) {
+				array_foreach(p, l->cells) {
 					float y = l->y + 1;
 					glVertex3f(p.x + 1, y, p.z + 1);
 					glVertex3f(p.x + 1, y, p.z);
@@ -36,7 +36,7 @@ void render_flowsim(struct context *ctx)
 	list_foreach(v, &ctx->flowsim->volumes, volumes) {
 		list_foreach(l, &v->layers, layers) {
 			if (l->is_top) {
-				stack_foreach(p, l->cells) {
+				array_foreach(p, l->cells) {
 					float y = v->top + l->y + .001;
 					glVertex3f(p.x + 1, y, p.z + 1);
 					glVertex3f(p.x + 1, y, p.z);

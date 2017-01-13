@@ -801,7 +801,7 @@ struct vertex_desc pane_z[] = {
 	{ 1., 1., .53125, 1., 0., .8, .8, .8 },
 };
 
-static inline void vertices_add(struct stack *s, const struct vertex_desc *buf, size_t len,
+static inline void vertices_add(struct array *s, const struct vertex_desc *buf, size_t len,
 	struct v3f p, struct v2f t1, const struct v2f *t2)
 {
 	int i;
@@ -818,11 +818,11 @@ static inline void vertices_add(struct stack *s, const struct vertex_desc *buf, 
 		v.g = buf[i].g * 255;
 		v.b = buf[i].b * 255;
 		v.a = 255;
-		stack_push(s, &v);
+		array_push(s, &v);
 	}
 }
 
-void update_cell(struct context *ctx, struct stack *buf, int64_t x, int64_t y, int64_t z)
+void update_cell(struct context *ctx, struct array *buf, int64_t x, int64_t y, int64_t z)
 {
 	int8_t s, l, d, b;
 	struct v2f lt;
@@ -937,12 +937,12 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 {
 	int64_t x1, y1, z1;
 	int64_t x, y, z;
-	struct stack *buf;
+	struct array *buf;
 
 	x1 = x0 + SHARD_W;
 	y1 = y0 + SHARD_H;
 	z1 = z0 + SHARD_D;
-	buf = stack(sizeof(struct vertex));
+	buf = array(sizeof(struct vertex));
 
 	for (x = x0; x < x1; ++x) {
 		for (y = y0; y < y1; ++y) {
@@ -953,7 +953,7 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 	}
 
 	vertex_buffer_update(ctx->shard_vertex_buffer, id, buf->data, buf->size);
-	stack_destroy(buf);
+	array_destroy(buf);
 }
 
 void use_inventory(struct context *ctx, struct inventory *inv)

@@ -1,7 +1,7 @@
 
 #include "lighting.h"
 
-#include "stack.h"
+#include "array.h"
 #include "box2.h"
 #include "v2.h"
 #include "types.h"
@@ -18,8 +18,8 @@ static const int opaque_shape[] = {
 
 struct lighting {
 	struct world *w;
-	struct stack *s1;
-	struct stack *s2;
+	struct array *s1;
+	struct array *s2;
 };
 
 static inline void find_boundary(struct lighting *l, struct v3ll p, int k)
@@ -31,9 +31,9 @@ static inline void find_boundary(struct lighting *l, struct v3ll p, int k)
 		return;
 	k2 = world_get_light(l->w, p);
 	if (k2 == k) {
-		stack_push(l->s1, &p);
+		array_push(l->s1, &p);
 	} else if (k2 > k) {
-		stack_push(l->s2, &p);
+		array_push(l->s2, &p);
 	}
 }
 
@@ -49,9 +49,9 @@ static inline void lit_up(struct lighting *l, struct v3ll p, int k, int f1, int 
 	k2 = world_get_light(l->w, p);
 	if (k2 < k - f1) {
 		world_set_light(l->w, p, k - f1);
-		stack_push(l->s2, &p);
+		array_push(l->s2, &p);
 	} else if (k < k2 - f2) {
-		stack_push(l->s2, &p);
+		array_push(l->s2, &p);
 	}
 }
 
@@ -73,16 +73,16 @@ void update_lighting(struct world *w, struct box3ll bb, struct box3ll *rbb)
 
 	l = calloc(1, sizeof(*l));
 	l->w = w;
-	l->s1 = stack(sizeof(struct v3ll));
-	l->s2 = stack(sizeof(struct v3ll));
+	l->s1 = array(sizeof(struct v3ll));
+	l->s2 = array(sizeof(struct v3ll));
 
 	box3_foreach(p, bb) {
-		stack_push(l->s1, &p);
-		stack_push(l->s2, &p);
+		array_push(l->s1, &p);
+		array_push(l->s2, &p);
 	}
 
-	while (stack_size(l->s1)) {
-		stack_pop(l->s1, &p);
+	while (array_size(l->s1)) {
+		array_pop(l->s1, &p);
 		k = world_get_light(w, p);
 		world_set_light(w, p, 0);
 		find_boundary(l, v3ll(p.x, p.y - 1, p.z), k);
@@ -101,8 +101,8 @@ void update_lighting(struct world *w, struct box3ll bb, struct box3ll *rbb)
 	}
 
 	*rbb = bb;
-	while (stack_size(l->s2)) {
-		stack_pop(l->s2, &p);
+	while (array_size(l->s2)) {
+		array_pop(l->s2, &p);
 		if (p.x < rbb->x0)
 			rbb->x0 = p.x;
 		else if (p.x >= rbb->x1)
@@ -123,8 +123,8 @@ void update_lighting(struct world *w, struct box3ll bb, struct box3ll *rbb)
 		lit_up(l, v3ll(p.x, p.y, p.z - 1), k, 1, 1);
 		lit_up(l, v3ll(p.x, p.y, p.z + 1), k, 1, 1);
 	}
-	stack_destroy(l->s1);
-	stack_destroy(l->s2);
+	array_destroy(l->s1);
+	array_destroy(l->s2);
 	free(l);
 
 	box3_foreach(p, bb) {

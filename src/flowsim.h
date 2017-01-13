@@ -5,7 +5,7 @@
 
 #include "v3.h"
 #include "chunk.h"
-#include "stack.h"
+#include "array.h"
 #include "list.h"
 
 struct flowsim {
@@ -26,8 +26,8 @@ struct fs_layer {
 	unsigned long long id;
 	struct fs_volume *v;
 	struct list layers;
-	struct stack *cells;
-	struct stack *falls;
+	struct array *cells;
+	struct array *falls;
 	int y;
 	int is_top;
 };
