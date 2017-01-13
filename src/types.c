@@ -39,8 +39,8 @@ const char *obj_names[] = {
 
 const char *mat_names[] = {
 	"limestone", "dirt", "wood", "tile", "grass", "stonebrick",
-	"workbench", "crate", "pipe", "cobble",
-	"mat0A", "mat0B", "mat0C", "mat0D", "mat0E", "mat0F",
+	"workbench", "crate", "pipe", "cobble", "brick",
+	"mat0B", "mat0C", "mat0D", "mat0E", "mat0F",
 	"mat10", "mat11", "mat12", "mat13", "mat14", "mat15", "mat16", "mat17",
 	"mat18", "mat19", "mat1A", "mat1B", "mat1C", "mat1D", "mat1E", "mat1F",
 	"mat20", "mat21", "mat22", "mat23", "mat24", "mat25", "mat26", "mat27",

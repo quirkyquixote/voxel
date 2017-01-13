@@ -22,6 +22,7 @@ enum {
 	MAT_CRATE,
 	MAT_PIPE,
 	MAT_COBBLE,
+	MAT_BRICK,
 	MAT_COUNT,
 };
 
