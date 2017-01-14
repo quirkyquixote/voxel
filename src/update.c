@@ -175,7 +175,7 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 void use_inventory(struct context *ctx, struct array *inv)
 {
 	if (inv == NULL) {
-		fprintf(stderr, "WARNING: no inventory found\n");
+		log_warning("no inventory found");
 		return;
 	}
 	struct v3ll p = ctx->cur.p;
@@ -187,54 +187,54 @@ void use_inventory(struct context *ctx, struct array *inv)
 	if (ctx->act == 1) {
 		if (ctx->move.y0) {
 			if (s2.num == 0) {
-				printf("nothing to take\n");
+				log_info("nothing to take");
 				return;
 			}
 			int acc = inventory_add(ctx->inv, s2);
 			inventory_set_num(inv, i, s2.num - acc);
 			if (acc == 0)
-				printf("no space to take\n");
+				log_info("no space to take");
 			else
-				printf("take %s %s %d\n", mat_names[s1.mat], obj_names[s1.obj], acc);
+				log_info("take %s %s %d", mat_names[s1.mat], obj_names[s1.obj], acc);
 		} else {
 			if (s2.num)
-				printf("take %s %s %d\n", mat_names[s2.mat], obj_names[s2.obj], s2.num);
+				log_info("take %s %s %d", mat_names[s2.mat], obj_names[s2.obj], s2.num);
 			if (s1.num)
-				printf("left %s %s %d\n", mat_names[s1.mat], obj_names[s1.obj], s1.num);
+				log_info("left %s %s %d", mat_names[s1.mat], obj_names[s1.obj], s1.num);
 			inventory_set(inv, i, s1);
 			inventory_set(ctx->inv, ctx->tool, s2);
 		}
 	} else if (ctx->use == 1) {
 		if (ctx->move.y0) {
 			if (s2.num == 0) {
-				printf("nothing to take\n");
+				log_info("nothing to take");
 				return;
 			}
 			int acc = inventory_add(ctx->inv, slot(s2.obj, s2.mat, 1));
 			inventory_set_num(inv, i, s2.num - acc);
 			if (acc == 0)
-				printf("no space to take\n");
+				log_info("no space to take");
 			else
-				printf("take %s %s 1\n", mat_names[s1.mat], obj_names[s1.obj], acc);
+				log_info("take %s %s 1", mat_names[s1.mat], obj_names[s1.obj], acc);
 		} else {
 			if (s1.num == 0) {
-				printf("nothing to leave\n");
+				log_info("nothing to leave");
 				return;
 			}
 			if (s2.num >= 64) {
-				printf("no space to leave\n");
+				log_info("no space to leave");
 				return;
 			}
 			if (s2.num == 0) {
 				inventory_set_obj(inv, i, s1.obj);
 				inventory_set_mat(inv, i, s1.mat);
 			} else if (s1.obj != s2.obj || s1.mat != s2.mat) {
-				printf("not the same object\n");
+				log_info("not the same object");
 				return;
 			}
 			inventory_set_num(inv, i, s2.num + 1);
 			inventory_set_num(ctx->inv, ctx->tool, s1.num - 1);
-			printf("left %s %s 1\n", mat_names[s1.mat], obj_names[s1.obj]);
+			log_info("left %s %s 1", mat_names[s1.mat], obj_names[s1.obj]);
 		}
 	}
 }
@@ -249,17 +249,17 @@ void use_workbench(struct context *ctx, struct array *inv)
 				inventory_add(ctx->inv, s);
 				++i;
 			} while (recipe_match(inv, &s));
-			printf("INFO: %s: take %s %s %d\n", __func__, mat_names[s.mat], obj_names[s.obj], s.num * i);
+			log_info("take %s %s %d", mat_names[s.mat], obj_names[s.obj], s.num * i);
 		} else {
-			printf("INFO: %s: not a recipe\n", __func__);
+			log_info("not a recipe");
 		}
 	} else if (ctx->use == 1) {
 		struct slot s;
 		if (recipe_match(inv, &s)) {
 			inventory_add(ctx->inv, s);
-			printf("INFO: %s: take %s %s %d\n", __func__, mat_names[s.mat], obj_names[s.obj], s.num);
+			log_info("take %s %s %d", mat_names[s.mat], obj_names[s.obj], s.num);
 		} else {
-			printf("INFO: %s: not a recipe\n", __func__);
+			log_info("not a recipe");
 		}
 	}
 }
@@ -453,25 +453,24 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-			fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
+			log_info("Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
 		if ((c->flags & CHUNK_UNLOADED) != 0) {
-				printf("; load from file");
+			log_info("load from file");
 			/* load this chunk */
 			c->flags ^= CHUNK_UNLOADED;
 		}
 		if ((c->flags & CHUNK_UNLIT) != 0) {
-			printf("; lit up");
+			log_info("lit up");
 		update_lighting(ctx->w, box3ll(c->x, 0, c->z, c->x + CHUNK_W, CHUNK_H, c->z + CHUNK_D), NULL);
 			c->flags ^= CHUNK_UNLIT;
 			c->flags |= CHUNK_UNRENDERED;
 		}
 		if ((c->flags & CHUNK_UNRENDERED) != 0) {
-				printf("; update vertex buffers");
+			log_info("update vbos");
 			for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 				update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
 			c->flags ^= CHUNK_UNRENDERED;
 		}
-			fprintf(stdout, "\n");
 	}
 }
 
