@@ -34,6 +34,7 @@ static inline void array_resize(struct array *s, size_t size)
 		alloc *= 2;
 	if (alloc != s->alloc)
 		s->data = realloc(s->data, alloc * s->elem_size);
+	memset(s->data + s->alloc * s->elem_size, 0, (alloc - s->alloc) * s->elem_size);
 	s->alloc = alloc;
 	s->size = size;
 }
