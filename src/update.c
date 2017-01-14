@@ -238,21 +238,10 @@ void use_inventory(struct context *ctx, struct array *inv)
 		}
 	}
 	if (mat_is_workbench[world_get_mat(ctx->w, p)]) {
-		const struct recipe *r;
-		int i;
-		for (r = recipes; r->num != 0; ++r) {
-			while (recipe_match(r, inv)) {
-				do {
-					for (i = 0; i < 9; ++i) {
-						int j = inventory_get_num(inv, i);
-						if (j)
-							inventory_set_num(inv, i, j - 1);
-					}
-					inventory_add(ctx->inv, slot(r->obj, 0, r->num));
-					printf("take %s %s %d\n", mat_names[0], obj_names[r->obj], r->num);
-				} while (recipe_match(r, inv));
-				break;
-			}
+		struct slot s;
+		if (recipe_match(inv, &s)) {
+			inventory_add(ctx->inv, s);
+			printf("take %s %s %d\n", mat_names[s.mat], obj_names[s.obj], s.num);
 		}
 	}
 }

@@ -7,15 +7,7 @@
 #include "context.h"
 #include "inventory.h"
 
-struct recipe {
-	uint8_t obj;
-	uint8_t num;
-	int pattern[9];
-};
-
-extern const struct recipe recipes[];
-
-int recipe_match(const struct recipe *r, struct array *inv);
+int recipe_match(struct array *inv, struct slot *s);
 
 #endif
 
