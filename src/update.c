@@ -237,11 +237,29 @@ void use_inventory(struct context *ctx, struct array *inv)
 			printf("left %s %s 1\n", mat_names[s1.mat], obj_names[s1.obj]);
 		}
 	}
-	if (mat_is_workbench[world_get_mat(ctx->w, p)]) {
+}
+
+void use_workbench(struct context *ctx, struct array *inv)
+{
+	if (ctx->act == 1) {
+		struct slot s;
+		if (recipe_match(inv, &s)) {
+			int i = 0;
+			do {
+				inventory_add(ctx->inv, s);
+				++i;
+			} while (recipe_match(inv, &s));
+			printf("INFO: %s: take %s %s %d\n", __func__, mat_names[s.mat], obj_names[s.obj], s.num * i);
+		} else {
+			printf("INFO: %s: not a recipe\n", __func__);
+		}
+	} else if (ctx->use == 1) {
 		struct slot s;
 		if (recipe_match(inv, &s)) {
 			inventory_add(ctx->inv, s);
-			printf("take %s %s %d\n", mat_names[s.mat], obj_names[s.obj], s.num);
+			printf("INFO: %s: take %s %s %d\n", __func__, mat_names[s.mat], obj_names[s.obj], s.num);
+		} else {
+			printf("INFO: %s: not a recipe\n", __func__);
 		}
 	}
 }
@@ -314,6 +332,10 @@ void update_player(struct context *ctx)
 			use_inventory(ctx, world_get_data(ctx->w, p));
 			return;
 		}
+	}
+	if (mat_is_workbench[m]) {
+		use_workbench(ctx, world_get_data(ctx->w, p));
+		return;
 	}
 	if (ctx->act == 1) {
 		if (ctx->cur.face != -1) {
