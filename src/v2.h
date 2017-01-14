@@ -58,7 +58,7 @@ static inline struct v2ll v2ll(long long x, long long y)
 	return (struct v2ll) { x, y };
 }
 
-#define v2_eql(u, v) (u.x == v.x && u.y == vy)
+#define v2_eql(u, v) (u.x == v.x && u.y == v.y)
 
 #define v2_neq(u, v) (u.x != v.x || u.y != v.y)
 
