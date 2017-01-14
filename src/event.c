@@ -24,6 +24,8 @@ void event(const SDL_Event *e, void *data)
 			ctx->move.y0 = 1;
 		} else if (e->key.keysym.sym == SDLK_SPACE) {
 			ctx->move.y1 = 1;
+		} else if (e->key.keysym.sym == SDLK_r) {
+			ctx->pick = 1;
 		} else if (e->key.keysym.sym == SDLK_LCTRL) {
 			ctx->run = 1;
 		} else if (e->key.keysym.sym == SDLK_1) {
@@ -88,6 +90,8 @@ void event(const SDL_Event *e, void *data)
 			ctx->move.y0 = 0;
 		} else if (e->key.keysym.sym == SDLK_SPACE) {
 			ctx->move.y1 = 0;
+		} else if (e->key.keysym.sym == SDLK_r) {
+			ctx->pick = 0;
 		} else if (e->key.keysym.sym == SDLK_o) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		} else if (e->key.keysym.sym == SDLK_p) {
@@ -130,28 +134,28 @@ void event(const SDL_Event *e, void *data)
 			ctx->act = 1;
 		} else if (e->button.button == SDL_BUTTON_RIGHT) {
 			ctx->use = 1;
-		} else if (e->button.button == SDL_BUTTON_MIDDLE) {
-			ctx->pick = 1;
 		}
 	} else if (e->type == SDL_MOUSEBUTTONUP) {
 		if (e->button.button == SDL_BUTTON_LEFT) {
 			ctx->act = 0;
 		} else if (e->button.button == SDL_BUTTON_RIGHT) {
 			ctx->use = 0;
-		} else if (e->button.button == SDL_BUTTON_MIDDLE) {
-			ctx->pick = 0;
 		}
 	} else if (e->type == SDL_MOUSEWHEEL) {
 		if (ctx->move.y0) {
 			int mat = inventory_get_mat(ctx->inv, ctx->tool);
 			if (e->wheel.y > 0) {
+				do {
 				if (mat == 0)
 					mat = MAT_COUNT;
 				--mat;
+				} while (v2_eql(texcoord_from_mat[mat][0], v2f(0, 0)));
 			} else if (e->wheel.y < 0) {
+				do {
 				++mat;
 				if (mat == MAT_COUNT)
 					mat = 0;
+				} while (v2_eql(texcoord_from_mat[mat][0], v2f(0, 0)));
 			}
 			inventory_set_mat(ctx->inv, ctx->tool, mat);
 		} else {

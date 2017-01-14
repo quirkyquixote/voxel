@@ -339,6 +339,20 @@ void update_player(struct context *ctx)
 		}
 	}
 	if (ctx->pick == 1) {
+		if (ctx->cur.face != -1) {
+			int s = world_get_shape(ctx->w, ctx->cur.p);
+			int m = world_get_mat(ctx->w, ctx->cur.p);
+			int o;
+			if (s >= SHAPE_BLOCK_DN && s <= SHAPE_BLOCK_FT)
+				o = OBJ_BLOCK;
+			else if (s >= SHAPE_SLAB_DN && s <= SHAPE_SLAB_FT)
+				o = OBJ_SLAB;
+			else if (s >= SHAPE_PANE_X && s <= SHAPE_PANE_Z)
+				o = OBJ_PANE;
+			else if (s >= SHAPE_STAIRS_DF && s <= SHAPE_STAIRS_UR)
+				o = OBJ_STAIRS;
+			inventory_set(ctx->inv, ctx->tool, slot(o, m, 64));
+		}
 	}
 }
 
