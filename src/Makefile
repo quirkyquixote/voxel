@@ -8,6 +8,7 @@ ALL_CFLAGS += -I$(shell pwd)
 voxel_objs += camera.o
 voxel_objs += chunk.o
 voxel_objs += context.o
+voxel_objs += commands.o
 voxel_objs += drop.o
 voxel_objs += event.o
 voxel_objs += fps_manager.o

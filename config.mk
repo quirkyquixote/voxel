@@ -49,8 +49,10 @@ ALL_CFLAGS += -DVX_DATADIR=\"$(datadir)\"
 ALL_CFLAGS += -DVX_LOCALSTATEDIR=\"$(localstatedir)\"
 ALL_CFLAGS += -MD
 ALL_CFLAGS += -fPIC
+ALL_CFLAGS += -I/usr/include/tcl
 
 ALL_LDFLAGS += -pthread
+ALL_LDFLAGS += -ltcl
 
 # A little function to print relevant text
 

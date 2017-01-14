@@ -10,7 +10,7 @@ void render_string(struct context *ctx, char *str)
 	GLfloat u0, v0, u1, v1;
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, ctx->tex_font);
-	while (*str != 0) {
+	while (*str) {
 		u0 = (*str % 16) / 16.;
 		v0 = (*str / 16) / 16.;
 		u1 = u0 + 1 / 16.;
@@ -150,7 +150,7 @@ void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 {
 	//glEnable(GL_TEXTURE_2D);
 	//glTexCoord2f(0.5, 0.5);
-	
+
 	if (mat >= MAT_COUNT)
 		mat = 0;
 
@@ -327,6 +327,17 @@ void roam_render(struct context *ctx)
 			glDisable(GL_BLEND);
 		}
 		glPopMatrix();
+	}
+
+	if (ctx->mode == MODE_COMMAND) {
+		glColor3f(1, 1, 1);
+		glTranslatef(ctx->cam->p.x, ctx->cam->p.y, ctx->cam->p.z);
+		glRotatef(180.0 * ctx->cam->r.y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
+		glTranslatef(-20, 0, -40);
+		char buf[sizeof(ctx->cmdline)];
+		sprintf(buf, "%s_", ctx->cmdline);
+		render_string(ctx, buf);
 	}
 	glEnable(GL_DEPTH_TEST);
 }

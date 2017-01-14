@@ -2,6 +2,8 @@
 #ifndef VOXEL_TYPES_H_
 #define VOXEL_TYPES_H_
 
+#include <string.h>
+
 enum {
 	OBJ_BLOCK,	/* full block */
 	OBJ_SLAB,	/* half block */
@@ -136,6 +138,7 @@ enum {
 	FACE_RT,
 	FACE_UP,
 	FACE_DN,
+	FACE_COUNT,
 };
 
 extern const char *obj_names[];
@@ -145,5 +148,37 @@ extern const char *shape_names[];
 
 extern const int mat_is_workbench[];
 extern const int mat_capacity[];
+
+static inline int obj_from_name(const char *name)
+{
+	for (int obj = 0; obj < OBJ_COUNT; ++obj)
+		if (obj_names[obj] && strcmp(obj_names[obj], name) == 0)
+			return obj;
+	return -1;
+}
+
+static inline int mat_from_name(const char *name)
+{
+	for (int mat = 0; mat < MAT_COUNT; ++mat)
+		if (mat_names[mat] && strcmp(mat_names[mat], name) == 0)
+			return mat;
+	return -1;
+}
+
+static inline int face_from_name(const char *name)
+{
+	for (int face = 0; face < FACE_COUNT; ++face)
+		if (face_names[face] && strcmp(face_names[face], name) == 0)
+			return face;
+	return -1;
+}
+
+static inline int shape_from_name(const char *name)
+{
+	for (int shape = 0; shape < SHAPE_COUNT; ++shape)
+		if (shape_names[shape] && strcmp(shape_names[shape], name) == 0)
+			return shape;
+	return -1;
+}
 
 #endif

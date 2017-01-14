@@ -2,6 +2,8 @@
 #ifndef VOXEL_H_
 #define VOXEL_H_
 
+#include <tcl.h>
+
 #include "chunk.h"
 #include "terraform.h"
 #include "main_loop.h"
@@ -17,7 +19,7 @@
 
 enum {
 	MODE_ROAM,
-	MODE_CRAFT,
+	MODE_COMMAND,
 };
 
 struct context {
@@ -49,6 +51,8 @@ struct context {
 	char rotx;
 	int chunks_per_tick;
 	uint64_t tick;
+	Tcl_Interp *tcl;
+	char cmdline[1024];
 };
 
 unsigned long long next_id(void);

@@ -9,6 +9,29 @@ void event(const SDL_Event *e, void *data)
 {
 	struct context *ctx = data;
 
+	if (ctx->mode == MODE_COMMAND) {
+		if (e->type == SDL_KEYDOWN) {
+			if (e->key.keysym.sym == SDLK_RETURN) {
+				Tcl_Eval(ctx->tcl, ctx->cmdline);
+				const char *ret = Tcl_GetStringResult(ctx->tcl);
+				if (ret && *ret)
+					log_info("%s", ret);
+				ctx->cmdline[0] = 0;
+				ctx->mode = MODE_ROAM;
+				SDL_StopTextInput();
+				return;
+			} else if (e->key.keysym.sym == SDLK_BACKSPACE) {
+				if (strlen(ctx->cmdline))
+					ctx->cmdline[strlen(ctx->cmdline) - 1] = 0;
+			}
+		} else if (e->type == SDL_TEXTINPUT) {
+			strcat(ctx->cmdline, e->text.text);
+		} else if (e->type == SDL_TEXTEDITING) {
+			log_warning("text editing event");
+		}
+		return;
+	}
+
 	if (e->type == SDL_KEYDOWN) {
 		if (e->key.repeat) {
 			return;
@@ -128,6 +151,9 @@ void event(const SDL_Event *e, void *data)
 					ctx->player->p.x, ctx->player->p.y, ctx->player->p.x,
 					ctx->player->r.x, ctx->player->r.y,
 					ctx->rotx, face_names[ctx->roty]);
+		} else if (e->key.keysym.sym == SDLK_PERIOD) {
+			ctx->mode = MODE_COMMAND;
+			SDL_StartTextInput();
 		}
 	} else if (e->type == SDL_MOUSEBUTTONDOWN) {
 		if (e->button.button == SDL_BUTTON_LEFT) {

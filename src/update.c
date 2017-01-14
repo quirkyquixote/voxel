@@ -453,20 +453,20 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-			log_info("Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
+		//	log_info("Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
 		if ((c->flags & CHUNK_UNLOADED) != 0) {
-			log_info("load from file");
+		//	log_info("load from file");
 			/* load this chunk */
 			c->flags ^= CHUNK_UNLOADED;
 		}
 		if ((c->flags & CHUNK_UNLIT) != 0) {
-			log_info("lit up");
+		//	log_info("lit up");
 		update_lighting(ctx->w, box3ll(c->x, 0, c->z, c->x + CHUNK_W, CHUNK_H, c->z + CHUNK_D), NULL);
 			c->flags ^= CHUNK_UNLIT;
 			c->flags |= CHUNK_UNRENDERED;
 		}
 		if ((c->flags & CHUNK_UNRENDERED) != 0) {
-			log_info("update vbos");
+		//	log_info("update vbos");
 			for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 				update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
 			c->flags ^= CHUNK_UNRENDERED;

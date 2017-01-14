@@ -14,6 +14,7 @@
 #include "render.h"
 #include "update.h"
 #include "event.h"
+#include "commands.h"
 
 int load_all(struct context *ctx);
 int save_all(struct context *ctx);
@@ -23,6 +24,7 @@ int save_world(struct world *w, const char *dir);
 
 int load_chunk(struct chunk *c, const char *dir);
 int save_chunk(struct chunk *c, const char *dir);
+
 
 int main(int argc, char *argv[])
 {
@@ -40,6 +42,11 @@ int main(int argc, char *argv[])
 	main_loop_set_update_callback(ctx->ml, update, ctx);
 	main_loop_add_window(ctx->ml, window("voxel", 0, 0, 1280, 768, 0));
 	window_set_render_callback(ctx->ml->windows, render, ctx);
+
+	/* Initialize Tcl */
+	ctx->tcl = Tcl_CreateInterp();
+	Tcl_CreateObjCommand(ctx->tcl, "give", cmd_give, ctx, NULL);
+	Tcl_CreateObjCommand(ctx->tcl, "take", cmd_take, ctx, NULL);
 
 	/* Load textures */
 	ctx->tex_terrain = texture("data/materials.png");
