@@ -190,6 +190,10 @@ void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 
 void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
 {
+	if (inv == NULL) {
+		fprintf(stderr, "WARNING: %s: inv == NULL\n", __func__);
+		return;
+	}
 	int i, x, z;
 	int side = sqrt(inv->size);
 	struct slot s;
@@ -264,7 +268,7 @@ void roam_render(struct context *ctx)
 
 	box3_foreach(p, bb) {
 		m = world_get_mat(ctx->w, p);
-		if (m == MAT_WORKBENCH || m == MAT_CRATE)
+		if (mat_capacity[m] > 0)
 			render_inventory(ctx, world_get_data(ctx->w, p), p);
 	}
 

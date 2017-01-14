@@ -236,7 +236,7 @@ void use_inventory(struct context *ctx, struct array *inv)
 			printf("left %s %s 1\n", mat_names[s1.mat], obj_names[s1.obj]);
 		}
 	}
-	if (world_get_mat(ctx->w, p) == MAT_WORKBENCH) {
+	if (mat_is_workbench[world_get_mat(ctx->w, p)]) {
 		const struct recipe *r;
 		int i;
 		for (r = recipes; r->num != 0; ++r) {
@@ -278,10 +278,9 @@ void use_tool(struct context *ctx)
 	if (world_get_shape(ctx->w, p) != SHAPE_NONE)
 		return;
 	if (s.obj == OBJ_BLOCK) {
-		if (s.mat == MAT_WORKBENCH)
-			world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat, inventory(9));
-		else if (s.mat == MAT_CRATE)
-			world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat, inventory(16));
+		int k = mat_capacity[s.mat];
+		if (k > 0)
+			world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat, inventory(k));
 		else
 			world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat, NULL);
 	} else if (s.obj == OBJ_SLAB) {
@@ -321,7 +320,7 @@ void update_player(struct context *ctx)
 	int m = world_get_mat(ctx->w, p);
 
 	if (ctx->cur.face == FACE_UP) {
-		if (m == MAT_WORKBENCH || m == MAT_CRATE) {
+		if (mat_capacity[m] > 0) {
 			use_inventory(ctx, world_get_data(ctx->w, p));
 			return;
 		}

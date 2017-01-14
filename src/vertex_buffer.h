@@ -83,8 +83,8 @@ static inline void vertices_add(struct array *s, const struct vertex_desc *buf, 
 		v.z = buf[i].z + p.z;
 		v.u0 = t1.x;
 		v.v0 = t1.y;
-		v.u1 = t2[buf[i].side].x + buf[i].u / 16.;
-		v.v1 = t2[buf[i].side].y + buf[i].v / 16.;
+		v.u1 = t2[buf[i].side].x + buf[i].u / 32.;
+		v.v1 = t2[buf[i].side].y + buf[i].v / 32.;
 		v.r = buf[i].r * 255;
 		v.g = buf[i].g * 255;
 		v.b = buf[i].b * 255;

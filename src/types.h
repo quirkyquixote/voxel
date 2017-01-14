@@ -67,13 +67,34 @@ enum {
 	MAT_CLAY_TILE,
 	MAT_CLAY_COLUMN,
 	MAT_CLAY_BLOCK,
-	MAT_WOOD_1,
-	MAT_WOOD_2,
-	MAT_WOOD_3,
-	MAT_WOOD_4,
-	MAT_WOOD_5,
-	MAT_WOOD_6,
-	MAT_WOOD_7,
+	MAT_WOOD1,
+	MAT_WOOD1_CRATE,
+	MAT_WOOD1_WORKBENCH,
+	MAT_WOOD1_PIPE,
+	MAT_WOOD2,
+	MAT_WOOD2_CRATE,
+	MAT_WOOD2_WORKBENCH,
+	MAT_WOOD2_PIPE,
+	MAT_WOOD3,
+	MAT_WOOD3_CRATE,
+	MAT_WOOD3_WORKBENCH,
+	MAT_WOOD3_PIPE,
+	MAT_WOOD4,
+	MAT_WOOD4_CRATE,
+	MAT_WOOD4_WORKBENCH,
+	MAT_WOOD4_PIPE,
+	MAT_WOOD5,
+	MAT_WOOD5_CRATE,
+	MAT_WOOD5_WORKBENCH,
+	MAT_WOOD5_PIPE,
+	MAT_WOOD6,
+	MAT_WOOD6_CRATE,
+	MAT_WOOD6_WORKBENCH,
+	MAT_WOOD6_PIPE,
+	MAT_WOOD7,
+	MAT_WOOD7_CRATE,
+	MAT_WOOD7_WORKBENCH,
+	MAT_WOOD7_PIPE,
 	MAT_COUNT,
 };
 
@@ -118,5 +139,8 @@ extern const char *obj_names[];
 extern const char *mat_names[];
 extern const char *face_names[];
 extern const char *shape_names[];
+
+extern const int mat_is_workbench[];
+extern const int mat_capacity[];
 
 #endif

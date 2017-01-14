@@ -159,7 +159,7 @@ int entity_save(struct chunk *c, struct v3ll p, union sz_tag **root)
 	union sz_tag *tag;
 	s = chunk_get_shape(c, p);
 	m = chunk_get_mat(c, p);
-	if (m == MAT_WORKBENCH || m == MAT_CRATE) {
+	if (mat_capacity[m] > 0) {
 		inv = chunk_get_data(c, p);
 		if (inv == NULL) {
 			fprintf(stderr, "WARNING: no inventory found\n");
