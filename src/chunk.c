@@ -7,6 +7,7 @@
 #include "sz.h"
 #include "lighting.h"
 #include "inventory.h"
+#include "context.h"
 
 struct shard *shard(int id, int y)
 {
@@ -35,7 +36,7 @@ int shard_load(struct shard *s, union sz_tag *root)
 		} else if (strcmp(key, "light") == 0) {
 			memcpy(s->light, val->raw.data, val->raw.size);
 		} else {
-			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
+			log_error("bad tag: %s", key);
 		}
 	}
 	return 0;
@@ -80,7 +81,7 @@ int inventory_load(struct array *i, union sz_tag *root)
 		} else if (strcmp(key, "items") == 0) {
 			memcpy(i->data, val->raw.data, val->raw.size);
 		} else {
-			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
+			log_error("bad tag: %s", key);
 		}
 	}
 	return 0;
@@ -103,7 +104,7 @@ int entity_load(struct chunk *c, union sz_tag *root)
 			inventory_load(inv, val);
 			chunk_set_data(c, p, inv);
 		} else {
-			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
+			log_error("bad tag: %s", key);
 		}
 	}
 	return 0;
@@ -137,7 +138,7 @@ int chunk_load(struct chunk *c, union sz_tag *root)
 				++i;
 			}
 		} else {
-			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
+			log_error("bad tag: %s", key);
 		}
 	}
 	c->flags = CHUNK_UNRENDERED;
@@ -162,7 +163,7 @@ int entity_save(struct chunk *c, struct v3ll p, union sz_tag **root)
 	if (mat_capacity[m] > 0) {
 		inv = chunk_get_data(c, p);
 		if (inv == NULL) {
-			fprintf(stderr, "WARNING: no inventory found\n");
+			log_warning("no inventory found");
 			return 0;
 		}
 		*root = sz_dict();
@@ -232,7 +233,7 @@ int world_load(struct world *w, union sz_tag *root)
 		} else if (strcmp(key, "z") == 0) {
 			w->z = val->i64.data;
 		} else {
-			fprintf(stderr, "%s: bad tag %s\n", __func__, key);
+			log_error("bad tag: %s", key);
 			return -1;
 		}
 	}

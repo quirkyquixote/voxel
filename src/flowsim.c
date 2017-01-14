@@ -7,7 +7,7 @@
 
 void merge_volumes(struct fs_volume *v1, struct fs_volume *v2)
 {
-	printf("%s %llu %llu\n", __func__, v1->id, v2->id);
+	log_info("%llu %llu", v1->id, v2->id);
 	list_merge(&v1->layers, &v2->layers);
 	v1->v += v2->v;
 	list_unlink(&v2->volumes);
@@ -16,7 +16,7 @@ void merge_volumes(struct fs_volume *v1, struct fs_volume *v2)
 
 void merge_layers(struct fs_layer *l1, struct fs_layer *l2)
 {
-	printf("%s %llu %llu\n", __func__, l1->id, l2->id);
+	log_info("%llu %llu", l1->id, l2->id);
 	struct v3ll p;
 
 	list_unlink(&l2->layers);
@@ -44,7 +44,7 @@ static inline void check_boundary(struct fs_layer *l, struct fs_layer *l2,
 static void layer_from_layer(struct fs_layer *l, struct fs_layer *l2,
     struct v3ll p)
 {
-	printf("%s %llu\n", __func__, l->id);
+	log_info("%llu", l->id);
 	struct array *s = array(sizeof(struct v3ll));
 	check_boundary(l, l2, s, p);
 	while (array_size(s)) {
@@ -69,7 +69,7 @@ static inline void test_fall(struct fs_layer *l, struct v3ll p)
 
 static void calculate_falls(struct fs_layer *l)
 {
-//      printf("%s %d\n", __func__, l->id);
+//      log_info("%d", l->id);
 	struct v3ll p;
 	array_clear(l->falls);
 	array_foreach(p, l->cells) {
@@ -101,7 +101,7 @@ static inline void test_cell(struct fs_layer *l, struct v3ll p)
 
 static void expand_layer(struct fs_layer *l)
 {
-//      printf("%s %d\n", __func__, l->id);
+//      log_info("%d", l->id);
 	struct v3ll p;
 	struct array *tmp = l->cells;
 	l->cells = array(sizeof(struct v3ll));
@@ -124,13 +124,13 @@ struct fs_layer *fs_layer(struct fs_volume *v, int y)
 	l->falls = array(sizeof(struct v3ll));
 	l->y = y;
 	l->id = next_id();
-	printf("%s %llu\n", __func__, l->id);
+	log_info("%llu", l->id);
 	return l;
 }
 
 void fs_layer_destroy(struct fs_layer *l)
 {
-	printf("%s %llu\n", __func__, l->id);
+	log_info("%llu", l->id);
 	struct v3ll p;
 	array_foreach(p, l->cells)
 		world_set_data(l->v->w, p,  NULL);
@@ -145,14 +145,14 @@ struct fs_volume *fs_volume(struct world *w)
 	v->w = w;
 	list_init(&v->layers);
 	v->id = next_id();
-	printf("%s %llu\n", __func__, v->id);
+	log_info("%llu", v->id);
 	return v;
 }
 
 void fs_volume_destroy(struct fs_volume *v)
 {
 	struct fs_layer *l;
-	printf("%s %llu\n", __func__, v->id);
+	log_info("%llu", v->id);
 	list_foreach(l, &v->layers, layers)
 		fs_layer_destroy(l);
 	free(v);
@@ -163,7 +163,7 @@ static void push_layer(struct fs_volume *v, struct fs_layer *l)
 {
 	struct v3ll p;
 	struct fs_layer *l2;
-	printf("%s %llu\n", __func__, v->id);
+	log_info("%llu", v->id);
 	array_foreach(p, l->cells) {
 		++p.y;
 		if (world_get_shape(v->w, p) == SHAPE_NONE) {
@@ -176,7 +176,7 @@ static void push_layer(struct fs_volume *v, struct fs_layer *l)
 				layer_from_layer(l2, l, p);
 				l2->is_top = 1;
 				list_prepend(&v->layers, &l2->layers);
-				printf("%d.is_top=1\n", l2->id);
+				log_info("%d.is_top=1", l2->id);
 			}
 		}
 	}
@@ -188,7 +188,7 @@ static void pop_layer(struct fs_volume *v, struct fs_layer *l)
 {
 	struct v3ll p;
 	struct fs_layer *l2;
-	printf("%s %llu\n", __func__, l->id);
+	log_info("%llu", l->id);
 	array_foreach(p, l->cells) {
 		--p.y;
 		if (world_get_shape(v->w, p) == SHAPE_NONE) {
@@ -196,7 +196,7 @@ static void pop_layer(struct fs_volume *v, struct fs_layer *l)
 			if (l2 != NULL && !l2->is_top) {
 				l2->is_top = 1;
 				list_prepend(&v->layers, &l2->layers);
-				printf("%d.is_top=1\n", l2->id);
+				log_info("%d.is_top=1", l2->id);
 			}
 		}
 	}

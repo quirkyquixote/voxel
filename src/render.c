@@ -191,7 +191,7 @@ void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
 {
 	if (inv == NULL) {
-		fprintf(stderr, "WARNING: %s: inv == NULL\n", __func__);
+		log_warning("inv == NULL");
 		return;
 	}
 	int i, x, z;

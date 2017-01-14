@@ -7,6 +7,8 @@
 #include "GL/glext.h"
 #undef GL_GLEXT_PROTOTYPES
 
+#include "context.h"
+
 GLuint texture(const char *path)
 {
 	SDL_Surface *image;
@@ -16,7 +18,7 @@ GLuint texture(const char *path)
 
 	image = IMG_Load(path);
 	if (image == NULL) {
-		fprintf(stderr, "%s: %s\n", path, IMG_GetError());
+		log_error("%s", IMG_GetError());
 		return -1;
 	}
 	fmt = image->format->BytesPerPixel == 4 ? GL_RGBA : GL_RGB;

@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "context.h"
+
 int load_shader(GLuint type, const char *path, GLuint *obj)
 {
 	FILE *f;
@@ -29,7 +31,7 @@ int load_shader(GLuint type, const char *path, GLuint *obj)
 	glGetShaderInfoLog(*obj, sizeof(lbuf), &llen, lbuf);
 	if (llen == 0)
 		return 0;
-	fprintf(stderr, "%s: %s\n", __func__, lbuf);
+	log_error("%s", lbuf);
 	return -1;
 }
 
@@ -45,7 +47,7 @@ int link_shaders(GLuint vobj, GLuint fobj, GLuint *pobj)
 	glGetProgramInfoLog(*pobj, sizeof(lbuf), &llen, lbuf);
 	if (llen == 0)
 		return 0;
-	fprintf(stderr, "%s: %s\n", __func__, lbuf);
+	log_error("%s", lbuf);
 	return -1;
 }
 
