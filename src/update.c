@@ -3,6 +3,7 @@
 
 #include "context.h"
 #include "recipes.h"
+#include "lighting.h"
 
 
 int chunks_by_priority(const void *p1, const void *p2)
@@ -427,19 +428,25 @@ void update_chunks(struct context *ctx)
 	i = i < ctx->chunks_per_tick ? i : ctx->chunks_per_tick;
 	for (j = 0; j < i; ++j) {
 		c = out_of_date[j];
-		//		fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
+			fprintf(stdout, "Update chunk %d (%d,%d); priority:%d", c->id, c->x, c->z, c->priority);
 		if ((c->flags & CHUNK_UNLOADED) != 0) {
-			//			printf("; load from file");
+				printf("; load from file");
 			/* load this chunk */
 			c->flags ^= CHUNK_UNLOADED;
 		}
+		if ((c->flags & CHUNK_UNLIT) != 0) {
+			printf("; lit up");
+		update_lighting(ctx->w, box3ll(c->x, 0, c->z, c->x + CHUNK_W, CHUNK_H, c->z + CHUNK_D), NULL);
+			c->flags ^= CHUNK_UNLIT;
+			c->flags |= CHUNK_UNRENDERED;
+		}
 		if ((c->flags & CHUNK_UNRENDERED) != 0) {
-			//			printf("; update vertex buffers");
+				printf("; update vertex buffers");
 			for (k = 0; k < SHARDS_PER_CHUNK; ++k)
 				update_vbo(ctx, c->shards[k]->id, c->x, k * SHARD_H, c->z);
 			c->flags ^= CHUNK_UNRENDERED;
 		}
-		//		fprintf(stdout, "\n");
+			fprintf(stdout, "\n");
 	}
 }
 

@@ -13,13 +13,9 @@
 
 #define TC(a,b) { a / 32., b / 32. }
 
-const struct v2f texcoord_from_mat[][3] = {
-	[MAT_DIRT] = { TC(0, 0), TC(0, 0), TC(1, 0) },
-	[MAT_WOOD] = { TC(2, 0), TC(2, 1), TC(2, 2) },
-	[MAT_GRASS] = { TC(1, 0), TC(1, 0), TC(1, 0) },
-	[MAT_WORKBENCH] = { TC(4, 8), TC(5, 8), TC(0, 8) },
-	[MAT_CRATE] = { TC(2, 8), TC(3, 8), TC(0, 8) },
-	[MAT_PIPE] = { TC(8, 0), TC(8, 1), TC(8, 2) },
+const struct v2f texcoord_from_mat[256][3] = {
+	[MAT_DIRT] = { TC(1, 0), TC(1, 0), TC(1, 0) },
+	[MAT_GRASS] = { TC(2, 0), TC(2, 0), TC(2, 0) },
 	[MAT_LIMESTONE] = { TC(0, 1), TC(0, 1), TC(0, 1) },
 	[MAT_LIMESTONE_COBBLE] = { TC(1, 1), TC(1, 1), TC(1, 1) },
 	[MAT_LIMESTONE_LBRICK] = { TC(6, 1), TC(7, 1), TC(8, 1) },

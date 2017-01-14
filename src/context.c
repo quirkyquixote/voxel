@@ -134,8 +134,9 @@ int load_all(struct context *ctx)
 			}
 		}
 	}
+/*
 	if (from_scratch)
-		update_lighting(ctx->w, box3ll(0, 0, 0, WORLD_W, WORLD_H, WORLD_D), NULL);
+		update_lighting(ctx->w, box3ll(0, 0, 0, WORLD_W, WORLD_H, WORLD_D), NULL);*/
 	p.x = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	p.y = CHUNK_H;
 	p.z = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;

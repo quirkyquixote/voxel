@@ -47,6 +47,7 @@ static inline void array_push(struct array *s, void *e)
 		else
 			s->alloc *= 2;
 		s->data = realloc(s->data, s->alloc * s->elem_size);
+		assert(s->data != NULL);
 	}
 	memcpy(s->data + s->size * s->elem_size, e, s->elem_size);
 	++s->size;
