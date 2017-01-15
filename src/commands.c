@@ -8,68 +8,64 @@ static struct box3ll sel_bb = { 0, 0, 0, 0, 0, 0 };
 
 int parse_slot(const char *str, int *mat, int *obj)
 {
-	char *tmp, *ptr;
-	int ret;
-
-	tmp = strdup(str);
-	ptr = strchr(tmp, '.');
-	ret = 0;
-	if (ptr == NULL) {
-		*mat = mat_from_name(tmp);
-		if (*mat < 0) {
-			log_warning("%s: not a valid material", tmp);
-			ret = -1;
-		}
-		*obj = OBJ_BLOCK;
-	} else {
-		*ptr = 0;
-		++ptr;
-		*mat = mat_from_name(tmp);
-		if (*mat < 0) {
-			log_warning("%s: not a valid material", tmp);
-			ret = -1;
-		}
-		*obj = obj_from_name(ptr);
-		if (*obj < 0) {
-			log_warning("%s: not a valid object", ptr);
-			ret = -1;
-		}
+	for (*mat = MAT_COUNT - 1; *mat >= 0; --*mat) {
+		if (mat_names[*mat] && strncmp(str, mat_names[*mat], strlen(mat_names[*mat])) == 0)
+			break;
 	}
-	free(tmp);
-	return ret;
+	if (*mat < 0) {
+		log_warning("%s: not a valid material", str);
+		return -1;
+	}
+	str += strlen(mat_names[*mat]);
+	if (*str == 0) {
+		*obj = 0;
+		return 0;
+	}
+	if (*str != '_') {
+		log_warning("expected '_' after %s", mat_names[*mat]);
+		return -1;
+	}
+	++str;
+	for (*obj = OBJ_COUNT - 1; *obj >= 0; --*obj) {
+		if (obj_names[*obj] && strncmp(str, obj_names[*obj], strlen(obj_names[*obj])) == 0)
+			break;
+	}
+	if (*obj < 0) {
+		log_warning("%s: not a valid object", str);
+		return -1;
+	}
+	return 0;
 }
 
 int parse_block(const char *str, int *mat, int *shape)
 {
-	char *tmp, *ptr;
-	int ret;
-
-	tmp = strdup(str);
-	ptr = strchr(tmp, '.');
-	ret = 0;
-	if (ptr == NULL) {
-		*mat = mat_from_name(tmp);
-		if (*mat < 0) {
-			log_warning("%s: not a valid material", tmp);
-			ret = -1;
-		}
-		*shape = SHAPE_BLOCK_DN;
-	} else {
-		*ptr = 0;
-		++ptr;
-		*mat = mat_from_name(tmp);
-		if (*mat < 0) {
-			log_warning("%s: not a valid material", tmp);
-			ret = -1;
-		}
-		*shape = shape_from_name(ptr);
-		if (*shape < 0) {
-			log_warning("%s: not a valid shape", ptr);
-			ret = -1;
-		}
+	for (*mat = MAT_COUNT - 1; *mat >= 0; --*mat) {
+		if (mat_names[*mat] && strncmp(str, mat_names[*mat], strlen(mat_names[*mat])) == 0)
+			break;
 	}
-	free(tmp);
-	return ret;
+	if (*mat < 0) {
+		log_warning("%s: not a valid material", str);
+		return -1;
+	}
+	str += strlen(mat_names[*mat]);
+	if (*str == 0) {
+		*shape = 0;
+		return 0;
+	}
+	if (*str != '_') {
+		log_warning("expected '_' after %s", mat_names[*mat]);
+		return -1;
+	}
+	++str;
+	for (*shape = SHAPE_COUNT - 1; *shape >= 0; --*shape) {
+		if (shape_names[*shape] && strncmp(str, shape_names[*shape], strlen(shape_names[*shape])) == 0)
+			break;
+	}
+	if (*shape < 0) {
+		log_warning("%s: not a valid shape", str);
+		return -1;
+	}
+	return 0;
 }
 
 int cmd_ls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -107,7 +103,7 @@ fail:
 
 int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: give <material>[.<object>] [<amount>]";
+	static const char *usage = "usage: give <material>[_<object>] [<amount>]";
 	struct context *ctx = data;
 	int mat, obj, num = 1;
 
@@ -120,7 +116,7 @@ int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 			goto fail;
 	}
 	inventory_add(ctx->inv, slot(obj, mat, num));
-	log_info("given %s.%s %d", mat_names[mat], obj_names[obj], num);
+	log_info("given %s_%s %d", mat_names[mat], obj_names[obj], num);
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -129,7 +125,7 @@ fail:
 
 int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: take <material>[.<object>] [<amount>]";
+	static const char *usage = "usage: take <material>[_<object>] [<amount>]";
 	struct context *ctx = data;
 	int mat, obj, num = 1;
 
@@ -142,7 +138,7 @@ int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 			goto fail;
 	}
 	inventory_remove(ctx->inv, slot(obj, mat, num));
-	log_info("taken %s.%s %d", mat_names[mat], obj_names[obj], num);
+	log_info("taken %s_%s %d", mat_names[mat], obj_names[obj], num);
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -174,7 +170,7 @@ int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		int i = 0;
 		array_foreach(s, inv) {
 			if (s.num > 0)
-				log_info("%d: %s %s %d", i, mat_names[s.mat],
+				log_info("%d: %s_%s %d", i, mat_names[s.mat],
 						obj_names[s.obj], s.num);
 			++i;
 		}
@@ -232,7 +228,7 @@ fail:
 
 int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: box <material>[.<shape>]";
+	static const char *usage = "usage: box <material>[_<shape>]";
 	struct context *ctx = data;
 	int mat, shape;
 	struct box3ll bb;
@@ -256,7 +252,7 @@ fail:
 
 int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: hbox <material>[.<shape>]";
+	static const char *usage = "usage: hbox <material>[_<shape>]";
 	struct context *ctx = data;
 	int mat, shape;
 	struct box3ll bb;
@@ -296,7 +292,7 @@ fail:
 
 int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: walls <material>[.<shape>]";
+	static const char *usage = "usage: walls <material>[_<shape>]";
 	struct context *ctx = data;
 	int mat, shape;
 	struct box3ll bb;
