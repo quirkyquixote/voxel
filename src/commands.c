@@ -4,46 +4,76 @@
 #include "context.h"
 #include "lighting.h"
 
+static struct box3ll sel_bb = { 0, 0, 0, 0, 0, 0 };
+
 int parse_slot(const char *str, int *mat, int *obj)
 {
-	char *tmp;
-	char *ptr;
+	char *tmp, *ptr;
+	int ret;
+
 	tmp = strdup(str);
 	ptr = strchr(tmp, '.');
+	ret = -1;
 	if (ptr == NULL) {
 		*mat = mat_from_name(tmp);
+		if (*mat < 0) {
+			log_warning("%s: not a valid material", tmp);
+			goto cleanup;
+		}
 		*obj = OBJ_BLOCK;
 	} else {
 		*ptr = 0;
 		++ptr;
 		*mat = mat_from_name(tmp);
+		if (*mat < 0) {
+			log_warning("%s: not a valid material", tmp);
+			goto cleanup;
+		}
 		*obj = obj_from_name(ptr);
+		if (*obj < 0) {
+			log_warning("%s: not a valid object", ptr);
+			goto cleanup;
+		}
 	}
+	ret = 0;
+cleanup:
 	free(tmp);
-	if (*mat < 0 || *obj < 0)
-		return -1;
-	return 0;
+	return ret;
 }
 
 int parse_block(const char *str, int *mat, int *shape)
 {
-	char *tmp;
-	char *ptr;
+	char *tmp, *ptr;
+	int ret;
+
 	tmp = strdup(str);
 	ptr = strchr(tmp, '.');
+	ret = -1;
 	if (ptr == NULL) {
 		*mat = mat_from_name(tmp);
+		if (*mat < 0) {
+			log_warning("%s: not a valid material", tmp);
+			goto cleanup;
+		}
 		*shape = SHAPE_BLOCK_DN;
 	} else {
 		*ptr = 0;
 		++ptr;
 		*mat = mat_from_name(tmp);
+		if (*mat < 0) {
+			log_warning("%s: not a valid material", tmp);
+			goto cleanup;
+		}
 		*shape = shape_from_name(ptr);
+		if (*shape < 0) {
+			log_warning("%s: not a valid shape", ptr);
+			goto cleanup;
+		}
 	}
+	ret = 0;
+cleanup:
 	free(tmp);
-	if (*mat < 0 || *shape < 0)
-		return -1;
-	return 0;
+	return ret;
 }
 
 int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -90,23 +120,6 @@ fail:
 	return TCL_ERROR;
 }
 
-int cmd_fill(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
-{
-	static const char *usage = "usage: fill <material>[.<shape>]";
-	struct context *ctx = data;
-	int mat, shape;
-
-	if (objc != 2)
-		goto fail;
-	if (parse_block(Tcl_GetString(objv[1]), &mat, &shape) != 0)
-		goto fail;
-	log_info("fill %s.%s", mat_names[mat], shape_names[shape]);
-	return 0;
-fail:
-	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
-	return TCL_ERROR;
-}
-
 int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: query";
@@ -139,6 +152,74 @@ int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	}
 	return TCL_OK;
 
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+
+int cmd_seta(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: a";
+	struct context *ctx = data;
+
+	if (objc != 1)
+		goto fail;
+	if (ctx->cur.face == -1) {
+		log_info("no block selected");
+		return TCL_OK;
+	}
+	sel_bb.x0 = ctx->cur.p.x;
+	sel_bb.y0 = ctx->cur.p.y;
+	sel_bb.z0 = ctx->cur.p.z;
+	log_info("a set to %lld,%lld,%lld", sel_bb.x0, sel_bb.y0, sel_bb.z0);
+	return TCL_OK;
+
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+
+int cmd_setb(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: b";
+	struct context *ctx = data;
+
+	if (objc != 1)
+		goto fail;
+	if (ctx->cur.face == -1) {
+		log_info("no block selected");
+		return TCL_OK;
+	}
+	sel_bb.x1 = ctx->cur.p.x;
+	sel_bb.y1 = ctx->cur.p.y;
+	sel_bb.z1 = ctx->cur.p.z;
+	log_info("b set to %lld,%lld,%lld", sel_bb.x1, sel_bb.y1, sel_bb.z1);
+	return TCL_OK;
+
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+
+int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: box <material>[.<shape>]";
+	struct context *ctx = data;
+	int mat, shape;
+	struct box3ll bb;
+	struct v3ll p;
+
+	if (objc != 2)
+		goto fail;
+	if (parse_block(Tcl_GetString(objv[1]), &mat, &shape) != 0)
+		goto fail;
+	bb = box3_fix(sel_bb);
+	++bb.x1;
+	++bb.y1;
+	++bb.z1;
+	box3_foreach(p, bb)
+		world_set(ctx->w, p, shape, mat, NULL);
+	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
 	return TCL_ERROR;

@@ -6,7 +6,9 @@
 
 int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int cmd_fill(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int cmd_seta(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int cmd_setb(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 

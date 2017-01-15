@@ -56,6 +56,14 @@ static inline struct box3ll box3ll(long long x0, long long y0, long long z0, lon
 	return (struct box3ll){ x0, y0, z0, x1, y1, z1 };
 }
 
+#define box3_fix(bb) (typeof(bb)){ \
+	bb.x0 < bb.x1 ? bb.x0 : bb.x1, \
+	bb.y0 < bb.y1 ? bb.y0 : bb.y1, \
+	bb.z0 < bb.z1 ? bb.z0 : bb.z1, \
+	bb.x0 > bb.x1 ? bb.x0 : bb.x1, \
+	bb.y0 > bb.y1 ? bb.y0 : bb.y1, \
+	bb.z0 > bb.z1 ? bb.z0 : bb.z1 }
+
 #define box3_overlap(b1, b2) \
 	(b2.x0 <= b1.x1 && b2.x1 >= b1.x0 &&\
 	 b2.y0 <= b1.y1 && b2.y1 >= b1.y0 &&\
