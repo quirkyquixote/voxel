@@ -12,24 +12,23 @@ void event(const SDL_Event *e, void *data)
 	if (ctx->mode == MODE_COMMAND) {
 		if (e->type == SDL_KEYDOWN) {
 			if (e->key.keysym.sym == SDLK_RETURN) {
-				Tcl_Eval(ctx->tcl, ctx->cmdline);
+				Tcl_Eval(ctx->tcl, ctx->cmdline->str);
 				const char *ret = Tcl_GetStringResult(ctx->tcl);
 				if (ret && *ret)
 					log_info("%s", ret);
-				ctx->cmdline[0] = 0;
+				str_assign(ctx->cmdline, "", 0);
 				ctx->mode = MODE_ROAM;
 				SDL_StopTextInput();
 				return;
 			} else if (e->key.keysym.sym == SDLK_ESCAPE) {
-				ctx->cmdline[0] = 0;
-				ctx->mode = MODE_ROAM;
+				str_assign(ctx->cmdline, "", 0);
 				SDL_StopTextInput();
 			} else if (e->key.keysym.sym == SDLK_BACKSPACE) {
-				if (strlen(ctx->cmdline))
-					ctx->cmdline[strlen(ctx->cmdline) - 1] = 0;
+				if (ctx->cmdline->len)
+					str_erase_char(ctx->cmdline, ctx->cmdline->len - 1);
 			}
 		} else if (e->type == SDL_TEXTINPUT) {
-			strcat(ctx->cmdline, e->text.text);
+			str_append(ctx->cmdline, e->text.text, strlen(e->text.text));
 		} else if (e->type == SDL_TEXTEDITING) {
 			log_warning("text editing event");
 		}

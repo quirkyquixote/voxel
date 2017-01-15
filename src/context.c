@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
 	Tcl_CreateObjCommand(ctx->tcl, "hbox", cmd_hbox, ctx, NULL);
 	Tcl_CreateObjCommand(ctx->tcl, "walls", cmd_walls, ctx, NULL);
 	Tcl_CreateObjCommand(ctx->tcl, "relit", cmd_relit, ctx, NULL);
+	ctx->cmdline = str();
 
 	/* Load textures */
 	ctx->tex_terrain = texture("data/materials.png");

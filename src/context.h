@@ -16,6 +16,7 @@
 #include "camera.h"
 #include "media.h"
 #include "inventory.h"
+#include "str.h"
 
 enum {
 	MODE_ROAM,
@@ -52,7 +53,7 @@ struct context {
 	int chunks_per_tick;
 	uint64_t tick;
 	Tcl_Interp *tcl;
-	char cmdline[1024];
+	struct str *cmdline;
 };
 
 unsigned long long next_id(void);
