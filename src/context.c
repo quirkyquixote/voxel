@@ -44,18 +44,7 @@ int main(int argc, char *argv[])
 	window_set_render_callback(ctx->ml->windows, render, ctx);
 
 	/* Initialize Tcl */
-	ctx->tcl = Tcl_CreateInterp();
-	Tcl_CreateObjCommand(ctx->tcl, "ls", cmd_ls, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "give", cmd_give, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "take", cmd_take, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "q", cmd_query, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "a", cmd_seta, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "b", cmd_setb, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "box", cmd_box, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "hbox", cmd_hbox, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "walls", cmd_walls, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "relit", cmd_relit, ctx, NULL);
-	ctx->cmdline = str();
+	ctx->cli = commandline();
 
 	/* Load textures */
 	ctx->tex_terrain = texture("data/materials.png");

@@ -12,23 +12,32 @@ void event(const SDL_Event *e, void *data)
 	if (ctx->mode == MODE_COMMAND) {
 		if (e->type == SDL_KEYDOWN) {
 			if (e->key.keysym.sym == SDLK_RETURN) {
-				Tcl_Eval(ctx->tcl, ctx->cmdline->str);
-				const char *ret = Tcl_GetStringResult(ctx->tcl);
+				Tcl_Eval(ctx->cli->tcl, ctx->cli->visible);
+				const char *ret = Tcl_GetStringResult(ctx->cli->tcl);
 				if (ret && *ret)
 					log_info("%s", ret);
-				str_assign(ctx->cmdline, "", 0);
+				array_push(ctx->cli->history, strdup(ctx->cli->visible));
+				str_assign(ctx->cli->buf, "", 0);
 				ctx->mode = MODE_ROAM;
 				SDL_StopTextInput();
 				return;
 			} else if (e->key.keysym.sym == SDLK_ESCAPE) {
-				str_assign(ctx->cmdline, "", 0);
+				str_assign(ctx->cli->buf, "", 0);
 				SDL_StopTextInput();
 			} else if (e->key.keysym.sym == SDLK_BACKSPACE) {
-				if (ctx->cmdline->len)
-					str_erase_char(ctx->cmdline, ctx->cmdline->len - 1);
+				if (strlen(ctx->cli->visible) != 0) {
+					if (ctx->cli->buf->str != ctx->cli->visible)
+						str_assign(ctx->cli->buf, ctx->cli->visible, strlen(ctx->cli->visible));
+					str_erase_char(ctx->cli->buf, ctx->cli->buf->len - 1);
+				}
+			} else  if (e->key.keysym.sym == SDLK_UP) {
+
 			}
 		} else if (e->type == SDL_TEXTINPUT) {
-			str_append(ctx->cmdline, e->text.text, strlen(e->text.text));
+			if (ctx->cli->buf->str != ctx->cli->visible)
+				str_assign(ctx->cli->buf, ctx->cli->visible, strlen(ctx->cli->visible));
+			str_append(ctx->cli->buf, e->text.text, strlen(e->text.text));
+			ctx->cli->visible = ctx->cli->buf->str;
 		} else if (e->type == SDL_TEXTEDITING) {
 			log_warning("text editing event");
 		}
@@ -139,15 +148,15 @@ void event(const SDL_Event *e, void *data)
 			int mat = inventory_get_mat(ctx->inv, ctx->tool);
 			if (e->wheel.y > 0) {
 				do {
-				if (mat == 0)
-					mat = MAT_COUNT;
-				--mat;
+					if (mat == 0)
+						mat = MAT_COUNT;
+					--mat;
 				} while (v2_eql(texcoord_from_mat[mat][0], v2f(0, 0)));
 			} else if (e->wheel.y < 0) {
 				do {
-				++mat;
-				if (mat == MAT_COUNT)
-					mat = 0;
+					++mat;
+					if (mat == MAT_COUNT)
+						mat = 0;
 				} while (v2_eql(texcoord_from_mat[mat][0], v2f(0, 0)));
 			}
 			inventory_set_mat(ctx->inv, ctx->tool, mat);

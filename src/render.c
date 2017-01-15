@@ -335,9 +335,14 @@ void roam_render(struct context *ctx)
 		glRotatef(180.0 * ctx->cam->r.y / M_PI, 0, -1, 0);
 		glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
 		glTranslatef(-20, 0, -40);
-		char buf[ctx->cmdline->len + 2];
-		sprintf(buf, "%s_", ctx->cmdline->str ? ctx->cmdline->str : "");
-		render_string(ctx, buf);
+		if (ctx->cli->visible) {
+			char buf[strlen(ctx->cli->visible) + 2];
+			sprintf(buf, "%s_", ctx->cli->visible);
+			render_string(ctx, buf);
+		} else {
+			render_string(ctx, "_");
+
+		}
 	}
 	glEnable(GL_DEPTH_TEST);
 }
