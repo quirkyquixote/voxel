@@ -13,12 +13,12 @@ int parse_slot(const char *str, int *mat, int *obj)
 
 	tmp = strdup(str);
 	ptr = strchr(tmp, '.');
-	ret = -1;
+	ret = 0;
 	if (ptr == NULL) {
 		*mat = mat_from_name(tmp);
 		if (*mat < 0) {
 			log_warning("%s: not a valid material", tmp);
-			goto cleanup;
+			ret = -1;
 		}
 		*obj = OBJ_BLOCK;
 	} else {
@@ -27,16 +27,14 @@ int parse_slot(const char *str, int *mat, int *obj)
 		*mat = mat_from_name(tmp);
 		if (*mat < 0) {
 			log_warning("%s: not a valid material", tmp);
-			goto cleanup;
+			ret = -1;
 		}
 		*obj = obj_from_name(ptr);
 		if (*obj < 0) {
 			log_warning("%s: not a valid object", ptr);
-			goto cleanup;
+			ret = -1;
 		}
 	}
-	ret = 0;
-cleanup:
 	free(tmp);
 	return ret;
 }
@@ -48,12 +46,12 @@ int parse_block(const char *str, int *mat, int *shape)
 
 	tmp = strdup(str);
 	ptr = strchr(tmp, '.');
-	ret = -1;
+	ret = 0;
 	if (ptr == NULL) {
 		*mat = mat_from_name(tmp);
 		if (*mat < 0) {
 			log_warning("%s: not a valid material", tmp);
-			goto cleanup;
+			ret = -1;
 		}
 		*shape = SHAPE_BLOCK_DN;
 	} else {
@@ -62,18 +60,49 @@ int parse_block(const char *str, int *mat, int *shape)
 		*mat = mat_from_name(tmp);
 		if (*mat < 0) {
 			log_warning("%s: not a valid material", tmp);
-			goto cleanup;
+			ret = -1;
 		}
 		*shape = shape_from_name(ptr);
 		if (*shape < 0) {
 			log_warning("%s: not a valid shape", ptr);
-			goto cleanup;
+			ret = -1;
 		}
 	}
-	ret = 0;
-cleanup:
 	free(tmp);
 	return ret;
+}
+
+int cmd_ls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: ls [mat|obj|sha]";
+	struct context *ctx = data;
+	char *str;
+
+	if (objc < 2)
+		goto fail;
+	str = Tcl_GetString(objv[1]);
+	if (strncmp(str, "mat", 3) == 0) {
+		log_info("all materials:");
+		for (int i = 0; i < MAT_COUNT; ++i)
+			if (mat_names[i])
+			log_info("%s", mat_names[i]);
+	} else if (strncmp(str, "obj", 3) == 0) {
+		log_info("all objects:");
+		for (int i = 0; i < OBJ_COUNT; ++i)
+			if (obj_names[i])
+			log_info("%s", obj_names[i]);
+	} else if (strncmp(str, "sha", 3) == 0) {
+		log_info("all shapes:");
+		for (int i = 0; i < SHAPE_COUNT; ++i)
+			if (shape_names[i])
+			log_info("%s", shape_names[i]);
+	} else {
+		goto fail;
+	}
+	return TCL_OK;
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
 }
 
 int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
@@ -87,7 +116,7 @@ int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	if (parse_slot(Tcl_GetString(objv[1]), &mat, &obj) != 0)
 		goto fail;
 	if (objc == 3) {
-		if (Tcl_GetIntFromObj(interp, objv[3], &num) != 0)
+		if (Tcl_GetIntFromObj(interp, objv[2], &num) != TCL_OK)
 			goto fail;
 	}
 	inventory_add(ctx->inv, slot(obj, mat, num));
@@ -109,7 +138,7 @@ int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	if (parse_slot(Tcl_GetString(objv[1]), &mat, &obj) != 0)
 		goto fail;
 	if (objc == 3) {
-		if (Tcl_GetIntFromObj(interp, objv[3], &num) != 0)
+		if (Tcl_GetIntFromObj(interp, objv[2], &num) != TCL_OK)
 			goto fail;
 	}
 	inventory_remove(ctx->inv, slot(obj, mat, num));

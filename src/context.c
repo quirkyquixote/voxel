@@ -45,6 +45,7 @@ int main(int argc, char *argv[])
 
 	/* Initialize Tcl */
 	ctx->tcl = Tcl_CreateInterp();
+	Tcl_CreateObjCommand(ctx->tcl, "ls", cmd_ls, ctx, NULL);
 	Tcl_CreateObjCommand(ctx->tcl, "give", cmd_give, ctx, NULL);
 	Tcl_CreateObjCommand(ctx->tcl, "take", cmd_take, ctx, NULL);
 	Tcl_CreateObjCommand(ctx->tcl, "q", cmd_query, ctx, NULL);
@@ -158,8 +159,6 @@ int load_all(struct context *ctx)
 	body_set_step_size(ctx->player, 1);
 	ctx->inv = inventory(9);
 	ctx->tool = 0;
-	for (x = 0; x < OBJ_COUNT; ++x)
-		inventory_set(ctx->inv, x, slot(x, MAT_LIMESTONE, 64));
 	list_init(&ctx->drops);
 	return 0;
 }
