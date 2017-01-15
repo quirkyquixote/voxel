@@ -362,7 +362,7 @@ void update_player(struct context *ctx)
 				o = OBJ_PANE;
 			else if (s >= SHAPE_STAIRS_DF && s <= SHAPE_STAIRS_UR)
 				o = OBJ_STAIRS;
-			inventory_set(ctx->inv, ctx->tool, slot(o, m, 64));
+			inventory_set(ctx->inv, ctx->tool, slot(o, m, 1));
 		}
 	}
 }

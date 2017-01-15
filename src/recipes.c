@@ -12,29 +12,77 @@ struct recipe {
 	struct ingredient pattern[9];
 };
 
+#define PATTERN_1x1(o1,m1,num,o2,m2) \
+	{ { o1, m1 }, num, { \
+		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
+		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	} }, \
+	{ { o1, m1 }, num, { \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	} }, \
+	{ { o1, m1 }, num, { \
+		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	} }
+
+#define PATTERN_2x1(o1,m1,num,o2,m2) \
+	{ { o1, m1 }, num, { \
+		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
+		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
+		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	} }, \
+	{ { o1, m1 }, num, { \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	} }, \
+	{ { o1, m1 }, num, { \
+		{ -1, -1 }, { -1, -1 }, { o2, m2 }, \
+		{ -1, -1 }, { -1, -1 }, { o2, m2 }, \
+		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	} }
+
+#define PATTERN_3x1(o1,m1,num,o2,m2) \
+	{ { o1, m1 }, num, { \
+		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
+		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
+		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
+	} }, \
+	{ { o1, m1 }, num, { \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+	} }
+
+#define PATTERN_2x2(o1,m1,num,o2,m2) \
+	{ { o1, m1 }, num, { \
+		{ o2, m2 }, { o2, m2 }, { -1, -1 }, \
+		{ o2, m2 }, { o2, m2 }, { -1, -1 }, \
+		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	} }
+
+#define PATTERN_DIAMOND(o1,m1,num,o2,m2) \
+	{ { o1, m1 }, num, { \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+		{ o2, m2 }, { -1, -1 }, { o2, m2 }, \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+	} }
+
+#define PATTERN_CROSS(o1,m1,num,o2,m2) \
+	{ { o1, m1 }, num, { \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+		{ o2, m2 }, { o2, m2 }, { o2, m2 }, \
+		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+	} }
+
+
 #define COMMON_RECIPES(mat)\
-	{ { OBJ_SLAB, mat }, 6, {\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 }\
-	} },\
-	{ { OBJ_SLAB, mat }, 6, {\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 }\
-	} },\
+	PATTERN_3x1(OBJ_SLAB, mat, 6, OBJ_BLOCK, mat), \
+	PATTERN_3x1(OBJ_PANE, mat, 6, OBJ_SLAB, mat), \
 	{ { OBJ_STAIRS, mat }, 6, {\
 		{ OBJ_BLOCK, mat },\
 		{ OBJ_BLOCK, mat },\
@@ -43,39 +91,6 @@ struct recipe {
 		{ OBJ_BLOCK, mat },\
 		{ -1, -1 },\
 		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} }, \
-	{ { OBJ_PANE, mat }, 6, {\
-		{ OBJ_SLAB, mat },\
-		{ OBJ_SLAB, mat },\
-		{ OBJ_SLAB, mat },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 }\
-	} },\
-	{ { OBJ_PANE, mat }, 6, {\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ OBJ_SLAB, mat },\
-		{ OBJ_SLAB, mat },\
-		{ OBJ_SLAB, mat },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 }\
-	} }, \
-	{ { OBJ_PANE, mat }, 16, {\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
 		{ -1, -1 },\
 		{ -1, -1 },\
 	} }
@@ -88,119 +103,20 @@ struct recipe {
 	COMMON_RECIPES(mat##_TILE),\
 	COMMON_RECIPES(mat##_COLUMN),\
 	COMMON_RECIPES(mat##_BLOCK), \
-	{ { OBJ_BLOCK, mat##_BLOCK }, 1, {\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_LBRICK }, 1, {\
-		{ OBJ_BLOCK, mat##_BLOCK },\
-		{ OBJ_BLOCK, mat##_BLOCK },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat##_BLOCK },\
-		{ OBJ_BLOCK, mat##_BLOCK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_SBRICK }, 1, {\
-		{ OBJ_BLOCK, mat##_LBRICK },\
-		{ OBJ_BLOCK, mat##_LBRICK },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat##_LBRICK },\
-		{ OBJ_BLOCK, mat##_LBRICK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_TILE }, 1, {\
-		{ OBJ_BLOCK, mat##_SBRICK },\
-		{ OBJ_BLOCK, mat##_SBRICK },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat##_SBRICK },\
-		{ OBJ_BLOCK, mat##_SBRICK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} }, \
-	{ { OBJ_BLOCK, mat##_BENCH }, 1, {\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_CRATE }, 1, {\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ OBJ_PANE, mat },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_PIPE }, 1, {\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-	} }
+	PATTERN_1x1(OBJ_BLOCK, mat##_BLOCK, 1, OBJ_BLOCK, mat), \
+	PATTERN_1x1(OBJ_BLOCK, mat##_LBRICK, 1, OBJ_BLOCK, mat##_BLOCK), \
+	PATTERN_1x1(OBJ_BLOCK, mat##_SBRICK, 1, OBJ_BLOCK, mat##_LBRICK), \
+	PATTERN_1x1(OBJ_BLOCK, mat##_TILE, 1, OBJ_BLOCK, mat##_SBRICK), \
+	PATTERN_2x2(OBJ_BLOCK, mat##_BENCH, 1, OBJ_BLOCK, mat), \
+	PATTERN_CROSS(OBJ_BLOCK, mat##_CRATE, 1, OBJ_PANE, mat), \
+	PATTERN_DIAMOND(OBJ_BLOCK, mat##_PIPE, 1, OBJ_PANE, mat)
 
 #define WOOD_RECIPES(mat)\
+	PATTERN_1x1(OBJ_BLOCK, mat, 4, OBJ_BLOCK, mat##_LOG), \
 	COMMON_RECIPES(mat), \
-	{ { OBJ_BLOCK, mat##_BENCH }, 1, {\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_CRATE }, 1, {\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ OBJ_PANE, mat },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_PIPE }, 1, {\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-		{ OBJ_PANE, mat },\
-		{ -1, -1 },\
-	} }
+	PATTERN_2x2(OBJ_BLOCK, mat##_BENCH, 1, OBJ_BLOCK, mat), \
+	PATTERN_CROSS(OBJ_BLOCK, mat##_CRATE, 1, OBJ_PANE, mat), \
+	PATTERN_DIAMOND(OBJ_BLOCK, mat##_PIPE, 1, OBJ_PANE, mat)
 
 static const struct recipe recipes[] = {
 	STONE_RECIPES(MAT_LIMESTONE),
