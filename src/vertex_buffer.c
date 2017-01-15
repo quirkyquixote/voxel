@@ -31,6 +31,7 @@
 
 #define WOOD_TC(mat,y)\
 	[mat] = { TC(1, y), TC(1, y), TC(1, y) },\
+	[mat##_LOG] = { TC(3, y), TC(2, y), TC(2, y) },\
 	COMMON_TC(mat, y)
 
 const struct v2f texcoord_from_mat[256][3] = {
