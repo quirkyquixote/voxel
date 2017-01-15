@@ -17,6 +17,8 @@ void render_string(struct context *ctx, char *str)
 		v0 = (*str / 16) / 16.;
 		u1 = u0 + 1 / 16.;
 		v1 = v0 + 1 / 16.;
+		u0 += .25 / 16.;
+		u1 -= .25 / 16.;
 		glBegin(GL_TRIANGLES);
 		glTexCoord2d(u1, v0);
 		glVertex3f(.5, 1, 0);
