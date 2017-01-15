@@ -89,6 +89,6 @@ static inline void array_clear(struct array *s)
 }
 
 #define array_foreach(_iter,_cont) \
-for (int i = 0; i < array_size(_cont) && array_get(_cont, i, &_iter); ++i)
+for (int _i = 0; _i < array_size(_cont) && array_get(_cont, _i, &_iter); ++_i)
 
 #endif
