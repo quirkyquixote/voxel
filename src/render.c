@@ -8,6 +8,8 @@
 void render_string(struct context *ctx, char *str)
 {
 	GLfloat u0, v0, u1, v1;
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, ctx->tex_font);
 	while (*str) {
@@ -33,6 +35,7 @@ void render_string(struct context *ctx, char *str)
 		++str;
 	}
 	glDisable(GL_TEXTURE_2D);
+	glPopMatrix();
 }
 
 void render_flowsim(struct context *ctx)
@@ -330,19 +333,25 @@ void roam_render(struct context *ctx)
 	}
 
 	if (ctx->mode == MODE_COMMAND) {
+		glEnable(GL_BLEND);
 		glColor3f(1, 1, 1);
 		glTranslatef(ctx->cam->p.x, ctx->cam->p.y, ctx->cam->p.z);
 		glRotatef(180.0 * ctx->cam->r.y / M_PI, 0, -1, 0);
 		glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
-		glTranslatef(-20, 0, -40);
-		if (ctx->cli->visible) {
-			char buf[strlen(ctx->cli->visible) + 2];
-			sprintf(buf, "%s_", ctx->cli->visible);
-			render_string(ctx, buf);
-		} else {
-			render_string(ctx, "_");
-
-		}
+		glTranslatef(-15, 0, -30);
+		if (ctx->cli->visible)
+			render_string(ctx, ctx->cli->visible);
+		glTranslatef(.5 * ctx->cli->cur_char, 0, 0);
+		glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
+		glBegin(GL_TRIANGLES);
+		glVertex3f(.5, 1, 0);
+		glVertex3f(0, 1, 0);
+		glVertex3f(.5, 0, 0);
+		glVertex3f(.5, 0, 0);
+		glVertex3f(0, 1, 0);
+		glVertex3f(0, 0, 0);
+		glEnd();
+		glDisable(GL_BLEND);
 	}
 	glEnable(GL_DEPTH_TEST);
 }
