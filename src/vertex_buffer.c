@@ -13,6 +13,11 @@
 
 #define TC(a,b) { a / 32., b / 32. }
 
+#define COMMON_TC(mat,y) \
+	[mat##_CRATE] = { TC(16, y), TC(17, y), TC(0, y) },\
+	[mat##_BENCH] = { TC(18, y), TC(19, y), TC(0, y) },\
+	[mat##_PIPE] = { TC(20, y), TC(21, y), TC(21, y) }
+
 #define STONE_TC(mat,y)\
 	[mat] = { TC(0, y), TC(0, y), TC(0, y) },\
 	[mat##_COBBLE] = { TC(1, y), TC(1, y), TC(1, y) },\
@@ -21,13 +26,12 @@
 	[mat##_TILE] = { TC(2, y), TC(2, y), TC(2, y) },\
 	[mat##_COLUMN] = { TC(9, y), TC(10, y), TC(10, y) },\
 	[mat##_BLOCK] = { TC(7, y), TC(7, y), TC(7, y) },\
-	[mat##_SAND] = { TC(15, y), TC(15, y), TC(16, y) }
+	[mat##_SAND] = { TC(15, y), TC(15, y), TC(16, y) },\
+	COMMON_TC(mat, y)
 
 #define WOOD_TC(mat,y)\
 	[mat] = { TC(1, y), TC(1, y), TC(1, y) },\
-	[mat##_CRATE] = { TC(2, y), TC(3, y), TC(0, y) },\
-	[mat##_BENCH] = { TC(4, y), TC(5, y), TC(0, y) },\
-	[mat##_PIPE] = { TC(6, y), TC(7, y), TC(7, y) }
+	COMMON_TC(mat, y)
 
 const struct v2f texcoord_from_mat[256][3] = {
 	[MAT_DIRT] = { TC(1, 0), TC(1, 0), TC(1, 0) },

@@ -45,152 +45,29 @@ struct recipe {
 		{ OBJ_BLOCK, mat },\
 		{ -1, -1 },\
 		{ -1, -1 },\
-	} }
-
-#define STONE_RECIPES(mat) \
-	COMMON_RECIPES(mat),\
-	COMMON_RECIPES(mat##_COBBLE),\
-	COMMON_RECIPES(mat##_LBRICK),\
-	COMMON_RECIPES(mat##_SBRICK),\
-	COMMON_RECIPES(mat##_TILE),\
-	COMMON_RECIPES(mat##_COLUMN),\
-	COMMON_RECIPES(mat##_COLUMN),\
-	COMMON_RECIPES(mat##_BLOCK), \
-	{ { OBJ_BLOCK, mat##_BLOCK }, 1, {\
-		{ OBJ_BLOCK, mat },\
+	} }, \
+	{ { OBJ_PANE, mat }, 6, {\
+		{ OBJ_SLAB, mat },\
+		{ OBJ_SLAB, mat },\
+		{ OBJ_SLAB, mat },\
 		{ -1, -1 },\
 		{ -1, -1 },\
 		{ -1, -1 },\
 		{ -1, -1 },\
 		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
+		{ -1, -1 }\
 	} },\
-	{ { OBJ_BLOCK, mat##_BLOCK }, 1, {\
+	{ { OBJ_PANE, mat }, 6, {\
 		{ -1, -1 },\
-		{ OBJ_BLOCK, mat },\
 		{ -1, -1 },\
 		{ -1, -1 },\
+		{ OBJ_SLAB, mat },\
+		{ OBJ_SLAB, mat },\
+		{ OBJ_SLAB, mat },\
 		{ -1, -1 },\
 		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_BLOCK }, 1, {\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_LBRICK }, 1, {\
-		{ OBJ_BLOCK, mat##_BLOCK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_LBRICK }, 1, {\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat##_BLOCK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_LBRICK }, 1, {\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat##_BLOCK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_SBRICK }, 1, {\
-		{ OBJ_BLOCK, mat##_LBRICK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_SBRICK }, 1, {\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat##_LBRICK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_SBRICK }, 1, {\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat##_LBRICK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_TILE }, 1, {\
-		{ OBJ_BLOCK, mat##_SBRICK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_TILE }, 1, {\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat##_SBRICK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} },\
-	{ { OBJ_BLOCK, mat##_TILE }, 1, {\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat##_SBRICK },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-		{ -1, -1 },\
-	} }
-
-#define WOOD_RECIPES(mat)\
-	COMMON_RECIPES(mat),\
+		{ -1, -1 }\
+	} }, \
 	{ { OBJ_PANE, mat }, 16, {\
 		{ OBJ_BLOCK, mat },\
 		{ OBJ_BLOCK, mat },\
@@ -201,7 +78,96 @@ struct recipe {
 		{ -1, -1 },\
 		{ -1, -1 },\
 		{ -1, -1 },\
+	} }
+
+#define STONE_RECIPES(mat) \
+	COMMON_RECIPES(mat),\
+	COMMON_RECIPES(mat##_COBBLE),\
+	COMMON_RECIPES(mat##_LBRICK),\
+	COMMON_RECIPES(mat##_SBRICK),\
+	COMMON_RECIPES(mat##_TILE),\
+	COMMON_RECIPES(mat##_COLUMN),\
+	COMMON_RECIPES(mat##_BLOCK), \
+	{ { OBJ_BLOCK, mat##_BLOCK }, 1, {\
+		{ OBJ_BLOCK, mat },\
+		{ OBJ_BLOCK, mat },\
+		{ -1, -1 },\
+		{ OBJ_BLOCK, mat },\
+		{ OBJ_BLOCK, mat },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+		{ -1, -1 },\
 	} },\
+	{ { OBJ_BLOCK, mat##_LBRICK }, 1, {\
+		{ OBJ_BLOCK, mat##_BLOCK },\
+		{ OBJ_BLOCK, mat##_BLOCK },\
+		{ -1, -1 },\
+		{ OBJ_BLOCK, mat##_BLOCK },\
+		{ OBJ_BLOCK, mat##_BLOCK },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+	} },\
+	{ { OBJ_BLOCK, mat##_SBRICK }, 1, {\
+		{ OBJ_BLOCK, mat##_LBRICK },\
+		{ OBJ_BLOCK, mat##_LBRICK },\
+		{ -1, -1 },\
+		{ OBJ_BLOCK, mat##_LBRICK },\
+		{ OBJ_BLOCK, mat##_LBRICK },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+	} },\
+	{ { OBJ_BLOCK, mat##_TILE }, 1, {\
+		{ OBJ_BLOCK, mat##_SBRICK },\
+		{ OBJ_BLOCK, mat##_SBRICK },\
+		{ -1, -1 },\
+		{ OBJ_BLOCK, mat##_SBRICK },\
+		{ OBJ_BLOCK, mat##_SBRICK },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+	} }, \
+	{ { OBJ_BLOCK, mat##_BENCH }, 1, {\
+		{ OBJ_BLOCK, mat },\
+		{ OBJ_BLOCK, mat },\
+		{ -1, -1 },\
+		{ OBJ_BLOCK, mat },\
+		{ OBJ_BLOCK, mat },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+		{ -1, -1 },\
+	} },\
+	{ { OBJ_BLOCK, mat##_CRATE }, 1, {\
+		{ -1, -1 },\
+		{ OBJ_PANE, mat },\
+		{ -1, -1 },\
+		{ OBJ_PANE, mat },\
+		{ OBJ_PANE, mat },\
+		{ OBJ_PANE, mat },\
+		{ -1, -1 },\
+		{ OBJ_PANE, mat },\
+		{ -1, -1 },\
+	} },\
+	{ { OBJ_BLOCK, mat##_PIPE }, 1, {\
+		{ -1, -1 },\
+		{ OBJ_PANE, mat },\
+		{ -1, -1 },\
+		{ OBJ_PANE, mat },\
+		{ -1, -1 },\
+		{ OBJ_PANE, mat },\
+		{ -1, -1 },\
+		{ OBJ_PANE, mat },\
+		{ -1, -1 },\
+	} }
+
+#define WOOD_RECIPES(mat)\
+	COMMON_RECIPES(mat), \
 	{ { OBJ_BLOCK, mat##_BENCH }, 1, {\
 		{ OBJ_BLOCK, mat },\
 		{ OBJ_BLOCK, mat },\
