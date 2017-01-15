@@ -44,6 +44,7 @@ int main(int argc, char *argv[])
 
 	/* Initialize Tcl */
 	ctx->tcl = Tcl_CreateInterp();
+	Tcl_CreateObjCommand(ctx->tcl, "help", cmd_help, ctx, NULL);
 	Tcl_CreateObjCommand(ctx->tcl, "ls", cmd_ls, ctx, NULL);
 	Tcl_CreateObjCommand(ctx->tcl, "give", cmd_give, ctx, NULL);
 	Tcl_CreateObjCommand(ctx->tcl, "take", cmd_take, ctx, NULL);

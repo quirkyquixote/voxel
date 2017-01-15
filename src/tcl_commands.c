@@ -68,6 +68,31 @@ int parse_block(const char *str, int *mat, int *shape)
 	return 0;
 }
 
+int cmd_help(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: help";
+	struct context *ctx = data;
+
+	if (objc != 1)
+		goto fail;
+	log_info("available commands:");
+	log_info("help: print this");
+	log_info("ls [mat|obj|sha]: list materials, objects, and shapes");
+	log_info("give <object> [amount]: add objects to inventory");
+	log_info("take <object> [amount]: remove objects to inventory");
+	log_info("q: query block under the cursor");
+	log_info("a: set first corner of selection");
+	log_info("b: set second corner of selection");
+	log_info("box <block>: fill a box with the given block");
+	log_info("hbox <block>: fill a hollow box with the given block");
+	log_info("walls <block>: fill the walls of a box with the given block");
+	log_info("relit: recalculate lighting for all loaded chunks");
+	return TCL_OK;
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+
 int cmd_ls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: ls [mat|obj|sha]";
