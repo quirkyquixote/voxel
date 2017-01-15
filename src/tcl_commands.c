@@ -1,29 +1,10 @@
 
-#include "commands.h"
+#include "tcl_commands.h"
 
 #include "context.h"
 #include "lighting.h"
 
 static struct box3ll sel_bb = { 0, 0, 0, 0, 0, 0 };
-
-struct commandline *commandline(void)
-{
-	struct commandline *cl = calloc(1, sizeof(*cl));
-	cl->tcl = Tcl_CreateInterp();
-	Tcl_CreateObjCommand(cl->tcl, "ls", cmd_ls, cl, NULL);
-	Tcl_CreateObjCommand(cl->tcl, "give", cmd_give, cl, NULL);
-	Tcl_CreateObjCommand(cl->tcl, "take", cmd_take, cl, NULL);
-	Tcl_CreateObjCommand(cl->tcl, "q", cmd_query, cl, NULL);
-	Tcl_CreateObjCommand(cl->tcl, "a", cmd_seta, cl, NULL);
-	Tcl_CreateObjCommand(cl->tcl, "b", cmd_setb, cl, NULL);
-	Tcl_CreateObjCommand(cl->tcl, "box", cmd_box, cl, NULL);
-	Tcl_CreateObjCommand(cl->tcl, "hbox", cmd_hbox, cl, NULL);
-	Tcl_CreateObjCommand(cl->tcl, "walls", cmd_walls, cl, NULL);
-	Tcl_CreateObjCommand(cl->tcl, "relit", cmd_relit, cl, NULL);
-	cl->buf = str();
-	cl->history = array(sizeof(char *));
-	return cl;
-}
 
 int parse_slot(const char *str, int *mat, int *obj)
 {

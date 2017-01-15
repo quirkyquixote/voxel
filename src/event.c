@@ -12,32 +12,29 @@ void event(const SDL_Event *e, void *data)
 	if (ctx->mode == MODE_COMMAND) {
 		if (e->type == SDL_KEYDOWN) {
 			if (e->key.keysym.sym == SDLK_RETURN) {
-				Tcl_Eval(ctx->cli->tcl, ctx->cli->visible);
-				const char *ret = Tcl_GetStringResult(ctx->cli->tcl);
+				Tcl_Eval(ctx->tcl, ctx->cli->visible);
+				const char *ret = Tcl_GetStringResult(ctx->tcl);
 				if (ret && *ret)
 					log_info("%s", ret);
-				array_push(ctx->cli->history, strdup(ctx->cli->visible));
-				str_assign(ctx->cli->buf, "", 0);
+				cli_push(ctx->cli);
 				ctx->mode = MODE_ROAM;
 				SDL_StopTextInput();
-				return;
 			} else if (e->key.keysym.sym == SDLK_ESCAPE) {
-				str_assign(ctx->cli->buf, "", 0);
+				ctx->mode = MODE_ROAM;
 				SDL_StopTextInput();
 			} else if (e->key.keysym.sym == SDLK_BACKSPACE) {
-				if (strlen(ctx->cli->visible) != 0) {
-					if (ctx->cli->buf->str != ctx->cli->visible)
-						str_assign(ctx->cli->buf, ctx->cli->visible, strlen(ctx->cli->visible));
-					str_erase_char(ctx->cli->buf, ctx->cli->buf->len - 1);
-				}
+				cli_delete(ctx->cli);
 			} else  if (e->key.keysym.sym == SDLK_UP) {
-
+				cli_prev_line(ctx->cli);
+			} else  if (e->key.keysym.sym == SDLK_DOWN) {
+				cli_next_line(ctx->cli);
+			} else  if (e->key.keysym.sym == SDLK_LEFT) {
+				cli_prev_char(ctx->cli);
+			} else  if (e->key.keysym.sym == SDLK_RIGHT) {
+				cli_next_char(ctx->cli);
 			}
 		} else if (e->type == SDL_TEXTINPUT) {
-			if (ctx->cli->buf->str != ctx->cli->visible)
-				str_assign(ctx->cli->buf, ctx->cli->visible, strlen(ctx->cli->visible));
-			str_append(ctx->cli->buf, e->text.text, strlen(e->text.text));
-			ctx->cli->visible = ctx->cli->buf->str;
+			cli_append(ctx->cli, e->text.text);
 		} else if (e->type == SDL_TEXTEDITING) {
 			log_warning("text editing event");
 		}

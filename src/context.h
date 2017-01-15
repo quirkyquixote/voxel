@@ -16,7 +16,8 @@
 #include "camera.h"
 #include "media.h"
 #include "inventory.h"
-#include "commands.h"
+#include "cli.h"
+#include "tcl_commands.h"
 
 enum {
 	MODE_ROAM,
@@ -26,7 +27,8 @@ enum {
 struct context {
 	char *dir;
 	struct main_loop *ml;
-	struct commandline *cli;
+	Tcl_Interp *tcl;
+	struct cli *cli;
 	struct world *w;
 	struct profile_manager *prof_mgr;
 	struct vertex_buffer *shard_vertex_buffer;
