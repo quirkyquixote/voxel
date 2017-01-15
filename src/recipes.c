@@ -202,7 +202,7 @@ struct recipe {
 		{ -1, -1 },\
 		{ -1, -1 },\
 	} },\
-	{ { OBJ_BLOCK, mat##_WORKBENCH }, 1, {\
+	{ { OBJ_BLOCK, mat##_BENCH }, 1, {\
 		{ OBJ_BLOCK, mat },\
 		{ OBJ_BLOCK, mat },\
 		{ -1, -1 },\

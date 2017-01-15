@@ -26,7 +26,7 @@
 #define WOOD_TC(mat,y)\
 	[mat] = { TC(1, y), TC(1, y), TC(1, y) },\
 	[mat##_CRATE] = { TC(2, y), TC(3, y), TC(0, y) },\
-	[mat##_WORKBENCH] = { TC(4, y), TC(5, y), TC(0, y) },\
+	[mat##_BENCH] = { TC(4, y), TC(5, y), TC(0, y) },\
 	[mat##_PIPE] = { TC(6, y), TC(7, y), TC(7, y) }
 
 const struct v2f texcoord_from_mat[256][3] = {
