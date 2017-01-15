@@ -22,8 +22,14 @@ void event(const SDL_Event *e, void *data)
 			} else if (e->key.keysym.sym == SDLK_ESCAPE) {
 				ctx->mode = MODE_ROAM;
 				SDL_StopTextInput();
+			} else if (e->key.keysym.sym == SDLK_DELETE) {
+				cli_delete_forward(ctx->cli);
 			} else if (e->key.keysym.sym == SDLK_BACKSPACE) {
-				cli_delete(ctx->cli);
+				cli_delete_backward(ctx->cli);
+			} else  if (e->key.keysym.sym == SDLK_HOME) {
+				cli_first_char(ctx->cli);
+			} else  if (e->key.keysym.sym == SDLK_END) {
+				cli_last_char(ctx->cli);
 			} else  if (e->key.keysym.sym == SDLK_UP) {
 				cli_prev_line(ctx->cli);
 			} else  if (e->key.keysym.sym == SDLK_DOWN) {

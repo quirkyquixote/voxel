@@ -3,10 +3,11 @@
 
 struct cli *cli(void)
 {
-	struct cli *cl = calloc(1, sizeof(*cl));
-	cl->buf = str();
-	cl->history = array(sizeof(char *));
-	return cl;
+	struct cli *c = calloc(1, sizeof(*c));
+	c->buf = str();
+	c->history = array(sizeof(char *));
+	c->visible = "";
+	return c;
 }
 
 void cli_append(struct cli *c, const char *str)
@@ -18,7 +19,7 @@ void cli_append(struct cli *c, const char *str)
 	c->visible = c->buf->str;
 }
 
-int cli_delete(struct cli *c)
+int cli_delete_backward(struct cli *c)
 {
 	if (c->cur_char == 0)
 		return 0;
@@ -26,6 +27,17 @@ int cli_delete(struct cli *c)
 		str_assign(c->buf, c->visible, strlen(c->visible));
 	str_erase_char(c->buf, c->cur_char - 1);
 	--c->cur_char;
+	c->visible = c->buf->str;
+	return 1;
+}
+
+int cli_delete_forward(struct cli *c)
+{
+	if (c->visible[c->cur_char] == 0)
+		return 0;
+	if (c->visible != c->buf->str)
+		str_assign(c->buf, c->visible, strlen(c->visible));
+	str_erase_char(c->buf, c->cur_char);
 	c->visible = c->buf->str;
 	return 1;
 }
@@ -44,6 +56,16 @@ int cli_next_char(struct cli *c)
 		return 0;
 	++c->cur_char;
 	return 1;
+}
+
+void cli_first_char(struct cli *c)
+{
+	c->cur_char = 0;
+}
+
+void cli_last_char(struct cli *c)
+{
+	c->cur_char = strlen(c->visible);
 }
 
 int cli_prev_line(struct cli *c)
