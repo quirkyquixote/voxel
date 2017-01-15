@@ -254,6 +254,46 @@ fail:
 	return TCL_ERROR;
 }
 
+int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: hbox <material>[.<shape>]";
+	struct context *ctx = data;
+	int mat, shape;
+	struct box3ll bb;
+	struct v3ll p;
+
+	if (objc != 2)
+		goto fail;
+	if (parse_block(Tcl_GetString(objv[1]), &mat, &shape) != 0)
+		goto fail;
+	bb = box3_fix(sel_bb);
+	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
+		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
+			p.y = bb.y0;
+			world_set(ctx->w, p, shape, mat, NULL);
+			p.y = bb.y1;
+			world_set(ctx->w, p, shape, mat, NULL);
+		}
+	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
+		for (p.y = bb.y0; p.y <= bb.y1; ++p.y) {
+			p.z = bb.z0;
+			world_set(ctx->w, p, shape, mat, NULL);
+			p.z = bb.z1;
+			world_set(ctx->w, p, shape, mat, NULL);
+		}
+	for (p.y = bb.y0; p.y <= bb.y1; ++p.y)
+		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
+			p.x = bb.x0;
+			world_set(ctx->w, p, shape, mat, NULL);
+			p.x = bb.x1;
+			world_set(ctx->w, p, shape, mat, NULL);
+		}
+	return 0;
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+
 int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: relit";
