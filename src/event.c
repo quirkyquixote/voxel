@@ -20,6 +20,10 @@ void event(const SDL_Event *e, void *data)
 				ctx->mode = MODE_ROAM;
 				SDL_StopTextInput();
 				return;
+			} else if (e->key.keysym.sym == SDLK_ESCAPE) {
+				ctx->cmdline[0] = 0;
+				ctx->mode = MODE_ROAM;
+				SDL_StopTextInput();
 			} else if (e->key.keysym.sym == SDLK_BACKSPACE) {
 				if (strlen(ctx->cmdline))
 					ctx->cmdline[strlen(ctx->cmdline) - 1] = 0;
@@ -87,16 +91,6 @@ void event(const SDL_Event *e, void *data)
 		} else if (e->key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE START ===\n");
 			profile_manager_reset(ctx->prof_mgr);
-		} else if (e->key.keysym.sym == SDLK_l) {
-			struct box3ll bb, bb2;
-			bb.x0 = ctx->w->x;
-			bb.y0 = WORLD_H - 1;
-			bb.z0 = ctx->w->z;
-			bb.x1 = bb.x0 + WORLD_W;
-			bb.y1 = bb.y0 + 1;
-			bb.z1 = bb.z0 + WORLD_W;
-			update_lighting(ctx->w, bb, &bb2);
-			world_set_flags(ctx->w, bb2, CHUNK_UNRENDERED);
 		}
 	} else if (e->type == SDL_KEYUP) {
 		if (e->key.repeat) {
@@ -120,32 +114,6 @@ void event(const SDL_Event *e, void *data)
 		} else if (e->key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE DUMP ===\n");
 			profile_manager_dump(ctx->prof_mgr);
-		} else if (e->key.keysym.sym == SDLK_q) {
-			if (ctx->cur.face == -1)
-				return;
-			printf("looking at %d,%d,%d; %.02g,%.02g,%.02g; %s; %s %s; light %d\n",
-					ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z,
-					ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z,
-					face_names[ctx->cur.face],
-					mat_names[world_get_mat(ctx->w, ctx->cur.p)],
-					shape_names[world_get_shape(ctx->w, ctx->cur.p)],
-					world_get_light(ctx->w, ctx->cur.p));
-			struct array *inv = world_get_data(ctx->w, ctx->cur.p);
-			if (inv != NULL) {
-				printf("inventory: [");
-				struct slot s;
-				int is_first = 1;
-				array_foreach(s, inv) {
-					if (is_first)
-						is_first = 0;
-					else
-						printf(",");
-					if (s.num > 0)
-						printf("%s %s %d", mat_names[s.mat],
-								obj_names[s.obj], s.num);
-				}
-				printf("]\n");
-			}
 		} else if (e->key.keysym.sym == SDLK_p) {
 			printf("at %g,%g,%g; rot %g,%g; facing %d,%s\n",
 					ctx->player->p.x, ctx->player->p.y, ctx->player->p.x,
