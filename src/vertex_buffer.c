@@ -797,60 +797,6 @@ struct vertex_desc vertices_pane_z[] = {
 	{ 1., 1., .53125, 1., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
 };
 
-const int orientation_up[] = {
-	[FACE_UP] = 1,
-	[FACE_DN] = 2,
-	[FACE_LF] = 0,
-	[FACE_RT] = 0,
-	[FACE_BK] = 0,
-	[FACE_FT] = 0,
-};
-
-const int orientation_dn[] = {
-	[FACE_UP] = 2,
-	[FACE_DN] = 1,
-	[FACE_LF] = 0,
-	[FACE_RT] = 0,
-	[FACE_BK] = 0,
-	[FACE_FT] = 0,
-};
-
-const int orientation_lf[] = {
-	[FACE_UP] = 0,
-	[FACE_DN] = 0,
-	[FACE_LF] = 1,
-	[FACE_RT] = 2,
-	[FACE_BK] = 0,
-	[FACE_FT] = 0,
-};
-
-const int orientation_rt[] = {
-	[FACE_UP] = 0,
-	[FACE_DN] = 0,
-	[FACE_LF] = 2,
-	[FACE_RT] = 1,
-	[FACE_BK] = 0,
-	[FACE_FT] = 0,
-};
-
-const int orientation_bk[] = {
-	[FACE_UP] = 0,
-	[FACE_DN] = 0,
-	[FACE_LF] = 0,
-	[FACE_RT] = 0,
-	[FACE_BK] = 1,
-	[FACE_FT] = 2,
-};
-
-const int orientation_ft[] = {
-	[FACE_UP] = 0,
-	[FACE_DN] = 0,
-	[FACE_LF] = 0,
-	[FACE_RT] = 0,
-	[FACE_BK] = 2,
-	[FACE_FT] = 1,
-};
-
 struct vertex_buffer *vertex_buffer(int vbo_count)
 {
 	struct vertex_buffer *r = calloc(1, sizeof(*r));

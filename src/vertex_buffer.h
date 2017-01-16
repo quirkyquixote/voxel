@@ -12,6 +12,7 @@
 #include "v4.h"
 #include "box2.h"
 #include "array.h"
+#include "types.h"
 
 struct vertex {
 	GLfloat x, y, z;
@@ -63,13 +64,6 @@ extern struct vertex_desc vertices_pane_x[];
 extern struct vertex_desc vertices_pane_y[];
 extern struct vertex_desc vertices_pane_z[];
 
-extern const int orientation_up[];
-extern const int orientation_dn[];
-extern const int orientation_lf[];
-extern const int orientation_rt[];
-extern const int orientation_bk[];
-extern const int orientation_ft[];
-
 struct vertex_buffer *vertex_buffer(int nbufs);
 void vertex_buffer_destroy(struct vertex_buffer *r);
 void vertex_buffer_enable(struct vertex_buffer *r);
@@ -80,7 +74,7 @@ void vertex_buffer_disable(struct vertex_buffer *r);
 void vertex_buffer_update(struct vertex_buffer *r, size_t buf, const void *data, size_t size);
 
 static inline void vertices_add(struct array *s, const struct vertex_desc *buf, size_t len,
-	struct v3f p, struct v2f t1, const struct v2f *t2, const int *ori)
+	struct v3f p, struct v2f t1, const struct v2f *t2)
 {
 	int i;
 	struct vertex v;
@@ -90,8 +84,8 @@ static inline void vertices_add(struct array *s, const struct vertex_desc *buf, 
 		v.z = buf[i].z + p.z;
 		v.u0 = t1.x;
 		v.v0 = t1.y;
-		v.u1 = t2[ori[buf[i].face]].x + buf[i].u / 32.;
-		v.v1 = t2[ori[buf[i].face]].y + buf[i].v / 32.;
+		v.u1 = t2[buf[i].face].x + buf[i].u / 32.;
+		v.v1 = t2[buf[i].face].y + buf[i].v / 32.;
 		v.r = buf[i].r * 255;
 		v.g = buf[i].g * 255;
 		v.b = buf[i].b * 255;
@@ -99,5 +93,102 @@ static inline void vertices_add(struct array *s, const struct vertex_desc *buf, 
 		array_push(s, &v);
 	}
 }
+
+static inline void texcoord_up(int mat, struct v2f *ret)
+{
+	ret[FACE_UP].x = texcoord_from_mat[mat][1].x;
+	ret[FACE_UP].y = texcoord_from_mat[mat][1].y;
+	ret[FACE_DN].x = texcoord_from_mat[mat][2].x;
+	ret[FACE_DN].y = texcoord_from_mat[mat][2].y;
+	ret[FACE_LF].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_LF].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_RT].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_RT].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_BK].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_BK].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_FT].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_FT].y = texcoord_from_mat[mat][0].y;
+}
+
+static inline void texcoord_dn(int mat, struct v2f *ret)
+{
+	ret[FACE_UP].x = texcoord_from_mat[mat][2].x;
+	ret[FACE_UP].y = texcoord_from_mat[mat][2].y;
+	ret[FACE_DN].x = texcoord_from_mat[mat][1].x;
+	ret[FACE_DN].y = texcoord_from_mat[mat][1].y;
+	ret[FACE_LF].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_LF].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_RT].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_RT].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_BK].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_BK].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_FT].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_FT].y = texcoord_from_mat[mat][0].y;
+}
+
+static inline void texcoord_lf(int mat, struct v2f *ret)
+{
+	ret[FACE_UP].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_UP].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_DN].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_DN].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_LF].x = texcoord_from_mat[mat][1].x;
+	ret[FACE_LF].y = texcoord_from_mat[mat][1].y;
+	ret[FACE_RT].x = texcoord_from_mat[mat][2].x;
+	ret[FACE_RT].y = texcoord_from_mat[mat][2].y;
+	ret[FACE_BK].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_BK].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_FT].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_FT].y = texcoord_from_mat[mat][0].y;
+}
+
+static inline void texcoord_rt(int mat, struct v2f *ret)
+{
+	ret[FACE_UP].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_UP].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_DN].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_DN].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_LF].x = texcoord_from_mat[mat][2].x;
+	ret[FACE_LF].y = texcoord_from_mat[mat][2].y;
+	ret[FACE_RT].x = texcoord_from_mat[mat][1].x;
+	ret[FACE_RT].y = texcoord_from_mat[mat][1].y;
+	ret[FACE_BK].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_BK].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_FT].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_FT].y = texcoord_from_mat[mat][0].y;
+}
+
+static inline void texcoord_bk(int mat, struct v2f *ret)
+{
+	ret[FACE_UP].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_UP].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_DN].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_DN].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_LF].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_LF].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_RT].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_RT].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_BK].x = texcoord_from_mat[mat][1].x;
+	ret[FACE_BK].y = texcoord_from_mat[mat][1].y;
+	ret[FACE_FT].x = texcoord_from_mat[mat][2].x;
+	ret[FACE_FT].y = texcoord_from_mat[mat][2].y;
+}
+
+static inline void texcoord_ft(int mat, struct v2f *ret)
+{
+	ret[FACE_UP].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_UP].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_DN].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_DN].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_LF].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_LF].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_RT].x = texcoord_from_mat[mat][0].x;
+	ret[FACE_RT].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_BK].x = texcoord_from_mat[mat][2].x;
+	ret[FACE_BK].y = texcoord_from_mat[mat][2].y;
+	ret[FACE_FT].x = texcoord_from_mat[mat][1].x;
+	ret[FACE_FT].y = texcoord_from_mat[mat][1].y;
+}
+
 #endif
 
