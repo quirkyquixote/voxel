@@ -272,7 +272,7 @@ int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	++bb.y1;
 	++bb.z1;
 	box3_foreach(p, bb)
-		world_set(ctx->w, p, shape, mat, NULL);
+		world_set(ctx->w, p, shape, mat);
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -295,23 +295,23 @@ int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
 			p.y = bb.y0;
-			world_set(ctx->w, p, shape, mat, NULL);
+			world_set(ctx->w, p, shape, mat);
 			p.y = bb.y1;
-			world_set(ctx->w, p, shape, mat, NULL);
+			world_set(ctx->w, p, shape, mat);
 		}
 	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
 		for (p.y = bb.y0; p.y <= bb.y1; ++p.y) {
 			p.z = bb.z0;
-			world_set(ctx->w, p, shape, mat, NULL);
+			world_set(ctx->w, p, shape, mat);
 			p.z = bb.z1;
-			world_set(ctx->w, p, shape, mat, NULL);
+			world_set(ctx->w, p, shape, mat);
 		}
 	for (p.y = bb.y0; p.y <= bb.y1; ++p.y)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
 			p.x = bb.x0;
-			world_set(ctx->w, p, shape, mat, NULL);
+			world_set(ctx->w, p, shape, mat);
 			p.x = bb.x1;
-			world_set(ctx->w, p, shape, mat, NULL);
+			world_set(ctx->w, p, shape, mat);
 		}
 	return 0;
 fail:
@@ -335,16 +335,16 @@ int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
 		for (p.y = bb.y0; p.y <= bb.y1; ++p.y) {
 			p.z = bb.z0;
-			world_set(ctx->w, p, shape, mat, NULL);
+			world_set(ctx->w, p, shape, mat);
 			p.z = bb.z1;
-			world_set(ctx->w, p, shape, mat, NULL);
+			world_set(ctx->w, p, shape, mat);
 		}
 	for (p.y = bb.y0; p.y <= bb.y1; ++p.y)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
 			p.x = bb.x0;
-			world_set(ctx->w, p, shape, mat, NULL);
+			world_set(ctx->w, p, shape, mat);
 			p.x = bb.x1;
-			world_set(ctx->w, p, shape, mat, NULL);
+			world_set(ctx->w, p, shape, mat);
 		}
 	return 0;
 fail:

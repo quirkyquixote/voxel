@@ -248,12 +248,13 @@ int world_save(struct world *w, union sz_tag **root)
 	return 0;
 }
 
-void world_set(struct world *w, struct v3ll p, int shape, int mat, void *data)
+void world_set(struct world *w, struct v3ll p, int shape, int mat)
 {
 	struct box3ll bb;
 	world_set_shape(w, p, shape);
 	world_set_mat(w, p, mat);
-	world_set_data(w, p, data);
+	if (mat_capacity[mat] > 0)
+		world_set_data(w, p, inventory(mat_capacity[mat]));
 	update_lighting(w, box3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
 	world_set_flags(w, bb, CHUNK_UNRENDERED);
 }

@@ -213,7 +213,7 @@ struct world *world(void);
 void world_destroy(struct world *w);
 int world_load(struct world *w, union sz_tag *root);
 int world_save(struct world *w, union sz_tag **root);
-void world_set(struct world *w, struct v3ll p, int shape, int mat, void *val);
+void world_set(struct world *w, struct v3ll p, int shape, int mat);
 void world_set_flags(struct world *w, struct box3ll bb, int flags);
 
 static inline int world_get_mat(struct world *w, struct v3ll p)

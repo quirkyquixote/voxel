@@ -286,36 +286,61 @@ void use_tool(struct context *ctx)
 	if (world_get_shape(ctx->w, p) != SHAPE_NONE)
 		return;
 	if (s.obj == OBJ_BLOCK) {
-		int k = mat_capacity[s.mat];
-		if (k > 0)
-			world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat, inventory(k));
-		else
-			world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat, NULL);
-	} else if (s.obj == OBJ_SLAB) {
-		if (f == FACE_UP) {
-			world_set(ctx->w, p, SHAPE_SLAB_DN, s.mat, NULL);
-		} else if (f == FACE_DN) {
-			world_set(ctx->w, p, SHAPE_SLAB_UP, s.mat, NULL);
-		} else if (q.y > 0.5) {
-			world_set(ctx->w, p, SHAPE_SLAB_UP, s.mat, NULL);
+		if (ctx->move.y0) {
+			if (f == FACE_UP)
+				world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat);
+			else if (f == FACE_DN)
+				world_set(ctx->w, p, SHAPE_BLOCK_UP, s.mat);
+			else if (f == FACE_LF)
+				world_set(ctx->w, p, SHAPE_BLOCK_RT, s.mat);
+			else if (f == FACE_RT)
+				world_set(ctx->w, p, SHAPE_BLOCK_LF, s.mat);
+			else if (f == FACE_BK)
+				world_set(ctx->w, p, SHAPE_BLOCK_FT, s.mat);
+			else if (f == FACE_FT)
+				world_set(ctx->w, p, SHAPE_BLOCK_BK, s.mat);
 		} else {
-			world_set(ctx->w, p, SHAPE_SLAB_DN, s.mat, NULL);
+			world_set(ctx->w, p, SHAPE_BLOCK_DN, s.mat);
+		}
+	} else if (s.obj == OBJ_SLAB) {
+		if (ctx->move.y0) {
+			if (f == FACE_UP)
+				world_set(ctx->w, p, SHAPE_SLAB_DN, s.mat);
+			else if (f == FACE_DN)
+				world_set(ctx->w, p, SHAPE_SLAB_UP, s.mat);
+			else if (f == FACE_LF)
+				world_set(ctx->w, p, SHAPE_SLAB_RT, s.mat);
+			else if (f == FACE_RT)
+				world_set(ctx->w, p, SHAPE_SLAB_LF, s.mat);
+			else if (f == FACE_BK)
+				world_set(ctx->w, p, SHAPE_SLAB_FT, s.mat);
+			else if (f == FACE_FT)
+				world_set(ctx->w, p, SHAPE_SLAB_BK, s.mat);
+		} else {
+			if (f == FACE_UP)
+				world_set(ctx->w, p, SHAPE_SLAB_DN, s.mat);
+			 else if (f == FACE_DN)
+				world_set(ctx->w, p, SHAPE_SLAB_UP, s.mat);
+			 else if (q.y > 0.5)
+				world_set(ctx->w, p, SHAPE_SLAB_UP, s.mat);
+			 else
+				world_set(ctx->w, p, SHAPE_SLAB_DN, s.mat);
 		}
 	} else if (s.obj == OBJ_STAIRS) {
 		if (f == FACE_UP) {
-			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, s.mat, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, s.mat);
 		} else if (f == FACE_DN) {
-			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, s.mat, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, s.mat);
 		} else if (q.y > 0.5) {
-			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, s.mat, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, s.mat);
 		} else {
-			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, s.mat, NULL);
+			world_set(ctx->w, p, SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, s.mat);
 		}
 	} else if (s.obj == OBJ_PANE) {
 		if (ctx->roty & 1)
-			world_set(ctx->w, p, SHAPE_PANE_X, s.mat, NULL);
+			world_set(ctx->w, p, SHAPE_PANE_X, s.mat);
 		else
-			world_set(ctx->w, p, SHAPE_PANE_Z, s.mat, NULL);
+			world_set(ctx->w, p, SHAPE_PANE_Z, s.mat);
 	} else if (s.obj == OBJ_FLUID) {
 		flowsim_add(ctx->flowsim, p, 1);
 	}
@@ -353,7 +378,7 @@ void update_player(struct context *ctx)
 	if (ctx->act == 1) {
 		if (ctx->cur.face != -1) {
 			if (s != SHAPE_NONE) {
-				world_set(ctx->w, p, 0, 0, NULL);
+				world_set(ctx->w, p, 0, 0);
 			}
 		}
 	}
