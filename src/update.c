@@ -491,6 +491,9 @@ void update(void *data)
 {
 	struct context *ctx = data;
 	struct v3ll p;
+
+	if (!window_has_mouse_focus(ctx->ml->windows))
+		return;
 	p.x = floor(ctx->cam->p.x);
 	p.y = floor(ctx->cam->p.y);
 	p.z = floor(ctx->cam->p.z);
