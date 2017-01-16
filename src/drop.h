@@ -3,19 +3,18 @@
 #define VOXEL_DROP_H_
 
 #include "context.h"
+#include "entity.h"
 
 struct drop {
-	struct list list;
+	struct entity entity;
 	struct context *ctx;
-	struct body *body;
 	uint8_t obj;
 	uint8_t mat;
 	uint8_t num;
-	int ttl;
+	int ticks;
 };
 
 struct drop *drop(struct context *ctx, uint8_t obj, uint8_t mat, uint8_t num);
-void drop_destroy(struct drop *d);
 
 #endif
 

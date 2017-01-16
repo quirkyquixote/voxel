@@ -166,7 +166,7 @@ int load_all(struct context *ctx)
 	body_set_step_size(ctx->player, 1);
 	ctx->inv = inventory(9);
 	ctx->tool = 0;
-	list_init(&ctx->drops);
+	list_init(&ctx->entities);
 	return 0;
 }
 

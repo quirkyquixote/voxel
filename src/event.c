@@ -88,11 +88,11 @@ void event(const SDL_Event *e, void *data)
 			struct slot s = inventory_get(ctx->inv, ctx->tool);
 			if (s.num > 0) {
 				struct drop *d = drop(ctx, s.obj, s.mat, 1);
-				body_set_position(d->body, ctx->cam->p);
+				body_set_position(d->entity.body, ctx->cam->p);
 				struct v3f v = v3f(0, 0, -.5);
 				v = v3_rotx(v, ctx->cam->r.x);
 				v = v3_roty(v, ctx->cam->r.y);
-				body_set_velocity(d->body, v);
+				body_set_velocity(d->entity.body, v);
 				inventory_set_num(ctx->inv, ctx->tool, s.num - 1);
 			}
 		} else if (e->key.keysym.sym == SDLK_ESCAPE) {

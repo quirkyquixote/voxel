@@ -259,7 +259,7 @@ void roam_render(struct context *ctx)
 {
 	struct box3ll bb;
 	struct v3ll p;
-	struct drop *d;
+	struct entity *e;
 	int m, i;
 	struct slot s;
 
@@ -282,13 +282,8 @@ void roam_render(struct context *ctx)
 
 	glDisable(GL_DEPTH_TEST);
 
-	list_foreach(d, &ctx->drops, list) {
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		glTranslatef(d->body->p.x, d->body->p.y, d->body->p.z);
-		glScalef(.25, .25, .25);
-		render_obj(ctx, d->obj, d->mat, 255);
-		glPopMatrix();
+	list_foreach(e, &ctx->entities, entities) {
+		e->traits->render_func(e);
 	}
 
 	s = inventory_get(ctx->inv, ctx->tool);
