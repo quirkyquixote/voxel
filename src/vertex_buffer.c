@@ -16,7 +16,8 @@
 #define COMMON_TC(mat,y) \
 	[mat##_CRATE] = { TC(16, y), TC(17, y), TC(0, y) },\
 	[mat##_BENCH] = { TC(18, y), TC(19, y), TC(0, y) },\
-	[mat##_PIPE] = { TC(20, y), TC(21, y), TC(21, y) }
+	[mat##_PIPE] = { TC(20, y), TC(21, y), TC(21, y) }, \
+	[mat##_BOARD] = { TC(22, y), TC(23, y), TC(0, y) }
 
 #define STONE_TC(mat,y)\
 	[mat] = { TC(0, y), TC(0, y), TC(0, y) },\

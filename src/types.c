@@ -23,6 +23,7 @@ const char *mat_names[256] = {
 	[MAT_LIMESTONE_CRATE] = "limestone_crate",
 	[MAT_LIMESTONE_BENCH] = "limestone_bench",
 	[MAT_LIMESTONE_PIPE] = "limestone_pipe",
+	[MAT_LIMESTONE_BOARD] = "limestone_board",
 	[MAT_SANDSTONE] = "sandstone",
 	[MAT_SANDSTONE_COBBLE] = "sandstone_cobble",
 	[MAT_SANDSTONE_LBRICK] = "sandstone_lbrick",
@@ -34,6 +35,7 @@ const char *mat_names[256] = {
 	[MAT_SANDSTONE_CRATE] = "sandstone_crate",
 	[MAT_SANDSTONE_BENCH] = "sandstone_bench",
 	[MAT_SANDSTONE_PIPE] = "sandstone_pipe",
+	[MAT_SANDSTONE_BOARD] = "sandstone_board",
 	[MAT_MARBLE] = "marble",
 	[MAT_MARBLE_COBBLE] = "marble_cobble",
 	[MAT_MARBLE_LBRICK] = "marble_lbrick",
@@ -45,6 +47,7 @@ const char *mat_names[256] = {
 	[MAT_MARBLE_CRATE] = "marble_crate",
 	[MAT_MARBLE_BENCH] = "marble_bench",
 	[MAT_MARBLE_PIPE] = "marble_pipe",
+	[MAT_MARBLE_BOARD] = "marble_board",
 	[MAT_GRANITE] = "granite",
 	[MAT_GRANITE_COBBLE] = "granite_cobble",
 	[MAT_GRANITE_LBRICK] = "granite_lbrick",
@@ -56,6 +59,7 @@ const char *mat_names[256] = {
 	[MAT_GRANITE_CRATE] = "granite_crate",
 	[MAT_GRANITE_BENCH] = "granite_bench",
 	[MAT_GRANITE_PIPE] = "granite_pipe",
+	[MAT_GRANITE_BOARD] = "granite_board",
 	[MAT_BASALT] = "basalt",
 	[MAT_BASALT_COBBLE] = "basalt_cobble",
 	[MAT_BASALT_LBRICK] = "basalt_lbrick",
@@ -67,6 +71,7 @@ const char *mat_names[256] = {
 	[MAT_BASALT_CRATE] = "basalt_crate",
 	[MAT_BASALT_BENCH] = "basalt_bench",
 	[MAT_BASALT_PIPE] = "basalt_pipe",
+	[MAT_BASALT_BOARD] = "basalt_board",
 	[MAT_SLATE] = "slate",
 	[MAT_SLATE_COBBLE] = "slate_cobble",
 	[MAT_SLATE_LBRICK] = "slate_lbrick",
@@ -78,6 +83,7 @@ const char *mat_names[256] = {
 	[MAT_SLATE_CRATE] = "slate_crate",
 	[MAT_SLATE_BENCH] = "slate_bench",
 	[MAT_SLATE_PIPE] = "slate_pipe",
+	[MAT_SLATE_BOARD] "slate_board",
 	[MAT_CLAY] = "clay",
 	[MAT_CLAY_COBBLE] = "clay_cobble",
 	[MAT_CLAY_LBRICK] = "clay_lbrick",
@@ -89,41 +95,49 @@ const char *mat_names[256] = {
 	[MAT_CLAY_CRATE] = "clay_crate",
 	[MAT_CLAY_BENCH] = "clay_bench",
 	[MAT_CLAY_PIPE] = "clay_pipe",
+	[MAT_CLAY_BOARD] = "clat_board",
 	[MAT_WOOD1] = "wood1",
 	[MAT_WOOD1_CRATE] = "wood1_crate",
 	[MAT_WOOD1_BENCH] = "wood1_bench",
 	[MAT_WOOD1_PIPE] = "wood1_pipe",
 	[MAT_WOOD1_LOG] = "wood1_log",
+	[MAT_WOOD1_BOARD] = "wood1_board",
 	[MAT_WOOD2] = "wood2",
 	[MAT_WOOD2_CRATE] = "wood2_crate",
 	[MAT_WOOD2_BENCH] = "wood2_bench",
 	[MAT_WOOD2_PIPE] = "wood2_pipe",
 	[MAT_WOOD2_LOG] = "wood2_log",
+	[MAT_WOOD2_BOARD] = "wood2_board",
 	[MAT_WOOD3] = "wood3",
 	[MAT_WOOD3_CRATE] = "wood3_crate",
 	[MAT_WOOD3_BENCH] = "wood3_bench",
 	[MAT_WOOD3_PIPE] = "wood3_pipe",
 	[MAT_WOOD3_LOG] = "wood3_log",
+	[MAT_WOOD3_BOARD] = "wood3_board",
 	[MAT_WOOD4] = "wood4",
 	[MAT_WOOD4_CRATE] = "wood4_crate",
 	[MAT_WOOD4_BENCH] = "wood4_bench",
 	[MAT_WOOD4_PIPE] = "wood4_pipe",
 	[MAT_WOOD4_LOG] = "wood4_log",
+	[MAT_WOOD4_BOARD] = "wood4_board",
 	[MAT_WOOD5] = "wood5",
 	[MAT_WOOD5_CRATE] = "wood5_crate",
 	[MAT_WOOD5_BENCH] = "wood5_bench",
 	[MAT_WOOD5_PIPE] = "wood5_pipe",
 	[MAT_WOOD5_LOG] = "wood5_log",
+	[MAT_WOOD5_BOARD] = "wood5_board",
 	[MAT_WOOD6] = "wood6",
 	[MAT_WOOD6_CRATE] = "wood6_crate",
 	[MAT_WOOD6_BENCH] = "wood6_bench",
 	[MAT_WOOD6_PIPE] = "wood6_pipe",
 	[MAT_WOOD6_LOG] = "wood6_log",
+	[MAT_WOOD6_BOARD] = "wood6_board",
 	[MAT_WOOD7] = "wood7",
 	[MAT_WOOD7_CRATE] = "wood7_crate",
 	[MAT_WOOD7_BENCH] = "wood7_bench",
 	[MAT_WOOD7_PIPE] = "wood7_pipe",
 	[MAT_WOOD7_LOG] = "wood7_log",
+	[MAT_WOOD7_BOARD] = "wood7_board",
 };
 
 const char *shape_names[256] = {
@@ -451,6 +465,109 @@ struct block_traits block_traits[256][256] = {
 	},
 	[MAT_WOOD7_PIPE] = {
 		[SHAPE_BLOCK_DN] = { .capacity = 9, },
+		[SHAPE_BLOCK_UP] = { .capacity = 9, },
+		[SHAPE_BLOCK_LF] = { .capacity = 9, },
+		[SHAPE_BLOCK_RT] = { .capacity = 9, },
+		[SHAPE_BLOCK_BK] = { .capacity = 9, },
+		[SHAPE_BLOCK_FT] = { .capacity = 9, },
+	},
+	[MAT_LIMESTONE_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_SANDSTONE_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_MARBLE_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_GRANITE_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_BASALT_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_SLATE_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_CLAY_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_WOOD1_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_WOOD2_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_WOOD3_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_WOOD4_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_WOOD5_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_WOOD6_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
+	},
+	[MAT_WOOD7_BOARD] = {
+		[SHAPE_BLOCK_DN] = {
+			.capacity = 64,
+			.is_board = 1,
+			.is_inventory = 1,
+		},
 	},
 };
 
@@ -515,6 +632,7 @@ do {\
 	COMMON_DROPS(mat##_BENCH, mat##_BENCH);\
 	COMMON_DROPS(mat##_CRATE, mat##_CRATE);\
 	COMMON_DROPS(mat##_PIPE, mat##_PIPE);\
+	COMMON_DROPS(mat##_BOARD, mat##_BOARD);\
 } while (0)
 
 #define WOOD_DROPS(mat) \
@@ -524,6 +642,7 @@ do {\
 	COMMON_DROPS(mat##_BENCH, mat##_BENCH);\
 	COMMON_DROPS(mat##_CRATE, mat##_CRATE);\
 	COMMON_DROPS(mat##_PIPE, mat##_PIPE);\
+	COMMON_DROPS(mat##_BOARD, mat##_BOARD);\
 } while (0)
 
 void block_traits_init(void)
