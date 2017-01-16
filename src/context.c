@@ -89,21 +89,21 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < MAT_COUNT; ++i) {
 		struct v2f lt = v2f(1, 1);
 		const struct v2f *mt = texcoord_from_mat[i];
-		vertices_add(a, vertices_face_dn, 6, v3f(0, 0, 0), lt, mt);
-		vertices_add(a, vertices_face_lf, 6, v3f(0, 0, 0), lt, mt);
-		vertices_add(a, vertices_face_bk, 6, v3f(0, 0, 0), lt, mt);
-		vertices_add(a, vertices_face_up, 6, v3f(0, 1, 0), lt, mt);
-		vertices_add(a, vertices_face_rt, 6, v3f(1, 0, 0), lt, mt);
-		vertices_add(a, vertices_face_ft, 6, v3f(0, 0, 1), lt, mt);
+		vertices_add(a, vertices_face_dn, 6, v3f(0, 0, 0), lt, mt, orientation_up);
+		vertices_add(a, vertices_face_lf, 6, v3f(0, 0, 0), lt, mt, orientation_up);
+		vertices_add(a, vertices_face_bk, 6, v3f(0, 0, 0), lt, mt, orientation_up);
+		vertices_add(a, vertices_face_up, 6, v3f(0, 0, 0), lt, mt, orientation_up);
+		vertices_add(a, vertices_face_rt, 6, v3f(0, 0, 0), lt, mt, orientation_up);
+		vertices_add(a, vertices_face_ft, 6, v3f(0, 0, 0), lt, mt, orientation_up);
 
-		vertices_add(a, vertices_face_dn, 6, v3f(0, 0, 0), lt, mt);
-		vertices_add(a, vertices_slab_dn, 30, v3f(0, 0, 0), lt, mt);
+		vertices_add(a, vertices_face_dn, 6, v3f(0, 0, 0), lt, mt, orientation_up);
+		vertices_add(a, vertices_slab_dn, 30, v3f(0, 0, 0), lt, mt, orientation_up);
 
-		vertices_add(a, vertices_face_dn, 6, v3f(0, 0, 0), lt, mt);
-		vertices_add(a, vertices_face_lf, 6, v3f(0, 0, 0), lt, mt);
-		vertices_add(a, vertices_stairs_dl, 42, v3f(0, 0, 0), lt, mt);
+		vertices_add(a, vertices_face_dn, 6, v3f(0, 0, 0), lt, mt, orientation_up);
+		vertices_add(a, vertices_face_lf, 6, v3f(0, 0, 0), lt, mt, orientation_up);
+		vertices_add(a, vertices_stairs_dl, 42, v3f(0, 0, 0), lt, mt, orientation_up);
 
-		vertices_add(a, vertices_pane_z, 36, v3f(0, 0, 0), lt, mt);
+		vertices_add(a, vertices_pane_z, 36, v3f(0, 0, 0), lt, mt, orientation_up);
 	}
 	vertex_buffer_update(ctx->obj_vertex_buffer, 0, a->data, a->size);
 	array_destroy(a);

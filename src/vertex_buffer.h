@@ -27,7 +27,7 @@ struct vertex_desc {
 	GLfloat x, y, z;
 	GLfloat u, v;
 	GLfloat r, g, b;
-	int side;
+	int face;
 };
 
 struct vertex_buffer {
@@ -63,6 +63,13 @@ extern struct vertex_desc vertices_pane_x[];
 extern struct vertex_desc vertices_pane_y[];
 extern struct vertex_desc vertices_pane_z[];
 
+extern const int orientation_up[];
+extern const int orientation_dn[];
+extern const int orientation_lf[];
+extern const int orientation_rt[];
+extern const int orientation_bk[];
+extern const int orientation_ft[];
+
 struct vertex_buffer *vertex_buffer(int nbufs);
 void vertex_buffer_destroy(struct vertex_buffer *r);
 void vertex_buffer_enable(struct vertex_buffer *r);
@@ -73,7 +80,7 @@ void vertex_buffer_disable(struct vertex_buffer *r);
 void vertex_buffer_update(struct vertex_buffer *r, size_t buf, const void *data, size_t size);
 
 static inline void vertices_add(struct array *s, const struct vertex_desc *buf, size_t len,
-	struct v3f p, struct v2f t1, const struct v2f *t2)
+	struct v3f p, struct v2f t1, const struct v2f *t2, const int *ori)
 {
 	int i;
 	struct vertex v;
@@ -83,8 +90,8 @@ static inline void vertices_add(struct array *s, const struct vertex_desc *buf, 
 		v.z = buf[i].z + p.z;
 		v.u0 = t1.x;
 		v.v0 = t1.y;
-		v.u1 = t2[buf[i].side].x + buf[i].u / 32.;
-		v.v1 = t2[buf[i].side].y + buf[i].v / 32.;
+		v.u1 = t2[ori[buf[i].face]].x + buf[i].u / 32.;
+		v.v1 = t2[ori[buf[i].face]].y + buf[i].v / 32.;
 		v.r = buf[i].r * 255;
 		v.g = buf[i].g * 255;
 		v.b = buf[i].b * 255;
