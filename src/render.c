@@ -273,7 +273,7 @@ void roam_render(struct context *ctx)
 
 	box3_foreach(p, bb) {
 		m = world_get_mat(ctx->w, p);
-		if (block_capacity[m][world_get_shape(ctx->w, p)] > 0)
+		if (block_traits[m][world_get_shape(ctx->w, p)].capacity > 0)
 			render_inventory(ctx, world_get_data(ctx->w, p), p);
 	}
 

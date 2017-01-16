@@ -169,13 +169,18 @@ enum {
 	FACE_COUNT,
 };
 
+struct block_traits {
+	unsigned char capacity;
+	int is_workbench : 1;
+	int is_inventory : 1;
+};
+
 extern const char *obj_names[];
 extern const char *mat_names[];
 extern const char *face_names[];
 extern const char *shape_names[];
 
-extern const int block_is_workbench[256][256];
-extern const int block_capacity[256][256];
+extern const struct block_traits block_traits[256][256];
 
 static inline int obj_from_name(const char *name)
 {

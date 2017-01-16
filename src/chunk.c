@@ -160,7 +160,7 @@ int entity_save(struct chunk *c, struct v3ll p, union sz_tag **root)
 	union sz_tag *tag;
 	s = chunk_get_shape(c, p);
 	m = chunk_get_mat(c, p);
-	if (block_capacity[m][s] > 0) {
+	if (block_traits[m][s].capacity > 0) {
 		inv = chunk_get_data(c, p);
 		if (inv == NULL) {
 			log_warning("no inventory found");
@@ -253,8 +253,8 @@ void world_set(struct world *w, struct v3ll p, int shape, int mat)
 	struct box3ll bb;
 	world_set_shape(w, p, shape);
 	world_set_mat(w, p, mat);
-	if (block_capacity[mat][shape] > 0)
-		world_set_data(w, p, inventory(block_capacity[mat][shape]));
+	if (block_traits[mat][shape].capacity > 0)
+		world_set_data(w, p, inventory(block_traits[mat][shape].capacity));
 	update_lighting(w, box3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
 	world_set_flags(w, bb, CHUNK_UNRENDERED);
 }

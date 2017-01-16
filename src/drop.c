@@ -21,7 +21,7 @@ void drop_callback(struct body *b, void *udata, struct v3ll p, int face)
 	if (d->num) {
 		int s = world_get_shape(d->ctx->w, p);
 		int m = world_get_mat(d->ctx->w, p);
-		if (block_capacity[m][s] > 0) {
+		if (block_traits[m][s].capacity > 0) {
 			struct array *inv = world_get_data(d->ctx->w, p);
 			d->num -= inventory_add(inv, slot(d->obj, d->mat, d->num));
 		}

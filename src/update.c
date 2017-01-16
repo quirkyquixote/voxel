@@ -484,7 +484,7 @@ void update_player(struct context *ctx)
 			use_inventory(ctx, ctx->bench);
 			return;
 		}
-		if (block_capacity[m][s] > 0) {
+		if (block_traits[m][s].is_inventory) {
 			use_inventory(ctx, world_get_data(ctx->w, p));
 			return;
 		}
@@ -493,7 +493,7 @@ void update_player(struct context *ctx)
 		use_workbench(ctx, ctx->bench);
 		return;
 	}
-	if (block_is_workbench[m][s]) {
+	if (block_traits[m][s].is_workbench) {
 		use_workbench(ctx, world_get_data(ctx->w, p));
 		return;
 	}
