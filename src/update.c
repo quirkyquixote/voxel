@@ -313,6 +313,28 @@ void spill_inventory(struct context *ctx, struct v3ll p)
 	array_destroy(inv);
 }
 
+void drop_block(struct context *ctx, struct v3ll p)
+{
+	int s2, m2;
+	struct slot s;
+	s2 = world_get_shape(ctx->w, p);
+	m2 = world_get_mat(ctx->w, p);
+	s = block_traits[m2][s2].drop;
+	if (s.num == 0)
+		return;
+	struct drop *d = drop(ctx, s.obj, s.mat, s.num);
+	struct v3f q = v3f(p.x, p.y, p.z);
+	q.x += (float)rand() / RAND_MAX;
+	q.y += (float)rand() / RAND_MAX;
+	q.z += (float)rand() / RAND_MAX;
+	body_set_position(d->entity.body, q);
+	struct v3f v = v3f(0, 0, 0);
+	v.x += .1 * ((float)rand() / RAND_MAX - .5);
+	v.y += .2 * ((float)rand() / RAND_MAX);
+	v.z += .1 * ((float)rand() / RAND_MAX - .5);
+	body_set_velocity(d->entity.body, v);
+}
+
 void use_inventory(struct context *ctx, struct array *inv)
 {
 	if (inv == NULL) {
@@ -535,6 +557,7 @@ void update_player(struct context *ctx)
 		if (ctx->cur.face != -1) {
 			if (s != SHAPE_NONE) {
 				spill_inventory(ctx, p);
+				drop_block(ctx, p);
 				world_set(ctx->w, p, 0, 0);
 			}
 		}

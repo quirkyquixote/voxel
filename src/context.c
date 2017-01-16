@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 
 	ctx = calloc(1, sizeof(*ctx));
 	ctx->dir = "foo";
+	block_traits_init();
 	ctx->w = world();
 	ctx->prof_mgr = profile_manager();
 	ctx->chunks_per_tick = 1;

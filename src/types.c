@@ -162,7 +162,7 @@ const char *face_names[] = {
 	[FACE_DN] = "down",
 };
 
-const struct block_traits block_traits[256][256] = {
+struct block_traits block_traits[256][256] = {
 	[MAT_LIMESTONE_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
 			.capacity = 9,
@@ -453,4 +453,96 @@ const struct block_traits block_traits[256][256] = {
 		[SHAPE_BLOCK_DN] = { .capacity = 9, },
 	},
 };
+
+#define BLOCK_DROPS(m1, m2) \
+do { \
+	block_traits[m1][SHAPE_BLOCK_DN].drop = slot(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_UP].drop = slot(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_LF].drop = slot(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_RT].drop = slot(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_BK].drop = slot(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_FT].drop = slot(OBJ_BLOCK, m2, 1);\
+} while (0)
+
+#define SLAB_DROPS(m1, m2) \
+do { \
+	block_traits[m1][SHAPE_SLAB_DN].drop = slot(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_UP].drop = slot(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_LF].drop = slot(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_RT].drop = slot(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_BK].drop = slot(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_FT].drop = slot(OBJ_SLAB, m2, 1);\
+} while (0)
+
+#define STAIR_DROPS(m1, m2) \
+do { \
+	block_traits[m1][SHAPE_STAIRS_DF].drop = slot(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DL].drop = slot(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DB].drop = slot(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DR].drop = slot(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UF].drop = slot(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UL].drop = slot(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UB].drop = slot(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UR].drop = slot(OBJ_STAIRS, m2, 1);\
+} while (0)
+
+#define PANE_DROPS(m1, m2) \
+do { \
+	block_traits[m1][SHAPE_PANE_X].drop = slot(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_Y].drop = slot(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_Z].drop = slot(OBJ_PANE, m2, 1);\
+} while (0)
+
+
+#define COMMON_DROPS(m1, m2) \
+do { \
+	BLOCK_DROPS(m1,m2);\
+	SLAB_DROPS(m1, m2);\
+	STAIR_DROPS(m1, m2);\
+	PANE_DROPS(m1, m2);\
+} while (0)
+
+#define STONE_DROPS(mat) \
+do {\
+	COMMON_DROPS(mat, mat##_COBBLE); \
+	COMMON_DROPS(mat##_COBBLE, mat##_COBBLE); \
+	COMMON_DROPS(mat##_BLOCK, mat##_BLOCK); \
+	COMMON_DROPS(mat##_LBRICK, mat##_LBRICK); \
+	COMMON_DROPS(mat##_SBRICK, mat##_SBRICK); \
+	COMMON_DROPS(mat##_TILE, mat##_TILE); \
+	COMMON_DROPS(mat##_COLUMN, mat##_COLUMN); \
+	COMMON_DROPS(mat##_SAND, mat##_SAND); \
+	COMMON_DROPS(mat##_BENCH, mat##_BENCH);\
+	COMMON_DROPS(mat##_CRATE, mat##_CRATE);\
+	COMMON_DROPS(mat##_PIPE, mat##_PIPE);\
+} while (0)
+
+#define WOOD_DROPS(mat) \
+do {\
+	COMMON_DROPS(mat, mat); \
+	COMMON_DROPS(mat##_LOG, mat##_LOG); \
+	COMMON_DROPS(mat##_BENCH, mat##_BENCH);\
+	COMMON_DROPS(mat##_CRATE, mat##_CRATE);\
+	COMMON_DROPS(mat##_PIPE, mat##_PIPE);\
+} while (0)
+
+void block_traits_init(void)
+{
+	COMMON_DROPS(MAT_GRASS, MAT_DIRT);
+	COMMON_DROPS(MAT_DIRT, MAT_DIRT);
+	STONE_DROPS(MAT_LIMESTONE);
+	STONE_DROPS(MAT_SANDSTONE);
+	STONE_DROPS(MAT_MARBLE);
+	STONE_DROPS(MAT_GRANITE);
+	STONE_DROPS(MAT_BASALT);
+	STONE_DROPS(MAT_SLATE);
+	STONE_DROPS(MAT_CLAY);
+	WOOD_DROPS(MAT_WOOD1);
+	WOOD_DROPS(MAT_WOOD2);
+	WOOD_DROPS(MAT_WOOD3);
+	WOOD_DROPS(MAT_WOOD4);
+	WOOD_DROPS(MAT_WOOD5);
+	WOOD_DROPS(MAT_WOOD6);
+	WOOD_DROPS(MAT_WOOD7);
+}
 

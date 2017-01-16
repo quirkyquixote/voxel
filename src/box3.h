@@ -64,6 +64,8 @@ static inline struct box3ll box3ll(long long x0, long long y0, long long z0, lon
 	bb.y0 > bb.y1 ? bb.y0 : bb.y1, \
 	bb.z0 > bb.z1 ? bb.z0 : bb.z1 }
 
+#define box3_grow(b,k) (typeof(b)){ b.x0 - k, b.y0 - k, b.z0 - k, b.x0 + k, b.y0 + k, b.z0 + k }
+
 #define box3_overlap(b1, b2) \
 	(b2.x0 <= b1.x1 && b2.x1 >= b1.x0 &&\
 	 b2.y0 <= b1.y1 && b2.y1 >= b1.y0 &&\

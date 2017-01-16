@@ -3,6 +3,7 @@
 #define VOXEL_TYPES_H_
 
 #include <string.h>
+#include <stdint.h>
 
 enum {
 	OBJ_BLOCK,	/* full block */
@@ -169,18 +170,30 @@ enum {
 	FACE_COUNT,
 };
 
+struct slot {
+	uint8_t obj;
+	uint8_t mat;
+	uint8_t num;
+};
+
 struct block_traits {
 	unsigned char capacity;
+	struct slot drop;
 	int is_workbench : 1;
 	int is_inventory : 1;
 };
+
+static inline struct slot slot(int obj, int mat, int num)
+{
+	return (struct slot){ obj, mat, num };
+}
 
 extern const char *obj_names[];
 extern const char *mat_names[];
 extern const char *face_names[];
 extern const char *shape_names[];
 
-extern const struct block_traits block_traits[256][256];
+extern struct block_traits block_traits[256][256];
 
 static inline int obj_from_name(const char *name)
 {
@@ -213,5 +226,7 @@ static inline int shape_from_name(const char *name)
 			return shape;
 	return -1;
 }
+
+void block_traits_init(void);
 
 #endif

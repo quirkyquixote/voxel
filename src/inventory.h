@@ -8,17 +8,6 @@
 #include "types.h"
 #include "array.h"
 
-struct slot {
-	uint8_t obj;
-	uint8_t mat;
-	uint8_t num;
-};
-
-static inline struct slot slot(int obj, int mat, int num)
-{
-	return (struct slot){ obj, mat, num };
-}
-
 static inline struct array *inventory(size_t size)
 {
 	struct array *i = array(sizeof(struct slot));

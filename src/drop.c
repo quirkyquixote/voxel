@@ -60,7 +60,7 @@ void drop_update(void *data)
 {
 	struct drop *d = data;
 	++d->ticks;
-	if (d->ticks > 10 && box3_overlap(d->entity.body->bb, d->ctx->player->bb))
+	if (d->ticks > 10 && box3_overlap(box3_grow(d->entity.body->bb, 1), d->ctx->player->bb))
 		d->num -= inventory_add(d->ctx->inv, slot(d->obj, d->mat, d->num));
 	if (d->ticks > 1800 || d->num == 0)
 		d->entity.die = 1;
