@@ -39,6 +39,10 @@ int parse_slot(const char *str, int *mat, int *obj)
 
 int parse_block(const char *str, int *mat, int *shape)
 {
+	if (strcmp(str, "air") == 0) {
+		*shape = SHAPE_NONE;
+		return 0;
+	}
 	for (*mat = MAT_COUNT - 1; *mat >= 0; --*mat) {
 		if (mat_names[*mat] && strncmp(str, mat_names[*mat], strlen(mat_names[*mat])) == 0)
 			break;
