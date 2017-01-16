@@ -277,6 +277,9 @@ void roam_render(struct context *ctx)
 			render_inventory(ctx, world_get_data(ctx->w, p), p);
 	}
 
+	if (ctx->bench)
+		render_inventory(ctx, ctx->bench, ctx->bench_p);
+
 	glDisable(GL_DEPTH_TEST);
 
 	list_foreach(d, &ctx->drops, list) {

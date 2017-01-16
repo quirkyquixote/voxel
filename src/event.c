@@ -120,6 +120,14 @@ void event(const SDL_Event *e, void *data)
 			ctx->move.y1 = 0;
 		} else if (e->key.keysym.sym == SDLK_r) {
 			ctx->pick = 0;
+		} else if (e->key.keysym.sym == SDLK_e) {
+			if (ctx->bench != NULL) {
+				array_destroy(ctx->bench);
+				ctx->bench = NULL;
+			} else if (ctx->cur.face != -1) {
+				ctx->bench = inventory(9);
+				ctx->bench_p = ctx->cur.p;
+			}
 		} else if (e->key.keysym.sym == SDLK_o) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		} else if (e->key.keysym.sym == SDLK_p) {

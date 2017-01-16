@@ -44,6 +44,8 @@ struct context {
 	struct query cur;
 	struct box3c move;
 	struct array *inv;
+	struct array *bench;
+	struct v3ll bench_p;
 	struct list drops;
 	char mode;
 	char act;

@@ -327,11 +327,24 @@ void update_player(struct context *ctx)
 	int s = world_get_shape(ctx->w, p);
 	int m = world_get_mat(ctx->w, p);
 
+	if (ctx->bench != NULL && v3_dist(ctx->bench_p, ctx->player->p) > 4) {
+		array_destroy(ctx->bench);
+		ctx->bench = NULL;
+	}
+
 	if (ctx->cur.face == FACE_UP) {
+		if (ctx->bench != NULL && v3_eql(ctx->cur.p, ctx->bench_p)) {
+			use_inventory(ctx, ctx->bench);
+			return;
+		}
 		if (mat_capacity[m] > 0) {
 			use_inventory(ctx, world_get_data(ctx->w, p));
 			return;
 		}
+	}
+	if (ctx->bench != NULL && v3_eql(ctx->cur.p, ctx->bench_p)) {
+		use_workbench(ctx, ctx->bench);
+		return;
 	}
 	if (mat_is_workbench[m]) {
 		use_workbench(ctx, world_get_data(ctx->w, p));
