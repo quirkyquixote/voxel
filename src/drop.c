@@ -23,7 +23,10 @@ void drop_callback(struct body *b, void *udata, struct v3ll p, int face)
 		int m = world_get_mat(d->ctx->w, p);
 		if (block_traits[m][s].capacity > 0) {
 			struct array *inv = world_get_data(d->ctx->w, p);
-			d->num -= inventory_add(inv, slot(d->obj, d->mat, d->num));
+			if (inv == NULL)
+				log_warning("expected inventory");
+			else
+				d->num -= inventory_add(inv, slot(d->obj, d->mat, d->num));
 		}
 	}
 	b->v.x *= .8;
