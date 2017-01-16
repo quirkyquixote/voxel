@@ -89,24 +89,25 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < MAT_COUNT; ++i) {
 		struct v2f lt = v2f(1, 1);
 		struct v2f mt[6];
+		int tilted[6];
 		struct v3f p;
-		texcoord_up(i, mt);
+		texcoord_up(i, mt, tilted);
 		p = v3f(0, 0, 0);
-		vertices_add(a, vertices_face_dn, 6, p, lt, mt);
-		vertices_add(a, vertices_face_lf, 6, p, lt, mt);
-		vertices_add(a, vertices_face_bk, 6, p, lt, mt);
-		vertices_add(a, vertices_face_up, 6, p, lt, mt);
-		vertices_add(a, vertices_face_rt, 6, p, lt, mt);
-		vertices_add(a, vertices_face_ft, 6, p, lt, mt);
+		vertices_add(a, vertices_face_dn, 6, p, lt, mt, tilted);
+		vertices_add(a, vertices_face_lf, 6, p, lt, mt, tilted);
+		vertices_add(a, vertices_face_bk, 6, p, lt, mt, tilted);
+		vertices_add(a, vertices_face_up, 6, p, lt, mt, tilted);
+		vertices_add(a, vertices_face_rt, 6, p, lt, mt, tilted);
+		vertices_add(a, vertices_face_ft, 6, p, lt, mt, tilted);
 
-		vertices_add(a, vertices_face_dn, 6, p, lt, mt);
-		vertices_add(a, vertices_slab_dn, 30, p, lt, mt);
+		vertices_add(a, vertices_face_dn, 6, p, lt, mt, tilted);
+		vertices_add(a, vertices_slab_dn, 30, p, lt, mt, tilted);
 
-		vertices_add(a, vertices_face_dn, 6, p, lt, mt);
-		vertices_add(a, vertices_face_lf, 6, p, lt, mt);
-		vertices_add(a, vertices_stairs_dl, 42, p, lt, mt);
+		vertices_add(a, vertices_face_dn, 6, p, lt, mt, tilted);
+		vertices_add(a, vertices_face_lf, 6, p, lt, mt, tilted);
+		vertices_add(a, vertices_stairs_dl, 42, p, lt, mt, tilted);
 
-		vertices_add(a, vertices_pane_z, 36, p, lt, mt);
+		vertices_add(a, vertices_pane_z, 36, p, lt, mt, tilted);
 	}
 	vertex_buffer_update(ctx->obj_vertex_buffer, 0, a->data, a->size);
 	array_destroy(a);

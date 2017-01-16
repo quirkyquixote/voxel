@@ -74,7 +74,7 @@ void vertex_buffer_disable(struct vertex_buffer *r);
 void vertex_buffer_update(struct vertex_buffer *r, size_t buf, const void *data, size_t size);
 
 static inline void vertices_add(struct array *s, const struct vertex_desc *buf, size_t len,
-	struct v3f p, struct v2f t1, const struct v2f *t2)
+	struct v3f p, struct v2f t1, const struct v2f *t2, const int *tilted)
 {
 	int i;
 	struct vertex v;
@@ -84,8 +84,13 @@ static inline void vertices_add(struct array *s, const struct vertex_desc *buf, 
 		v.z = buf[i].z + p.z;
 		v.u0 = t1.x;
 		v.v0 = t1.y;
+		if (tilted[buf[i].face]) {
+		v.u1 = t2[buf[i].face].x + buf[i].v / 32.;
+		v.v1 = t2[buf[i].face].y + buf[i].u / 32.;
+		} else {
 		v.u1 = t2[buf[i].face].x + buf[i].u / 32.;
 		v.v1 = t2[buf[i].face].y + buf[i].v / 32.;
+		}
 		v.r = buf[i].r * 255;
 		v.g = buf[i].g * 255;
 		v.b = buf[i].b * 255;
@@ -94,100 +99,100 @@ static inline void vertices_add(struct array *s, const struct vertex_desc *buf, 
 	}
 }
 
-static inline void texcoord_up(int mat, struct v2f *ret)
+static inline void texcoord_up(int mat, struct v2f *ret, int *tilted)
 {
-	ret[FACE_UP].x = texcoord_from_mat[mat][1].x;
-	ret[FACE_UP].y = texcoord_from_mat[mat][1].y;
-	ret[FACE_DN].x = texcoord_from_mat[mat][2].x;
-	ret[FACE_DN].y = texcoord_from_mat[mat][2].y;
-	ret[FACE_LF].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_LF].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_RT].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_RT].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_BK].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_BK].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_FT].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_FT].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_UP] = texcoord_from_mat[mat][1];
+	ret[FACE_DN] = texcoord_from_mat[mat][2];
+	ret[FACE_LF] = texcoord_from_mat[mat][0];
+	ret[FACE_RT] = texcoord_from_mat[mat][0];
+	ret[FACE_BK] = texcoord_from_mat[mat][0];
+	ret[FACE_FT] = texcoord_from_mat[mat][0];
+	tilted[FACE_UP] = 0;
+	tilted[FACE_DN] = 0;
+	tilted[FACE_LF] = 0;
+	tilted[FACE_RT] = 0;
+	tilted[FACE_BK] = 0;
+	tilted[FACE_FT] = 0;
 }
 
-static inline void texcoord_dn(int mat, struct v2f *ret)
+static inline void texcoord_dn(int mat, struct v2f *ret, int *tilted)
 {
-	ret[FACE_UP].x = texcoord_from_mat[mat][2].x;
-	ret[FACE_UP].y = texcoord_from_mat[mat][2].y;
-	ret[FACE_DN].x = texcoord_from_mat[mat][1].x;
-	ret[FACE_DN].y = texcoord_from_mat[mat][1].y;
-	ret[FACE_LF].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_LF].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_RT].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_RT].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_BK].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_BK].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_FT].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_FT].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_UP] = texcoord_from_mat[mat][2];
+	ret[FACE_DN] = texcoord_from_mat[mat][1];
+	ret[FACE_LF] = texcoord_from_mat[mat][0];
+	ret[FACE_RT] = texcoord_from_mat[mat][0];
+	ret[FACE_BK] = texcoord_from_mat[mat][0];
+	ret[FACE_FT] = texcoord_from_mat[mat][0];
+	tilted[FACE_UP] = 0;
+	tilted[FACE_DN] = 0;
+	tilted[FACE_LF] = 0;
+	tilted[FACE_RT] = 0;
+	tilted[FACE_BK] = 0;
+	tilted[FACE_FT] = 0;
 }
 
-static inline void texcoord_lf(int mat, struct v2f *ret)
+static inline void texcoord_lf(int mat, struct v2f *ret, int *tilted)
 {
-	ret[FACE_UP].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_UP].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_DN].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_DN].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_LF].x = texcoord_from_mat[mat][1].x;
-	ret[FACE_LF].y = texcoord_from_mat[mat][1].y;
-	ret[FACE_RT].x = texcoord_from_mat[mat][2].x;
-	ret[FACE_RT].y = texcoord_from_mat[mat][2].y;
-	ret[FACE_BK].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_BK].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_FT].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_FT].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_UP] = texcoord_from_mat[mat][0];
+	ret[FACE_DN] = texcoord_from_mat[mat][0];
+	ret[FACE_LF] = texcoord_from_mat[mat][2];
+	ret[FACE_RT] = texcoord_from_mat[mat][1];
+	ret[FACE_BK] = texcoord_from_mat[mat][0];
+	ret[FACE_FT] = texcoord_from_mat[mat][0];
+	tilted[FACE_UP] = 0;
+	tilted[FACE_DN] = 1;
+	tilted[FACE_LF] = 0;
+	tilted[FACE_RT] = 0;
+	tilted[FACE_BK] = 1;
+	tilted[FACE_FT] = 1;
 }
 
-static inline void texcoord_rt(int mat, struct v2f *ret)
+static inline void texcoord_rt(int mat, struct v2f *ret, int *tilted)
 {
-	ret[FACE_UP].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_UP].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_DN].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_DN].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_LF].x = texcoord_from_mat[mat][2].x;
-	ret[FACE_LF].y = texcoord_from_mat[mat][2].y;
-	ret[FACE_RT].x = texcoord_from_mat[mat][1].x;
-	ret[FACE_RT].y = texcoord_from_mat[mat][1].y;
-	ret[FACE_BK].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_BK].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_FT].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_FT].y = texcoord_from_mat[mat][0].y;
+	ret[FACE_UP] = texcoord_from_mat[mat][0];
+	ret[FACE_DN] = texcoord_from_mat[mat][0];
+	ret[FACE_LF] = texcoord_from_mat[mat][1];
+	ret[FACE_RT] = texcoord_from_mat[mat][2];
+	ret[FACE_BK] = texcoord_from_mat[mat][0];
+	ret[FACE_FT] = texcoord_from_mat[mat][0];
+	tilted[FACE_UP] = 0;
+	tilted[FACE_DN] = 1;
+	tilted[FACE_LF] = 0;
+	tilted[FACE_RT] = 0;
+	tilted[FACE_BK] = 1;
+	tilted[FACE_FT] = 1;
 }
 
-static inline void texcoord_bk(int mat, struct v2f *ret)
+static inline void texcoord_bk(int mat, struct v2f *ret, int *tilted)
 {
-	ret[FACE_UP].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_UP].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_DN].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_DN].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_LF].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_LF].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_RT].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_RT].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_BK].x = texcoord_from_mat[mat][1].x;
-	ret[FACE_BK].y = texcoord_from_mat[mat][1].y;
-	ret[FACE_FT].x = texcoord_from_mat[mat][2].x;
-	ret[FACE_FT].y = texcoord_from_mat[mat][2].y;
+	ret[FACE_UP] = texcoord_from_mat[mat][0];
+	ret[FACE_DN] = texcoord_from_mat[mat][0];
+	ret[FACE_LF] = texcoord_from_mat[mat][0];
+	ret[FACE_RT] = texcoord_from_mat[mat][0];
+	ret[FACE_BK] = texcoord_from_mat[mat][1];
+	ret[FACE_FT] = texcoord_from_mat[mat][2];
+	tilted[FACE_UP] = 1;
+	tilted[FACE_DN] = 0;
+	tilted[FACE_LF] = 1;
+	tilted[FACE_RT] = 1;
+	tilted[FACE_BK] = 0;
+	tilted[FACE_FT] = 0;
 }
 
-static inline void texcoord_ft(int mat, struct v2f *ret)
+static inline void texcoord_ft(int mat, struct v2f *ret, int *tilted)
 {
-	ret[FACE_UP].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_UP].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_DN].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_DN].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_LF].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_LF].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_RT].x = texcoord_from_mat[mat][0].x;
-	ret[FACE_RT].y = texcoord_from_mat[mat][0].y;
-	ret[FACE_BK].x = texcoord_from_mat[mat][2].x;
-	ret[FACE_BK].y = texcoord_from_mat[mat][2].y;
-	ret[FACE_FT].x = texcoord_from_mat[mat][1].x;
-	ret[FACE_FT].y = texcoord_from_mat[mat][1].y;
+	ret[FACE_UP] = texcoord_from_mat[mat][0];
+	ret[FACE_DN] = texcoord_from_mat[mat][0];
+	ret[FACE_LF] = texcoord_from_mat[mat][0];
+	ret[FACE_RT] = texcoord_from_mat[mat][0];
+	ret[FACE_BK] = texcoord_from_mat[mat][1];
+	ret[FACE_FT] = texcoord_from_mat[mat][2];
+	tilted[FACE_UP] = 1;
+	tilted[FACE_DN] = 0;
+	tilted[FACE_LF] = 1;
+	tilted[FACE_RT] = 1;
+	tilted[FACE_BK] = 0;
+	tilted[FACE_FT] = 0;
 }
 
 #endif
