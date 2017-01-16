@@ -388,6 +388,8 @@ void use_tool(struct context *ctx)
 	int f = ctx->cur.face;
 	struct slot s = inventory_get(ctx->inv, ctx->tool);
 
+	if (s.num == 0)
+		return;
 	if (f == FACE_LF)
 		p = v3_add(p, v3c(-1, 0, 0));
 	else if (f == FACE_RT)
