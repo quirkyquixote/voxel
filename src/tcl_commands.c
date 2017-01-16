@@ -53,7 +53,7 @@ int parse_block(const char *str, int *mat, int *shape)
 	}
 	str += strlen(mat_names[*mat]);
 	if (*str == 0) {
-		*shape = 0;
+		*shape = SHAPE_BLOCK_DN;
 		return 0;
 	}
 	if (*str != '_') {
