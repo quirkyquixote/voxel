@@ -174,8 +174,8 @@ extern const char *mat_names[];
 extern const char *face_names[];
 extern const char *shape_names[];
 
-extern const int mat_is_workbench[];
-extern const int mat_capacity[];
+extern const int block_is_workbench[256][256];
+extern const int block_capacity[256][256];
 
 static inline int obj_from_name(const char *name)
 {

@@ -482,7 +482,7 @@ void update_player(struct context *ctx)
 			use_inventory(ctx, ctx->bench);
 			return;
 		}
-		if (s == SHAPE_BLOCK_DN && mat_capacity[m] > 0) {
+		if (block_capacity[m][s] > 0) {
 			use_inventory(ctx, world_get_data(ctx->w, p));
 			return;
 		}
@@ -491,7 +491,7 @@ void update_player(struct context *ctx)
 		use_workbench(ctx, ctx->bench);
 		return;
 	}
-	if (s == SHAPE_BLOCK_DN && mat_is_workbench[m]) {
+	if (block_is_workbench[m][s]) {
 		use_workbench(ctx, world_get_data(ctx->w, p));
 		return;
 	}
