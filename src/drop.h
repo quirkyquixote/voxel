@@ -6,6 +6,7 @@
 
 struct drop {
 	struct list list;
+	struct context *ctx;
 	struct body *body;
 	uint8_t obj;
 	uint8_t mat;

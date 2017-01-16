@@ -103,13 +103,15 @@ void move_xpos(struct space *s, struct body *b, float dt)
 			if (cell_at(s, shape_masks, x, y, z)) {
 				if (y < y0 + b->step_size) {
 					step_up = 1;
-				} else {
-					b->v.x = 0;
-					b->p.x = 0.5 * x - b->s.x - s->impulse;
-					if (b->cb_func != NULL)
-						b->cb_func(b, b->cb_data, FACE_LF);
-					return;
+					continue;
 				}
+				b->v.x = 0;
+				b->p.x = 0.5 * x - b->s.x - s->impulse;
+				if (b->cb_func != NULL) {
+					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
+					b->cb_func(b, b->cb_data, p, FACE_LF);
+				}
+				return;
 			}
 		}
 	}
@@ -137,8 +139,10 @@ void move_xneg(struct space *s, struct body *b, float dt)
 				}
 				b->v.x = 0;
 				b->p.x = 0.5 * (x + 1) + b->s.x + s->impulse;
-				if (b->cb_func != NULL)
-					b->cb_func(b, b->cb_data, FACE_RT);
+				if (b->cb_func != NULL) {
+					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
+					b->cb_func(b, b->cb_data, p, FACE_RT);
+				}
 				return;
 			}
 		}
@@ -167,8 +171,10 @@ void move_zpos(struct space *s, struct body *b, float dt)
 				}
 				b->v.z = 0;
 				b->p.z = 0.5 * z - b->s.x - s->impulse;
-				if (b->cb_func != NULL)
-					b->cb_func(b, b->cb_data, FACE_FT);
+				if (b->cb_func != NULL) {
+					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
+					b->cb_func(b, b->cb_data, p, FACE_FT);
+				}
 				return;
 			}
 		}
@@ -197,8 +203,10 @@ void move_zneg(struct space *s, struct body *b, float dt)
 				}
 				b->v.z = 0;
 				b->p.z = 0.5 * (z + 1) + b->s.x + s->impulse;
-				if (b->cb_func != NULL)
-					b->cb_func(b, b->cb_data, FACE_BK);
+				if (b->cb_func != NULL) {
+					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
+					b->cb_func(b, b->cb_data, p, FACE_BK);
+				}
 				return;
 			}
 		}
@@ -222,8 +230,10 @@ void move_ypos(struct space *s, struct body *b, float dt)
 			if (cell_at(s, shape_masks, x, y, z)) {
 				b->v.y = 0;
 				b->p.y = 0.5 * y - b->s.y - s->impulse;
-				if (b->cb_func != NULL)
-					b->cb_func(b, b->cb_data, FACE_DN);
+				if (b->cb_func != NULL) {
+					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
+					b->cb_func(b, b->cb_data, p, FACE_DN);
+				}
 				return;
 			}
 		}
@@ -245,8 +255,10 @@ void move_yneg(struct space *s, struct body *b, float dt)
 			if (cell_at(s, shape_masks, x, y, z)) {
 				b->v.y = 0;
 				b->p.y = 0.5 * (y + 1) + b->s.y + s->impulse;
-				if (b->cb_func != NULL)
-					b->cb_func(b, b->cb_data, FACE_UP);
+				if (b->cb_func != NULL) {
+					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
+					b->cb_func(b, b->cb_data, p, FACE_UP);
+				}
 				return;
 			}
 		}

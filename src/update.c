@@ -4,6 +4,7 @@
 #include "context.h"
 #include "recipes.h"
 #include "lighting.h"
+#include "drop.h"
 
 int chunks_by_priority(const void *p1, const void *p2)
 {
@@ -645,6 +646,7 @@ void update(void *data)
 {
 	struct context *ctx = data;
 	struct v3ll p;
+	struct drop *d;
 
 	if (!window_has_mouse_focus(ctx->ml->windows))
 		return;
@@ -669,6 +671,10 @@ void update(void *data)
 			ctx->pick = 1;
 	}
 	update_chunks(ctx);
+	list_foreach_safe(d, &ctx->drops, list) {
+		if (d->num == 0)
+			drop_destroy(d);
+	}
 	tone_mapper_update(ctx->tone_mapper, (world_get_light(ctx->w,
 					p) << 4) / 255., 0);
 	++ctx->tick;

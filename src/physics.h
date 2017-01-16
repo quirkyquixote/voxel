@@ -30,7 +30,7 @@ struct body {
 	struct v2f s;
 	struct box3f bb;
 	int step_size;
-	void (* cb_func)(struct body *b, void *data, int face);
+	void (* cb_func)(struct body *b, void *data, struct v3ll p, int face);
 	void *cb_data;
 };
 
@@ -98,7 +98,7 @@ static inline void body_set_step_size(struct body *b, int s)
 }
 
 static inline void body_set_callback(struct body *b,
-		void(*func)(struct body *, void *, int), void *data)
+		void(*func)(struct body *, void *, struct v3ll, int), void *data)
 {
 	b->cb_func = func;
 	b->cb_data = data;
