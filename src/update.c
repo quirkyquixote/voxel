@@ -4,6 +4,7 @@
 #include "context.h"
 #include "recipes.h"
 #include "lighting.h"
+#include "drop.h"
 
 int chunks_by_priority(const void *p1, const void *p2)
 {
@@ -500,6 +501,29 @@ void update_player(struct context *ctx)
 	if (ctx->act == 1) {
 		if (ctx->cur.face != -1) {
 			if (s != SHAPE_NONE) {
+	int s2, m2;
+	s2 = world_get_shape(ctx->w, p);
+	m2 = world_get_mat(ctx->w, p);
+	if (block_traits[m2][s2].capacity > 0) {
+		struct array *inv = world_get_data(ctx->w, p);
+		struct slot s;
+		array_foreach(s, inv) {
+			if (s.num) {
+				struct drop *d = drop(ctx, s.obj, s.mat, s.num);
+				struct v3f q = v3f(p.x, p.y, p.z);
+				q.x += (float)rand() / RAND_MAX;
+				q.y += (float)rand() / RAND_MAX;
+				q.z += (float)rand() / RAND_MAX;
+				body_set_position(d->entity.body, q);
+				struct v3f v = v3f(0, 0, 0);
+				v.x += .1 * ((float)rand() / RAND_MAX - .5);
+				v.y += .2 * ((float)rand() / RAND_MAX);
+				v.z += .1 * ((float)rand() / RAND_MAX - .5);
+				body_set_velocity(d->entity.body, v);
+			}
+		}
+		array_destroy(inv);
+	}
 				world_set(ctx->w, p, 0, 0);
 			}
 		}
