@@ -165,183 +165,183 @@ const char *face_names[] = {
 const struct block_traits block_traits[256][256] = {
 	[MAT_LIMESTONE_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_SANDSTONE_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_MARBLE_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_GRANITE_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_BASALT_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_SLATE_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_CLAY_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD1_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD2_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD3_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD4_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD5_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD6_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD7_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 16,
+			.capacity = 9,
 			.is_workbench = 1,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_LIMESTONE_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_SANDSTONE_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_MARBLE_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_GRANITE_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_BASALT_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_SLATE_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_CLAY_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD1_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD2_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD3_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD4_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD5_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD6_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
 	[MAT_WOOD7_CRATE] = {
 		[SHAPE_BLOCK_DN] = {
-			.capacity = 9,
+			.capacity = 16,
 			.is_inventory = 1,
 		},
 	},
