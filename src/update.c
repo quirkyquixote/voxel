@@ -499,6 +499,7 @@ void use_tool(struct context *ctx)
 	} else if (s.obj == OBJ_FLUID) {
 		flowsim_add(ctx->flowsim, p, 1);
 	}
+	inventory_set_num(ctx->inv, ctx->tool, s.num - 1);
 }
 
 void update_player(struct context *ctx)
