@@ -13,7 +13,8 @@ struct entity_traits {
 	void (* destroy_func)(void *);
 	int (* save_func)(void *, union sz_tag *);
 	int (* load_func)(void *, char *, union sz_tag *);
-	void (* use_func)(void *, struct context *ctx);
+	int (* use_func)(void *);
+	struct list list;
 };
 
 struct entity {
@@ -50,15 +51,19 @@ static inline void *entity_load(struct context *ctx, union sz_tag *root)
 	e = NULL;
 	sz_dict_foreach(key, val, root) {
 		if (strcmp(key, "name") == 0) {
-			array_foreach(traits, ctx->entity_traits) {
+			list_foreach(traits, &ctx->entity_traits, list) {
 				if (strcmp(val->str.data, traits->name) == 0) {
 					e = traits->create_func(ctx);
 					break;
 				}
 			}
+			if (e == NULL) {
+				log_error("bad entity name: \"%s\"", val->str.data);
+			}
 		} else if (e == NULL) {
 			log_error("found \"%s\" before \"name\"", key);
 		} else if (traits->load_func(e, key, val) != 0) {
+			log_error("bad key: \"%s\"", key);
 			traits->destroy_func(e);
 			return NULL;
 		}

@@ -24,12 +24,13 @@ static inline int block_entity_save(void *raw, union sz_tag *root)
 static inline int block_entity_load(void *raw, char *key, union sz_tag *val)
 {
 	struct block_entity *e = raw;
-	if (strcmp(key, "p")) {
+	if (strcmp(key, "p") == 0) {
 		typeof(e->p.x) *p = &e->p.x;
-		int i = 0;
 		union sz_tag *iter;
-		sz_list_foreach(iter, val)
-			p[i++] = val->i64.data;
+		sz_list_foreach(iter, val) {
+			*p = iter->i64.data;
+			++p;
+		}
 		return 0;
 	}
 	return -1;

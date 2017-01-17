@@ -47,7 +47,7 @@ struct context {
 	struct array *bench;
 	struct v3ll bench_p;
 	struct list entities;
-	struct array *entity_traits;
+	struct list entity_traits;
 	char mode;
 	char act;
 	char use;

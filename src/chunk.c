@@ -100,7 +100,7 @@ int chunk_load(struct chunk *c, union sz_tag *root)
 				e = entity_load(c->ctx, iter);
 				if (e == NULL)
 					return -1;
-				chunk_set_data(c, e->p, e);
+				world_set_data(c->ctx->w, e->p, e);
 			}
 		} else {
 			log_error("bad tag: %s", key);
@@ -191,8 +191,14 @@ void world_set(struct world *w, struct v3ll p, int shape, int mat)
 	struct box3ll bb;
 	world_set_shape(w, p, shape);
 	world_set_mat(w, p, mat);
-	if (block_traits[mat][shape].entity != NULL)
-		world_set_data(w, p, entity(w->ctx, block_traits[mat][shape].entity));
+	if (block_traits[mat][shape].entity != NULL) {
+		struct block_entity *e;
+		e = entity(w->ctx, block_traits[mat][shape].entity);
+		e->p = p;
+		world_set_data(w, p, e);
+	} else {
+		world_set_data(w, p, NULL);
+	}
 	update_lighting(w, box3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
 	world_set_flags(w, bb, CHUNK_UNRENDERED);
 }

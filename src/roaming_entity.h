@@ -36,7 +36,7 @@ static inline int roaming_entity_save(void *raw, union sz_tag *root)
 static inline int roaming_entity_load(void *raw, char *key, union sz_tag *val)
 {
 	struct roaming_entity *e = raw;
-	if (strcmp(key, "p")) {
+	if (strcmp(key, "p") == 0) {
 		typeof(e->body->p.x) *p = &e->body->p.x;
 		int i = 0;
 		union sz_tag *iter;
@@ -44,7 +44,7 @@ static inline int roaming_entity_load(void *raw, char *key, union sz_tag *val)
 			p[i++] = val->i64.data;
 		return 0;
 	}
-	if (strcmp(key, "r")) {
+	if (strcmp(key, "r") == 0) {
 		typeof(e->body->r.x) *r = &e->body->r.x;
 		int i = 0;
 		union sz_tag *iter;
@@ -52,7 +52,7 @@ static inline int roaming_entity_load(void *raw, char *key, union sz_tag *val)
 			r[i++] = val->i64.data;
 		return 0;
 	}
-	if (strcmp(key, "v")) {
+	if (strcmp(key, "v") == 0) {
 		typeof(e->body->v.x) *v = &e->body->v.x;
 		int i = 0;
 		union sz_tag *iter;

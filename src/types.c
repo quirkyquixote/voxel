@@ -1,6 +1,8 @@
 
 #include "types.h"
 
+#include "crate_entity.h"
+
 const char *obj_names[256] = {
 	[OBJ_BLOCK] = "block",
 	[OBJ_SLAB] = "slab",
@@ -675,5 +677,20 @@ void block_traits_init(void)
 	WOOD_DROPS(MAT_WOOD5);
 	WOOD_DROPS(MAT_WOOD6);
 	WOOD_DROPS(MAT_WOOD7);
+
+	block_traits[MAT_LIMESTONE_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_SANDSTONE_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_MARBLE_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_GRANITE_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_BASALT_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_SLATE_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_CLAY_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_WOOD1_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_WOOD2_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_WOOD3_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_WOOD4_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_WOOD5_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_WOOD6_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_WOOD7_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
 }
 

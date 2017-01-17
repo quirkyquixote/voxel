@@ -15,6 +15,8 @@
 #include "update.h"
 #include "event.h"
 
+#include "crate_entity.h"
+
 int load_all(struct context *ctx);
 int save_all(struct context *ctx);
 
@@ -34,7 +36,10 @@ int main(int argc, char *argv[])
 	block_traits_init();
 	ctx->w = world(ctx);
 	ctx->prof_mgr = profile_manager();
-	ctx->entity_traits = array(sizeof(struct entity_traits *));
+
+	/* Populate entity traits list */
+	list_init(&ctx->entity_traits);
+	list_append(&ctx->entity_traits, &crate_traits.list);
 	ctx->chunks_per_tick = 1;
 
 	/* Setup main loop */
