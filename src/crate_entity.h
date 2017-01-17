@@ -6,7 +6,6 @@
 
 struct crate_entity {
 	struct block_entity block;
-	struct array *items;
 };
 
 struct entity_traits crate_traits;

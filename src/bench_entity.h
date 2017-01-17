@@ -6,7 +6,6 @@
 
 struct bench_entity {
 	struct block_entity block;
-	struct array *items;
 };
 
 struct entity_traits bench_traits;

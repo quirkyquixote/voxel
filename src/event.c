@@ -2,8 +2,8 @@
 #include "event.h"
 
 #include "context.h"
-#include "drop.h"
 #include "lighting.h"
+#include "drop_entity.h"
 
 void event(const SDL_Event *e, void *data)
 {
@@ -87,7 +87,7 @@ void event(const SDL_Event *e, void *data)
 		} else if (e->key.keysym.sym == SDLK_q) {
 			struct item s = inventory_get(ctx->inv, ctx->tool);
 			if (s.num > 0) {
-				struct drop *d = drop(ctx, item(s.obj, s.mat, 1));
+				struct drop_entity *d = drop_entity(ctx, item(s.obj, s.mat, 1));
 				body_set_position(d->roaming.body, ctx->cam->p);
 				struct v3f v = v3f(0, 0, -.5);
 				v = v3_rotx(v, ctx->cam->r.x);

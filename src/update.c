@@ -4,7 +4,7 @@
 #include "context.h"
 #include "recipes.h"
 #include "lighting.h"
-#include "drop.h"
+#include "drop_entity.h"
 
 int chunks_by_priority(const void *p1, const void *p2)
 {
@@ -327,7 +327,7 @@ void spill_inventory(struct context *ctx, struct v3ll p)
 	}
 	array_foreach(s, inv) {
 		if (s.num) {
-			struct drop *d = drop(ctx, s);
+			struct drop_entity *d = drop_entity(ctx, s);
 			struct v3f q = v3f(p.x, p.y, p.z);
 			q.x += (float)rand() / RAND_MAX;
 			q.y += (float)rand() / RAND_MAX;
@@ -421,7 +421,7 @@ void drop_block(struct context *ctx, struct v3ll p)
 	s = block_traits[m2][s2].drop;
 	if (s.num == 0)
 		return;
-	struct drop *d = drop(ctx, s);
+	struct drop_entity *d = drop_entity(ctx, s);
 	struct v3f q = v3f(p.x, p.y, p.z);
 	q.x += (float)rand() / RAND_MAX;
 	q.y += (float)rand() / RAND_MAX;

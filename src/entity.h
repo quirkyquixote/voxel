@@ -20,6 +20,7 @@ struct entity_traits {
 struct entity {
 	const struct entity_traits *traits;
 	struct context *ctx;
+	struct array *items;
 };
 
 static inline void *entity(struct context *ctx, struct entity_traits *traits)
@@ -62,6 +63,8 @@ static inline void *entity_load(struct context *ctx, union sz_tag *root)
 			}
 		} else if (e == NULL) {
 			log_error("found \"%s\" before \"name\"", key);
+		} else if (strcmp(key, "items") == 0) {
+			memcpy(e->items->data, val->raw.data, val->raw.size);
 		} else if (traits->load_func(e, key, val) != 0) {
 			log_error("bad key: \"%s\"", key);
 			traits->destroy_func(e);
@@ -78,6 +81,10 @@ static inline union sz_tag *entity_save(void *raw)
 	root = sz_dict();
 	sz_dict_add(root, "name", sz_str(e->traits->name));
 	e->traits->save_func(e, root);
+	if (e->items != NULL)
+		sz_dict_add(root, "items",
+				sz_raw(e->items->data,
+					e->items->elem_size * e->items->size));
 	return root;
 }
 

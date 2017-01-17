@@ -19,6 +19,7 @@
 #include "board_entity.h"
 #include "crate_entity.h"
 #include "pipe_entity.h"
+#include "drop_entity.h"
 
 int load_all(struct context *ctx);
 int save_all(struct context *ctx);
@@ -46,6 +47,7 @@ int main(int argc, char *argv[])
 	list_append(&ctx->entity_traits, &crate_traits.list);
 	list_append(&ctx->entity_traits, &pipe_traits.list);
 	list_append(&ctx->entity_traits, &board_traits.list);
+	list_append(&ctx->entity_traits, &drop_traits.list);
 	ctx->chunks_per_tick = 1;
 
 	/* Setup main loop */

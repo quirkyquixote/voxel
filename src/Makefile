@@ -9,7 +9,6 @@ voxel_objs += camera.o
 voxel_objs += chunk.o
 voxel_objs += cli.o
 voxel_objs += context.o
-voxel_objs += drop.o
 voxel_objs += event.o
 voxel_objs += fps_manager.o
 voxel_objs += flowsim.o
@@ -34,6 +33,7 @@ voxel_objs += bench_entity.o
 voxel_objs += board_entity.o
 voxel_objs += crate_entity.o
 voxel_objs += pipe_entity.o
+voxel_objs += drop_entity.o
 
 szcat_objs += sz.o
 

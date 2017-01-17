@@ -6,7 +6,6 @@
 
 struct pipe_entity {
 	struct block_entity block;
-	struct array *items;
 };
 
 struct entity_traits pipe_traits;
