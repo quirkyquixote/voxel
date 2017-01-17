@@ -313,19 +313,12 @@ void update_vbo(struct context *ctx, int id, int64_t x0, int64_t y0, int64_t z0)
 
 void spill_inventory(struct context *ctx, struct v3ll p)
 {
-	int s2, m2;
-	struct array *inv;
+	struct entity *e;
 	struct item s;
-	s2 = world_get_shape(ctx->w, p);
-	m2 = world_get_mat(ctx->w, p);
-	if (block_traits[m2][s2].capacity <= 0)
+	e = world_get_data(ctx->w, p);
+	if (e == NULL || e->items == NULL)
 		return;
-	inv = world_get_data(ctx->w, p);
-	if (inv == NULL) {
-		log_warning("no inventory found");
-		return;
-	}
-	array_foreach(s, inv) {
+	array_foreach(s, e->items) {
 		if (s.num) {
 			struct drop_entity *d = drop_entity(ctx, s);
 			struct v3f q = v3f(p.x, p.y, p.z);
@@ -340,7 +333,6 @@ void spill_inventory(struct context *ctx, struct v3ll p)
 			body_set_velocity(d->roaming.body, v);
 		}
 	}
-	array_destroy(inv);
 }
 
 void use_inventory(struct context *ctx, struct array *items)
