@@ -6,7 +6,7 @@
 
 static struct box3ll sel_bb = { 0, 0, 0, 0, 0, 0 };
 
-int parse_slot(const char *str, int *mat, int *obj)
+int parse_item(const char *str, int *mat, int *obj)
 {
 	for (*mat = MAT_COUNT - 1; *mat >= 0; --*mat) {
 		if (mat_names[*mat] && strncmp(str, mat_names[*mat], strlen(mat_names[*mat])) == 0)
@@ -138,13 +138,13 @@ int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 	if (objc < 2 || objc > 3)
 		goto fail;
-	if (parse_slot(Tcl_GetString(objv[1]), &mat, &obj) != 0)
+	if (parse_item(Tcl_GetString(objv[1]), &mat, &obj) != 0)
 		goto fail;
 	if (objc == 3) {
 		if (Tcl_GetIntFromObj(interp, objv[2], &num) != TCL_OK)
 			goto fail;
 	}
-	inventory_add(ctx->inv, slot(obj, mat, num));
+	inventory_add(ctx->inv, item(obj, mat, num));
 	log_info("given %s_%s %d", mat_names[mat], obj_names[obj], num);
 	return 0;
 fail:
@@ -160,13 +160,13 @@ int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 	if (objc < 2 || objc > 3)
 		goto fail;
-	if (parse_slot(Tcl_GetString(objv[1]), &mat, &obj) != 0)
+	if (parse_item(Tcl_GetString(objv[1]), &mat, &obj) != 0)
 		goto fail;
 	if (objc == 3) {
 		if (Tcl_GetIntFromObj(interp, objv[2], &num) != TCL_OK)
 			goto fail;
 	}
-	inventory_remove(ctx->inv, slot(obj, mat, num));
+	inventory_remove(ctx->inv, item(obj, mat, num));
 	log_info("taken %s_%s %d", mat_names[mat], obj_names[obj], num);
 	return 0;
 fail:
@@ -195,7 +195,7 @@ int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	struct array *inv = world_get_data(ctx->w, ctx->cur.p);
 	if (inv != NULL) {
 		log_info("inventory:");
-		struct slot s;
+		struct item s;
 		int i = 0;
 		array_foreach(s, inv) {
 			if (s.num > 0)

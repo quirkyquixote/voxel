@@ -7,7 +7,7 @@
 #include "context.h"
 #include "inventory.h"
 
-int recipe_match(struct array *inv, struct slot *s);
+int recipe_match(struct array *inv, struct item *s);
 
 #endif
 

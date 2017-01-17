@@ -315,7 +315,7 @@ void spill_inventory(struct context *ctx, struct v3ll p)
 {
 	int s2, m2;
 	struct array *inv;
-	struct slot s;
+	struct item s;
 	s2 = world_get_shape(ctx->w, p);
 	m2 = world_get_mat(ctx->w, p);
 	if (block_traits[m2][s2].capacity <= 0)
@@ -327,7 +327,7 @@ void spill_inventory(struct context *ctx, struct v3ll p)
 	}
 	array_foreach(s, inv) {
 		if (s.num) {
-			struct drop *d = drop(ctx, s.obj, s.mat, s.num);
+			struct drop *d = drop(ctx, s);
 			struct v3f q = v3f(p.x, p.y, p.z);
 			q.x += (float)rand() / RAND_MAX;
 			q.y += (float)rand() / RAND_MAX;
@@ -346,13 +346,13 @@ void spill_inventory(struct context *ctx, struct v3ll p)
 void drop_block(struct context *ctx, struct v3ll p)
 {
 	int s2, m2;
-	struct slot s;
+	struct item s;
 	s2 = world_get_shape(ctx->w, p);
 	m2 = world_get_mat(ctx->w, p);
 	s = block_traits[m2][s2].drop;
 	if (s.num == 0)
 		return;
-	struct drop *d = drop(ctx, s.obj, s.mat, s.num);
+	struct drop *d = drop(ctx, s);
 	struct v3f q = v3f(p.x, p.y, p.z);
 	q.x += (float)rand() / RAND_MAX;
 	q.y += (float)rand() / RAND_MAX;
@@ -375,8 +375,8 @@ void use_inventory(struct context *ctx, struct array *inv)
 	struct v3f q = ctx->cur.q;
 	int side = sqrt(inv->size);
 	int i = side * floor(q.x * side) + floor(q.z * side);
-	struct slot s1 = inventory_get(ctx->inv, ctx->tool);
-	struct slot s2 = inventory_get(inv, i);
+	struct item s1 = inventory_get(ctx->inv, ctx->tool);
+	struct item s2 = inventory_get(inv, i);
 	if (ctx->act == 1) {
 		if (ctx->move.y0) {
 			if (s2.num == 0) {
@@ -407,7 +407,7 @@ void use_inventory(struct context *ctx, struct array *inv)
 				return;
 			}
 			int acc =
-				inventory_add(ctx->inv, slot(s2.obj, s2.mat, 1));
+				inventory_add(ctx->inv, item(s2.obj, s2.mat, 1));
 			inventory_set_num(inv, i, s2.num - acc);
 			if (acc == 0)
 				log_info("no space to take");
@@ -441,7 +441,7 @@ void use_inventory(struct context *ctx, struct array *inv)
 void use_workbench(struct context *ctx, struct array *inv)
 {
 	if (ctx->act == 1) {
-		struct slot s;
+		struct item s;
 		if (recipe_match(inv, &s)) {
 			int i = 0;
 			do {
@@ -454,7 +454,7 @@ void use_workbench(struct context *ctx, struct array *inv)
 			log_info("not a recipe");
 		}
 	} else if (ctx->use == 1) {
-		struct slot s;
+		struct item s;
 		if (recipe_match(inv, &s)) {
 			inventory_add(ctx->inv, s);
 			log_info("take %s %s %d", mat_names[s.mat],
@@ -470,7 +470,7 @@ void use_tool(struct context *ctx)
 	struct v3ll p = ctx->cur.p;
 	struct v3f q = ctx->cur.q;
 	int f = ctx->cur.face;
-	struct slot s = inventory_get(ctx->inv, ctx->tool);
+	struct item s = inventory_get(ctx->inv, ctx->tool);
 
 	if (s.num == 0)
 		return;
@@ -625,7 +625,7 @@ void update_player(struct context *ctx)
 				o = OBJ_PANE;
 			else if (s >= SHAPE_STAIRS_DF && s <= SHAPE_STAIRS_UR)
 				o = OBJ_STAIRS;
-			inventory_set(ctx->inv, ctx->tool, slot(o, m, 1));
+			inventory_set(ctx->inv, ctx->tool, item(o, m, 1));
 		}
 	}
 }

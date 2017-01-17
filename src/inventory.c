@@ -4,10 +4,10 @@
 
 #include <string.h>
 
-int inventory_add(struct array *a, struct slot s)
+int inventory_add(struct array *a, struct item s)
 {
 	int i, acc, max;
-	struct slot s2;
+	struct item s2;
 
 	acc = 0;
 	for (i = 0; i < a->size; ++i) {
@@ -38,10 +38,10 @@ int inventory_add(struct array *a, struct slot s)
 	return acc;
 }
 
-int inventory_add_to_slot(struct array *a, int i, struct slot s)
+int inventory_add_to_item(struct array *a, int i, struct item s)
 {
 	int max;
-	struct slot s2;
+	struct item s2;
 
 	array_get(a, i, &s2);
 	if (s2.num == 0) {
@@ -63,10 +63,10 @@ int inventory_add_to_slot(struct array *a, int i, struct slot s)
 	}
 }
 
-int inventory_remove(struct array *a, struct slot s)
+int inventory_remove(struct array *a, struct item s)
 {
 	int i, acc, max;
-	struct slot s2;
+	struct item s2;
 
 	for (i = 0; i < a->size; ++i) {
 		array_get(a, i, &s2);
@@ -88,10 +88,10 @@ int inventory_remove(struct array *a, struct slot s)
 	return acc;
 }
 
-int inventory_remove_from_slot(struct array *a, int i, struct slot s)
+int inventory_remove_from_item(struct array *a, int i, struct item s)
 {
 	int max;
-	struct slot s2;
+	struct item s2;
 
 	array_get(a, i, &s2);
 	if (s2.num > 0 && s2.mat == s.mat && s2.obj == s.obj) {

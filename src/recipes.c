@@ -142,10 +142,10 @@ int rotations[4][9] = {
 	{ 2, 5, 8, 1, 4, 7, 0, 3, 6 },
 };
 
-int rotation_match(const struct recipe *r, struct array *inv, int *rot, struct slot *rval)
+int rotation_match(const struct recipe *r, struct array *inv, int *rot, struct item *rval)
 {
 	int k;
-	struct slot s;
+	struct item s;
 	struct ingredient i;
 	for (k = 0; k < 9; ++k)	{
 		s = inventory_get(inv, k);
@@ -169,7 +169,7 @@ int rotation_match(const struct recipe *r, struct array *inv, int *rot, struct s
 	return 1;
 }
 
-int recipe_match(struct array *inv, struct slot *rval)
+int recipe_match(struct array *inv, struct item *rval)
 {
 	int i, j;
 	for (i = 0; i < sizeof(recipes) / sizeof(*recipes); ++i) {

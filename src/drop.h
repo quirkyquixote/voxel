@@ -8,13 +8,11 @@
 struct drop {
 	struct entity entity;
 	struct context *ctx;
-	uint8_t obj;
-	uint8_t mat;
-	uint8_t num;
+	struct item item;
 	int ticks;
 };
 
-struct drop *drop(struct context *ctx, uint8_t obj, uint8_t mat, uint8_t num);
+struct drop *drop(struct context *ctx, struct item item);
 
 #endif
 

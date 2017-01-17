@@ -201,7 +201,7 @@ void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
 	}
 	int i, x, z;
 	int side = sqrt(inv->size);
-	struct slot s;
+	struct item s;
 
 	GLfloat d = v3_dist(ctx->player->p, p);
 	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
@@ -226,7 +226,7 @@ void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
 			glVertex3f(1, 0, 1);
 			glEnd();
 			glPopMatrix();
-			struct slot s = inventory_get(inv, i);
+			struct item s = inventory_get(inv, i);
 			if (s.num > 0) {
 				glColor4ub(0, 0, 0, alpha);
 				glPushMatrix();
@@ -261,7 +261,7 @@ void roam_render(struct context *ctx)
 	struct v3ll p;
 	struct entity *e;
 	int m, i;
-	struct slot s;
+	struct item s;
 
 	render_cursor(ctx);
 	bb.x0 = floor(ctx->player->p.x - 4);

@@ -579,47 +579,47 @@ struct block_traits block_traits[256][256] = {
 
 #define BLOCK_DROPS(m1, m2) \
 do { \
-	block_traits[m1][SHAPE_BLOCK_DN].drop = slot(OBJ_BLOCK, m2, 1);\
-	block_traits[m1][SHAPE_BLOCK_UP].drop = slot(OBJ_BLOCK, m2, 1);\
-	block_traits[m1][SHAPE_BLOCK_LF].drop = slot(OBJ_BLOCK, m2, 1);\
-	block_traits[m1][SHAPE_BLOCK_RT].drop = slot(OBJ_BLOCK, m2, 1);\
-	block_traits[m1][SHAPE_BLOCK_BK].drop = slot(OBJ_BLOCK, m2, 1);\
-	block_traits[m1][SHAPE_BLOCK_FT].drop = slot(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_DN].drop = item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_UP].drop = item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_LF].drop = item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_RT].drop = item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_BK].drop = item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_FT].drop = item(OBJ_BLOCK, m2, 1);\
 } while (0)
 
 #define SLAB_DROPS(m1, m2) \
 do { \
-	block_traits[m1][SHAPE_SLAB_DN].drop = slot(OBJ_SLAB, m2, 1);\
-	block_traits[m1][SHAPE_SLAB_UP].drop = slot(OBJ_SLAB, m2, 1);\
-	block_traits[m1][SHAPE_SLAB_LF].drop = slot(OBJ_SLAB, m2, 1);\
-	block_traits[m1][SHAPE_SLAB_RT].drop = slot(OBJ_SLAB, m2, 1);\
-	block_traits[m1][SHAPE_SLAB_BK].drop = slot(OBJ_SLAB, m2, 1);\
-	block_traits[m1][SHAPE_SLAB_FT].drop = slot(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_DN].drop = item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_UP].drop = item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_LF].drop = item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_RT].drop = item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_BK].drop = item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_FT].drop = item(OBJ_SLAB, m2, 1);\
 } while (0)
 
 #define STAIR_DROPS(m1, m2) \
 do { \
-	block_traits[m1][SHAPE_STAIRS_DF].drop = slot(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_DL].drop = slot(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_DB].drop = slot(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_DR].drop = slot(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_UF].drop = slot(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_UL].drop = slot(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_UB].drop = slot(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_UR].drop = slot(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DF].drop = item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DL].drop = item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DB].drop = item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DR].drop = item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UF].drop = item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UL].drop = item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UB].drop = item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UR].drop = item(OBJ_STAIRS, m2, 1);\
 } while (0)
 
 #define PANE_DROPS(m1, m2) \
 do { \
-	block_traits[m1][SHAPE_PANE_X].drop = slot(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_Y].drop = slot(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_Z].drop = slot(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_DN].drop = slot(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_UP].drop = slot(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_LF].drop = slot(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_RT].drop = slot(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_BK].drop = slot(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_FT].drop = slot(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_X].drop = item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_Y].drop = item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_Z].drop = item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_DN].drop = item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_UP].drop = item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_LF].drop = item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_RT].drop = item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_BK].drop = item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_FT].drop = item(OBJ_PANE, m2, 1);\
 } while (0)
 
 

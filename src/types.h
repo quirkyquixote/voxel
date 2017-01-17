@@ -190,7 +190,7 @@ enum {
 	FACE_COUNT,
 };
 
-struct slot {
+struct item {
 	uint8_t obj;
 	uint8_t mat;
 	uint8_t num;
@@ -198,15 +198,15 @@ struct slot {
 
 struct block_traits {
 	unsigned char capacity;
-	struct slot drop;
+	struct item drop;
 	int is_workbench : 1;
 	int is_inventory : 1;
 	int is_board : 1;
 };
 
-static inline struct slot slot(int obj, int mat, int num)
+static inline struct item item(int obj, int mat, int num)
 {
-	return (struct slot){ obj, mat, num };
+	return (struct item){ obj, mat, num };
 }
 
 extern const char *obj_names[];
