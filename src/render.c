@@ -275,11 +275,11 @@ void roam_render(struct context *ctx)
 			be->entity.traits->render_func(be);
 	}
 
-	glDisable(GL_DEPTH_TEST);
-
 	list_foreach(re, &ctx->entities, entities) {
 		re->entity.traits->render_func(re);
 	}
+
+	glDisable(GL_DEPTH_TEST);
 
 	s = inventory_get(ctx->inv, ctx->tool);
 	if (s.num > 0) {
