@@ -1,6 +1,6 @@
 
-#ifndef VOXEL_CONTAINER_ENTITY_H_
-#define VOXEL_CONTAINER_ENTITY_H_
+#ifndef VOXEL_CRATE_ENTITY_H_
+#define VOXEL_CRATE_ENTITY_H_
 
 #include "block_entity.h"
 

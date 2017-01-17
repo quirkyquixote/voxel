@@ -79,7 +79,7 @@ int crate_entity_use(void *raw)
 {
 	struct crate_entity *e = raw;
 	if (e->block.entity.ctx->cur.face == FACE_UP) {
-		update_inventory(e->block.entity.ctx, e->items);
+		use_inventory(e->block.entity.ctx, e->items);
 		return 1;
 	}
 	return 0;

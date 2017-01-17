@@ -5,6 +5,7 @@ include ../config.mk
 # headers in the current directory.
 ALL_CFLAGS += -I$(shell pwd)
 
+voxel_objs += bench_entity.o
 voxel_objs += crate_entity.o
 voxel_objs += camera.o
 voxel_objs += chunk.o

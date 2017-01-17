@@ -343,7 +343,7 @@ void spill_inventory(struct context *ctx, struct v3ll p)
 	array_destroy(inv);
 }
 
-void update_inventory(struct context *ctx, struct array *items)
+void use_inventory(struct context *ctx, struct array *items)
 {
 	struct v3ll p = ctx->cur.p;
 	struct v3f q = ctx->cur.q;
@@ -432,10 +432,6 @@ void drop_block(struct context *ctx, struct v3ll p)
 	v.y += .2 * ((float)rand() / RAND_MAX);
 	v.z += .1 * ((float)rand() / RAND_MAX - .5);
 	body_set_velocity(d->roaming.body, v);
-}
-
-void use_inventory(struct context *ctx, struct array *inv)
-{
 }
 
 void use_workbench(struct context *ctx, struct array *inv)

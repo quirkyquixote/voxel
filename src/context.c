@@ -15,6 +15,7 @@
 #include "update.h"
 #include "event.h"
 
+#include "bench_entity.h"
 #include "crate_entity.h"
 
 int load_all(struct context *ctx);
@@ -39,6 +40,7 @@ int main(int argc, char *argv[])
 
 	/* Populate entity traits list */
 	list_init(&ctx->entity_traits);
+	list_append(&ctx->entity_traits, &bench_traits.list);
 	list_append(&ctx->entity_traits, &crate_traits.list);
 	ctx->chunks_per_tick = 1;
 

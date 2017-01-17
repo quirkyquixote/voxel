@@ -1,6 +1,7 @@
 
 #include "types.h"
 
+#include "bench_entity.h"
 #include "crate_entity.h"
 
 const char *obj_names[256] = {
@@ -692,5 +693,20 @@ void block_traits_init(void)
 	block_traits[MAT_WOOD5_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
 	block_traits[MAT_WOOD6_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
 	block_traits[MAT_WOOD7_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+
+	block_traits[MAT_LIMESTONE_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_SANDSTONE_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_MARBLE_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_GRANITE_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_BASALT_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_SLATE_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_CLAY_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_WOOD1_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_WOOD2_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_WOOD3_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_WOOD4_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_WOOD5_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_WOOD6_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_WOOD7_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
 }
 

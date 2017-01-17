@@ -7,6 +7,7 @@
 
 void update(void *data);
 
-void update_inventory(struct context *ctx, struct array *inventory);
+void use_inventory(struct context *ctx, struct array *inv);
+void use_workbench(struct context *ctx, struct array *inv);
 
 #endif
