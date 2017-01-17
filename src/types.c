@@ -3,6 +3,7 @@
 
 #include "bench_entity.h"
 #include "crate_entity.h"
+#include "pipe_entity.h"
 
 const char *obj_names[256] = {
 	[OBJ_BLOCK] = "block",
@@ -708,5 +709,20 @@ void block_traits_init(void)
 	block_traits[MAT_WOOD5_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
 	block_traits[MAT_WOOD6_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
 	block_traits[MAT_WOOD7_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+
+	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
 }
 

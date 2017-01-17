@@ -5,8 +5,6 @@ include ../config.mk
 # headers in the current directory.
 ALL_CFLAGS += -I$(shell pwd)
 
-voxel_objs += bench_entity.o
-voxel_objs += crate_entity.o
 voxel_objs += camera.o
 voxel_objs += chunk.o
 voxel_objs += cli.o
@@ -32,6 +30,9 @@ voxel_objs += terraform.o
 voxel_objs += tone_mapper.o
 voxel_objs += types.o
 voxel_objs += update.o
+voxel_objs += bench_entity.o
+voxel_objs += crate_entity.o
+voxel_objs += pipe_entity.o
 
 szcat_objs += sz.o
 
