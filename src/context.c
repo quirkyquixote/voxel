@@ -16,6 +16,7 @@
 #include "event.h"
 
 #include "bench_entity.h"
+#include "board_entity.h"
 #include "crate_entity.h"
 #include "pipe_entity.h"
 
@@ -44,6 +45,7 @@ int main(int argc, char *argv[])
 	list_append(&ctx->entity_traits, &bench_traits.list);
 	list_append(&ctx->entity_traits, &crate_traits.list);
 	list_append(&ctx->entity_traits, &pipe_traits.list);
+	list_append(&ctx->entity_traits, &board_traits.list);
 	ctx->chunks_per_tick = 1;
 
 	/* Setup main loop */

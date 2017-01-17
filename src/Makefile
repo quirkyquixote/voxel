@@ -31,6 +31,7 @@ voxel_objs += tone_mapper.o
 voxel_objs += types.o
 voxel_objs += update.o
 voxel_objs += bench_entity.o
+voxel_objs += board_entity.o
 voxel_objs += crate_entity.o
 voxel_objs += pipe_entity.o
 

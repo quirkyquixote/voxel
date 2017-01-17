@@ -2,6 +2,7 @@
 #include "types.h"
 
 #include "bench_entity.h"
+#include "board_entity.h"
 #include "crate_entity.h"
 #include "pipe_entity.h"
 
@@ -724,5 +725,20 @@ void block_traits_init(void)
 	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
 	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
 	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+
+	block_traits[MAT_LIMESTONE_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_SANDSTONE_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_MARBLE_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_GRANITE_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_BASALT_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_SLATE_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_CLAY_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_WOOD1_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_WOOD2_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_WOOD3_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_WOOD4_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_WOOD5_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_WOOD6_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_WOOD7_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
 }
 
