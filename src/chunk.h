@@ -41,6 +41,8 @@ enum {
 	CHUNK_UNRENDERED = 1 << 2,
 };
 
+struct context;
+
 struct shard {
 	int id;
 	int8_t y;
@@ -54,11 +56,13 @@ struct chunk {
 	int id;
 	int flags;
 	int priority;
+	struct context *ctx;
 	int64_t x, z;
 	struct shard *shards[SHARDS_PER_CHUNK];
 };
 
 struct world {
+	struct context *ctx;
 	uint64_t x, z;
 	struct chunk *chunks[CHUNKS_PER_WORLD][CHUNKS_PER_WORLD];
 };
@@ -132,7 +136,7 @@ static inline void *shard_set_data(struct shard *s, struct v3ll p, void *val)
 	s->data[p.x][p.y][p.z] = val;
 }
 
-struct chunk *chunk(int id);
+struct chunk *chunk(struct context *ctx, int id);
 void chunk_destroy(struct chunk *c);
 int chunk_load(struct chunk *c, union sz_tag *root);
 int chunk_save(struct chunk *c, union sz_tag **root);
@@ -209,7 +213,7 @@ static inline void chunk_set_data(struct chunk *c, struct v3ll p, void *val)
 	shard_set_data(c->shards[y], p, val);
 }
 
-struct world *world(void);
+struct world *world(struct context *ctx);
 void world_destroy(struct world *w);
 int world_load(struct world *w, union sz_tag *root);
 int world_save(struct world *w, union sz_tag **root);

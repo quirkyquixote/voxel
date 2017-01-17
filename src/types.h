@@ -199,6 +199,7 @@ struct item {
 struct block_traits {
 	unsigned char capacity;
 	struct item drop;
+	struct entity_traits *entity;
 	int is_workbench : 1;
 	int is_inventory : 1;
 	int is_board : 1;

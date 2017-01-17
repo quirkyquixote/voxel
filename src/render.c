@@ -3,7 +3,8 @@
 #include "render.h"
 
 #include "context.h"
-#include "drop.h"
+#include "roaming_entity.h"
+#include "block_entity.h"
 
 void render_string(struct context *ctx, char *str)
 {
@@ -259,7 +260,8 @@ void roam_render(struct context *ctx)
 {
 	struct box3ll bb;
 	struct v3ll p;
-	struct entity *e;
+	struct block_entity *be;
+	struct roaming_entity *re;
 	int m, i;
 	struct item s;
 
@@ -272,18 +274,15 @@ void roam_render(struct context *ctx)
 	bb.z1 = ceil(ctx->player->p.z + 4);
 
 	box3_foreach(p, bb) {
-		m = world_get_mat(ctx->w, p);
-		if (block_traits[m][world_get_shape(ctx->w, p)].is_inventory)
-			render_inventory(ctx, world_get_data(ctx->w, p), p);
+		be = world_get_data(ctx->w, p);
+		if (be != NULL)
+			be->entity.traits->render_func(be);
 	}
-
-	if (ctx->bench)
-		render_inventory(ctx, ctx->bench, ctx->bench_p);
 
 	glDisable(GL_DEPTH_TEST);
 
-	list_foreach(e, &ctx->entities, entities) {
-		e->traits->render_func(e);
+	list_foreach(re, &ctx->entities, entities) {
+		re->entity.traits->render_func(re);
 	}
 
 	s = inventory_get(ctx->inv, ctx->tool);

@@ -332,12 +332,12 @@ void spill_inventory(struct context *ctx, struct v3ll p)
 			q.x += (float)rand() / RAND_MAX;
 			q.y += (float)rand() / RAND_MAX;
 			q.z += (float)rand() / RAND_MAX;
-			body_set_position(d->entity.body, q);
+			body_set_position(d->roaming.body, q);
 			struct v3f v = v3f(0, 0, 0);
 			v.x += .1 * ((float)rand() / RAND_MAX - .5);
 			v.y += .2 * ((float)rand() / RAND_MAX);
 			v.z += .1 * ((float)rand() / RAND_MAX - .5);
-			body_set_velocity(d->entity.body, v);
+			body_set_velocity(d->roaming.body, v);
 		}
 	}
 	array_destroy(inv);
@@ -357,85 +357,16 @@ void drop_block(struct context *ctx, struct v3ll p)
 	q.x += (float)rand() / RAND_MAX;
 	q.y += (float)rand() / RAND_MAX;
 	q.z += (float)rand() / RAND_MAX;
-	body_set_position(d->entity.body, q);
+	body_set_position(d->roaming.body, q);
 	struct v3f v = v3f(0, 0, 0);
 	v.x += .1 * ((float)rand() / RAND_MAX - .5);
 	v.y += .2 * ((float)rand() / RAND_MAX);
 	v.z += .1 * ((float)rand() / RAND_MAX - .5);
-	body_set_velocity(d->entity.body, v);
+	body_set_velocity(d->roaming.body, v);
 }
 
 void use_inventory(struct context *ctx, struct array *inv)
 {
-	if (inv == NULL) {
-		log_warning("no inventory found");
-		return;
-	}
-	struct v3ll p = ctx->cur.p;
-	struct v3f q = ctx->cur.q;
-	int side = sqrt(inv->size);
-	int i = side * floor(q.x * side) + floor(q.z * side);
-	struct item s1 = inventory_get(ctx->inv, ctx->tool);
-	struct item s2 = inventory_get(inv, i);
-	if (ctx->act == 1) {
-		if (ctx->move.y0) {
-			if (s2.num == 0) {
-				log_info("nothing to take");
-				return;
-			}
-			int acc = inventory_add(ctx->inv, s2);
-			inventory_set_num(inv, i, s2.num - acc);
-			if (acc == 0)
-				log_info("no space to take");
-			else
-				log_info("take %s %s %d", mat_names[s1.mat],
-						obj_names[s1.obj], acc);
-		} else {
-			if (s2.num)
-				log_info("take %s %s %d", mat_names[s2.mat],
-						obj_names[s2.obj], s2.num);
-			if (s1.num)
-				log_info("left %s %s %d", mat_names[s1.mat],
-						obj_names[s1.obj], s1.num);
-			inventory_set(inv, i, s1);
-			inventory_set(ctx->inv, ctx->tool, s2);
-		}
-	} else if (ctx->use == 1) {
-		if (ctx->move.y0) {
-			if (s2.num == 0) {
-				log_info("nothing to take");
-				return;
-			}
-			int acc =
-				inventory_add(ctx->inv, item(s2.obj, s2.mat, 1));
-			inventory_set_num(inv, i, s2.num - acc);
-			if (acc == 0)
-				log_info("no space to take");
-			else
-				log_info("take %s %s 1", mat_names[s1.mat],
-						obj_names[s1.obj], acc);
-		} else {
-			if (s1.num == 0) {
-				log_info("nothing to leave");
-				return;
-			}
-			if (s2.num >= 64) {
-				log_info("no space to leave");
-				return;
-			}
-			if (s2.num == 0) {
-				inventory_set_obj(inv, i, s1.obj);
-				inventory_set_mat(inv, i, s1.mat);
-			} else if (s1.obj != s2.obj || s1.mat != s2.mat) {
-				log_info("not the same object");
-				return;
-			}
-			inventory_set_num(inv, i, s2.num + 1);
-			inventory_set_num(ctx->inv, ctx->tool, s1.num - 1);
-			log_info("left %s %s 1", mat_names[s1.mat],
-					obj_names[s1.obj]);
-		}
-	}
 }
 
 void use_workbench(struct context *ctx, struct array *inv)
@@ -574,28 +505,10 @@ void update_player(struct context *ctx)
 	struct v3ll p = ctx->cur.p;
 	int s = world_get_shape(ctx->w, p);
 	int m = world_get_mat(ctx->w, p);
+	struct entity *e = world_get_data(ctx->w, p);
 
-	if (ctx->bench != NULL && v3_dist(ctx->bench_p, ctx->player->p) > 4) {
-		array_destroy(ctx->bench);
-		ctx->bench = NULL;
-	}
-
-	if (ctx->cur.face == FACE_UP) {
-		if (ctx->bench != NULL && v3_eql(ctx->cur.p, ctx->bench_p)) {
-			use_inventory(ctx, ctx->bench);
-			return;
-		}
-		if (block_traits[m][s].is_inventory) {
-			use_inventory(ctx, world_get_data(ctx->w, p));
-			return;
-		}
-	}
-	if (ctx->bench != NULL && v3_eql(ctx->cur.p, ctx->bench_p)) {
-		use_workbench(ctx, ctx->bench);
-		return;
-	}
-	if (block_traits[m][s].is_workbench) {
-		use_workbench(ctx, world_get_data(ctx->w, p));
+	if (e != NULL) {
+		e->traits->use_func(e, ctx);
 		return;
 	}
 	if (ctx->act == 1) {
@@ -748,14 +661,14 @@ void update_chunks(struct context *ctx)
 
 void update_entities(struct context *ctx)
 {
-	struct entity *e;
+	struct roaming_entity *re;
 
-	list_foreach(e, &ctx->entities, entities) {
-		e->traits->update_func(e);
+	list_foreach(re, &ctx->entities, entities) {
+		re->entity.traits->update_func(re);
 	}
-	list_foreach_safe(e, &ctx->entities, entities) {
-		if (e->die)
-			e->traits->destroy_func(e);
+	list_foreach_safe(re, &ctx->entities, entities) {
+		if (re->die)
+			re->entity.traits->destroy_func(re);
 	}
 }
 

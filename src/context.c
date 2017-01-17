@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	ctx = calloc(1, sizeof(*ctx));
 	ctx->dir = "foo";
 	block_traits_init();
-	ctx->w = world();
+	ctx->w = world(ctx);
 	ctx->prof_mgr = profile_manager();
 	ctx->entity_traits = array(sizeof(struct entity_traits *));
 	ctx->chunks_per_tick = 1;

@@ -13,14 +13,12 @@ struct entity_traits {
 	void (* destroy_func)(void *);
 	int (* save_func)(void *, union sz_tag *);
 	int (* load_func)(void *, char *, union sz_tag *);
-
+	void (* use_func)(void *, struct context *ctx);
 };
 
 struct entity {
 	const struct entity_traits *traits;
-	struct list entities;
-	struct body *body;
-	int die;
+	struct context *ctx;
 };
 
 static inline void *entity(struct context *ctx, struct entity_traits *traits)
@@ -49,6 +47,7 @@ static inline void *entity_load(struct context *ctx, union sz_tag *root)
 	struct entity *e;
 	char *key;
 	union sz_tag *val;
+	e = NULL;
 	sz_dict_foreach(key, val, root) {
 		if (strcmp(key, "name") == 0) {
 			array_foreach(traits, ctx->entity_traits) {

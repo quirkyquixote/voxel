@@ -25,10 +25,10 @@ void drop_callback(struct body *b, void *udata, struct v3ll p, int face)
 	if (face != FACE_UP)
 		return;
 	if (d->item.num) {
-		int s = world_get_shape(d->ctx->w, p);
-		int m = world_get_mat(d->ctx->w, p);
+		int s = world_get_shape(d->roaming.entity.ctx->w, p);
+		int m = world_get_mat(d->roaming.entity.ctx->w, p);
 		if (block_traits[m][s].capacity > 0) {
-			struct array *inv = world_get_data(d->ctx->w, p);
+			struct array *inv = world_get_data(d->roaming.entity.ctx->w, p);
 			if (inv == NULL)
 				log_warning("expected inventory");
 			else
@@ -49,20 +49,20 @@ struct drop *drop(struct context *ctx, struct item item)
 void *drop_create(struct context *ctx)
 {
 	struct drop *d = calloc(1, sizeof(*d));
-	d->entity.traits = &drop_traits;
-	list_link(&ctx->entities, &d->entity.entities);
-	d->entity.body = body(ctx->space);
-	body_set_size(d->entity.body, v2f(.0625, .0625));
-	body_set_callback(d->entity.body, drop_callback, d);
-	d->ctx = ctx;
+	d->roaming.entity.traits = &drop_traits;
+	d->roaming.body = body(ctx->space);
+	list_link(&ctx->entities, &d->roaming.entities);
+	body_set_size(d->roaming.body, v2f(.0625, .0625));
+	body_set_callback(d->roaming.body, drop_callback, d);
+	d->roaming.entity.ctx = ctx;
 	return d;
 }
 
 void drop_destroy(void *data)
 {
 	struct drop *d = data;
-	list_unlink(&d->entity.entities);
-	body_destroy(d->entity.body);
+	list_unlink(&d->roaming.entities);
+	body_destroy(d->roaming.body);
 	free(d);
 }
 
@@ -70,10 +70,10 @@ void drop_update(void *data)
 {
 	struct drop *d = data;
 	++d->ticks;
-	if (d->ticks > 10 && box3_overlap(box3_grow(d->entity.body->bb, 1), d->ctx->player->bb))
-		d->item.num -= inventory_add(d->ctx->inv, d->item);
+	if (d->ticks > 10 && box3_overlap(box3_grow(d->roaming.body->bb, 1), d->roaming.entity.ctx->player->bb))
+		d->item.num -= inventory_add(d->roaming.entity.ctx->inv, d->item);
 	if (d->ticks > 1800 || d->item.num == 0)
-		d->entity.die = 1;
+		d->roaming.die = 1;
 }
 
 void drop_render(void *data)
@@ -81,9 +81,9 @@ void drop_render(void *data)
 	struct drop *d = data;
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glTranslatef(d->entity.body->p.x, d->entity.body->p.y, d->entity.body->p.z);
+	glTranslatef(d->roaming.body->p.x, d->roaming.body->p.y, d->roaming.body->p.z);
 	glScalef(.25, .25, .25);
-	render_obj(d->ctx, d->item.obj, d->item.mat, 255);
+	render_obj(d->roaming.entity.ctx, d->item.obj, d->item.mat, 255);
 	glPopMatrix();
 }
 

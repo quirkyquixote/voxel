@@ -8,6 +8,7 @@
 #include "lighting.h"
 #include "inventory.h"
 #include "context.h"
+#include "block_entity.h"
 
 struct shard *shard(int id, int y)
 {
@@ -52,11 +53,12 @@ int shard_save(struct shard *s, union sz_tag **root)
 	return 0;
 }
 
-struct chunk *chunk(int id)
+struct chunk *chunk(struct context *ctx, int id)
 {
 	int i;
 	struct chunk *c = calloc(1, sizeof(*c));
 	c->id = id;
+	c->ctx = ctx;
 	for (i = 0; i < SHARDS_PER_CHUNK; ++i)
 		c->shards[i] = shard(id * SHARDS_PER_CHUNK + i, i);
 	c->flags = CHUNK_UNLOADED;
@@ -69,45 +71,6 @@ void chunk_destroy(struct chunk *c)
 	for (i = 0; i < SHARDS_PER_CHUNK; ++i)
 		shard_destroy(c->shards[i]);
 	free(c);
-}
-
-int inventory_load(struct array *i, union sz_tag *root)
-{
-	char *key;
-	union sz_tag *val;
-	sz_dict_foreach(key, val, root) {
-		if (strcmp(key, "size") == 0) {
-			array_resize(i, val->i8.data);
-		} else if (strcmp(key, "items") == 0) {
-			memcpy(i->data, val->raw.data, val->raw.size);
-		} else {
-			log_error("bad tag: %s", key);
-		}
-	}
-	return 0;
-}
-
-int entity_load(struct chunk *c, union sz_tag *root)
-{
-	char *key;
-	union sz_tag *val;
-	struct v3ll p;
-	sz_dict_foreach(key, val, root) {
-		if (strcmp(key, "x") == 0) {
-			p.x = val->i64.data;
-		} else if (strcmp(key, "y") == 0) {
-			p.y = val->i64.data;
-		} else if (strcmp(key, "z") == 0) {
-			p.z = val->i64.data;
-		} else if (strcmp(key, "items") == 0) {
-			struct array *inv = inventory(0);
-			inventory_load(inv, val);
-			chunk_set_data(c, p, inv);
-		} else {
-			log_error("bad tag: %s", key);
-		}
-	}
-	return 0;
 }
 
 int chunk_load(struct chunk *c, union sz_tag *root)
@@ -133,47 +96,17 @@ int chunk_load(struct chunk *c, union sz_tag *root)
 			union sz_tag *iter;
 			i = 0;
 			sz_list_foreach(iter, val) {
-				if (entity_load(c, iter) != 0)
+				struct block_entity *e;
+				e = entity_load(c->ctx, iter);
+				if (e == NULL)
 					return -1;
-				++i;
+				chunk_set_data(c, e->p, e);
 			}
 		} else {
 			log_error("bad tag: %s", key);
 		}
 	}
 	c->flags = CHUNK_UNRENDERED;
-	return 0;
-}
-
-int inventory_save(struct array *i, union sz_tag **root)
-{
-	*root = sz_dict();
-	sz_dict_add(*root, "size", sz_i8(i->size));
-	sz_dict_add(*root, "items", sz_raw(i->data, i->elem_size * i->size));
-	return 0;
-}
-
-int entity_save(struct chunk *c, struct v3ll p, union sz_tag **root)
-{
-	int s, m;
-	struct array *inv;
-	union sz_tag *tag;
-	s = chunk_get_shape(c, p);
-	m = chunk_get_mat(c, p);
-	if (block_traits[m][s].capacity > 0) {
-		inv = chunk_get_data(c, p);
-		if (inv == NULL) {
-			log_warning("no inventory found");
-			return 0;
-		}
-		*root = sz_dict();
-		sz_dict_add(*root, "x", sz_i64(p.x));
-		sz_dict_add(*root, "y", sz_i64(p.y));
-		sz_dict_add(*root, "z", sz_i64(p.z));
-		inventory_save(inv, &tag);
-		sz_dict_add(*root, "items", tag);
-		return 1;
-	}
 	return 0;
 }
 
@@ -195,23 +128,28 @@ int chunk_save(struct chunk *c, union sz_tag **root)
 	sz_dict_add(*root, "shards", shards);
 	entities = sz_list();
 	box3_foreach(p, bb) {
+		struct block_entity *e;
 		union sz_tag *tag;
-		if (entity_save(c, p, &tag))
+		e = chunk_get_data(c, p);
+		if (e != NULL) {
+			tag = entity_save(e);
 			sz_list_add(entities, tag);
+		}
 	}
 	sz_dict_add(*root, "entities", entities);
 	return 0;
 }
 
-struct world *world(void)
+struct world *world(struct context *ctx)
 {
 	struct world *w;
 	int x, z, id;
 	w = calloc(1, sizeof(*w));
 	id = 0;
+	w->ctx = ctx;
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x)
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z)
-			w->chunks[x][z] = chunk(id++);
+			w->chunks[x][z] = chunk(ctx, id++);
 	return w;
 }
 
@@ -253,8 +191,8 @@ void world_set(struct world *w, struct v3ll p, int shape, int mat)
 	struct box3ll bb;
 	world_set_shape(w, p, shape);
 	world_set_mat(w, p, mat);
-	if (block_traits[mat][shape].capacity > 0)
-		world_set_data(w, p, inventory(block_traits[mat][shape].capacity));
+	if (block_traits[mat][shape].entity != NULL)
+		world_set_data(w, p, entity(w->ctx, block_traits[mat][shape].entity));
 	update_lighting(w, box3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
 	world_set_flags(w, bb, CHUNK_UNRENDERED);
 }
