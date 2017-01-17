@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "lighting.h"
 #include "render.h"
@@ -30,6 +31,7 @@ int save_world(struct world *w, const char *dir);
 int load_chunk(struct chunk *c, const char *dir);
 int save_chunk(struct chunk *c, const char *dir);
 
+int mkpath(const char *path, mode_t mode);
 
 int main(int argc, char *argv[])
 {
@@ -100,32 +102,32 @@ int main(int argc, char *argv[])
 	ctx->obj_vertex_buffer = vertex_buffer(1);
 
 	{
-	struct array *a = array(sizeof(struct vertex));
-	for (int i = 0; i < MAT_COUNT; ++i) {
-		struct v2f lt = v2f(1, 1);
-		struct v2f mt[6];
-		int tilted[6];
-		struct v3f p;
-		texcoord_up(i, mt, tilted);
-		p = v3f(0, 0, 0);
-		vertices_add(a, vertices_face_dn, 6, p, lt, mt, tilted);
-		vertices_add(a, vertices_face_lf, 6, p, lt, mt, tilted);
-		vertices_add(a, vertices_face_bk, 6, p, lt, mt, tilted);
-		vertices_add(a, vertices_face_up, 6, p, lt, mt, tilted);
-		vertices_add(a, vertices_face_rt, 6, p, lt, mt, tilted);
-		vertices_add(a, vertices_face_ft, 6, p, lt, mt, tilted);
+		struct array *a = array(sizeof(struct vertex));
+		for (int i = 0; i < MAT_COUNT; ++i) {
+			struct v2f lt = v2f(1, 1);
+			struct v2f mt[6];
+			int tilted[6];
+			struct v3f p;
+			texcoord_up(i, mt, tilted);
+			p = v3f(0, 0, 0);
+			vertices_add(a, vertices_face_dn, 6, p, lt, mt, tilted);
+			vertices_add(a, vertices_face_lf, 6, p, lt, mt, tilted);
+			vertices_add(a, vertices_face_bk, 6, p, lt, mt, tilted);
+			vertices_add(a, vertices_face_up, 6, p, lt, mt, tilted);
+			vertices_add(a, vertices_face_rt, 6, p, lt, mt, tilted);
+			vertices_add(a, vertices_face_ft, 6, p, lt, mt, tilted);
 
-		vertices_add(a, vertices_face_dn, 6, p, lt, mt, tilted);
-		vertices_add(a, vertices_slab_dn, 30, p, lt, mt, tilted);
+			vertices_add(a, vertices_face_dn, 6, p, lt, mt, tilted);
+			vertices_add(a, vertices_slab_dn, 30, p, lt, mt, tilted);
 
-		vertices_add(a, vertices_face_dn, 6, p, lt, mt, tilted);
-		vertices_add(a, vertices_face_lf, 6, p, lt, mt, tilted);
-		vertices_add(a, vertices_stairs_dl, 42, p, lt, mt, tilted);
+			vertices_add(a, vertices_face_dn, 6, p, lt, mt, tilted);
+			vertices_add(a, vertices_face_lf, 6, p, lt, mt, tilted);
+			vertices_add(a, vertices_stairs_dl, 42, p, lt, mt, tilted);
 
-		vertices_add(a, vertices_pane_z, 36, p, lt, mt, tilted);
-	}
-	vertex_buffer_update(ctx->obj_vertex_buffer, 0, a->data, a->size);
-	array_destroy(a);
+			vertices_add(a, vertices_pane_z, 36, p, lt, mt, tilted);
+		}
+		vertex_buffer_update(ctx->obj_vertex_buffer, 0, a->data, a->size);
+		array_destroy(a);
 	}
 
 	ctx->tone_mapper = tone_mapper(1. / 30., 16);
@@ -157,6 +159,7 @@ int load_all(struct context *ctx)
 	struct v3f p;
 	int from_scratch;
 
+	mkpath(ctx->dir, 0700);
 	from_scratch = load_world(ctx->w, ctx->dir);
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
@@ -169,9 +172,9 @@ int load_all(struct context *ctx)
 			}
 		}
 	}
-/*
-	if (from_scratch)
-		update_lighting(ctx->w, box3ll(0, 0, 0, WORLD_W, WORLD_H, WORLD_D), NULL);*/
+	/*
+	   if (from_scratch)
+	   update_lighting(ctx->w, box3ll(0, 0, 0, WORLD_W, WORLD_H, WORLD_D), NULL);*/
 	p.x = ctx->w->x + CHUNK_W * CHUNKS_PER_WORLD / 2;
 	p.y = CHUNK_H;
 	p.z = ctx->w->z + CHUNK_W * CHUNKS_PER_WORLD / 2;
@@ -292,3 +295,50 @@ unsigned long long max_id(void)
 	return id;
 }
 
+static int do_mkdir(const char *path, mode_t mode)
+{
+	struct stat     st;
+	int             status = 0;
+
+	if (stat(path, &st) != 0) {
+		/* Directory does not exist. EEXIST for race condition */
+		if (mkdir(path, mode) != 0 && errno != EEXIST)
+			status = -1;
+	}
+	else if (!S_ISDIR(st.st_mode)) {
+		errno = ENOTDIR;
+		status = -1;
+	}
+
+	return status;
+}
+
+/**
+ * ** mkpath - ensure all directories in path exist
+ * ** Algorithm takes the pessimistic view and works top-down to ensure
+ * ** each directory in path exists, rather than optimistically creating
+ * ** the last element and working backwards.
+ * */
+int mkpath(const char *path, mode_t mode)
+{
+	char           *pp;
+	char           *sp;
+	int             status;
+	char           *copypath = strdup(path);
+
+	status = 0;
+	pp = copypath;
+	while (status == 0 && (sp = strchr(pp, '/')) != 0) {
+		if (sp != pp) {
+			/* Neither root nor double slash in path */
+			*sp = '\0';
+			status = do_mkdir(copypath, mode);
+			*sp = '/';
+		}
+		pp = sp + 1;
+	}
+	if (status == 0)
+		status = do_mkdir(path, mode);
+	free(copypath);
+	return status;
+}
