@@ -165,6 +165,12 @@ const char *shape_names[256] = {
 	[SHAPE_STAIRS_UL] = "stairs_ul",
 	[SHAPE_STAIRS_UB] = "stairs_ub",
 	[SHAPE_STAIRS_UR] = "stairs_ur",
+	[SHAPE_PANE_UP] = "pane_up",
+	[SHAPE_PANE_DN] = "pane_dn",
+	[SHAPE_PANE_LF] = "pane_lf",
+	[SHAPE_PANE_RT] = "pane_rt",
+	[SHAPE_PANE_BK] = "pane_bk",
+	[SHAPE_PANE_FT] = "pane_ft",
 };
 
 const char *face_names[] = {
@@ -608,6 +614,12 @@ do { \
 	block_traits[m1][SHAPE_PANE_X].drop = slot(OBJ_PANE, m2, 1);\
 	block_traits[m1][SHAPE_PANE_Y].drop = slot(OBJ_PANE, m2, 1);\
 	block_traits[m1][SHAPE_PANE_Z].drop = slot(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_DN].drop = slot(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_UP].drop = slot(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_LF].drop = slot(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_RT].drop = slot(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_BK].drop = slot(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_FT].drop = slot(OBJ_PANE, m2, 1);\
 } while (0)
 
 

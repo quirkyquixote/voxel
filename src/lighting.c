@@ -12,6 +12,7 @@ static const int opaque_shape[] = {
 	1, 1, 1, 1, 1, 1,
 	0, 0, 0,
 	1, 1, 1, 1, 1, 1, 1, 1,
+	0, 0, 0, 0, 0, 0
 };
 
 struct lighting {

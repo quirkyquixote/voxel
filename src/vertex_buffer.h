@@ -63,6 +63,12 @@ extern struct vertex_desc vertices_stairs_uf[];
 extern struct vertex_desc vertices_pane_x[];
 extern struct vertex_desc vertices_pane_y[];
 extern struct vertex_desc vertices_pane_z[];
+extern struct vertex_desc vertices_pane_dn[];
+extern struct vertex_desc vertices_pane_up[];
+extern struct vertex_desc vertices_pane_lf[];
+extern struct vertex_desc vertices_pane_rt[];
+extern struct vertex_desc vertices_pane_bk[];
+extern struct vertex_desc vertices_pane_ft[];
 
 struct vertex_buffer *vertex_buffer(int nbufs);
 void vertex_buffer_destroy(struct vertex_buffer *r);

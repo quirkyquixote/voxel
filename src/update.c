@@ -254,6 +254,36 @@ void update_cell(struct context *ctx, struct array *buf, int64_t x, int64_t y,
 		texcoord_up(world_get_mat(ctx->w, v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
 		vertices_add(buf, vertices_pane_z, 36, v3f(x, y, z), lt, mt, tilted);
+	} else if (s == SHAPE_PANE_DN) {
+		texcoord_up(world_get_mat(ctx->w, v3ll(x, y, z)), mt, tilted);
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
+		vertices_add(buf, vertices_pane_dn, 30, v3f(x, y, z), lt, mt, tilted);
+		update_face_dn(ctx, buf, x, y, z, mt, tilted);
+	} else if (s == SHAPE_PANE_UP) {
+		texcoord_up(world_get_mat(ctx->w, v3ll(x, y, z)), mt, tilted);
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
+		vertices_add(buf, vertices_pane_up, 30, v3f(x, y, z), lt, mt, tilted);
+		update_face_up(ctx, buf, x, y, z, mt, tilted);
+	} else if (s == SHAPE_PANE_LF) {
+		texcoord_up(world_get_mat(ctx->w, v3ll(x, y, z)), mt, tilted);
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
+		vertices_add(buf, vertices_pane_lf, 30, v3f(x, y, z), lt, mt, tilted);
+		update_face_lf(ctx, buf, x, y, z, mt, tilted);
+	} else if (s == SHAPE_PANE_RT) {
+		texcoord_up(world_get_mat(ctx->w, v3ll(x, y, z)), mt, tilted);
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
+		vertices_add(buf, vertices_pane_rt, 30, v3f(x, y, z), lt, mt, tilted);
+		update_face_rt(ctx, buf, x, y, z, mt, tilted);
+	} else if (s == SHAPE_PANE_BK) {
+		texcoord_up(world_get_mat(ctx->w, v3ll(x, y, z)), mt, tilted);
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
+		vertices_add(buf, vertices_pane_bk, 30, v3f(x, y, z), lt, mt, tilted);
+		update_face_bk(ctx, buf, x, y, z, mt, tilted);
+	} else if (s == SHAPE_PANE_FT) {
+		texcoord_up(world_get_mat(ctx->w, v3ll(x, y, z)), mt, tilted);
+		lt = texcoord_from_light(world_get_light(ctx->w, v3ll(x, y, z)));
+		vertices_add(buf, vertices_pane_ft, 30, v3f(x, y, z), lt, mt, tilted);
+		update_face_ft(ctx, buf, x, y, z, mt, tilted);
 	}
 }
 
@@ -514,10 +544,25 @@ void use_tool(struct context *ctx)
 					SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, s.mat);
 		}
 	} else if (s.obj == OBJ_PANE) {
-		if (ctx->roty & 1)
-			world_set(ctx->w, p, SHAPE_PANE_X, s.mat);
-		else
-			world_set(ctx->w, p, SHAPE_PANE_Z, s.mat);
+		if (ctx->move.y0) {
+			if (f == FACE_UP)
+				world_set(ctx->w, p, SHAPE_PANE_DN, s.mat);
+			else if (f == FACE_DN)
+				world_set(ctx->w, p, SHAPE_PANE_UP, s.mat);
+			else if (f == FACE_LF)
+				world_set(ctx->w, p, SHAPE_PANE_RT, s.mat);
+			else if (f == FACE_RT)
+				world_set(ctx->w, p, SHAPE_PANE_LF, s.mat);
+			else if (f == FACE_BK)
+				world_set(ctx->w, p, SHAPE_PANE_FT, s.mat);
+			else if (f == FACE_FT)
+				world_set(ctx->w, p, SHAPE_PANE_BK, s.mat);
+		} else {
+			if (ctx->roty & 1)
+				world_set(ctx->w, p, SHAPE_PANE_X, s.mat);
+			else
+				world_set(ctx->w, p, SHAPE_PANE_Z, s.mat);
+		}
 	} else if (s.obj == OBJ_FLUID) {
 		flowsim_add(ctx->flowsim, p, 1);
 	}
