@@ -3,11 +3,12 @@
 
 #include "render.h"
 
+void *drop_create(struct context *ctx);
 void drop_destroy(void *data);
 void drop_update(void *data);
 void drop_render(void *data);
 int drop_save(void *data, union sz_tag *root);
-int drop_load(void *data, union sz_tag *root);
+int drop_load(void *data, char *key, union sz_tag *val);
 
 static const struct entity_traits drop_traits = {
 	.name = "drop",
@@ -40,6 +41,13 @@ void drop_callback(struct body *b, void *udata, struct v3ll p, int face)
 
 struct drop *drop(struct context *ctx, struct item item)
 {
+	struct drop *d = drop_create(ctx);
+	d->item = item;
+	return d;
+}
+
+void *drop_create(struct context *ctx)
+{
 	struct drop *d = calloc(1, sizeof(*d));
 	d->entity.traits = &drop_traits;
 	list_link(&ctx->entities, &d->entity.entities);
@@ -47,7 +55,6 @@ struct drop *drop(struct context *ctx, struct item item)
 	body_set_size(d->entity.body, v2f(.0625, .0625));
 	body_set_callback(d->entity.body, drop_callback, d);
 	d->ctx = ctx;
-	d->item = item;
 	return d;
 }
 
@@ -89,7 +96,7 @@ int drop_save(void *data, union sz_tag *root)
 	return 0;
 }
 
-int drop_load(void *data, union sz_tag *root)
+int drop_load(void *data, char *key, union sz_tag *val)
 {/*
 	char *key;
 	union sz_tag *val;

@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 	block_traits_init();
 	ctx->w = world();
 	ctx->prof_mgr = profile_manager();
+	ctx->entity_traits = array(sizeof(struct entity_traits *));
 	ctx->chunks_per_tick = 1;
 
 	/* Setup main loop */

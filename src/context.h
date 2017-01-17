@@ -18,7 +18,6 @@
 #include "inventory.h"
 #include "cli.h"
 #include "tcl_commands.h"
-#include "entity.h"
 
 enum {
 	MODE_ROAM,
@@ -48,6 +47,7 @@ struct context {
 	struct array *bench;
 	struct v3ll bench_p;
 	struct list entities;
+	struct array *entity_traits;
 	char mode;
 	char act;
 	char use;
