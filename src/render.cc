@@ -1,19 +1,17 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
  
-#include "render.h"
-
 #include "context.h"
 #include "roaming_entity.h"
 #include "block_entity.h"
 
-void render_string(Context *ctx, const char *str)
+void Context::render_string(const char *str)
 {
 	GLfloat u0, v0, u1, v1;
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, ctx->tex_font);
+	glBindTexture(GL_TEXTURE_2D, tex_font);
 	while (*str) {
 		u0 = (*str % 16) / 16.;
 		v0 = (*str / 16) / 16.;
@@ -52,7 +50,7 @@ void render_flowsim(Context *ctx)
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4f(1, 0, 0, .5);
 	glBegin(GL_TRIANGLES);
-	list_foreach(v, &ctx->flowsim->volumes, volumes) {
+	list_foreach(v, &flowsim->volumes, volumes) {
 		list_foreach(l, &v->layers, layers) {
 			if (!l->is_top) {
 				array_foreach(p, l->cells) {
@@ -70,7 +68,7 @@ void render_flowsim(Context *ctx)
 	glEnd();
 	glColor4f(0, 0, 1, .5);
 	glBegin(GL_TRIANGLES);
-	list_foreach(v, &ctx->flowsim->volumes, volumes) {
+	list_foreach(v, &flowsim->volumes, volumes) {
 		list_foreach(l, &v->layers, layers) {
 			if (l->is_top) {
 				array_foreach(p, l->cells) {
@@ -89,16 +87,16 @@ void render_flowsim(Context *ctx)
 	glDisable(GL_BLEND);
 }
 */
-void render_cursor(Context *ctx)
+void Context::render_cursor()
 {
-	if (ctx->cur.face == -1)
+	if (cur.face == -1)
 		return;
 
-	GLfloat x = ctx->cur.p.x;
-	GLfloat y = ctx->cur.p.y;
-	GLfloat z = ctx->cur.p.z;
+	GLfloat x = cur.p.x;
+	GLfloat y = cur.p.y;
+	GLfloat z = cur.p.z;
 
-	if (ctx->cur.face == FACE_UP && ctx->w->get_data(ctx->cur.p) != nullptr)
+	if (cur.face == FACE_UP && w->get_data(cur.p) != nullptr)
 		return;
 
 	glMatrixMode(GL_MODELVIEW);
@@ -152,7 +150,7 @@ void render_cursor(Context *ctx)
 }
 
 
-void render_obj(Context *ctx, int obj, int mat, GLfloat alpha)
+void Context::render_item(int obj, int mat, GLfloat alpha)
 {
 	//glEnable(GL_TEXTURE_2D);
 	//glTexCoord2f(0.5, 0.5);
@@ -160,47 +158,47 @@ void render_obj(Context *ctx, int obj, int mat, GLfloat alpha)
 	if (mat >= MAT_COUNT)
 		mat = 0;
 
-	ctx->shader->enable();
+	shader->enable();
 
 	glActiveTexture(GL_TEXTURE0);
-	int tl0 = ctx->shader->get_uniform_location("Texture0");
+	int tl0 = shader->get_uniform_location("Texture0");
 	glUniform1i(tl0, 0);
-	glBindTexture(GL_TEXTURE_2D, ctx->tone_mapper->get_texture());
+	glBindTexture(GL_TEXTURE_2D, tone_mapper->get_texture());
 
 	glActiveTexture(GL_TEXTURE1);
-	int tl1 = ctx->shader->get_uniform_location("Texture1");
+	int tl1 = shader->get_uniform_location("Texture1");
 	glUniform1i(tl1, 1);
-	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
+	glBindTexture(GL_TEXTURE_2D, tex_terrain);
 
 	glActiveTexture(GL_TEXTURE0);
 	if (obj == OBJ_BLOCK) {
-		ctx->obj_vertex_buffer->enable();
-		ctx->obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 0, 36);
-		ctx->obj_vertex_buffer->disable();
+		obj_vertex_buffer->enable();
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 0, 36);
+		obj_vertex_buffer->disable();
 	} else if (obj == OBJ_SLAB) {
-		ctx->obj_vertex_buffer->enable();
-		ctx->obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
-		ctx->obj_vertex_buffer->disable();
+		obj_vertex_buffer->enable();
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		obj_vertex_buffer->disable();
 	} else if (obj == OBJ_STAIRS) {
-		ctx->obj_vertex_buffer->enable();
-		ctx->obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 72, 54);
-		ctx->obj_vertex_buffer->disable();
+		obj_vertex_buffer->enable();
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 72, 54);
+		obj_vertex_buffer->disable();
 	} else if (obj == OBJ_PANE) {
-		ctx->obj_vertex_buffer->enable();
-		ctx->obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 126, 36);
-		ctx->obj_vertex_buffer->disable();
+		obj_vertex_buffer->enable();
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 126, 36);
+		obj_vertex_buffer->disable();
 	}
-	ctx->shader->disable();
+	shader->disable();
 	//glDisable(GL_TEXTURE_2D);
 }
 
-void render_inventory(Context *ctx, const std::vector<Item> &inv, const v3ll &p)
+void Context::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 {
 	int i, x, z;
 	int side = sqrt(inv.size());
 	Item s;
 
-	GLfloat d = dist(ctx->player->get_p(), v3f(p));
+	GLfloat d = dist(player->get_p(), v3f(p));
 	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -229,7 +227,7 @@ void render_inventory(Context *ctx, const std::vector<Item> &inv, const v3ll &p)
 				glPushMatrix();
 				glTranslatef(.25 / side, 0, .25 / side);
 				glScalef(.5 / side, .5 / side, .5 / side);
-				render_obj(ctx, s.obj, s.mat, alpha);
+				render_item(s.obj, s.mat, alpha);
 				glPopMatrix();
 			}
 			if (s.num > 1) {
@@ -237,12 +235,12 @@ void render_inventory(Context *ctx, const std::vector<Item> &inv, const v3ll &p)
 				glMatrixMode(GL_MODELVIEW);
 				glPushMatrix();
 				glTranslatef(.5 / side, .5 / side, .5 / side);
-				glRotatef(180.0 * ctx->cam->get_r().y / M_PI, 0, -1, 0);
-				glRotatef(180.0 * ctx->cam->get_r().x / M_PI, 1, 0, 0);
+				glRotatef(180.0 * cam->get_r().y / M_PI, 0, -1, 0);
+				glRotatef(180.0 * cam->get_r().x / M_PI, 1, 0, 0);
 				glScalef(.05, .05, .05);
 				char buf[3];
 				snprintf(buf, sizeof(buf), "%02d", s.num);
-				render_string(ctx, buf);
+				render_string(buf);
 				glPopMatrix();
 			}
 			glPopMatrix();
@@ -252,14 +250,10 @@ void render_inventory(Context *ctx, const std::vector<Item> &inv, const v3ll &p)
 	glDisable(GL_BLEND);
 }
 
-void roam_render(Context *ctx)
+void Context::render_block_entities()
 {
+	v3f p = player->get_p();
 	box3ll bb;
-	int m, i;
-	Item s;
-
-	render_cursor(ctx);
-	v3f p = ctx->player->get_p();
 	bb.x0 = floor(p.x - 4);
 	bb.y0 = floor(p.y - 4);
 	bb.z0 = floor(p.z - 4);
@@ -268,40 +262,49 @@ void roam_render(Context *ctx)
 	bb.z1 = ceil(p.z + 4);
 
 	for (auto &p : bb) {
-		Entity *e = ctx->w->get_data(p);
+		Entity *e = w->get_data(p);
 		if (e != NULL)
 			e->render();
 	}
+}
 
-	for (auto &e : ctx->entities)
+void Context::render_roaming_entities()
+{
+	for (auto &e : entities)
 		e->render();
+}
 
+void Context::render_held_item()
+{
 	glDisable(GL_DEPTH_TEST);
 
-	s = ctx->inv[ctx->tool];
+	Item s = inv[tool];
 	if (s.num > 0) {
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		v3f p = ctx->cam->get_p();
+		v3f p = cam->get_p();
 		glTranslatef(p.x, p.y, p.z);
-		glRotatef(180.0 * ctx->cam->get_r().y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * ctx->cam->get_r().x / M_PI, 1, 0, 0);
+		glRotatef(180.0 * cam->get_r().y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * cam->get_r().x / M_PI, 1, 0, 0);
 		glTranslatef(.4, -.4, -.8);
 		glScalef(.125, .125, .125);
-		render_obj(ctx, s.obj, s.mat, 255);
+		render_item(s.obj, s.mat, 255);
 		glPopMatrix();
 	}
+}
 
-	for (i = 0; i < 9; ++i) {
+void Context::render_hotbar()
+{
+	for (int i = 0; i < 9; ++i) {
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		v3f p = ctx->cam->get_p();
+		v3f p = cam->get_p();
 		glTranslatef(p.x, p.y, p.z);
-		glRotatef(180.0 * ctx->cam->get_r().y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * ctx->cam->get_r().x / M_PI, 1, 0, 0);
+		glRotatef(180.0 * cam->get_r().y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * cam->get_r().x / M_PI, 1, 0, 0);
 		glTranslatef(i * .06 - .30, -.4, -.8);
 		glScalef(.03125, .03125, .03125);
-		if (i == ctx->tool)
+		if (i == tool)
 			glColor3ub(255, 255, 255);
 		else
 			glColor3ub(64, 64, 64);
@@ -311,32 +314,35 @@ void roam_render(Context *ctx)
 		glVertex3f(1.25, 0, 1.25);
 		glVertex3f(1.25, 0, -.25);
 		glEnd();
-		s = ctx->inv[i];
+		Item s = inv[i];
 		if (s.num > 0)
-			render_obj(ctx, s.obj, s.mat, 255);
+			render_item(s.obj, s.mat, 255);
 		if (s.num > 1) {
 			glEnable(GL_BLEND);
 			glColor3f(1, 1, 1);
 			glTranslatef(0, -1.5, 0);
 			char buf[3];
 			snprintf(buf, sizeof(buf), "%02d", s.num);
-			render_string(ctx, buf);
+			render_string(buf);
 			glDisable(GL_BLEND);
 		}
 		glPopMatrix();
 	}
+}
 
-	if (ctx->mode == MODE_COMMAND) {
+void Context::render_commandline()
+{
+	if (mode == MODE_COMMAND) {
 		glEnable(GL_BLEND);
 		glColor3f(1, 1, 1);
-		v3f p = ctx->cam->get_p();
+		v3f p = cam->get_p();
 		glTranslatef(p.x, p.y, p.z);
-		glRotatef(180.0 * ctx->cam->get_r().y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * ctx->cam->get_r().x / M_PI, 1, 0, 0);
+		glRotatef(180.0 * cam->get_r().y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * cam->get_r().x / M_PI, 1, 0, 0);
 		glTranslatef(-15, 0, -30);
-		if (ctx->cli->get_visible())
-			render_string(ctx, ctx->cli->get_visible());
-		glTranslatef(.5 * ctx->cli->get_cur_char(), 0, 0);
+		if (cli->get_visible())
+			render_string(cli->get_visible());
+		glTranslatef(.5 * cli->get_cur_char(), 0, 0);
 		glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 		glBegin(GL_TRIANGLES);
 		glVertex3f(.5, 1, 0);
@@ -351,7 +357,7 @@ void roam_render(Context *ctx)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void render(Context *ctx)
+void Context::render_shards()
 {
 	int64_t x, y, z;
 	v3f p;
@@ -360,42 +366,52 @@ void render(Context *ctx)
 	int shards_rendered;
 
 	shards_rendered = 0;
-	ctx->cam->load_gl_matrices();
-	ctx->shader->enable();
+	cam->load_gl_matrices();
+	shader->enable();
 
 	glActiveTexture(GL_TEXTURE0);
-	int tl0 = ctx->shader->get_uniform_location("Texture0");
+	int tl0 = shader->get_uniform_location("Texture0");
 	glUniform1i(tl0, 0);
-	glBindTexture(GL_TEXTURE_2D, ctx->tone_mapper->get_texture());
+	glBindTexture(GL_TEXTURE_2D, tone_mapper->get_texture());
 
 	glActiveTexture(GL_TEXTURE1);
-	int tl1 = ctx->shader->get_uniform_location("Texture1");
+	int tl1 = shader->get_uniform_location("Texture1");
 	glUniform1i(tl1, 1);
-	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
+	glBindTexture(GL_TEXTURE_2D, tex_terrain);
 
 	glActiveTexture(GL_TEXTURE0);
-	ctx->shard_vertex_buffer->enable();
+	shard_vertex_buffer->enable();
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
-			c = ctx->w->get_chunk(v2ll(x, z));
+			c = w->get_chunk(v2ll(x, z));
 			p.x = c->get_p().x + CHUNK_W / 2;
 			p.z = c->get_p().y + CHUNK_W / 2;
 			for (y = 0; y < SHARDS_PER_CHUNK; ++y) {
 				s = c->get_shard(y);
-				if (ctx->shard_vertex_buffer->get_size(s->get_id()) == 0)
+				if (shard_vertex_buffer->get_size(s->get_id()) == 0)
 					continue;
 				p.y = (s->get_y() + 0.5) * SHARD_W;
-				if (!ctx->cam->is_visible(p, SHARD_W))
+				if (!cam->is_visible(p, SHARD_W))
 					continue;
-				ctx->shard_vertex_buffer->draw(GL_TRIANGLES, s->get_id());
+				shard_vertex_buffer->draw(GL_TRIANGLES, s->get_id());
 				++shards_rendered;
 			}
 		}
 	}
-	ctx->shard_vertex_buffer->disable();
-	ctx->shader->disable();
-//	render_flowsim(ctx);
-	roam_render(ctx);
+	shard_vertex_buffer->disable();
+	shader->disable();
+}
+
+void Context::render()
+{
+	render_shards();
+	render_cursor();
+//	render_flowsim(this);
+	render_block_entities();
+	render_roaming_entities();
+	render_held_item();
+	render_hotbar();
+	render_commandline();
 }
 
 

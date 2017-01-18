@@ -2,7 +2,7 @@
 
 #include "drop_entity.h"
 
-#include "render.h"
+#include "context.h"
 #include "block_entity.h"
 
 void DropEntity::callback(Body *b, const v3ll &cp, int face)
@@ -44,7 +44,7 @@ void DropEntity::render()
 	glPushMatrix();
 	glTranslatef(body->get_p().x, body->get_p().y, body->get_p().z);
 	glScalef(.25, .25, .25);
-	render_obj(ctx, items[0].obj, items[0].mat, 255);
+	ctx->render_item(items[0].obj, items[0].mat, 255);
 	glPopMatrix();
 }
 

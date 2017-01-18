@@ -2,7 +2,7 @@
 
 #include "bench_entity.h"
 
-#include "render.h"
+#include "context.h"
 #include "update.h"
 
 BenchEntity::BenchEntity(Context *ctx) : BlockEntity(ctx, 9)
@@ -19,7 +19,7 @@ void BenchEntity::update()
 
 void BenchEntity::render()
 {
-	render_inventory(ctx, items, p);
+	ctx->render_inventory(items, p);
 }
 
 void BenchEntity::load(sz_Tag *tag)

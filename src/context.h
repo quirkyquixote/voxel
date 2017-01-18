@@ -58,6 +58,18 @@ class Context {
 	uint64_t tick;
 
 	void event(const SDL_Event *e);
+	void render();
+
+	void render_shards();
+	void render_cursor();
+	void render_block_entities();
+	void render_roaming_entities();
+	void render_held_item();
+	void render_hotbar();
+	void render_commandline();
+	void render_string(const char *str);
+	void render_inventory(const std::vector<Item> &items, const v3ll &p);
+	void render_item(int obj, int mat, GLfloat alpha);
 };
 
 unsigned long long next_id(void);

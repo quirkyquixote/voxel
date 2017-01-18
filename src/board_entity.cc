@@ -2,7 +2,7 @@
 
 #include "board_entity.h"
 
-#include "render.h"
+#include "context.h"
 #include "update.h"
 
 BoardEntity::BoardEntity(Context *ctx) : BlockEntity(ctx, 64)
@@ -19,7 +19,7 @@ void BoardEntity::update()
 
 void BoardEntity::render()
 {
-	render_inventory(ctx, items, p);
+	ctx->render_inventory(items, p);
 }
 
 void BoardEntity::load(sz_Tag *tag)

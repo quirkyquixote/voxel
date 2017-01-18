@@ -2,7 +2,7 @@
 
 #include "crate_entity.h"
 
-#include "render.h"
+#include "context.h"
 #include "update.h"
 
 CrateEntity::CrateEntity(Context *ctx) : BlockEntity(ctx, 16)
@@ -19,7 +19,7 @@ void CrateEntity::update()
 
 void CrateEntity::render()
 {
-	render_inventory(ctx, items, p);
+	ctx->render_inventory(items, p);
 }
 
 void CrateEntity::load(sz_Tag *tag)
