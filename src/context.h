@@ -52,10 +52,12 @@ class Context {
 
 	bool load_all();
 	bool load_world();
+	bool load_player();
 	bool load_chunk(Chunk *c);
 
 	void save_all();
 	void save_world();
+	void save_player();
 	void save_chunk(Chunk *c);
 
 };

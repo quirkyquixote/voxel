@@ -69,6 +69,9 @@ Context::Context(const char *dir)
 
 	/* Initialize flowsim */
 	//flowsim = flowsim(world);
+
+	/* Create player */
+	player = new PlayerEntity(this);
 }
 
 Context::~Context()
@@ -88,6 +91,12 @@ bool Context::load_all()
 
 	mkpath(dir, 0700);
 	load_world();
+	if (!load_player()) {
+		v2ll p = world->get_p();
+		p.x += CHUNK_W * CHUNKS_PER_WORLD / 2;
+		p.y += CHUNK_W * CHUNKS_PER_WORLD / 2;
+		player->get_body()->set_p(v3f(p.x, WORLD_H, p.y));
+	}
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
 			c = world->get_chunk(v2ll(x, z));
@@ -101,11 +110,6 @@ bool Context::load_all()
 			}
 		}
 	}
-	v2ll p = world->get_p();
-	p.x += CHUNK_W * CHUNKS_PER_WORLD / 2;
-	p.y += CHUNK_W * CHUNKS_PER_WORLD / 2;
-	player = new PlayerEntity(this);
-	player->get_body()->set_p(v3f(p.x, WORLD_H, p.y));
 	return true;
 }
 
@@ -113,6 +117,7 @@ void Context::save_all()
 {
 	v2ll p;
 	save_world();
+	save_player();
 	for (p.x = 0; p.x < CHUNKS_PER_WORLD; ++p.x)
 		for (p.y = 0; p.y < CHUNKS_PER_WORLD; ++p.y)
 			save_chunk(world->get_chunk(p));
@@ -147,6 +152,45 @@ void Context::save_world()
 	if (fd >= 0) {
 		try {
 			std::unique_ptr<sz_Tag> root(world->save());
+			sz_write(fd, root.get());
+		} catch(sz_Exception &ex) {
+			/* do nothing */
+		}
+		close(fd);
+	} else {
+		log_error("%s: %s", path.c_str(), strerror(errno));
+	}
+}
+
+bool Context::load_player()
+{
+	bool ret = false;
+	std::string path(dir);
+	path += "/player.dat";
+	int fd = open(path.c_str(), O_RDONLY, 0400);
+	if (fd >= 0) {
+		try {
+			std::unique_ptr<sz_Tag> root(sz_read(fd));
+			player->load(root.get());
+			ret = true;
+		} catch (sz_Exception &ex) {
+			/* do nothing */
+		}
+		close(fd);
+	} else {
+		log_error("%s: %s", path.c_str(), strerror(errno));
+	}
+	return ret;
+}
+
+void Context::save_player()
+{
+	std::string path(dir);
+	path += "/player.dat";
+	int fd = creat(path.c_str(), 0600);
+	if (fd >= 0) {
+		try {
+			std::unique_ptr<sz_Tag> root(player->save());
 			sz_write(fd, root.get());
 		} catch(sz_Exception &ex) {
 			/* do nothing */

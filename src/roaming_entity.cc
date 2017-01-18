@@ -23,37 +23,37 @@ sz_Tag *RoamingEntity::save()
 	sz_list_add(tmp, new sz_f64(body->get_p().x));
 	sz_list_add(tmp, new sz_f64(body->get_p().y));
 	sz_list_add(tmp, new sz_f64(body->get_p().y));
-	sz_dict_add(root, "p", tmp);
+	sz_dict_add(root, "pos", tmp);
 	tmp = new sz_List();
 	sz_list_add(tmp, new sz_f64(body->get_r().x));
 	sz_list_add(tmp, new sz_f64(body->get_r().y));
 	sz_list_add(tmp, new sz_f64(body->get_r().y));
-	sz_dict_add(root, "r", tmp);
+	sz_dict_add(root, "rot", tmp);
 	tmp = new sz_List();
 	sz_list_add(tmp, new sz_f64(body->get_v().x));
 	sz_list_add(tmp, new sz_f64(body->get_v().y));
 	sz_list_add(tmp, new sz_f64(body->get_v().y));
-	sz_dict_add(root, "v", tmp);
-	return 0;
+	sz_dict_add(root, "vel", tmp);
+	return root;
 }
 
 void RoamingEntity::load(sz_Tag *root)
 {
 	Entity::load(root);
 	for (auto &it : root->get_dict()) {
-		if (strcmp(it.first, "p") == 0) {
+		if (strcmp(it.first, "pos") == 0) {
 			v3f p;
 			p.x = it.second->get_list()[0]->get_f64();
 			p.y = it.second->get_list()[1]->get_f64();
 			p.z = it.second->get_list()[2]->get_f64();
 			body->set_p(p);
-		} else if (strcmp(it.first, "r") == 0) {
+		} else if (strcmp(it.first, "rot") == 0) {
 			v3f r;
 			r.x = it.second->get_list()[0]->get_f64();
 			r.y = it.second->get_list()[1]->get_f64();
 			r.z = it.second->get_list()[2]->get_f64();
 			body->set_r(r);
-		} else if (strcmp(it.first, "v") == 0) {
+		} else if (strcmp(it.first, "vel") == 0) {
 			v3f v;
 			v.x = it.second->get_list()[0]->get_f64();
 			v.y = it.second->get_list()[1]->get_f64();
