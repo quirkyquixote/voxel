@@ -18,7 +18,6 @@ void PipeEntity::update()
 
 void PipeEntity::render()
 {
-	render_inventory(ctx, items, p);
 }
 
 void PipeEntity::load(sz_Tag *tag)
@@ -33,9 +32,5 @@ sz_Tag *PipeEntity::save()
 
 bool PipeEntity::use()
 {
-	if (ctx->cur.face == FACE_UP) {
-		use_inventory(ctx, &items);
-		return true;
-	}
 	return false;
 }
