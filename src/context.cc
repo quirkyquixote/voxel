@@ -11,16 +11,9 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <memory>
+
 #include "lighting.h"
-
-int load_all(Context *ctx);
-int save_all(Context *ctx);
-
-int load_world(World *w, const char *dir);
-int save_world(World *w, const char *dir);
-
-int load_chunk(Chunk *c, const char *dir);
-int save_chunk(Chunk *c, const char *dir);
 
 int mkpath(const char *path, mode_t mode);
 
@@ -28,9 +21,9 @@ int main(int argc, char *argv[])
 {
 	block_traits_init();
 	Context *ctx = new Context("foo");
-	load_all(ctx);
+	ctx->load_all();
 	ctx->ml->run();
-	save_all(ctx);
+	ctx->save_all();
 	delete ctx;
 	return 0;
 }
@@ -88,141 +81,129 @@ Context::~Context()
 	delete space;
 }
 
-int load_all(Context *ctx)
+bool Context::load_all()
 {
 	int x, z;
 	Chunk *c;
-	int from_scratch;
 
-	mkpath(ctx->dir, 0700);
-	from_scratch = load_world(ctx->world, ctx->dir);
+	mkpath(dir, 0700);
+	load_world();
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
-			c = ctx->world->get_chunk(v2ll(x, z));
-			v2ll p = ctx->world->get_p();
+			c = world->get_chunk(v2ll(x, z));
+			v2ll p = world->get_p();
 			p.x += x * CHUNK_W;
 			p.y += z * CHUNK_D;
 			c->set_p(p);
-			if (load_chunk(c, ctx->dir) != 0) {
+			if (!load_chunk(c)) {
 				terraform(0, c);
 				c->set_flags(CHUNK_UNLIT);
 			}
 		}
 	}
-	/*
-	   if (from_scratch)
-	   update_lighting(ctx->world, box3ll(0, 0, 0, WORLD_W, WORLD_H, WORLD_D), NULL);*/
-	v2ll p = ctx->world->get_p();
+	v2ll p = world->get_p();
 	p.x += CHUNK_W * CHUNKS_PER_WORLD / 2;
 	p.y += CHUNK_W * CHUNKS_PER_WORLD / 2;
-	ctx->player = new PlayerEntity(ctx);
-	ctx->player->get_body()->set_p(v3f(p.x, WORLD_H, p.y));
-	return 0;
+	player = new PlayerEntity(this);
+	player->get_body()->set_p(v3f(p.x, WORLD_H, p.y));
+	return true;
 }
 
-int save_all(Context *ctx)
+void Context::save_all()
 {
 	v2ll p;
-	if (save_world(ctx->world, ctx->dir) != 0)
-		return -1;
+	save_world();
 	for (p.x = 0; p.x < CHUNKS_PER_WORLD; ++p.x)
 		for (p.y = 0; p.y < CHUNKS_PER_WORLD; ++p.y)
-			save_chunk(ctx->world->get_chunk(p), ctx->dir);
-	return 0;
+			save_chunk(world->get_chunk(p));
 }
 
-int load_world(World *w, const char *dir)
+bool Context::load_world()
 {
-	sz_Tag *root;
-	char path[256];
-	int fd;
-
-	snprintf(path, sizeof(path), "%s/world.dat", dir);
-	fd = open(path, O_RDONLY, 0400);
-	if (fd < 0) {
-		perror(path);
-		return -1;
+	bool ret = false;
+	std::string path(dir);
+	path += "/world.dat";
+	int fd = open(path.c_str(), O_RDONLY, 0400);
+	if (fd >= 0) {
+		try {
+			std::unique_ptr<sz_Tag> root(sz_read(fd));
+			world->load(root.get());
+			ret = true;
+		} catch (sz_Exception &ex) {
+			/* do nothing */
+		}
+		close(fd);
+	} else {
+		log_error("%s: %s", path.c_str(), strerror(errno));
 	}
-	try {
-		root = sz_read(fd);
-		w->load(root);
-		delete root;
-	} catch (sz_Exception &ex) {
-		return -1;
-	}
-	close(fd);
-	return 0;
+	return ret;
 }
 
-int save_world(World *w, const char *dir)
+void Context::save_world()
 {
-	sz_Tag *root;
-	char path[256];
-	int fd;
-
-	root = w->save();
-	snprintf(path, sizeof(path), "%s/world.dat", dir);
-	fd = creat(path, 0600);
-	if (fd < 0) {
-		perror(path);
-		return -1;
+	std::string path(dir);
+	path += "/world.dat";
+	int fd = creat(path.c_str(), 0600);
+	if (fd >= 0) {
+		try {
+			std::unique_ptr<sz_Tag> root(world->save());
+			sz_write(fd, root.get());
+		} catch(sz_Exception &ex) {
+			/* do nothing */
+		}
+		close(fd);
+	} else {
+		log_error("%s: %s", path.c_str(), strerror(errno));
 	}
-	try {
-		sz_write(fd, root);
-	} catch (sz_Exception &ex) {
-		return -1;
-	}
-	close(fd);
-	delete root;
-	return 0;
 }
 
-int load_chunk(Chunk *c, const char *dir)
+bool Context::load_chunk(Chunk *c)
 {
-	char path[256];
-	int fd;
-	sz_Tag *root;
-	v2ll p;
-
-	p = c->get_p();
-	snprintf(path, sizeof(path), "%s/%06llx%06llx.dat", dir, p.x / CHUNK_W, p.y / CHUNK_D);
-	fd = open(path, O_RDONLY, 0400);
-	if (fd < 0)
-		return -1;
-	try {
-		root = sz_read(fd);
-		c->load(root);
-		delete root;
-	} catch (sz_Exception &ex) {
-		return -1;
+	bool ret;
+	char name[16];
+	v2ll p = c->get_p();
+	snprintf(name, sizeof(name), "%06llx%06llx", p.x / CHUNK_W, p.y / CHUNK_D);
+	std::string path(dir);
+	path += "/";
+	path += name;
+	path += ".dat";
+	int fd = open(path.c_str(), O_RDONLY, 0400);
+	if (fd >= 0) {
+		try {
+			std::unique_ptr<sz_Tag> root(sz_read(fd));
+			c->load(root.get());
+			ret = true;
+		} catch (sz_Exception &ex) {
+			/* do nothing */
+		}
+		close(fd);
+	} else {
+		log_error("%s: %s", path.c_str(), strerror(errno));
 	}
-	close(fd);
-	return 0;
+	return ret;
 }
 
-int save_chunk(Chunk *c, const char *dir)
+void Context::save_chunk(Chunk *c)
 {
-	char path[256];
-	int fd;
-	sz_Tag *root;
-	v2ll p;
-
-	root = c->save();
-	p = c->get_p();
-	snprintf(path, sizeof(path), "%s/%06llx%06llx.dat", dir, p.x / CHUNK_W, p.y / CHUNK_D);
-	fd = creat(path, 0600);
-	if (fd < 0) {
-		perror(path);
-		return -1;
+	char name[16];
+	v2ll p = c->get_p();
+	snprintf(name, sizeof(name), "%06llx%06llx", p.x / CHUNK_W, p.y / CHUNK_D);
+	std::string path(dir);
+	path += "/";
+	path += name;
+	path += ".dat";
+	int fd = creat(path.c_str(), 0600);
+	if (fd >= 0) {
+		try {
+			std::unique_ptr<sz_Tag> root(c->save());
+			sz_write(fd, root.get());
+		} catch (sz_Exception &ex) {
+			/* do nothing */
+		}
+		close(fd);
+	} else {
+		log_error("%s: %s", path.c_str(), strerror(errno));
 	}
-	try {
-		sz_write(fd, root);
-	} catch (sz_Exception &ex) {
-		return -1;
-	}
-	close(fd);
-	delete root;
-	return 0;
 }
 
 static unsigned long long id = 0;

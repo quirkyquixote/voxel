@@ -49,6 +49,15 @@ class Context {
 	void drop_block(const v3ll &p);
 	void update_chunks();
 	void update_entities();
+
+	bool load_all();
+	bool load_world();
+	bool load_chunk(Chunk *c);
+
+	void save_all();
+	void save_world();
+	void save_chunk(Chunk *c);
+
 };
 
 unsigned long long next_id(void);
