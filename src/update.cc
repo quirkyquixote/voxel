@@ -7,303 +7,10 @@
 #include "lighting.h"
 #include "drop_entity.h"
 
-static const char has_left_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
-};
-
-static const char has_right_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
-};
-
-static const char has_down_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
-};
-
-static const char has_up_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
-};
-
-static const char has_back_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
-};
-
-static const char has_front_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
-};
-
-void Context::update_face_lf(std::vector<Vertex> *buf,
-		int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted)
-{
-	v2f lt;
-	if (has_right_side[w->get_shape(v3ll(x - 1, y, z))])
-		return;
-	lt = texcoord_from_light(w->get_light(v3ll(x - 1, y, z)));
-	vertices_add(buf, vertices_face_lf, 6, v3f(x, y, z), lt, mt, tilted);
-}
-
-void Context::update_face_rt(std::vector<Vertex> *buf,
-		int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted)
-{
-	v2f lt;
-	if (has_left_side[w->get_shape(v3ll(x + 1, y, z))])
-		return;
-	lt = texcoord_from_light(w->get_light(v3ll(x + 1, y, z)));
-	vertices_add(buf, vertices_face_rt, 6, v3f(x, y, z), lt, mt, tilted);
-}
-
-void Context::update_face_dn(std::vector<Vertex> *buf,
-		int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted)
-{
-	v2f lt;
-	if (has_up_side[w->get_shape(v3ll(x, y - 1, z))])
-		return;
-	lt = texcoord_from_light(w->get_light(v3ll(x, y - 1, z)));
-	vertices_add(buf, vertices_face_dn, 6, v3f(x, y, z), lt, mt, tilted);
-}
-
-void Context::update_face_up(std::vector<Vertex> *buf,
-		int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted)
-{
-	v2f lt;
-	if (has_down_side[w->get_shape(v3ll(x, y + 1, z))])
-		return;
-	lt = texcoord_from_light(w->get_light(v3ll(x, y + 1, z)));
-	vertices_add(buf, vertices_face_up, 6, v3f(x, y, z), lt, mt, tilted);
-}
-
-void Context::update_face_bk(std::vector<Vertex> *buf,
-		int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted)
-{
-	v2f lt;
-	if (has_front_side[w->get_shape(v3ll(x, y, z - 1))])
-		return;
-	lt = texcoord_from_light(w->get_light(v3ll(x, y, z - 1)));
-	vertices_add(buf, vertices_face_bk, 6, v3f(x, y, z), lt, mt, tilted);
-}
-
-void Context::update_face_ft(std::vector<Vertex> *buf,
-		int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted)
-{
-	v2f lt;
-	if (has_back_side[w->get_shape(v3ll(x, y, z + 1))])
-		return;
-	lt = texcoord_from_light(w->get_light(v3ll(x, y, z + 1)));
-	vertices_add(buf, vertices_face_ft, 6, v3f(x, y, z), lt, mt, tilted);
-}
-
-void Context::update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z)
-{
-	int8_t s, sl, sd, sb, sr, su, sf;
-	v2f mt[6];
-	int tilted[6];
-	v2f lt;
-
-	s = w->get_shape(v3ll(x, y, z));
-	if (s == SHAPE_NONE)
-		return;
-
-	if (s == SHAPE_BLOCK_DN) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		update_face_lf(buf, x, y, z, mt, tilted);
-		update_face_rt(buf, x, y, z, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-		update_face_bk(buf, x, y, z, mt, tilted);
-		update_face_ft(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_BLOCK_UP) {
-		texcoord_dn(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		update_face_lf(buf, x, y, z, mt, tilted);
-		update_face_rt(buf, x, y, z, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-		update_face_bk(buf, x, y, z, mt, tilted);
-		update_face_ft(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_BLOCK_LF) {
-		texcoord_lf(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		update_face_lf(buf, x, y, z, mt, tilted);
-		update_face_rt(buf, x, y, z, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-		update_face_bk(buf, x, y, z, mt, tilted);
-		update_face_ft(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_BLOCK_RT) {
-		texcoord_rt(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		update_face_lf(buf, x, y, z, mt, tilted);
-		update_face_rt(buf, x, y, z, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-		update_face_bk(buf, x, y, z, mt, tilted);
-		update_face_ft(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_BLOCK_BK) {
-		texcoord_bk(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		update_face_lf(buf, x, y, z, mt, tilted);
-		update_face_rt(buf, x, y, z, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-		update_face_bk(buf, x, y, z, mt, tilted);
-		update_face_ft(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_BLOCK_FT) {
-		texcoord_ft(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		update_face_lf(buf, x, y, z, mt, tilted);
-		update_face_rt(buf, x, y, z, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-		update_face_bk(buf, x, y, z, mt, tilted);
-		update_face_ft(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_SLAB_DN) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_dn, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_SLAB_UP) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_up, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_SLAB_LF) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_lf, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_lf(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_SLAB_RT) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_rt, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_rt(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_SLAB_BK) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_bk, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_bk(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_SLAB_FT) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_ft, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_ft(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_STAIRS_DF) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_df, 42, v3f(x, y, z), lt, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-		update_face_ft(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_STAIRS_DL) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_dl, 42, v3f(x, y, z), lt, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-		update_face_lf(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_STAIRS_DB) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_db, 42, v3f(x, y, z), lt, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-		update_face_bk(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_STAIRS_DR) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_dr, 42, v3f(x, y, z), lt, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-		update_face_rt(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_STAIRS_UF) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_uf, 42, v3f(x, y, z), lt, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-		update_face_ft(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_STAIRS_UL) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_ul, 42, v3f(x, y, z), lt, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-		update_face_lf(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_STAIRS_UB) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_ub, 42, v3f(x, y, z), lt, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-		update_face_bk(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_STAIRS_UR) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_ur, 42, v3f(x, y, z), lt, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-		update_face_rt(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_PANE_Y) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_y, 36, v3f(x, y, z), lt, mt, tilted);
-	} else if (s == SHAPE_PANE_X) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_x, 36, v3f(x, y, z), lt, mt, tilted);
-	} else if (s == SHAPE_PANE_Z) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_z, 36, v3f(x, y, z), lt, mt, tilted);
-	} else if (s == SHAPE_PANE_DN) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_dn, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_dn(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_PANE_UP) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_up, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_up(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_PANE_LF) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_lf, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_lf(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_PANE_RT) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_rt, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_rt(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_PANE_BK) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_bk, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_bk(buf, x, y, z, mt, tilted);
-	} else if (s == SHAPE_PANE_FT) {
-		texcoord_up(w->get_mat(v3ll(x, y, z)), mt, tilted);
-		lt = texcoord_from_light(w->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_ft, 30, v3f(x, y, z), lt, mt, tilted);
-		update_face_ft(buf, x, y, z, mt, tilted);
-	}
-}
-
-void Context::update_vbo(int id, int64_t x0, int64_t y0, int64_t z0)
-{
-	int64_t x1, y1, z1;
-	int64_t x, y, z;
-	std::vector<Vertex> buf;
-
-	x1 = x0 + SHARD_W;
-	y1 = y0 + SHARD_H;
-	z1 = z0 + SHARD_D;
-
-	for (x = x0; x < x1; ++x) {
-		for (y = y0; y < y1; ++y) {
-			for (z = z0; z < z1; ++z) {
-				update_cell(&buf, x, y, z);
-			}
-		}
-	}
-
-	shard_vertex_buffer->update(id, buf.data(), buf.size());
-}
-
 void Context::spill_inventory(const v3ll &p)
 {
 	Entity *e;
-	e = w->get_data(p);
+	e = world->get_data(p);
 	if (e == nullptr || e->get_items()->size() == 0)
 		return;
 	for (auto &s : *e->get_items()) {
@@ -394,8 +101,8 @@ void Context::drop_block(const v3ll &p)
 {
 	int s2, m2;
 	Item s;
-	s2 = w->get_shape(p);
-	m2 = w->get_mat(p);
+	s2 = world->get_shape(p);
+	m2 = world->get_mat(p);
 	s = block_traits[m2][s2].drop;
 	if (s.num == 0)
 		return;
@@ -461,82 +168,82 @@ void Context::use_tool()
 		p = p + v3ll(0, 0, -1);
 	else if (f == FACE_FT)
 		p = p + v3ll(0, 0, 1);
-	if (w->get_shape(p) != SHAPE_NONE)
+	if (world->get_shape(p) != SHAPE_NONE)
 		return;
 	if (s.obj == OBJ_BLOCK) {
 		if (move.y0) {
 			if (f == FACE_UP)
-				w->set_block(p, SHAPE_BLOCK_DN, s.mat);
+				world->set_block(p, SHAPE_BLOCK_DN, s.mat);
 			else if (f == FACE_DN)
-				w->set_block(p, SHAPE_BLOCK_UP, s.mat);
+				world->set_block(p, SHAPE_BLOCK_UP, s.mat);
 			else if (f == FACE_LF)
-				w->set_block(p, SHAPE_BLOCK_RT, s.mat);
+				world->set_block(p, SHAPE_BLOCK_RT, s.mat);
 			else if (f == FACE_RT)
-				w->set_block(p, SHAPE_BLOCK_LF, s.mat);
+				world->set_block(p, SHAPE_BLOCK_LF, s.mat);
 			else if (f == FACE_BK)
-				w->set_block(p, SHAPE_BLOCK_FT, s.mat);
+				world->set_block(p, SHAPE_BLOCK_FT, s.mat);
 			else if (f == FACE_FT)
-				w->set_block(p, SHAPE_BLOCK_BK, s.mat);
+				world->set_block(p, SHAPE_BLOCK_BK, s.mat);
 		} else {
-			w->set_block(p, SHAPE_BLOCK_DN, s.mat);
+			world->set_block(p, SHAPE_BLOCK_DN, s.mat);
 		}
 	} else if (s.obj == OBJ_SLAB) {
 		if (move.y0) {
 			if (f == FACE_UP)
-				w->set_block(p, SHAPE_SLAB_DN, s.mat);
+				world->set_block(p, SHAPE_SLAB_DN, s.mat);
 			else if (f == FACE_DN)
-				w->set_block(p, SHAPE_SLAB_UP, s.mat);
+				world->set_block(p, SHAPE_SLAB_UP, s.mat);
 			else if (f == FACE_LF)
-				w->set_block(p, SHAPE_SLAB_RT, s.mat);
+				world->set_block(p, SHAPE_SLAB_RT, s.mat);
 			else if (f == FACE_RT)
-				w->set_block(p, SHAPE_SLAB_LF, s.mat);
+				world->set_block(p, SHAPE_SLAB_LF, s.mat);
 			else if (f == FACE_BK)
-				w->set_block(p, SHAPE_SLAB_FT, s.mat);
+				world->set_block(p, SHAPE_SLAB_FT, s.mat);
 			else if (f == FACE_FT)
-				w->set_block(p, SHAPE_SLAB_BK, s.mat);
+				world->set_block(p, SHAPE_SLAB_BK, s.mat);
 		} else {
 			if (f == FACE_UP)
-				w->set_block(p, SHAPE_SLAB_DN, s.mat);
+				world->set_block(p, SHAPE_SLAB_DN, s.mat);
 			else if (f == FACE_DN)
-				w->set_block(p, SHAPE_SLAB_UP, s.mat);
+				world->set_block(p, SHAPE_SLAB_UP, s.mat);
 			else if (q.y > 0.5)
-				w->set_block(p, SHAPE_SLAB_UP, s.mat);
+				world->set_block(p, SHAPE_SLAB_UP, s.mat);
 			else
-				w->set_block(p, SHAPE_SLAB_DN, s.mat);
+				world->set_block(p, SHAPE_SLAB_DN, s.mat);
 		}
 	} else if (s.obj == OBJ_STAIRS) {
 		if (f == FACE_UP) {
-			w->set_block(p,
+			world->set_block(p,
 					SHAPE_STAIRS_DF + (rot.y + 2) % 4, s.mat);
 		} else if (f == FACE_DN) {
-			w->set_block(p,
+			world->set_block(p,
 					SHAPE_STAIRS_UF + (rot.y + 2) % 4, s.mat);
 		} else if (q.y > 0.5) {
-			w->set_block(p,
+			world->set_block(p,
 					SHAPE_STAIRS_UF + (rot.y + 2) % 4, s.mat);
 		} else {
-			w->set_block(p,
+			world->set_block(p,
 					SHAPE_STAIRS_DF + (rot.y + 2) % 4, s.mat);
 		}
 	} else if (s.obj == OBJ_PANE) {
 		if (move.y0) {
 			if (f == FACE_UP)
-				w->set_block(p, SHAPE_PANE_DN, s.mat);
+				world->set_block(p, SHAPE_PANE_DN, s.mat);
 			else if (f == FACE_DN)
-				w->set_block(p, SHAPE_PANE_UP, s.mat);
+				world->set_block(p, SHAPE_PANE_UP, s.mat);
 			else if (f == FACE_LF)
-				w->set_block(p, SHAPE_PANE_RT, s.mat);
+				world->set_block(p, SHAPE_PANE_RT, s.mat);
 			else if (f == FACE_RT)
-				w->set_block(p, SHAPE_PANE_LF, s.mat);
+				world->set_block(p, SHAPE_PANE_LF, s.mat);
 			else if (f == FACE_BK)
-				w->set_block(p, SHAPE_PANE_FT, s.mat);
+				world->set_block(p, SHAPE_PANE_FT, s.mat);
 			else if (f == FACE_FT)
-				w->set_block(p, SHAPE_PANE_BK, s.mat);
+				world->set_block(p, SHAPE_PANE_BK, s.mat);
 		} else {
 			if (rot.y & 1)
-				w->set_block(p, SHAPE_PANE_X, s.mat);
+				world->set_block(p, SHAPE_PANE_X, s.mat);
 			else
-				w->set_block(p, SHAPE_PANE_Z, s.mat);
+				world->set_block(p, SHAPE_PANE_Z, s.mat);
 		}
 /*	} else if (s.obj == OBJ_FLUID) {
 		flowsim_add(flowsim, p, 1);*/
@@ -545,47 +252,6 @@ void Context::use_tool()
 }
 
 void Context::update_player()
-{
-	v3ll p = cur.p;
-	int s = w->get_shape(p);
-	int m = w->get_mat(p);
-	Entity *e = w->get_data(p);
-
-	if (e != nullptr && e->use())
-			return;
-	if (act == 1) {
-		if (cur.face != -1) {
-			if (s != SHAPE_NONE) {
-				spill_inventory(p);
-				drop_block(p);
-				w->set_block(p, 0, 0);
-			}
-		}
-	}
-	if (use == 1) {
-		if (cur.face != -1) {
-			use_tool();
-		}
-	}
-	if (pick == 1) {
-		if (cur.face != -1) {
-			int s = w->get_shape(cur.p);
-			int m = w->get_mat(cur.p);
-			int o;
-			if (s >= SHAPE_BLOCK_DN && s <= SHAPE_BLOCK_FT)
-				o = OBJ_BLOCK;
-			else if (s >= SHAPE_SLAB_DN && s <= SHAPE_SLAB_FT)
-				o = OBJ_SLAB;
-			else if (s >= SHAPE_PANE_X && s <= SHAPE_PANE_Z)
-				o = OBJ_PANE;
-			else if (s >= SHAPE_STAIRS_DF && s <= SHAPE_STAIRS_UR)
-				o = OBJ_STAIRS;
-			inv[tool] = Item(o, m, 1);
-		}
-	}
-}
-
-void Context::update_camera()
 {
 	int w, h;
 	int x, y;
@@ -616,17 +282,51 @@ void Context::update_camera()
 	player->set_v(v);
 	player->set_step_size(1 + run);
 
-	cam->set_fovy((cam->get_fovy() + (run ? 70.f : 60.f)) * 0.5);
-	cam->set_p(player->get_p() + v3f(0, .8, 0));
-	cam->set_r(player->get_r());
-
 	rot.x = (unsigned int)floor(0.5 + r.x / M_PI_2) & 3;
 	rot.y = (unsigned int)floor(0.5 + r.y / M_PI_2) & 3;
 
 	v = v3f(0, 0, -5);
 	v = rotx(v, r.x);
 	v = roty(v, r.y);
-	space->query(cam->get_p(), v, &cur);
+	space->query(renderer->get_cam()->get_p(), v, &cur);
+
+	v3ll p = cur.p;
+	int s = world->get_shape(p);
+	int m = world->get_mat(p);
+	Entity *e = world->get_data(p);
+
+	if (e != nullptr && e->use())
+			return;
+	if (act == 1) {
+		if (cur.face != -1) {
+			if (s != SHAPE_NONE) {
+				spill_inventory(p);
+				drop_block(p);
+				world->set_block(p, 0, 0);
+			}
+		}
+	}
+	if (use == 1) {
+		if (cur.face != -1) {
+			use_tool();
+		}
+	}
+	if (pick == 1) {
+		if (cur.face != -1) {
+			int s = world->get_shape(cur.p);
+			int m = world->get_mat(cur.p);
+			int o;
+			if (s >= SHAPE_BLOCK_DN && s <= SHAPE_BLOCK_FT)
+				o = OBJ_BLOCK;
+			else if (s >= SHAPE_SLAB_DN && s <= SHAPE_SLAB_FT)
+				o = OBJ_SLAB;
+			else if (s >= SHAPE_PANE_X && s <= SHAPE_PANE_Z)
+				o = OBJ_PANE;
+			else if (s >= SHAPE_STAIRS_DF && s <= SHAPE_STAIRS_UR)
+				o = OBJ_STAIRS;
+			inv[tool] = Item(o, m, 1);
+		}
+	}
 }
 
 void Context::update_chunks()
@@ -647,7 +347,7 @@ void Context::update_chunks()
 
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
-			c = w->get_chunk(v2ll(x, z));
+			c = world->get_chunk(v2ll(x, z));
 			if (c->get_flags() != 0) {
 				int d = dist(c->get_p(), p);
 				out_of_date.emplace(d, c);
@@ -672,7 +372,7 @@ void Context::update_chunks()
 		}
 		if ((c->get_flags() & CHUNK_UNLIT) != 0) {
 //			log_info("lit up");
-			update_lighting(w, box3ll(c->get_p().x, 0, c->get_p().y,
+			update_lighting(world, box3ll(c->get_p().x, 0, c->get_p().y,
 						c->get_p().x + CHUNK_W, CHUNK_H, c->get_p().y + CHUNK_D), NULL);
 			c->unset_flags(CHUNK_UNLIT);
 			c->set_flags(CHUNK_UNRENDERED);
@@ -680,7 +380,7 @@ void Context::update_chunks()
 		if ((c->get_flags() & CHUNK_UNRENDERED) != 0) {
 //			log_info("update vbos");
 			for (int k = 0; k < SHARDS_PER_CHUNK; ++k)
-				update_vbo(c->get_shard(k)->get_id(), c->get_p().x,
+				renderer->update_shard(c->get_shard(k)->get_id(), c->get_p().x,
 						k * SHARD_H, c->get_p().y);
 			c->unset_flags(CHUNK_UNRENDERED);
 		}
@@ -702,14 +402,14 @@ void Context::update()
 
 	if (!ml->get_window()->has_mouse_focus())
 		return;
-	p.x = floor(cam->get_p().x);
-	p.y = floor(cam->get_p().y);
-	p.z = floor(cam->get_p().z);
+	p.x = floor(renderer->get_cam()->get_p().x);
+	p.y = floor(renderer->get_cam()->get_p().y);
+	p.z = floor(renderer->get_cam()->get_p().z);
 	space->run();
 /*	if ((tick & 1) == 0)
 		flowsim_step(flowsim);*/
 	update_player();
-	update_camera();
+	renderer->update_camera();
 	if (act > 0) {
 		if (++act >= 8)
 			act = 1;
@@ -724,6 +424,5 @@ void Context::update()
 	}
 	update_chunks();
 	update_entities();
-	tone_mapper->update((w->get_light(p) << 4) / 255., 0);
 	++tick;
 }

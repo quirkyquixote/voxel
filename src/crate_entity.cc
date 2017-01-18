@@ -18,7 +18,7 @@ void CrateEntity::update()
 
 void CrateEntity::render()
 {
-	ctx->render_inventory(items, p);
+	ctx->renderer->render_inventory(items, p);
 }
 
 void CrateEntity::load(sz_Tag *tag)

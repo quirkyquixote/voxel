@@ -76,7 +76,7 @@ void Chunk::load(sz_Tag *root)
 		} else if (strcmp(it.first, "entities") == 0) {
 			for (auto &it2 : it.second->get_list()) {
 				Entity *e = load_entity(ctx, it2);
-				ctx->w->set_data(e->get_p(), e);
+				ctx->world->set_data(e->get_p(), e);
 			}
 		} else {
 			log_error("bad tag: %s", it.first);

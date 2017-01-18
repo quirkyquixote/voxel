@@ -85,10 +85,10 @@ void Context::event(const SDL_Event *e)
 			Item &s = inv[tool];
 			if (s.num > 0) {
 				DropEntity *e = new DropEntity(this, Item(s.obj, s.mat, 1));
-				e->get_body()->set_p(cam->get_p());
+				e->get_body()->set_p(renderer->get_cam()->get_p());
 				v3f v(0, 0, -.5);
-				v = rotx(v, cam->get_r().x);
-				v = roty(v, cam->get_r().y);
+				v = rotx(v, renderer->get_cam()->get_r().x);
+				v = roty(v, renderer->get_cam()->get_r().y);
 				e->get_body()->set_v(v);
 				entities.push_back(e);
 				--s.num;

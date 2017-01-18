@@ -12,11 +12,7 @@
 #include "main_loop.h"
 #include "physics.h"
 #include "profile.h"
-#include "vertex_buffer.h"
-#include "tone_mapper.h"
-#include "shader.h"
-#include "camera.h"
-#include "media.h"
+#include "renderer.h"
 #include "inventory.h"
 #include "cli.h"
 #include "tcl_commands.h"
@@ -33,14 +29,8 @@ class Context {
 	MainLoop *ml;
 	Tcl_Interp *tcl;
 	CommandLine *cli;
-	World *w;
-	VertexBuffer *shard_vertex_buffer;
-	VertexBuffer *obj_vertex_buffer;
-	ToneMapper *tone_mapper;
-	Shader *shader;
-	Camera *cam;
-	GLuint tex_terrain;
-	GLuint tex_font;
+	World *world;
+	Renderer *renderer;
 	Space *space;
 	Body *player;
 	Query cur;
@@ -58,35 +48,14 @@ class Context {
 	uint64_t tick;
 
 	void event(const SDL_Event *e);
-	void render();
 	void update();
 
-	void render_shards();
-	void render_cursor();
-	void render_block_entities();
-	void render_roaming_entities();
-	void render_held_item();
-	void render_hotbar();
-	void render_commandline();
-	void render_string(const char *str);
-	void render_inventory(const std::vector<Item> &items, const v3ll &p);
-	void render_item(int obj, int mat, GLfloat alpha);
-
-	void update_face_lf(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
-	void update_face_rt(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
-	void update_face_dn(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
-	void update_face_up(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
-	void update_face_bk(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
-	void update_face_ft(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
-	void update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z);
-	void update_vbo(int id, int64_t x0, int64_t y0, int64_t z0);
 	void spill_inventory(const v3ll &p);
 	void use_inventory(std::vector<Item> *items);
 	void drop_block(const v3ll &p);
 	void use_workbench(std::vector<Item> *inv);
 	void use_tool();
 	void update_player();
-	void update_camera();
 	void update_chunks();
 	void update_entities();
 };

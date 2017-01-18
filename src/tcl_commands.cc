@@ -190,9 +190,9 @@ int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	log_info("offset: %.02g,%.02g,%.02g", ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z);
 	log_info("face: %s", face_names[ctx->cur.face]);
 	log_info("type: %s.%s",
-			mat_names[ctx->w->get_mat(ctx->cur.p)],
-			shape_names[ctx->w->get_shape(ctx->cur.p)]);
-	log_info("light level: %d", ctx->w->get_light(ctx->cur.p));
+			mat_names[ctx->world->get_mat(ctx->cur.p)],
+			shape_names[ctx->world->get_shape(ctx->cur.p)]);
+	log_info("light level: %d", ctx->world->get_light(ctx->cur.p));
 /*
 	struct array *inv = world_get_data(ctx->w, ctx->cur.p);
 	if (inv != NULL) {
@@ -274,7 +274,7 @@ int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	++bb.y1;
 	++bb.z1;
 	for (auto &p : bb)
-		ctx->w->set_block(p, shape, mat);
+		ctx->world->set_block(p, shape, mat);
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -297,23 +297,23 @@ int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
 			p.y = bb.y0;
-			ctx->w->set_block(p, shape, mat);
+			ctx->world->set_block(p, shape, mat);
 			p.y = bb.y1;
-			ctx->w->set_block(p, shape, mat);
+			ctx->world->set_block(p, shape, mat);
 		}
 	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
 		for (p.y = bb.y0; p.y <= bb.y1; ++p.y) {
 			p.z = bb.z0;
-			ctx->w->set_block(p, shape, mat);
+			ctx->world->set_block(p, shape, mat);
 			p.z = bb.z1;
-			ctx->w->set_block(p, shape, mat);
+			ctx->world->set_block(p, shape, mat);
 		}
 	for (p.y = bb.y0; p.y <= bb.y1; ++p.y)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
 			p.x = bb.x0;
-			ctx->w->set_block(p, shape, mat);
+			ctx->world->set_block(p, shape, mat);
 			p.x = bb.x1;
-			ctx->w->set_block(p, shape, mat);
+			ctx->world->set_block(p, shape, mat);
 		}
 	return 0;
 fail:
@@ -337,16 +337,16 @@ int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
 		for (p.y = bb.y0; p.y <= bb.y1; ++p.y) {
 			p.z = bb.z0;
-			ctx->w->set_block(p, shape, mat);
+			ctx->world->set_block(p, shape, mat);
 			p.z = bb.z1;
-			ctx->w->set_block(p, shape, mat);
+			ctx->world->set_block(p, shape, mat);
 		}
 	for (p.y = bb.y0; p.y <= bb.y1; ++p.y)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
 			p.x = bb.x0;
-			ctx->w->set_block(p, shape, mat);
+			ctx->world->set_block(p, shape, mat);
 			p.x = bb.x1;
-			ctx->w->set_block(p, shape, mat);
+			ctx->world->set_block(p, shape, mat);
 		}
 	return 0;
 fail:
@@ -362,14 +362,14 @@ int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 	if (objc != 1)
 		goto fail;
-	bb.x0 = ctx->w->get_p().x;
+	bb.x0 = ctx->world->get_p().x;
 	bb.y0 = WORLD_H - 1;
-	bb.z0 = ctx->w->get_p().y;
+	bb.z0 = ctx->world->get_p().y;
 	bb.x1 = bb.x0 + WORLD_W;
 	bb.y1 = bb.y0 + 1;
 	bb.z1 = bb.z0 + WORLD_W;
-	update_lighting(ctx->w, bb, &bb2);
-	ctx->w->set_flags(bb2, CHUNK_UNRENDERED);
+	update_lighting(ctx->world, bb, &bb2);
+	ctx->world->set_flags(bb2, CHUNK_UNRENDERED);
 	return TCL_OK;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));

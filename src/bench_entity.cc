@@ -18,7 +18,7 @@ void BenchEntity::update()
 
 void BenchEntity::render()
 {
-	ctx->render_inventory(items, p);
+	ctx->renderer->render_inventory(items, p);
 }
 
 void BenchEntity::load(sz_Tag *tag)

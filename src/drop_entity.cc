@@ -10,7 +10,7 @@ void DropEntity::callback(Body *b, const v3ll &cp, int face)
 	if (face != FACE_UP)
 		return;
 	if (items[0].num) {
-		Entity *e = ctx->w->get_data(cp);
+		Entity *e = ctx->world->get_data(cp);
 		if (e != nullptr)
 			items[0].num -= inventory_add(e->get_items(), items[0]);
 	}
@@ -44,7 +44,7 @@ void DropEntity::render()
 	glPushMatrix();
 	glTranslatef(body->get_p().x, body->get_p().y, body->get_p().z);
 	glScalef(.25, .25, .25);
-	ctx->render_item(items[0].obj, items[0].mat, 255);
+	ctx->renderer->render_item(items[0].obj, items[0].mat, 255);
 	glPopMatrix();
 }
 

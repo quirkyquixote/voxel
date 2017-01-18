@@ -18,7 +18,7 @@ void BoardEntity::update()
 
 void BoardEntity::render()
 {
-	ctx->render_inventory(items, p);
+	ctx->renderer->render_inventory(items, p);
 }
 
 void BoardEntity::load(sz_Tag *tag)
