@@ -62,7 +62,7 @@ void PlayerEntity::update()
 	int m = ctx->world->get_mat(p);
 	Entity *e = ctx->world->get_data(p);
 
-	if (e == nullptr || e->use(this)) {
+	if (e == nullptr || !e->use(this)) {
 		if (act == 1) {
 			if (cur.face != -1) {
 				if (s != SHAPE_NONE) {
