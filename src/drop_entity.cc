@@ -4,17 +4,15 @@
 #include "render.h"
 #include "block_entity.h"
 
-void DropEntity::callback(Body *b, const v3ll &p, int face)
+void DropEntity::callback(Body *b, const v3ll &cp, int face)
 {
 	if (face != FACE_UP)
 		return;
-/*
-	if (d->get_items()[0].num) {
-		Entity *e = 
-		struct block_entity *e = world_get_data(entity.ctx->w, p);
-		if (e != NULL && e->entity.items != NULL)
-			item.num -= inventory_add(e->entity.items, item);
-	}*/
+	if (items[0].num) {
+		Entity *e = ctx->w->get_data(cp);
+		if (e != nullptr)
+			items[0].num -= inventory_add(e->get_items(), items[0]);
+	}
 	b->set_v(b->get_v() * .8f);
 }
 

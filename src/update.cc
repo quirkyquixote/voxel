@@ -306,9 +306,9 @@ void spill_inventory(Context *ctx, const v3ll &p)
 {
 	Entity *e;
 	e = ctx->w->get_data(p);
-	if (e == nullptr || e->get_items().size() == 0)
+	if (e == nullptr || e->get_items()->size() == 0)
 		return;
-	for (auto &s : e->get_items()) {
+	for (auto &s : *e->get_items()) {
 		if (s.num) {
 			DropEntity *d = new DropEntity(ctx, s);
 			v3f q(p);
