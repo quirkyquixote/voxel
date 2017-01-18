@@ -510,16 +510,16 @@ void use_tool(Context *ctx)
 	} else if (s.obj == OBJ_STAIRS) {
 		if (f == FACE_UP) {
 			ctx->w->set_block(p,
-					SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, s.mat);
+					SHAPE_STAIRS_DF + (ctx->rot.y + 2) % 4, s.mat);
 		} else if (f == FACE_DN) {
 			ctx->w->set_block(p,
-					SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, s.mat);
+					SHAPE_STAIRS_UF + (ctx->rot.y + 2) % 4, s.mat);
 		} else if (q.y > 0.5) {
 			ctx->w->set_block(p,
-					SHAPE_STAIRS_UF + (ctx->roty + 2) % 4, s.mat);
+					SHAPE_STAIRS_UF + (ctx->rot.y + 2) % 4, s.mat);
 		} else {
 			ctx->w->set_block(p,
-					SHAPE_STAIRS_DF + (ctx->roty + 2) % 4, s.mat);
+					SHAPE_STAIRS_DF + (ctx->rot.y + 2) % 4, s.mat);
 		}
 	} else if (s.obj == OBJ_PANE) {
 		if (ctx->move.y0) {
@@ -536,7 +536,7 @@ void use_tool(Context *ctx)
 			else if (f == FACE_FT)
 				ctx->w->set_block(p, SHAPE_PANE_BK, s.mat);
 		} else {
-			if (ctx->roty & 1)
+			if (ctx->rot.y & 1)
 				ctx->w->set_block(p, SHAPE_PANE_X, s.mat);
 			else
 				ctx->w->set_block(p, SHAPE_PANE_Z, s.mat);
@@ -623,8 +623,8 @@ void update_camera(Context *ctx)
 	ctx->cam->set_p(ctx->player->get_p() + v3f(0, .8, 0));
 	ctx->cam->set_r(ctx->player->get_r());
 
-	ctx->rotx = (unsigned int)floor(0.5 + r.x / M_PI_2) & 3;
-	ctx->roty = (unsigned int)floor(0.5 + r.y / M_PI_2) & 3;
+	ctx->rot.x = (unsigned int)floor(0.5 + r.x / M_PI_2) & 3;
+	ctx->rot.y = (unsigned int)floor(0.5 + r.y / M_PI_2) & 3;
 
 	v = v3f(0, 0, -5);
 	v = rotx(v, r.x);

@@ -1,45 +1,43 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#include "event.h"
-
 #include "context.h"
 #include "lighting.h"
 #include "drop_entity.h"
 
-void event(const SDL_Event *e, Context *ctx)
+void Context::event(const SDL_Event *e)
 {
-	if (ctx->mode == MODE_COMMAND) {
+	if (mode == MODE_COMMAND) {
 		if (e->type == SDL_KEYDOWN) {
 			if (e->key.keysym.sym == SDLK_RETURN) {
-				Tcl_Eval(ctx->tcl, ctx->cli->get_visible());
-				const char *ret = Tcl_GetStringResult(ctx->tcl);
+				Tcl_Eval(tcl, cli->get_visible());
+				const char *ret = Tcl_GetStringResult(tcl);
 				if (ret && *ret)
 					log_info("%s", ret);
-				ctx->cli->push();
-				ctx->mode = MODE_ROAM;
+				cli->push();
+				mode = MODE_ROAM;
 				SDL_StopTextInput();
 			} else if (e->key.keysym.sym == SDLK_ESCAPE) {
-				ctx->mode = MODE_ROAM;
+				mode = MODE_ROAM;
 				SDL_StopTextInput();
 			} else if (e->key.keysym.sym == SDLK_DELETE) {
-				ctx->cli->delete_forward();
+				cli->delete_forward();
 			} else if (e->key.keysym.sym == SDLK_BACKSPACE) {
-				ctx->cli->delete_backward();
+				cli->delete_backward();
 			} else  if (e->key.keysym.sym == SDLK_HOME) {
-				ctx->cli->first_char();
+				cli->first_char();
 			} else  if (e->key.keysym.sym == SDLK_END) {
-				ctx->cli->last_char();
+				cli->last_char();
 			} else  if (e->key.keysym.sym == SDLK_UP) {
-				ctx->cli->prev_line();
+				cli->prev_line();
 			} else  if (e->key.keysym.sym == SDLK_DOWN) {
-				ctx->cli->next_line();
+				cli->next_line();
 			} else  if (e->key.keysym.sym == SDLK_LEFT) {
-				ctx->cli->prev_char();
+				cli->prev_char();
 			} else  if (e->key.keysym.sym == SDLK_RIGHT) {
-				ctx->cli->next_char();
+				cli->next_char();
 			}
 		} else if (e->type == SDL_TEXTINPUT) {
-			ctx->cli->append(e->text.text);
+			cli->append(e->text.text);
 		} else if (e->type == SDL_TEXTEDITING) {
 			log_warning("text editing event");
 		}
@@ -50,108 +48,108 @@ void event(const SDL_Event *e, Context *ctx)
 		if (e->key.repeat) {
 			return;
 		} else if (e->key.keysym.sym == SDLK_w) {
-			ctx->move.z0 = 1;
+			move.z0 = 1;
 		} else if (e->key.keysym.sym == SDLK_a) {
-			ctx->move.x0 = 1;
+			move.x0 = 1;
 		} else if (e->key.keysym.sym == SDLK_s) {
-			ctx->move.z1 = 1;
+			move.z1 = 1;
 		} else if (e->key.keysym.sym == SDLK_d) {
-			ctx->move.x1 = 1;
+			move.x1 = 1;
 		} else if (e->key.keysym.sym == SDLK_LSHIFT) {
-			ctx->move.y0 = 1;
+			move.y0 = 1;
 		} else if (e->key.keysym.sym == SDLK_SPACE) {
-			ctx->move.y1 = 1;
+			move.y1 = 1;
 		} else if (e->key.keysym.sym == SDLK_r) {
-			ctx->pick = 1;
+			pick = 1;
 		} else if (e->key.keysym.sym == SDLK_LCTRL) {
-			ctx->run = 1;
+			run = 1;
 		} else if (e->key.keysym.sym == SDLK_1) {
-			ctx->tool = 0;
+			tool = 0;
 		} else if (e->key.keysym.sym == SDLK_2) {
-			ctx->tool = 1;
+			tool = 1;
 		} else if (e->key.keysym.sym == SDLK_3) {
-			ctx->tool = 2;
+			tool = 2;
 		} else if (e->key.keysym.sym == SDLK_4) {
-			ctx->tool = 3;
+			tool = 3;
 		} else if (e->key.keysym.sym == SDLK_5) {
-			ctx->tool = 4;
+			tool = 4;
 		} else if (e->key.keysym.sym == SDLK_6) {
-			ctx->tool = 5;
+			tool = 5;
 		} else if (e->key.keysym.sym == SDLK_7) {
-			ctx->tool = 6;
+			tool = 6;
 		} else if (e->key.keysym.sym == SDLK_8) {
-			ctx->tool = 7;
+			tool = 7;
 		} else if (e->key.keysym.sym == SDLK_9) {
-			ctx->tool = 8;
+			tool = 8;
 		} else if (e->key.keysym.sym == SDLK_q) {
-			Item &s = ctx->inv[ctx->tool];
+			Item &s = inv[tool];
 			if (s.num > 0) {
-				DropEntity *e = new DropEntity(ctx, Item(s.obj, s.mat, 1));
-				e->get_body()->set_p(ctx->cam->get_p());
+				DropEntity *e = new DropEntity(this, Item(s.obj, s.mat, 1));
+				e->get_body()->set_p(cam->get_p());
 				v3f v(0, 0, -.5);
-				v = rotx(v, ctx->cam->get_r().x);
-				v = roty(v, ctx->cam->get_r().y);
+				v = rotx(v, cam->get_r().x);
+				v = roty(v, cam->get_r().y);
 				e->get_body()->set_v(v);
-				ctx->entities.push_back(e);
+				entities.push_back(e);
 				--s.num;
 			}
 		} else if (e->key.keysym.sym == SDLK_ESCAPE) {
-			ctx->ml->kill();
+			ml->kill();
 		} else if (e->key.keysym.sym == SDLK_o) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else if (e->key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE START ===\n");
-		//	profile_manager_reset(ctx->prof_mgr);
+		//	profile_manager_reset(prof_mgr);
 		}
 	} else if (e->type == SDL_KEYUP) {
 		if (e->key.repeat) {
 			return;
 		} else if (e->key.keysym.sym == SDLK_w) {
-			ctx->move.z0 = 0;
+			move.z0 = 0;
 		} else if (e->key.keysym.sym == SDLK_a) {
-			ctx->move.x0 = 0;
+			move.x0 = 0;
 		} else if (e->key.keysym.sym == SDLK_s) {
-			ctx->move.z1 = 0;
+			move.z1 = 0;
 		} else if (e->key.keysym.sym == SDLK_d) {
-			ctx->move.x1 = 0;
+			move.x1 = 0;
 		} else if (e->key.keysym.sym == SDLK_LSHIFT) {
-			ctx->move.y0 = 0;
+			move.y0 = 0;
 		} else if (e->key.keysym.sym == SDLK_SPACE) {
-			ctx->move.y1 = 0;
+			move.y1 = 0;
 		} else if (e->key.keysym.sym == SDLK_r) {
-			ctx->pick = 0;
+			pick = 0;
 		} else if (e->key.keysym.sym == SDLK_o) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		} else if (e->key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE DUMP ===\n");
-			//profile_manager_dump(ctx->prof_mgr);
+			//profile_manager_dump(prof_mgr);
 		} else if (e->key.keysym.sym == SDLK_l) {
-			v3f p = ctx->player->get_p();
-			v3f v = ctx->player->get_v();
-			v3f r = ctx->player->get_r();
+			v3f p = player->get_p();
+			v3f v = player->get_v();
+			v3f r = player->get_r();
 			log_info("pos %g,%g,%g", p.x, p.y, p.z);
 			log_info("vel %g,%g,%g", v.x, v.y, v.z);
 			log_info("rot %g,%g,%g", r.x, r.y, r.z);
-			log_info("facing %d,%s", ctx->rotx, face_names[ctx->roty]);
+			log_info("facing %d,%s", rot.x, face_names[rot.y]);
 		} else if (e->key.keysym.sym == SDLK_PERIOD) {
-			ctx->mode = MODE_COMMAND;
+			mode = MODE_COMMAND;
 			SDL_StartTextInput();
 		}
 	} else if (e->type == SDL_MOUSEBUTTONDOWN) {
 		if (e->button.button == SDL_BUTTON_LEFT) {
-			ctx->act = 1;
+			act = 1;
 		} else if (e->button.button == SDL_BUTTON_RIGHT) {
-			ctx->use = 1;
+			use = 1;
 		}
 	} else if (e->type == SDL_MOUSEBUTTONUP) {
 		if (e->button.button == SDL_BUTTON_LEFT) {
-			ctx->act = 0;
+			act = 0;
 		} else if (e->button.button == SDL_BUTTON_RIGHT) {
-			ctx->use = 0;
+			use = 0;
 		}
 	} else if (e->type == SDL_MOUSEWHEEL) {
-		if (ctx->move.y0) {
-			int mat = ctx->inv[ctx->tool].mat;
+		if (move.y0) {
+			int mat = inv[tool].mat;
 			if (e->wheel.y > 0) {
 				do {
 					if (mat == 0)
@@ -165,16 +163,16 @@ void event(const SDL_Event *e, Context *ctx)
 						mat = 0;
 				} while (texcoord_from_mat[mat][0] == v2f(0, 0));
 			}
-			ctx->inv[ctx->tool].mat = mat;
+			inv[tool].mat = mat;
 		} else {
 			if (e->wheel.y > 0) {
-				if (ctx->tool == 0)
-					ctx->tool = ctx->inv.size();
-				--ctx->tool;
+				if (tool == 0)
+					tool = inv.size();
+				--tool;
 			} else if (e->wheel.y < 0) {
-				++ctx->tool;
-				if (ctx->tool == ctx->inv.size())
-					ctx->tool = 0;
+				++tool;
+				if (tool == inv.size())
+					tool = 0;
 			}
 		}
 	}
