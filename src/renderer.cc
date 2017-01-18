@@ -66,11 +66,13 @@ Renderer::~Renderer()
 
 void Renderer::operator()()
 {
+	glEnable(GL_DEPTH_TEST);
 	render_shards();
 //	render_flowsim(this);
 	render_block_entities();
 	render_roaming_entities();
 	ctx->player->render();
+	glDisable(GL_DEPTH_TEST);
 	render_commandline();
 }
 
