@@ -3,7 +3,6 @@
 #include "crate_entity.h"
 
 #include "context.h"
-#include "update.h"
 
 CrateEntity::CrateEntity(Context *ctx) : BlockEntity(ctx, 16)
 {
@@ -35,7 +34,7 @@ sz_Tag *CrateEntity::save()
 bool CrateEntity::use()
 {
 	if (ctx->cur.face == FACE_UP) {
-		use_inventory(ctx, &items);
+		ctx->use_inventory(&items);
 		return true;
 	}
 	return false;

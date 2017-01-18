@@ -3,7 +3,6 @@
 #include "bench_entity.h"
 
 #include "context.h"
-#include "update.h"
 
 BenchEntity::BenchEntity(Context *ctx) : BlockEntity(ctx, 9)
 {
@@ -35,10 +34,10 @@ sz_Tag *BenchEntity::save()
 bool BenchEntity::use()
 {
 	if (ctx->cur.face == FACE_UP) {
-		use_inventory(ctx, &items);
+		ctx->use_inventory(&items);
 		return true;
 	} else {
-		use_workbench(ctx, &items);
+		ctx->use_workbench(&items);
 		return true;
 	}
 	return false;

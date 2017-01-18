@@ -59,6 +59,7 @@ class Context {
 
 	void event(const SDL_Event *e);
 	void render();
+	void update();
 
 	void render_shards();
 	void render_cursor();
@@ -70,6 +71,24 @@ class Context {
 	void render_string(const char *str);
 	void render_inventory(const std::vector<Item> &items, const v3ll &p);
 	void render_item(int obj, int mat, GLfloat alpha);
+
+	void update_face_lf(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
+	void update_face_rt(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
+	void update_face_dn(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
+	void update_face_up(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
+	void update_face_bk(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
+	void update_face_ft(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);
+	void update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z);
+	void update_vbo(int id, int64_t x0, int64_t y0, int64_t z0);
+	void spill_inventory(const v3ll &p);
+	void use_inventory(std::vector<Item> *items);
+	void drop_block(const v3ll &p);
+	void use_workbench(std::vector<Item> *inv);
+	void use_tool();
+	void update_player();
+	void update_camera();
+	void update_chunks();
+	void update_entities();
 };
 
 unsigned long long next_id(void);

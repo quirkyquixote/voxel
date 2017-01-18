@@ -2,8 +2,6 @@
 
 #include "pipe_entity.h"
 
-#include "update.h"
-
 PipeEntity::PipeEntity(Context *ctx) : BlockEntity(ctx, 9)
 {
 }

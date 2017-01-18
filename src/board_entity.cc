@@ -3,7 +3,6 @@
 #include "board_entity.h"
 
 #include "context.h"
-#include "update.h"
 
 BoardEntity::BoardEntity(Context *ctx) : BlockEntity(ctx, 64)
 {
@@ -35,7 +34,7 @@ sz_Tag *BoardEntity::save()
 bool BoardEntity::use()
 {
 	if (ctx->cur.face == FACE_UP) {
-		use_inventory(ctx, &items);
+		ctx->use_inventory(&items);
 		return true;
 	}
 	return false;

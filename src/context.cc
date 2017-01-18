@@ -12,7 +12,6 @@
 #include <errno.h>
 
 #include "lighting.h"
-#include "update.h"
 
 int load_all(Context *ctx);
 int save_all(Context *ctx);
@@ -39,7 +38,7 @@ int main(int argc, char *argv[])
 	/* Setup main loop */
 	ctx->ml = new MainLoop(30);
 	ctx->ml->set_event_callback([ctx](const SDL_Event *e){ctx->event(e);});
-	ctx->ml->set_update_callback(std::bind(update, ctx));
+	ctx->ml->set_update_callback([ctx](){ctx->update();});
 	ctx->ml->set_window(new Window("voxel", 0, 0, 1280, 768, 0));
 	ctx->ml->get_window()->set_render_callback([ctx](){ctx->render();});
 
