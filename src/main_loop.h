@@ -2,6 +2,8 @@
 #ifndef VOXEL_MAIN_LOOP_H_
 #define VOXEL_MAIN_LOOP_H_
 
+#include <functional>
+
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 #include "SDL2/SDL_mixer.h"
@@ -11,39 +13,71 @@
 #undef GL_GLEXT_PROTOTYPES
 #include "GL/glu.h"
 
-struct window {
-	struct window *next;
+class Window {
+public:
+	Window(const char *title, int x, int y, int w, int h, int flags);
+	~Window();
+
+	inline void redraw()
+	{
+		SDL_GL_MakeCurrent(sdl_window, gl_context);
+		render_func();
+		SDL_GL_SwapWindow(sdl_window);
+	}
+
+	inline bool has_keyboard_focus()
+	{
+		return SDL_GetKeyboardFocus() == sdl_window;
+	}
+
+	inline bool has_mouse_focus()
+	{
+		return SDL_GetMouseFocus() == sdl_window;
+	}
+
+	inline void set_render_callback(const std::function<void(void)> &func)
+	{
+		render_func = func;
+	}
+
+	inline SDL_Window *get_sdl_window() { return sdl_window; }
+	inline SDL_GLContext get_gl_context() { return gl_context; }
+
+private:
 	SDL_Window *sdl_window;
 	SDL_GLContext gl_context;
-	void(*render_func)(void *);
-	void *render_data;
+	std::function<void(void)> render_func;
 };
 
-struct main_loop {
-	void(*update_func)(void *);
-	void *update_data;
-	void(*event_func)(const SDL_Event *, void *);
-	void *event_data;
-	struct window *windows;
+class MainLoop {
+public:
+	MainLoop(int fps);
+	~MainLoop();
+
+	void run();
+
+	inline void kill() { keep_going = false; }
+	inline void set_window(Window *w) { window = w; }
+	inline Window *get_window() { return window; }
+
+	inline void set_update_callback(const std::function<void(void)> &func)
+	{
+		update_func = func;
+	}
+
+	inline void set_event_callback(const std::function<void(const SDL_Event *)> &func)
+	{
+		event_func = func;
+	}
+
+private:
+	std::function<void(void)> update_func;
+	std::function<void(const SDL_Event *)> event_func;
+	Window *window;
 	int fps;
 	int keep_going;
 };
 
-struct window *window(const char *title, int x, int y, int w, int h, int flags);
-void window_destroy(struct window *w);
-void window_redraw(struct window *w);
-int window_has_keyboard_focus(struct window *w);
-int window_has_mouse_focus(struct window *w);
-void window_set_render_callback(struct window *w, void(*func)(void *), void *data);
-
-struct main_loop *main_loop(int fps);
-void main_loop_destroy(struct main_loop *ml);
-void main_loop_run(struct main_loop *ml);
-void main_loop_kill(struct main_loop *ml);
-void main_loop_add_window(struct main_loop *ml, struct window *w);
-void main_loop_remove_window(struct main_loop *ml, struct window *w);
-void main_loop_set_update_callback(struct main_loop *ml, void(*func)(void *), void *data);
-void main_loop_set_event_callback(struct main_loop *ml, void(*func)(const SDL_Event *, void *), void *data);
 
 #endif
 

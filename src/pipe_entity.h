@@ -4,12 +4,18 @@
 
 #include "block_entity.h"
 
-struct pipe_entity {
-	struct block_entity block;
+class PipeEntity : public BlockEntity {
+public:
+	PipeEntity(Context *ctx);
+	~PipeEntity();
+
+	void update();
+	void render();
+	sz_Tag *save();
+	void load(sz_Tag *val);
+	bool use();
+
+	const char *get_name() { return "pipe"; }
 };
-
-struct entity_traits pipe_traits;
-
-struct pipe_entity *pipe_entity(struct context *ctx);
 
 #endif

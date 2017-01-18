@@ -4,11 +4,12 @@
 
 #include <tcl.h>
 
+#include <list>
+
 #include "chunk.h"
 #include "terraform.h"
 #include "main_loop.h"
 #include "physics.h"
-#include "flowsim.h"
 #include "profile.h"
 #include "vertex_buffer.h"
 #include "tone_mapper.h"
@@ -18,36 +19,33 @@
 #include "inventory.h"
 #include "cli.h"
 #include "tcl_commands.h"
+#include "roaming_entity.h"
 
 enum {
 	MODE_ROAM,
 	MODE_COMMAND,
 };
 
-struct context {
-	char *dir;
-	struct main_loop *ml;
+class Context {
+public:
+	const char *dir;
+	MainLoop *ml;
 	Tcl_Interp *tcl;
-	struct cli *cli;
-	struct world *w;
-	struct profile_manager *prof_mgr;
-	struct vertex_buffer *shard_vertex_buffer;
-	struct vertex_buffer *obj_vertex_buffer;
-	struct tone_mapper *tone_mapper;
-	struct shader *shader;
-	struct camera *cam;
+	CommandLine *cli;
+	World *w;
+	VertexBuffer *shard_vertex_buffer;
+	VertexBuffer *obj_vertex_buffer;
+	ToneMapper *tone_mapper;
+	Shader *shader;
+	Camera *cam;
 	GLuint tex_terrain;
 	GLuint tex_font;
-	struct space *space;
-	struct flowsim *flowsim;
-	struct body *player;
-	struct query cur;
-	struct box3c move;
-	struct array *inv;
-	struct array *bench;
-	struct v3ll bench_p;
-	struct list entities;
-	struct list entity_traits;
+	Space *space;
+	Body *player;
+	Query cur;
+	box3c move;
+	Inventory inv;
+	std::list<RoamingEntity*> entities;
 	char mode;
 	char act;
 	char use;

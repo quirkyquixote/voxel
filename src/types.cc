@@ -88,7 +88,7 @@ const char *mat_names[256] = {
 	[MAT_SLATE_CRATE] = "slate_crate",
 	[MAT_SLATE_BENCH] = "slate_bench",
 	[MAT_SLATE_PIPE] = "slate_pipe",
-	[MAT_SLATE_BOARD] "slate_board",
+	[MAT_SLATE_BOARD] = "slate_board",
 	[MAT_CLAY] = "clay",
 	[MAT_CLAY_COBBLE] = "clay_cobble",
 	[MAT_CLAY_LBRICK] = "clay_lbrick",
@@ -187,7 +187,7 @@ const char *face_names[] = {
 	[FACE_DN] = "down",
 };
 
-struct block_traits block_traits[256][256] = {
+BlockTraits block_traits[256][256] = {
 	[MAT_LIMESTONE_BENCH] = {
 		[SHAPE_BLOCK_DN] = {
 			.capacity = 9,
@@ -584,47 +584,47 @@ struct block_traits block_traits[256][256] = {
 
 #define BLOCK_DROPS(m1, m2) \
 do { \
-	block_traits[m1][SHAPE_BLOCK_DN].drop = item(OBJ_BLOCK, m2, 1);\
-	block_traits[m1][SHAPE_BLOCK_UP].drop = item(OBJ_BLOCK, m2, 1);\
-	block_traits[m1][SHAPE_BLOCK_LF].drop = item(OBJ_BLOCK, m2, 1);\
-	block_traits[m1][SHAPE_BLOCK_RT].drop = item(OBJ_BLOCK, m2, 1);\
-	block_traits[m1][SHAPE_BLOCK_BK].drop = item(OBJ_BLOCK, m2, 1);\
-	block_traits[m1][SHAPE_BLOCK_FT].drop = item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_DN].drop = Item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_UP].drop = Item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_LF].drop = Item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_RT].drop = Item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_BK].drop = Item(OBJ_BLOCK, m2, 1);\
+	block_traits[m1][SHAPE_BLOCK_FT].drop = Item(OBJ_BLOCK, m2, 1);\
 } while (0)
 
 #define SLAB_DROPS(m1, m2) \
 do { \
-	block_traits[m1][SHAPE_SLAB_DN].drop = item(OBJ_SLAB, m2, 1);\
-	block_traits[m1][SHAPE_SLAB_UP].drop = item(OBJ_SLAB, m2, 1);\
-	block_traits[m1][SHAPE_SLAB_LF].drop = item(OBJ_SLAB, m2, 1);\
-	block_traits[m1][SHAPE_SLAB_RT].drop = item(OBJ_SLAB, m2, 1);\
-	block_traits[m1][SHAPE_SLAB_BK].drop = item(OBJ_SLAB, m2, 1);\
-	block_traits[m1][SHAPE_SLAB_FT].drop = item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_DN].drop = Item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_UP].drop = Item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_LF].drop = Item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_RT].drop = Item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_BK].drop = Item(OBJ_SLAB, m2, 1);\
+	block_traits[m1][SHAPE_SLAB_FT].drop = Item(OBJ_SLAB, m2, 1);\
 } while (0)
 
 #define STAIR_DROPS(m1, m2) \
 do { \
-	block_traits[m1][SHAPE_STAIRS_DF].drop = item(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_DL].drop = item(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_DB].drop = item(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_DR].drop = item(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_UF].drop = item(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_UL].drop = item(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_UB].drop = item(OBJ_STAIRS, m2, 1);\
-	block_traits[m1][SHAPE_STAIRS_UR].drop = item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DF].drop = Item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DL].drop = Item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DB].drop = Item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_DR].drop = Item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UF].drop = Item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UL].drop = Item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UB].drop = Item(OBJ_STAIRS, m2, 1);\
+	block_traits[m1][SHAPE_STAIRS_UR].drop = Item(OBJ_STAIRS, m2, 1);\
 } while (0)
 
 #define PANE_DROPS(m1, m2) \
 do { \
-	block_traits[m1][SHAPE_PANE_X].drop = item(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_Y].drop = item(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_Z].drop = item(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_DN].drop = item(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_UP].drop = item(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_LF].drop = item(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_RT].drop = item(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_BK].drop = item(OBJ_PANE, m2, 1);\
-	block_traits[m1][SHAPE_PANE_FT].drop = item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_X].drop = Item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_Y].drop = Item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_Z].drop = Item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_DN].drop = Item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_UP].drop = Item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_LF].drop = Item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_RT].drop = Item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_BK].drop = Item(OBJ_PANE, m2, 1);\
+	block_traits[m1][SHAPE_PANE_FT].drop = Item(OBJ_PANE, m2, 1);\
 } while (0)
 
 
@@ -662,6 +662,11 @@ do {\
 	COMMON_DROPS(mat##_BOARD, mat##_BOARD);\
 } while (0)
 
+template<typename T>Entity *construct_entity(Context *ctx)
+{
+	return new T(ctx);
+}
+
 void block_traits_init(void)
 {
 	COMMON_DROPS(MAT_GRASS, MAT_DIRT);
@@ -681,64 +686,64 @@ void block_traits_init(void)
 	WOOD_DROPS(MAT_WOOD6);
 	WOOD_DROPS(MAT_WOOD7);
 
-	block_traits[MAT_LIMESTONE_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_SANDSTONE_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_MARBLE_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_GRANITE_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_BASALT_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_SLATE_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_CLAY_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_WOOD1_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_WOOD2_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_WOOD3_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_WOOD4_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_WOOD5_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_WOOD6_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
-	block_traits[MAT_WOOD7_CRATE][SHAPE_BLOCK_DN].entity = &crate_traits;
+	block_traits[MAT_LIMESTONE_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_SANDSTONE_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_MARBLE_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_GRANITE_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_BASALT_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_SLATE_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_CLAY_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD1_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD2_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD3_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD4_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD5_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD6_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD7_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
 
-	block_traits[MAT_LIMESTONE_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_SANDSTONE_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_MARBLE_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_GRANITE_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_BASALT_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_SLATE_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_CLAY_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_WOOD1_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_WOOD2_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_WOOD3_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_WOOD4_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_WOOD5_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_WOOD6_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
-	block_traits[MAT_WOOD7_BENCH][SHAPE_BLOCK_DN].entity = &bench_traits;
+	block_traits[MAT_LIMESTONE_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_SANDSTONE_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_MARBLE_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_GRANITE_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_BASALT_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_SLATE_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_CLAY_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD1_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD2_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD3_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD4_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD5_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD6_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD7_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
 
-	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
-	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_DN].entity = &pipe_traits;
+	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
 
-	block_traits[MAT_LIMESTONE_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_SANDSTONE_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_MARBLE_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_GRANITE_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_BASALT_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_SLATE_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_CLAY_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_WOOD1_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_WOOD2_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_WOOD3_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_WOOD4_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_WOOD5_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_WOOD6_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
-	block_traits[MAT_WOOD7_BOARD][SHAPE_BLOCK_DN].entity = &board_traits;
+	block_traits[MAT_LIMESTONE_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_SANDSTONE_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_MARBLE_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_GRANITE_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_BASALT_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_SLATE_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_CLAY_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD1_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD2_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD3_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD4_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD5_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD6_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD7_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
 }
 

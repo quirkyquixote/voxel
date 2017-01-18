@@ -2,6 +2,8 @@
 #ifndef VOXEL_RENDERER_H_
 #define VOXEL_RENDERER_H_
 
+#include <vector>
+
 #define GL_GLEXT_PROTOTYPES 1
 #include "SDL2/SDL_opengl.h"
 #include "GL/glext.h"
@@ -11,10 +13,9 @@
 #include "v3.h"
 #include "v4.h"
 #include "box2.h"
-#include "array.h"
 #include "types.h"
 
-struct vertex {
+struct Vertex {
 	GLfloat x, y, z;
 	GLfloat u0, v0;
 	GLfloat u1, v1;
@@ -24,66 +25,72 @@ struct vertex {
 	GLubyte a;
 };
 
-struct vertex_desc {
+struct VertexDesc {
 	GLfloat x, y, z;
 	GLfloat u, v;
 	GLfloat r, g, b;
 	int face;
 };
 
-struct vertex_buffer {
+class VertexBuffer {
+public:
+	VertexBuffer(int nbufs);
+	~VertexBuffer();
+
+	void enable();
+	void draw(GLenum mode, size_t buf);
+	void draw_slice(GLenum mode, size_t buf, size_t first, size_t count);
+	void disable();
+	void update(size_t buf, const void *data, size_t size);
+
+	inline size_t get_count() const { return vbo_count; }
+	inline GLuint get_name(int i) const { return vbo_names[i]; }
+	inline size_t get_size(int i) const { return vbo_sizes[i]; }
+
+private:
 	size_t vbo_count;
 	GLuint *vbo_names;
 	size_t *vbo_sizes;
 };
 
-extern const struct v2f texcoord_from_mat[][3];
+extern v2f texcoord_from_mat[256][3];
 
-extern struct vertex_desc vertices_face_dn[];
-extern struct vertex_desc vertices_face_up[];
-extern struct vertex_desc vertices_face_lf[];
-extern struct vertex_desc vertices_face_rt[];
-extern struct vertex_desc vertices_face_bk[];
-extern struct vertex_desc vertices_face_ft[];
+extern VertexDesc vertices_face_dn[];
+extern VertexDesc vertices_face_up[];
+extern VertexDesc vertices_face_lf[];
+extern VertexDesc vertices_face_rt[];
+extern VertexDesc vertices_face_bk[];
+extern VertexDesc vertices_face_ft[];
 
-extern struct vertex_desc vertices_slab_dn[];
-extern struct vertex_desc vertices_slab_up[];
-extern struct vertex_desc vertices_slab_lf[];
-extern struct vertex_desc vertices_slab_rt[];
-extern struct vertex_desc vertices_slab_bk[];
-extern struct vertex_desc vertices_slab_ft[];
-extern struct vertex_desc vertices_stairs_dl[];
-extern struct vertex_desc vertices_stairs_dr[];
-extern struct vertex_desc vertices_stairs_db[];
-extern struct vertex_desc vertices_stairs_df[];
-extern struct vertex_desc vertices_stairs_ul[];
-extern struct vertex_desc vertices_stairs_ur[];
-extern struct vertex_desc vertices_stairs_ub[];
-extern struct vertex_desc vertices_stairs_uf[];
-extern struct vertex_desc vertices_pane_x[];
-extern struct vertex_desc vertices_pane_y[];
-extern struct vertex_desc vertices_pane_z[];
-extern struct vertex_desc vertices_pane_dn[];
-extern struct vertex_desc vertices_pane_up[];
-extern struct vertex_desc vertices_pane_lf[];
-extern struct vertex_desc vertices_pane_rt[];
-extern struct vertex_desc vertices_pane_bk[];
-extern struct vertex_desc vertices_pane_ft[];
+extern VertexDesc vertices_slab_dn[];
+extern VertexDesc vertices_slab_up[];
+extern VertexDesc vertices_slab_lf[];
+extern VertexDesc vertices_slab_rt[];
+extern VertexDesc vertices_slab_bk[];
+extern VertexDesc vertices_slab_ft[];
+extern VertexDesc vertices_stairs_dl[];
+extern VertexDesc vertices_stairs_dr[];
+extern VertexDesc vertices_stairs_db[];
+extern VertexDesc vertices_stairs_df[];
+extern VertexDesc vertices_stairs_ul[];
+extern VertexDesc vertices_stairs_ur[];
+extern VertexDesc vertices_stairs_ub[];
+extern VertexDesc vertices_stairs_uf[];
+extern VertexDesc vertices_pane_x[];
+extern VertexDesc vertices_pane_y[];
+extern VertexDesc vertices_pane_z[];
+extern VertexDesc vertices_pane_dn[];
+extern VertexDesc vertices_pane_up[];
+extern VertexDesc vertices_pane_lf[];
+extern VertexDesc vertices_pane_rt[];
+extern VertexDesc vertices_pane_bk[];
+extern VertexDesc vertices_pane_ft[];
 
-struct vertex_buffer *vertex_buffer(int nbufs);
-void vertex_buffer_destroy(struct vertex_buffer *r);
-void vertex_buffer_enable(struct vertex_buffer *r);
-void vertex_buffer_draw(struct vertex_buffer *r, GLenum mode, size_t buf);
-void vertex_buffer_draw_slice(struct vertex_buffer *r, GLenum mode, size_t buf,
-		size_t first, size_t count);
-void vertex_buffer_disable(struct vertex_buffer *r);
-void vertex_buffer_update(struct vertex_buffer *r, size_t buf, const void *data, size_t size);
-
-static inline void vertices_add(struct array *s, const struct vertex_desc *buf, size_t len,
-	struct v3f p, struct v2f t1, const struct v2f *t2, const int *tilted)
+static inline void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf, size_t len,
+	v3f p, v2f t1, const v2f *t2, const int *tilted)
 {
 	int i;
-	struct vertex v;
+	Vertex v;
 	for (i = 0; i < len; ++i) {
 		v.x = buf[i].x + p.x;
 		v.y = buf[i].y + p.y;
@@ -101,11 +108,11 @@ static inline void vertices_add(struct array *s, const struct vertex_desc *buf, 
 		v.g = buf[i].g * 255;
 		v.b = buf[i].b * 255;
 		v.a = 255;
-		array_push(s, &v);
+		s->push_back(v);
 	}
 }
 
-static inline void texcoord_up(int mat, struct v2f *ret, int *tilted)
+static inline void texcoord_up(int mat, v2f *ret, int *tilted)
 {
 	ret[FACE_UP] = texcoord_from_mat[mat][1];
 	ret[FACE_DN] = texcoord_from_mat[mat][2];
@@ -121,7 +128,7 @@ static inline void texcoord_up(int mat, struct v2f *ret, int *tilted)
 	tilted[FACE_FT] = 0;
 }
 
-static inline void texcoord_dn(int mat, struct v2f *ret, int *tilted)
+static inline void texcoord_dn(int mat, v2f *ret, int *tilted)
 {
 	ret[FACE_UP] = texcoord_from_mat[mat][2];
 	ret[FACE_DN] = texcoord_from_mat[mat][1];
@@ -137,7 +144,7 @@ static inline void texcoord_dn(int mat, struct v2f *ret, int *tilted)
 	tilted[FACE_FT] = 0;
 }
 
-static inline void texcoord_lf(int mat, struct v2f *ret, int *tilted)
+static inline void texcoord_lf(int mat, v2f *ret, int *tilted)
 {
 	ret[FACE_UP] = texcoord_from_mat[mat][0];
 	ret[FACE_DN] = texcoord_from_mat[mat][0];
@@ -153,7 +160,7 @@ static inline void texcoord_lf(int mat, struct v2f *ret, int *tilted)
 	tilted[FACE_FT] = 1;
 }
 
-static inline void texcoord_rt(int mat, struct v2f *ret, int *tilted)
+static inline void texcoord_rt(int mat, v2f *ret, int *tilted)
 {
 	ret[FACE_UP] = texcoord_from_mat[mat][0];
 	ret[FACE_DN] = texcoord_from_mat[mat][0];
@@ -169,7 +176,7 @@ static inline void texcoord_rt(int mat, struct v2f *ret, int *tilted)
 	tilted[FACE_FT] = 1;
 }
 
-static inline void texcoord_bk(int mat, struct v2f *ret, int *tilted)
+static inline void texcoord_bk(int mat, v2f *ret, int *tilted)
 {
 	ret[FACE_UP] = texcoord_from_mat[mat][0];
 	ret[FACE_DN] = texcoord_from_mat[mat][0];
@@ -185,7 +192,7 @@ static inline void texcoord_bk(int mat, struct v2f *ret, int *tilted)
 	tilted[FACE_FT] = 0;
 }
 
-static inline void texcoord_ft(int mat, struct v2f *ret, int *tilted)
+static inline void texcoord_ft(int mat, v2f *ret, int *tilted)
 {
 	ret[FACE_UP] = texcoord_from_mat[mat][0];
 	ret[FACE_DN] = texcoord_from_mat[mat][0];
@@ -200,6 +207,8 @@ static inline void texcoord_ft(int mat, struct v2f *ret, int *tilted)
 	tilted[FACE_BK] = 0;
 	tilted[FACE_FT] = 0;
 }
+
+void populate_material_texcoord_table();
 
 #endif
 

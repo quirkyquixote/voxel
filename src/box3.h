@@ -2,78 +2,72 @@
 #ifndef VOXEL_AAB3_H_
 #define VOXEL_AAB3_H_
 
-struct box3f {
-	float x0, y0, z0, x1, y1, z1;
+template<typename T> struct box3 {
+	struct iterator {
+		v3<T> cur;
+		box3<T> box;
+		iterator(v3<T> cur, box3<T> box) : cur(cur), box(box) { }
+		inline void operator++()
+		{
+			++cur.z;
+			if (cur.z == box.z1) {
+				cur.z = box.z0;
+				++cur.y;
+				if (cur.y == box.y1) {
+					cur.y = box.y0;
+					++cur.x;
+				}
+			}
+		}
+		inline bool operator!=(const iterator &rhs) { return cur != rhs.cur; }
+		inline v3<T> &operator*() { return cur; }
+	};
+
+	T x0, y0, z0, x1, y1, z1;
+	box3(T x0, T y0, T z0, T x1, T y1, T z1)
+		: x0(x0), y0(y0), z0(z0), x1(x1), y1(y1), z1(z1) {}
+	box3() : x0(0), y0(0), z0(0), x1(0), y1(0), z1(0) {}
+
+	iterator begin() const { return iterator(v3<T>(x0, y0, z0), *this); }
+	iterator end() const { return iterator(v3<T>(x1, y0, z0), *this); }
 };
 
-struct box3d {
-	double x0, y0, z0, x1, y1, z1;
+template<typename T> struct box3_iterator {
 };
 
-struct box3c {
-	char x0, y0, z0, x1, y1, z1;
-};
+typedef box3<float> box3f;
+typedef box3<double> box3d;
+typedef box3<char> box3c;
+typedef box3<short> box3s;
+typedef box3<long> box3l;
+typedef box3<long long> box3ll;
 
-struct box3s {
-	short x0, y0, z0, x1, y1, z1;
-};
-
-struct box3l {
-	long x0, y0, z0, x1, y1, z1;
-};
-
-struct box3ll {
-	long long x0, y0, z0, x1, y1, z1;
-};
-
-static inline struct box3f box3f(float x0, float y0, float z0, float x1, float y1, float z1)
+template<typename T> box3<T> fix(const box3<T> &b)
 {
-	return (struct box3f){ x0, y0, z0, x1, y1, z1 };
+	return box3<T>(
+		b.x0 < b.x1 ? b.x0 : b.x1,
+		b.y0 < b.y1 ? b.y0 : b.y1,
+		b.z0 < b.z1 ? b.z0 : b.z1,
+		b.x0 > b.x1 ? b.x0 : b.x1,
+		b.y0 > b.y1 ? b.y0 : b.y1,
+		b.z0 > b.z1 ? b.z0 : b.z1);
 }
 
-static inline struct box3d box3d(double x0, double y0, double z0, double x1, double y1, double z1)
+template<typename T> box3<T> grow(const box3<T> &b, T k)
 {
-	return (struct box3d){ x0, y0, z0, x1, y1, z1 };
+	return box3<T>(b.x0 - k, b.y0 - k, b.z0 - k, b.x0 + k, b.y0 + k, b.z0 + k);
 }
 
-static inline struct box3c box3c(char x0, char y0, char z0, char x1, char y1, char z1)
+template<typename T> bool overlap(const box3<T> &b1, const box3<T> &b2)
 {
-	return (struct box3c){ x0, y0, z0, x1, y1, z1 };
+	return (b2.x0 <= b1.x1 && b2.x1 >= b1.x0 &&
+			b2.y0 <= b1.y1 && b2.y1 >= b1.y0 &&
+			b2.z0 <= b1.z1 && b2.z1 >= b1.z0);
 }
-
-static inline struct box3s box3s(short x0, short y0, short z0, short x1, short y1, short z1)
-{
-	return (struct box3s){ x0, y0, z0, x1, y1, z1 };
-}
-
-static inline struct box3l box3l(long x0, long y0, long z0, long x1, long y1, long z1)
-{
-	return (struct box3l){ x0, y0, z0, x1, y1, z1 };
-}
-
-static inline struct box3ll box3ll(long long x0, long long y0, long long z0, long long x1, long long y1, long long z1)
-{
-	return (struct box3ll){ x0, y0, z0, x1, y1, z1 };
-}
-
-#define box3_fix(bb) (typeof(bb)){ \
-	bb.x0 < bb.x1 ? bb.x0 : bb.x1, \
-	bb.y0 < bb.y1 ? bb.y0 : bb.y1, \
-	bb.z0 < bb.z1 ? bb.z0 : bb.z1, \
-	bb.x0 > bb.x1 ? bb.x0 : bb.x1, \
-	bb.y0 > bb.y1 ? bb.y0 : bb.y1, \
-	bb.z0 > bb.z1 ? bb.z0 : bb.z1 }
-
-#define box3_grow(b,k) (typeof(b)){ b.x0 - k, b.y0 - k, b.z0 - k, b.x0 + k, b.y0 + k, b.z0 + k }
-
-#define box3_overlap(b1, b2) \
-	(b2.x0 <= b1.x1 && b2.x1 >= b1.x0 &&\
-	 b2.y0 <= b1.y1 && b2.y1 >= b1.y0 &&\
-	 b2.z0 <= b1.z1 && b2.z1 >= b1.z0)
 
 #define box3_foreach(_iter,_bbox) \
 	for (_iter.x = _bbox.x0; _iter.x < _bbox.x1; ++_iter.x) \
-	for (_iter.y = _bbox.y0; _iter.y < _bbox.y1; ++_iter.y) \
-	for (_iter.z = _bbox.z0; _iter.z < _bbox.z1; ++_iter.z)
+for (_iter.y = _bbox.y0; _iter.y < _bbox.y1; ++_iter.y) \
+for (_iter.z = _bbox.z0; _iter.z < _bbox.z1; ++_iter.z)
 
 #endif

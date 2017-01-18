@@ -4,12 +4,18 @@
 
 #include "block_entity.h"
 
-struct board_entity {
-	struct block_entity block;
+class BoardEntity : public BlockEntity {
+public:
+	BoardEntity(Context *ctx);
+	~BoardEntity();
+
+	void update();
+	void render();
+	sz_Tag *save();
+	void load(sz_Tag *val);
+	bool use();
+
+	const char *get_name() { return "board"; }
 };
-
-struct entity_traits board_traits;
-
-struct board_entity *board_entity(struct context *ctx);
 
 #endif

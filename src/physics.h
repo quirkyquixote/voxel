@@ -5,7 +5,9 @@
 #ifndef VOXEL_PHYSICS_H_
 #define VOXEL_PHYSICS_H_
 
-#include "list.h"
+#include <list>
+#include <functional>
+
 #include "v2.h"
 #include "v3.h"
 #include "box3.h"
@@ -22,113 +24,101 @@ enum {
 	CELL_RUF = 1 << 7,
 };
 
-struct body {
-	struct list list;
-	struct v3f p;
-	struct v3f r;
-	struct v3f v;
-	struct v2f s;
-	struct box3f bb;
+class Space;
+class Body;
+struct Query;
+
+class Body {
+	friend class Space;
+
+public:
+	Body(Space *s);
+	~Body();
+
+	inline v3f get_p() const { return p; }
+	inline v3f get_r() const { return r; }
+	inline v3f get_v() const { return v; }
+	inline v2f get_size() const { return s; }
+	inline box3f get_box() const { return bb; }
+	inline int get_step_size() const { return step_size; }
+
+	inline void set_p(const v3f &new_p) { p = new_p; }
+	inline void set_r(const v3f &new_r) { r = new_r; }
+	inline void set_v(const v3f &new_v) { v = new_v; }
+	inline void set_size(const v2f &new_s) { s = new_s; }
+	inline void set_step_size(int s) { step_size = s; }
+
+	inline void set_callback(const std::function<void(Body *, const v3ll &, int)> &func)
+	{
+		cb_func = func;
+	}
+
+private:
+	v3f p;
+	v3f r;
+	v3f v;
+	v2f s;
+	box3f bb;
 	int step_size;
-	void (* cb_func)(struct body *b, void *data, struct v3ll p, int face);
-	void *cb_data;
+	std::function<void(Body *, const v3ll, int)> cb_func;
 };
 
-struct space {
+class Space {
+public:
+	Space(World *w);
+	~Space();
+
+	void run();
+	int query(const v3f &p, const v3f &v, Query *q);
+
+	inline void set_gravity(float g) { gravity = g; }
+	inline void set_iterations(int i) { iterations = i; }
+	inline void set_impulse(float i) { impulse = i; }
+	inline void set_terminal_speed(float t) { terminal_speed = t; }
+
+	inline Body *create_body()
+	{
+		Body *b = new Body(this);
+		bodies.push_back(b);
+		return b;
+	}
+
+	inline void destroy_body(Body *b)
+	{
+		bodies.remove(b);
+		delete b;
+	}
+
+private:
 	int iterations;
 	float impulse;
-	struct v3f gravity;
+	float gravity;
 	float terminal_speed;
-	struct world *world;
-	struct list body;
+	World *world;
+	std::list<Body *> bodies;
+
+	int cell_at(const int *masks, int64_t x, int64_t y, int64_t z);
+	void move_xpos(Body *b, float dt);
+	void move_xneg(Body *b, float dt);
+	void move_zpos(Body *b, float dt);
+	void move_zneg(Body *b, float dt);
+	void move_ypos(Body *b, float dt);
+	void move_yneg(Body *b, float dt);
+	void step(float dt);
+
+	int query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t);
+	int query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t);
+	int query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t);
+	int query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t);
+	int query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t);
+	int query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t);
 };
 
-struct query {
+struct Query {
 	int face;
-	struct v3ll p;
-	struct v3f q;
+	v3ll p;
+	v3f q;
 };
-
-struct body *body(struct space *s);
-void body_destroy(struct body *b);
-
-static inline struct v3f body_get_position(struct body *b)
-{
-	return b->p;
-}
-
-static inline struct v3f body_get_rotation(struct body *b)
-{
-	return b->r;
-}
-
-static inline struct v3f body_get_velocity(struct body *b)
-{
-	return b->v;
-}
-
-static inline struct v2f body_get_size(struct body *b)
-{
-	return b->s;
-}
-
-static inline void body_set_position(struct body *b, struct v3f p)
-{
-	b->p = p;
-}
-
-static inline void body_set_rotation(struct body *b, struct v3f r)
-{
-	b->r = r;
-}
-
-static inline void body_set_velocity(struct body *b, struct v3f v)
-{
-	b->v = v;
-}
-
-static inline void body_set_size(struct body *b, struct v2f s)
-{
-	b->s = s;
-}
-
-static inline void body_set_step_size(struct body *b, int s)
-{
-	b->step_size = s;
-}
-
-static inline void body_set_callback(struct body *b,
-		void(*func)(struct body *, void *, struct v3ll, int), void *data)
-{
-	b->cb_func = func;
-	b->cb_data = data;
-}
-
-struct space *space(struct world *w);
-void space_destroy(struct space *s);
-void space_run(struct space *s);
-int space_query(struct space *s, struct v3f p, struct v3f v, struct query *q);
-
-static inline void space_set_gravity(struct space *s, struct v3f g)
-{
-	s->gravity = g;
-}
-
-static inline void space_set_iterations(struct space *s, int i)
-{
-	s->iterations = i;
-}
-
-static inline void space_set_impulse(struct space *s, float i)
-{
-	s->impulse = i;
-}
-
-static inline void space_set_terminal_speed(struct space *s, float t)
-{
-	s->terminal_speed = t;
-}
-
 
 #endif
 

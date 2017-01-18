@@ -4,7 +4,7 @@
 #include "context.h"
 #include "lighting.h"
 
-static struct box3ll sel_bb = { 0, 0, 0, 0, 0, 0 };
+static box3ll sel_bb = { 0, 0, 0, 0, 0, 0 };
 
 int parse_item(const char *str, int *mat, int *obj)
 {
@@ -75,7 +75,7 @@ int parse_block(const char *str, int *mat, int *shape)
 int cmd_help(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: help";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
 
 	if (objc != 1)
 		goto fail;
@@ -100,7 +100,7 @@ fail:
 int cmd_ls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: ls [mat|obj|sha]";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
 	char *str;
 
 	if (objc < 2)
@@ -133,7 +133,7 @@ fail:
 int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: give <material>[_<object>] [<amount>]";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
 	int mat, obj, num = 1;
 
 	if (objc < 2 || objc > 3)
@@ -144,7 +144,7 @@ int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		if (Tcl_GetIntFromObj(interp, objv[2], &num) != TCL_OK)
 			goto fail;
 	}
-	inventory_add(ctx->inv, item(obj, mat, num));
+	inventory_add(&ctx->inv, Item(obj, mat, num));
 	log_info("given %s_%s %d", mat_names[mat], obj_names[obj], num);
 	return 0;
 fail:
@@ -155,7 +155,7 @@ fail:
 int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: take <material>[_<object>] [<amount>]";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
 	int mat, obj, num = 1;
 
 	if (objc < 2 || objc > 3)
@@ -166,7 +166,7 @@ int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		if (Tcl_GetIntFromObj(interp, objv[2], &num) != TCL_OK)
 			goto fail;
 	}
-	inventory_remove(ctx->inv, item(obj, mat, num));
+	inventory_remove(&ctx->inv, Item(obj, mat, num));
 	log_info("taken %s_%s %d", mat_names[mat], obj_names[obj], num);
 	return 0;
 fail:
@@ -177,7 +177,7 @@ fail:
 int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: query";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
 
 	if (objc != 1)
 		goto fail;
@@ -185,13 +185,14 @@ int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		log_info("no block selected");
 		return TCL_OK;
 	}
-	log_info("block: %d,%d,%d", ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z);
+	log_info("block: %lld,%lld,%lld", ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z);
 	log_info("offset: %.02g,%.02g,%.02g", ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z);
 	log_info("face: %s", face_names[ctx->cur.face]);
 	log_info("type: %s.%s",
-			mat_names[world_get_mat(ctx->w, ctx->cur.p)],
-			shape_names[world_get_shape(ctx->w, ctx->cur.p)]);
-	log_info("light level: %d", world_get_light(ctx->w, ctx->cur.p));
+			mat_names[ctx->w->get_mat(ctx->cur.p)],
+			shape_names[ctx->w->get_shape(ctx->cur.p)]);
+	log_info("light level: %d", ctx->w->get_light(ctx->cur.p));
+/*
 	struct array *inv = world_get_data(ctx->w, ctx->cur.p);
 	if (inv != NULL) {
 		log_info("inventory:");
@@ -204,6 +205,7 @@ int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 			++i;
 		}
 	}
+*/
 	return TCL_OK;
 
 fail:
@@ -214,7 +216,7 @@ fail:
 int cmd_seta(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: a";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
 
 	if (objc != 1)
 		goto fail;
@@ -236,7 +238,7 @@ fail:
 int cmd_setb(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: b";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
 
 	if (objc != 1)
 		goto fail;
@@ -258,21 +260,20 @@ fail:
 int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: box <material>[_<shape>]";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
 	int mat, shape;
-	struct box3ll bb;
-	struct v3ll p;
+	box3ll bb;
 
 	if (objc != 2)
 		goto fail;
 	if (parse_block(Tcl_GetString(objv[1]), &mat, &shape) != 0)
 		goto fail;
-	bb = box3_fix(sel_bb);
+	bb = fix(sel_bb);
 	++bb.x1;
 	++bb.y1;
 	++bb.z1;
-	box3_foreach(p, bb)
-		world_set(ctx->w, p, shape, mat);
+	for (auto &p : bb)
+		ctx->w->set_block(p, shape, mat);
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -282,36 +283,36 @@ fail:
 int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: hbox <material>[_<shape>]";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
 	int mat, shape;
-	struct box3ll bb;
-	struct v3ll p;
+	box3ll bb;
+	v3ll p;
 
 	if (objc != 2)
 		goto fail;
 	if (parse_block(Tcl_GetString(objv[1]), &mat, &shape) != 0)
 		goto fail;
-	bb = box3_fix(sel_bb);
+	bb = fix(sel_bb);
 	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
 			p.y = bb.y0;
-			world_set(ctx->w, p, shape, mat);
+			ctx->w->set_block(p, shape, mat);
 			p.y = bb.y1;
-			world_set(ctx->w, p, shape, mat);
+			ctx->w->set_block(p, shape, mat);
 		}
 	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
 		for (p.y = bb.y0; p.y <= bb.y1; ++p.y) {
 			p.z = bb.z0;
-			world_set(ctx->w, p, shape, mat);
+			ctx->w->set_block(p, shape, mat);
 			p.z = bb.z1;
-			world_set(ctx->w, p, shape, mat);
+			ctx->w->set_block(p, shape, mat);
 		}
 	for (p.y = bb.y0; p.y <= bb.y1; ++p.y)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
 			p.x = bb.x0;
-			world_set(ctx->w, p, shape, mat);
+			ctx->w->set_block(p, shape, mat);
 			p.x = bb.x1;
-			world_set(ctx->w, p, shape, mat);
+			ctx->w->set_block(p, shape, mat);
 		}
 	return 0;
 fail:
@@ -322,29 +323,29 @@ fail:
 int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: walls <material>[_<shape>]";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
 	int mat, shape;
-	struct box3ll bb;
-	struct v3ll p;
+	box3ll bb;
+	v3ll p;
 
 	if (objc != 2)
 		goto fail;
 	if (parse_block(Tcl_GetString(objv[1]), &mat, &shape) != 0)
 		goto fail;
-	bb = box3_fix(sel_bb);
+	bb = fix(sel_bb);
 	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
 		for (p.y = bb.y0; p.y <= bb.y1; ++p.y) {
 			p.z = bb.z0;
-			world_set(ctx->w, p, shape, mat);
+			ctx->w->set_block(p, shape, mat);
 			p.z = bb.z1;
-			world_set(ctx->w, p, shape, mat);
+			ctx->w->set_block(p, shape, mat);
 		}
 	for (p.y = bb.y0; p.y <= bb.y1; ++p.y)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
 			p.x = bb.x0;
-			world_set(ctx->w, p, shape, mat);
+			ctx->w->set_block(p, shape, mat);
 			p.x = bb.x1;
-			world_set(ctx->w, p, shape, mat);
+			ctx->w->set_block(p, shape, mat);
 		}
 	return 0;
 fail:
@@ -355,19 +356,19 @@ fail:
 int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: relit";
-	struct context *ctx = data;
+	Context *ctx = static_cast<Context *>(data);
+	box3ll bb, bb2;
 
 	if (objc != 1)
 		goto fail;
-	struct box3ll bb, bb2;
-	bb.x0 = ctx->w->x;
+	bb.x0 = ctx->w->get_p().x;
 	bb.y0 = WORLD_H - 1;
-	bb.z0 = ctx->w->z;
+	bb.z0 = ctx->w->get_p().y;
 	bb.x1 = bb.x0 + WORLD_W;
 	bb.y1 = bb.y0 + 1;
 	bb.z1 = bb.z0 + WORLD_W;
 	update_lighting(ctx->w, bb, &bb2);
-	world_set_flags(ctx->w, bb2, CHUNK_UNRENDERED);
+	ctx->w->set_flags(bb2, CHUNK_UNRENDERED);
 	return TCL_OK;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));

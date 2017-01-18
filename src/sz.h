@@ -5,6 +5,10 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include <vector>
+#include <string>
 
 enum sz_typeid {
 	SZ_NULL = 0,
@@ -20,102 +24,156 @@ enum sz_typeid {
 	SZ_DICT = 10,
 };
 
-struct sz_i8 {
-	uint8_t tag;
-	int8_t data;
+class sz_Exception {
+public:
+	sz_Exception() { }
+	~sz_Exception() { }
 };
 
-struct sz_i16 {
-	uint8_t tag;
-	int16_t data;
+class sz_Tag {
+public:
+	typedef std::vector<sz_Tag *> List;
+	typedef std::vector<std::pair<char *, sz_Tag *> > Dict;
+
+	sz_Tag() { }
+	virtual ~sz_Tag() { }
+
+	virtual inline uint8_t get_tag() const { return SZ_NULL; }
+
+	virtual inline int8_t get_i8() const { throw sz_Exception(); }
+	virtual inline int16_t get_i16() const { throw sz_Exception(); }
+	virtual inline int32_t get_i32() const { throw sz_Exception(); }
+	virtual inline int64_t get_i64() const { throw sz_Exception(); }
+	virtual inline float get_f32() const { throw sz_Exception(); }
+	virtual inline double get_f64() const { throw sz_Exception(); }
+	virtual inline const char *get_str() const { throw sz_Exception(); }
+	virtual inline const std::string &get_raw() const { throw sz_Exception(); }
+	virtual inline List &get_list() { throw sz_Exception(); }
+	virtual inline Dict &get_dict() { throw sz_Exception(); }
 };
 
-struct sz_i32 {
-	uint8_t tag;
-	int32_t data;
+class sz_i8 : public sz_Tag {
+public:
+	sz_i8(int8_t val) : val(val) {}
+	~sz_i8() { }
+	inline uint8_t get_tag() const { return SZ_I8; }
+	inline int8_t get_i8() const { return val; }
+private:
+	int8_t val;
 };
 
-struct sz_i64 {
-	uint8_t tag;
-	int64_t data;
+class sz_i16 : public sz_Tag {
+public:
+	sz_i16(int16_t val) : val(val) {}
+	~sz_i16() { }
+	inline uint8_t get_tag() const { return SZ_I16; }
+	inline int16_t get_i16() const { return val; }
+private:
+	int16_t val;
 };
 
-struct sz_f32 {
-	uint8_t tag;
-	float data;
+class sz_i32 : public sz_Tag {
+public:
+	sz_i32(int32_t val) : val(val) {}
+	~sz_i32() { }
+	inline uint8_t get_tag() const { return SZ_I32; }
+	inline int32_t get_i32() const { return val; }
+private:
+	int32_t val;
 };
 
-struct sz_f64 {
-	uint8_t tag;
-	double data;
+class sz_i64 : public sz_Tag {
+public:
+	sz_i64(int64_t val) : val(val) {}
+	~sz_i64() { }
+	inline uint8_t get_tag() const { return SZ_I64; }
+	inline int64_t get_i64() const { return val; }
+private:
+	int64_t val;
 };
 
-struct sz_str {
-	uint8_t tag;
-	int16_t size;
-	char *data;
+class sz_f32 : public sz_Tag {
+public:
+	sz_f32(float val) : val(val) {}
+	~sz_f32() { }
+	inline uint8_t get_tag() const { return SZ_F32; }
+	inline float get_f32() const { return val; }
+private:
+	float val;
 };
 
-struct sz_raw {
-	uint8_t tag;
-	int32_t size;
-	void *data;
+class sz_f64 : public sz_Tag {
+public:
+	sz_f64(double val) : val(val) {}
+	~sz_f64() { }
+	inline uint8_t get_tag() const { return SZ_F64; }
+	inline double get_f64() const { return val; }
+private:
+	double val;
 };
 
-struct sz_list {
-	uint8_t tag;
-	int32_t size;
-	int32_t alloc;
-	union sz_tag **vals;
+class sz_Str : public sz_Tag {
+public:
+	sz_Str(const char *val) : val(strdup(val)) { }
+	~sz_Str() { free(val); }
+	inline uint8_t get_tag() const { return SZ_STR; }
+	inline const char *get_str() const { return val; }
+private:
+	char *val;
 };
 
-struct sz_dict {
-	uint8_t tag;
-	int32_t size;
-	int32_t alloc;
-	char **keys;
-	union sz_tag **vals;
+class sz_Raw : public sz_Tag {
+public:
+	sz_Raw(const void *buf, size_t bytes) : data(reinterpret_cast<const char *>(buf), bytes) { }
+	~sz_Raw() { }
+	inline uint8_t get_tag() const { return SZ_RAW; }
+	inline const std::string &get_raw() const { return data; }
+private:
+	std::string data;
 };
 
-union sz_tag {
-	uint8_t tag;
-	struct sz_i8 i8;
-	struct sz_i16 i16;
-	struct sz_i32 i32;
-	struct sz_i64 i64;
-	struct sz_f32 f32;
-	struct sz_f64 f64;
-	struct sz_str str;
-	struct sz_raw raw;
-	struct sz_list list;
-	struct sz_dict dict;
+class sz_List : public sz_Tag {
+public:
+	sz_List() { }
+	~sz_List()
+	{
+		for (auto &it : val)
+			delete it;
+	}
+	inline uint8_t get_tag() const { return SZ_LIST; }
+	inline List &get_list() { return val; }
+private:
+	List val;
 };
 
-union sz_tag *sz_null(void);
-union sz_tag *sz_i8(int8_t data);
-union sz_tag *sz_i16(int16_t data);
-union sz_tag *sz_i32(int32_t data);
-union sz_tag *sz_i64(int64_t data);
-union sz_tag *sz_f32(float data);
-union sz_tag *sz_f64(double data);
-union sz_tag *sz_str(const char *data);
-union sz_tag *sz_raw(const void *data, size_t size);
-union sz_tag *sz_list(void);
-union sz_tag *sz_dict(void);
+class sz_Dict : public sz_Tag {
+public:
+	sz_Dict() { }
+	~sz_Dict()
+	{
+		for (auto &it : val) {
+			free(it.first);
+			delete it.second;
+		}
+	}
+	inline uint8_t get_tag() const { return SZ_DICT; }
+	inline Dict &get_dict() { return val; }
+private:
+	Dict val;
+};
 
-void sz_destroy(union sz_tag *tag);
+sz_Tag *sz_read(int fd);
+void sz_write(int fd, sz_Tag *root);
 
-int sz_list_add(union sz_tag *list, union sz_tag *elem);
-int sz_dict_add(union sz_tag *dict, const char *key, union sz_tag *elem);
+static inline void sz_list_add(sz_Tag *d, sz_Tag *v)
+{
+	d->get_list().push_back(v);
+}
 
-#define sz_list_foreach(_iter,_list) \
-for (int _i = 0; (_i < _list->list.size) && (_iter = _list->list.vals[_i]); ++_i)
-
-#define sz_dict_foreach(_key,_val,_dict) \
-for (int _i = 0; (_i < _dict->dict.size) && (_key = _dict->dict.keys[_i]) && (_val = _dict->dict.vals[_i]); ++_i)
-
-int sz_read(int fd, union sz_tag **root);
-int sz_write(int fd, union sz_tag *root);
+static inline void sz_dict_add(sz_Tag *d, const char *k, sz_Tag *v)
+{
+	d->get_dict().push_back(std::make_pair(strdup(k), v));
+}
 
 #endif
 

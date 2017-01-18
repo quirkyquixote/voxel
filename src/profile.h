@@ -5,50 +5,43 @@
 
 #include <stdint.h>
 
-struct profile;
+class Profile {
+public:
+	Profile(const char *tag);
+	virtual ~Profile();
+	virtual void begin();
+	virtual void end();
+	virtual void update();
 
-struct profile_traits {
-	void(*init)(struct profile *);
-	void(*deinit)(struct profile *);
-	void(*begin)(struct profile *);
-	void(*end)(struct profile *);
-	void(*update)(struct profile *);
+protected:
+	char *tag;
+	long long acc;
+	long long samples;
 };
 
-struct profile {
-	const struct profile_traits *traits;
-	struct profile *next;
-	const char *tag;
-	uint64_t acc;
-	uint64_t samples;
-	union {
-		uint64_t cpu;
-		unsigned int gpu;
-	};
+class CpuProfile : public Profile {
+public:
+	CpuProfile();
+	~CpuProfile();
+	void begin();
+	void end();
+	void update();
+
+private:
+	long long time;
 };
 
-struct profile_manager {
-	struct profile *first;
-	struct profile *last;
+class GpuProfile : public Profile {
+public:
+	GpuProfile();
+	~GpuProfile();
+	void begin();
+	void end();
+	void update();
+
+private:
+	long long time;
 };
-
-const struct profile_traits cpu_profile;
-const struct profile_traits gpu_profile;
-
-struct profile *profile(const char *name, const struct profile_traits *traits);
-void profile_destroy(struct profile *p);
-void profile_begin(struct profile *p);
-void profile_end(struct profile *p);
-void profile_reset(struct profile *p);
-void profile_dump(struct profile *p);
-
-struct profile_manager *profile_manager(void);
-void profile_manager_destroy(struct profile_manager *pm);
-void profile_manager_add(struct profile_manager *pm, struct profile *p);
-void profile_manager_remove(struct profile_manager *pm, struct profile *p);
-void profile_manager_update(struct profile_manager *pm);
-void profile_manager_reset(struct profile_manager *pm);
-void profile_manager_dump(struct profile_manager *pm);
 
 
 #endif

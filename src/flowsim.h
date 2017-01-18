@@ -5,7 +5,6 @@
 
 #include "v3.h"
 #include "chunk.h"
-#include "array.h"
 #include "list.h"
 
 struct flowsim {

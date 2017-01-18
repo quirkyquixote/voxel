@@ -7,7 +7,7 @@
 #include "context.h"
 #include "inventory.h"
 
-int recipe_match(struct array *inv, struct item *s);
+int recipe_match(std::vector<Item> *inv, Item *s);
 
 #endif
 

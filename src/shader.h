@@ -8,15 +8,31 @@
 #undef GL_GLEXT_PROTOTYPES
 
 
-struct shader {
+class Shader {
+public:
+	Shader(const char *vpath, const char *fpath);
+	~Shader();
+
+	inline void enable()
+	{
+		glUseProgram(pobj);
+	}
+
+	inline void disable()
+	{
+		glUseProgram(0);
+	}
+
+	inline GLint get_uniform_location(const GLchar *name)
+	{
+		return glGetUniformLocation(pobj, name);
+	}
+
+private:
 	GLuint vobj;
 	GLuint fobj;
 	GLuint pobj;
 };
-
-struct shader *shader(const char *vpath, const char *fpath);
-void shader_destroy(struct shader *s);
-int shader_enable(struct shader *s);
 
 
 #endif

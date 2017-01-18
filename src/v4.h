@@ -4,80 +4,63 @@
 
 #include <math.h>
 
-struct v4f {
-	float x, y, z, w;
+template<typename T> struct v4 {
+	T x, y, z, w;
+	v4() : x(0), y(0), z(0), w(0) {}
+	v4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
+	template<typename U> v4(const v4<U> &rhs) : x(rhs.x), y(rhs.y), z(rhs.z), w(rhs.w) {}
 };
 
-struct v4d {
-	double x, y, z, w;
-};
+typedef v4<float> v4f;
+typedef v4<double> v4d;
+typedef v4<char> v4c;
+typedef v4<short> v4s;
+typedef v4<long> v4l;
+typedef v4<long long> v4ll;
 
-struct v4c {
-	char x, y, z, w;
-};
-
-struct v4s {
-	short x, y, z, w;
-};
-
-struct v4l {
-	long x, y, z, w;
-};
-
-struct v4ll {
-	long long x, y, z, w;
-};
-
-static inline struct v4f v4f(float x, float y, float z, float w)
+template<typename T> inline bool operator==(const v4<T> &lhs, const v4<T> &rhs)
 {
-	return (struct v4f) { x, y, z };
+	return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z && lhs.w == rhs.w;
 }
 
-static inline struct v4d v4d(double x, double y, double z, double w)
+template<typename T> inline bool operator!=(const v4<T> &lhs, const v4<T> &rhs)
 {
-	return (struct v4d) { x, y, z };
+	return lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z || lhs.w != rhs.w;
 }
 
-static inline struct v4c v4c(char x, char y, char z, char w)
+template<typename T> inline v4<T> operator+(const v4<T> &lhs, const v4<T> &rhs)
 {
-	return (struct v4c) { x, y, z };
+	return v4<T>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w);
 }
 
-static inline struct v4s v4s(short x, short y, short z, char w)
+template<typename T> inline v4<T> operator-(const v4<T> &lhs, const v4<T> &rhs)
 {
-	return (struct v4s) { x, y, z };
+	return v4<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w);
 }
 
-static inline struct v4l v4l(long x, long y, long z, long w)
+template<typename T> inline v4<T> operator*(const v4<T> &lhs, T rhs)
 {
-	return (struct v4l) { x, y, z };
+	return v4<T>(lhs.x * rhs, lhs.y * rhs, lhs.z * rhs, lhs.w * rhs);
 }
 
-static inline struct v4ll v4ll(long long x, long long y, long long z, long long w)
+template<typename T> inline T dot(const v4<T> &lhs, const v4<T> &rhs)
 {
-	return (struct v4ll) { x, y, z };
+	return (lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w);
 }
 
-#define v4_eql(u, v) (u.x == v.x && u.y == v.y && u.z == v.z && u.w == v.w)
+template<typename T> inline T length(const v4<T> &lhs)
+{
+	return hypot(hypot(hypot(lhs.x, lhs.y), lhs.z), lhs.w);
+}
 
-#define v4_neq(u, v) (u.x != v.x || u.y != v.y || u.z != v.z || u.w != v.w)
+template<typename T> inline T dist(const v4<T> &lhs, const v4<T> &rhs)
+{
+	return length(lhs - rhs);
+}
 
-#define v4_add(u, v) ((typeof(u)){ u.x + v.x, u.y + v.y, u.z + v.z, u.w + v.w })
-
-#define v4_addx(u, v, d) ((typeof(u)){ u.x + v.x * d, u.y + v.y * d, u.z + v.z * d, u.w + v.w * d })
-
-#define v4_sub(u, v) ((typeof(u)){ u.x - v.x, u.y - v.y, u.z - v.z, u.w - v.w })
-
-#define v4_subx(u, v, d) ((typeof(u)){ u.x - v.x * d, u.y - v.y * d, u.z - v.z * d, u.v - v.w * d })
-
-#define v4_mul(u, d) ((typeof(u)){ u.x * d, u.y * d, u.z * d, u.w * d })
-
-#define v4_dot(u, v) (u.x * v.x + u.y * v.y + u.z * v.z + u.w * v.w)
-
-#define v4_length(u) hypot(hypot(hypot(u.x, u.y), u.z), u.w)
-
-#define v4_dist(u, v) v4_length(v4_sub(u, v))
-
-#define v4_normalize(u) v4_mul(u, 1.0 / v4_length(u))
+template<typename T> inline v4<T> normalize(const v4<T> &lhs)
+{
+	return lhs / length(lhs);
+}
 
 #endif

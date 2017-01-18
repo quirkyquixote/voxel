@@ -190,64 +190,33 @@ enum {
 	FACE_COUNT,
 };
 
-struct item {
+struct Item {
 	uint8_t obj;
 	uint8_t mat;
 	uint8_t num;
+
+	Item() : obj(0), mat(0), num(0) { }
+	Item(int obj, int mat, int num) : obj(obj), mat(mat), num(num) { }
 };
 
-struct block_traits {
+class Entity;
+class Context;
+
+struct BlockTraits {
 	unsigned char capacity;
-	struct item drop;
-	struct entity_traits *entity;
+	Item drop;
+	Entity *(*entity)(Context *);
 	int is_workbench : 1;
 	int is_inventory : 1;
 	int is_board : 1;
 };
-
-static inline struct item item(int obj, int mat, int num)
-{
-	return (struct item){ obj, mat, num };
-}
 
 extern const char *obj_names[];
 extern const char *mat_names[];
 extern const char *face_names[];
 extern const char *shape_names[];
 
-extern struct block_traits block_traits[256][256];
-
-static inline int obj_from_name(const char *name)
-{
-	for (int obj = 0; obj < OBJ_COUNT; ++obj)
-		if (obj_names[obj] && strcmp(obj_names[obj], name) == 0)
-			return obj;
-	return -1;
-}
-
-static inline int mat_from_name(const char *name)
-{
-	for (int mat = 0; mat < MAT_COUNT; ++mat)
-		if (mat_names[mat] && strcmp(mat_names[mat], name) == 0)
-			return mat;
-	return -1;
-}
-
-static inline int face_from_name(const char *name)
-{
-	for (int face = 0; face < FACE_COUNT; ++face)
-		if (face_names[face] && strcmp(face_names[face], name) == 0)
-			return face;
-	return -1;
-}
-
-static inline int shape_from_name(const char *name)
-{
-	for (int shape = 0; shape < SHAPE_COUNT; ++shape)
-		if (shape_names[shape] && strcmp(shape_names[shape], name) == 0)
-			return shape;
-	return -1;
-}
+extern struct BlockTraits block_traits[256][256];
 
 void block_traits_init(void);
 

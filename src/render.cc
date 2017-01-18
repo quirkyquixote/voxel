@@ -6,7 +6,7 @@
 #include "roaming_entity.h"
 #include "block_entity.h"
 
-void render_string(struct context *ctx, char *str)
+void render_string(Context *ctx, const char *str)
 {
 	GLfloat u0, v0, u1, v1;
 	glMatrixMode(GL_MODELVIEW);
@@ -40,12 +40,12 @@ void render_string(struct context *ctx, char *str)
 	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
 }
-
-void render_flowsim(struct context *ctx)
+/*
+void render_flowsim(Context *ctx)
 {
 	struct fs_volume *v;
 	struct fs_layer *l;
-	struct v3ll p;
+	v3ll p;
 
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -87,8 +87,8 @@ void render_flowsim(struct context *ctx)
 	glEnd();
 	glDisable(GL_BLEND);
 }
-
-void render_cursor(struct context *ctx)
+*/
+void render_cursor(Context *ctx)
 {
 	if (ctx->cur.face == -1)
 		return;
@@ -97,8 +97,7 @@ void render_cursor(struct context *ctx)
 	GLfloat y = ctx->cur.p.y;
 	GLfloat z = ctx->cur.p.z;
 
-	if (ctx->cur.face == FACE_UP &&
-			world_get_data(ctx->w, ctx->cur.p) != NULL)
+	if (ctx->cur.face == FACE_UP && ctx->w->get_data(ctx->cur.p) != nullptr)
 		return;
 
 	glMatrixMode(GL_MODELVIEW);
@@ -152,7 +151,7 @@ void render_cursor(struct context *ctx)
 }
 
 
-void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
+void render_obj(Context *ctx, int obj, int mat, GLfloat alpha)
 {
 	//glEnable(GL_TEXTURE_2D);
 	//glTexCoord2f(0.5, 0.5);
@@ -160,47 +159,47 @@ void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha)
 	if (mat >= MAT_COUNT)
 		mat = 0;
 
-	shader_enable(ctx->shader);
+	ctx->shader->enable();
 
 	glActiveTexture(GL_TEXTURE0);
-	int tl0 = glGetUniformLocation(ctx->shader->pobj, "Texture0");
+	int tl0 = ctx->shader->get_uniform_location("Texture0");
 	glUniform1i(tl0, 0);
-	glBindTexture(GL_TEXTURE_2D, ctx->tone_mapper->texture);
+	glBindTexture(GL_TEXTURE_2D, ctx->tone_mapper->get_texture());
 
 	glActiveTexture(GL_TEXTURE1);
-	int tl1 = glGetUniformLocation(ctx->shader->pobj, "Texture1");
+	int tl1 = ctx->shader->get_uniform_location("Texture1");
 	glUniform1i(tl1, 1);
 	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
 
 	glActiveTexture(GL_TEXTURE0);
 	if (obj == OBJ_BLOCK) {
-		vertex_buffer_enable(ctx->obj_vertex_buffer);
-		vertex_buffer_draw_slice(ctx->obj_vertex_buffer, GL_TRIANGLES, 0, 162 * mat + 0, 36);
-		vertex_buffer_disable(ctx->obj_vertex_buffer);
+		ctx->obj_vertex_buffer->enable();
+		ctx->obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 0, 36);
+		ctx->obj_vertex_buffer->disable();
 	} else if (obj == OBJ_SLAB) {
-		vertex_buffer_enable(ctx->obj_vertex_buffer);
-		vertex_buffer_draw_slice(ctx->obj_vertex_buffer, GL_TRIANGLES, 0, 162 * mat + 36, 36);
-		vertex_buffer_disable(ctx->obj_vertex_buffer);
+		ctx->obj_vertex_buffer->enable();
+		ctx->obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		ctx->obj_vertex_buffer->disable();
 	} else if (obj == OBJ_STAIRS) {
-		vertex_buffer_enable(ctx->obj_vertex_buffer);
-		vertex_buffer_draw_slice(ctx->obj_vertex_buffer, GL_TRIANGLES, 0, 162 * mat + 72, 54);
-		vertex_buffer_disable(ctx->obj_vertex_buffer);
+		ctx->obj_vertex_buffer->enable();
+		ctx->obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 72, 54);
+		ctx->obj_vertex_buffer->disable();
 	} else if (obj == OBJ_PANE) {
-		vertex_buffer_enable(ctx->obj_vertex_buffer);
-		vertex_buffer_draw_slice(ctx->obj_vertex_buffer, GL_TRIANGLES, 0, 162 * mat + 126, 36);
-		vertex_buffer_disable(ctx->obj_vertex_buffer);
+		ctx->obj_vertex_buffer->enable();
+		ctx->obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 126, 36);
+		ctx->obj_vertex_buffer->disable();
 	}
-	shader_enable(NULL);
+	ctx->shader->disable();
 	//glDisable(GL_TEXTURE_2D);
 }
 
-void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
+void render_inventory(Context *ctx, const std::vector<Item> &inv, const v3ll &p)
 {
 	int i, x, z;
-	int side = sqrt(inv->size);
-	struct item s;
+	int side = sqrt(inv.size());
+	Item s;
 
-	GLfloat d = v3_dist(ctx->player->p, p);
+	GLfloat d = dist(ctx->player->get_p(), v3f(p));
 	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -223,7 +222,7 @@ void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
 			glVertex3f(1, 0, 1);
 			glEnd();
 			glPopMatrix();
-			struct item s = inventory_get(inv, i);
+			Item s = inv[i];
 			if (s.num > 0) {
 				glColor4ub(0, 0, 0, alpha);
 				glPushMatrix();
@@ -237,8 +236,8 @@ void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
 				glMatrixMode(GL_MODELVIEW);
 				glPushMatrix();
 				glTranslatef(.5 / side, .5 / side, .5 / side);
-				glRotatef(180.0 * ctx->cam->r.y / M_PI, 0, -1, 0);
-				glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
+				glRotatef(180.0 * ctx->cam->get_r().y / M_PI, 0, -1, 0);
+				glRotatef(180.0 * ctx->cam->get_r().x / M_PI, 1, 0, 0);
 				glScalef(.05, .05, .05);
 				char buf[3];
 				snprintf(buf, sizeof(buf), "%02d", s.num);
@@ -252,42 +251,40 @@ void render_inventory(struct context *ctx, struct array *inv, struct v3ll p)
 	glDisable(GL_BLEND);
 }
 
-void roam_render(struct context *ctx)
+void roam_render(Context *ctx)
 {
-	struct box3ll bb;
-	struct v3ll p;
-	struct block_entity *be;
-	struct roaming_entity *re;
+	box3ll bb;
 	int m, i;
-	struct item s;
+	Item s;
 
 	render_cursor(ctx);
-	bb.x0 = floor(ctx->player->p.x - 4);
-	bb.y0 = floor(ctx->player->p.y - 4);
-	bb.z0 = floor(ctx->player->p.z - 4);
-	bb.x1 = ceil(ctx->player->p.x + 4);
-	bb.y1 = ceil(ctx->player->p.y + 4);
-	bb.z1 = ceil(ctx->player->p.z + 4);
+	v3f p = ctx->player->get_p();
+	bb.x0 = floor(p.x - 4);
+	bb.y0 = floor(p.y - 4);
+	bb.z0 = floor(p.z - 4);
+	bb.x1 = ceil(p.x + 4);
+	bb.y1 = ceil(p.y + 4);
+	bb.z1 = ceil(p.z + 4);
 
-	box3_foreach(p, bb) {
-		be = world_get_data(ctx->w, p);
-		if (be != NULL)
-			be->entity.traits->render_func(be);
+	for (auto &p : bb) {
+		Entity *e = ctx->w->get_data(p);
+		if (e != NULL)
+			e->render();
 	}
 
-	list_foreach(re, &ctx->entities, entities) {
-		re->entity.traits->render_func(re);
-	}
+	for (auto &e : ctx->entities)
+		e->render();
 
 	glDisable(GL_DEPTH_TEST);
 
-	s = inventory_get(ctx->inv, ctx->tool);
+	s = ctx->inv[ctx->tool];
 	if (s.num > 0) {
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		glTranslatef(ctx->cam->p.x, ctx->cam->p.y, ctx->cam->p.z);
-		glRotatef(180.0 * ctx->cam->r.y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
+		v3f p = ctx->cam->get_p();
+		glTranslatef(p.x, p.y, p.z);
+		glRotatef(180.0 * ctx->cam->get_r().y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * ctx->cam->get_r().x / M_PI, 1, 0, 0);
 		glTranslatef(.4, -.4, -.8);
 		glScalef(.125, .125, .125);
 		render_obj(ctx, s.obj, s.mat, 255);
@@ -297,9 +294,10 @@ void roam_render(struct context *ctx)
 	for (i = 0; i < 9; ++i) {
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		glTranslatef(ctx->cam->p.x, ctx->cam->p.y, ctx->cam->p.z);
-		glRotatef(180.0 * ctx->cam->r.y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
+		v3f p = ctx->cam->get_p();
+		glTranslatef(p.x, p.y, p.z);
+		glRotatef(180.0 * ctx->cam->get_r().y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * ctx->cam->get_r().x / M_PI, 1, 0, 0);
 		glTranslatef(i * .06 - .30, -.4, -.8);
 		glScalef(.03125, .03125, .03125);
 		if (i == ctx->tool)
@@ -312,7 +310,7 @@ void roam_render(struct context *ctx)
 		glVertex3f(1.25, 0, 1.25);
 		glVertex3f(1.25, 0, -.25);
 		glEnd();
-		s = inventory_get(ctx->inv, i);
+		s = ctx->inv[i];
 		if (s.num > 0)
 			render_obj(ctx, s.obj, s.mat, 255);
 		if (s.num > 1) {
@@ -330,13 +328,14 @@ void roam_render(struct context *ctx)
 	if (ctx->mode == MODE_COMMAND) {
 		glEnable(GL_BLEND);
 		glColor3f(1, 1, 1);
-		glTranslatef(ctx->cam->p.x, ctx->cam->p.y, ctx->cam->p.z);
-		glRotatef(180.0 * ctx->cam->r.y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * ctx->cam->r.x / M_PI, 1, 0, 0);
+		v3f p = ctx->cam->get_p();
+		glTranslatef(p.x, p.y, p.z);
+		glRotatef(180.0 * ctx->cam->get_r().y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * ctx->cam->get_r().x / M_PI, 1, 0, 0);
 		glTranslatef(-15, 0, -30);
-		if (ctx->cli->visible)
-			render_string(ctx, ctx->cli->visible);
-		glTranslatef(.5 * ctx->cli->cur_char, 0, 0);
+		if (ctx->cli->get_visible())
+			render_string(ctx, ctx->cli->get_visible());
+		glTranslatef(.5 * ctx->cli->get_cur_char(), 0, 0);
 		glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ZERO);
 		glBegin(GL_TRIANGLES);
 		glVertex3f(.5, 1, 0);
@@ -351,51 +350,50 @@ void roam_render(struct context *ctx)
 	glEnable(GL_DEPTH_TEST);
 }
 
-void render(void *data)
+void render(Context *ctx)
 {
-	struct context *ctx = data;
 	int64_t x, y, z;
-	struct v3f p;
-	struct chunk *c;
-	struct shard *s;
+	v3f p;
+	Chunk *c;
+	Shard *s;
 	int shards_rendered;
 
 	shards_rendered = 0;
-	camera_load_gl_matrices(ctx->cam);
-	shader_enable(ctx->shader);
+	ctx->cam->load_gl_matrices();
+	ctx->shader->enable();
 
 	glActiveTexture(GL_TEXTURE0);
-	int tl0 = glGetUniformLocation(ctx->shader->pobj, "Texture0");
+	int tl0 = ctx->shader->get_uniform_location("Texture0");
 	glUniform1i(tl0, 0);
-	glBindTexture(GL_TEXTURE_2D, ctx->tone_mapper->texture);
+	glBindTexture(GL_TEXTURE_2D, ctx->tone_mapper->get_texture());
 
 	glActiveTexture(GL_TEXTURE1);
-	int tl1 = glGetUniformLocation(ctx->shader->pobj, "Texture1");
+	int tl1 = ctx->shader->get_uniform_location("Texture1");
 	glUniform1i(tl1, 1);
 	glBindTexture(GL_TEXTURE_2D, ctx->tex_terrain);
 
 	glActiveTexture(GL_TEXTURE0);
-	vertex_buffer_enable(ctx->shard_vertex_buffer);
+	ctx->shard_vertex_buffer->enable();
 	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
 		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
-			c = ctx->w->chunks[x][z];
-			p.x = c->x + CHUNK_W / 2;
-			p.z = c->z + CHUNK_W / 2;
+			c = ctx->w->get_chunk(v2ll(x, z));
+			p.x = c->get_p().x + CHUNK_W / 2;
+			p.z = c->get_p().y + CHUNK_W / 2;
 			for (y = 0; y < SHARDS_PER_CHUNK; ++y) {
-				s = c->shards[y];
-				if (ctx->shard_vertex_buffer->vbo_sizes[s->id] == 0)
+				s = c->get_shard(y);
+				if (ctx->shard_vertex_buffer->get_size(s->get_id()) == 0)
 					continue;
-				p.y = (s->y + 0.5) * SHARD_W;
-				if (camera_visible(ctx->cam, p, SHARD_W) == 0)
+				p.y = (s->get_y() + 0.5) * SHARD_W;
+				if (!ctx->cam->is_visible(p, SHARD_W))
 					continue;
-				vertex_buffer_draw(ctx->shard_vertex_buffer, GL_TRIANGLES, s->id);
+				ctx->shard_vertex_buffer->draw(GL_TRIANGLES, s->get_id());
 				++shards_rendered;
 			}
 		}
 	}
-	vertex_buffer_disable(ctx->shard_vertex_buffer);
-	shader_enable(NULL);
-	render_flowsim(ctx);
+	ctx->shard_vertex_buffer->disable();
+	ctx->shader->disable();
+//	render_flowsim(ctx);
 	roam_render(ctx);
 }
 

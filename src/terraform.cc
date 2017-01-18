@@ -72,29 +72,33 @@ double noise_4d(double a, double b, double c, double d, double zoom, int steps)
     return ret;
 }
 
-int terraform(int64_t seed, struct chunk *c)
+int terraform(int64_t seed, Chunk *c)
 {
+	v2ll p;
 	uint64_t u, v;
 	int x, y, z;
 	int height, heat, humidity;
 
-	for (x = 0, u = c->x; x < CHUNK_W; ++x, ++u) {
-		for (z = 0, v = c->z; z < CHUNK_D; ++z, ++v) {
+	p = c->get_p();
+
+	for (x = 0, u = p.x; x < CHUNK_W; ++x, ++u) {
+		for (z = 0, v = p.y; z < CHUNK_D; ++z, ++v) {
 //			height = CHUNK_H * (0.5 + noise_3d(seed, u, v, 100, 4) * 0.1);
 			height = CHUNK_H / 2;
 			for (y = 0; y < height - 4; ++y) {
-				chunk_set_mat(c, v3ll(x, y, z), MAT_LIMESTONE);
-				chunk_set_shape(c, v3ll(x, y, z), SHAPE_BLOCK_DN);
+				c->set_mat(v3ll(x, y, z), MAT_LIMESTONE);
+				c->set_shape(v3ll(x, y, z), SHAPE_BLOCK_DN);
 			}
 			for (; y < height - 1; ++y) {
-				chunk_set_mat(c, v3ll(x, y, z), MAT_DIRT);
-				chunk_set_shape(c, v3ll(x, y, z), SHAPE_BLOCK_DN);
+				c->set_mat(v3ll(x, y, z), MAT_DIRT);
+				c->set_shape(v3ll(x, y, z), SHAPE_BLOCK_DN);
 			}
 			for (; y < height; ++y) {
-				chunk_set_mat(c, v3ll(x, y, z), MAT_GRASS);
-				chunk_set_shape(c, v3ll(x, y, z), SHAPE_BLOCK_DN);
+				c->set_mat(v3ll(x, y, z), MAT_GRASS);
+				c->set_shape(v3ll(x, y, z), SHAPE_BLOCK_DN);
 			}
 		}
 	}
+	return 0;
 }
 

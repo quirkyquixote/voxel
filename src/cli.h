@@ -2,28 +2,35 @@
 #ifndef VOXEL_CLI_H_
 #define VOXEL_CLI_H_
 
-#include "array.h"
-#include "str.h"
+#include <string>
+#include <vector>
 
-struct cli {
-	struct str* buf;
-	struct array *history;
-	char *visible;
+class CommandLine {
+public:
+	CommandLine();
+	~CommandLine();
+
+	void append(const char *str);
+	int delete_backward();
+	int delete_forward();
+	int prev_char();
+	int next_char();
+	void first_char();
+	void last_char();
+	int prev_line();
+	int next_line();
+	int push();
+
+	inline const char *get_visible() const { return visible; }
+	inline int get_cur_char() const  { return cur_char; }
+	inline int get_cur_line() const  { return cur_line; }
+
+private:
+	std::string buf;
+	std::vector<char *> history;
+	const char *visible;
 	int cur_line;
 	int cur_char;
 };
-
-struct cli *cli(void);
-
-void cli_append(struct cli *c, const char *str);
-int cli_delete_backward(struct cli *c);
-int cli_delete_forward(struct cli *c);
-int cli_prev_char(struct cli *c);
-int cli_next_char(struct cli *c);
-void cli_first_char(struct cli *c);
-void cli_last_char(struct cli *c);
-int cli_prev_line(struct cli *c);
-int cli_next_line(struct cli *c);
-int cli_push(struct cli *c);
 
 #endif

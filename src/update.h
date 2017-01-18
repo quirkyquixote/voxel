@@ -5,9 +5,9 @@
 #include "context.h"
 #include "inventory.h"
 
-void update(void *data);
+void update(Context *ctx);
 
-void use_inventory(struct context *ctx, struct array *inv);
-void use_workbench(struct context *ctx, struct array *inv);
+void use_inventory(Context *ctx, std::vector<Item> *inv);
+void use_workbench(Context *ctx, std::vector<Item> *inv);
 
 #endif

@@ -1,15 +1,15 @@
 
 #include "recipes.h"
 
-struct ingredient {
+struct Ingredient {
 	int obj;
 	int mat;
 };
 
-struct recipe {
-	struct ingredient result;
+struct Recipe {
+	Ingredient result;
 	int amount;
-	struct ingredient pattern[9];
+	Ingredient pattern[9];
 };
 
 #define PATTERN_1x1(o1,m1,num,o2,m2) \
@@ -118,7 +118,7 @@ struct recipe {
 	PATTERN_CROSS(OBJ_BLOCK, mat##_CRATE, 1, OBJ_PANE, mat), \
 	PATTERN_DIAMOND(OBJ_BLOCK, mat##_PIPE, 1, OBJ_PANE, mat)
 
-static const struct recipe recipes[] = {
+static const Recipe recipes[] = {
 	STONE_RECIPES(MAT_LIMESTONE),
 	STONE_RECIPES(MAT_SANDSTONE),
 	STONE_RECIPES(MAT_MARBLE),
@@ -142,13 +142,13 @@ int rotations[4][9] = {
 	{ 2, 5, 8, 1, 4, 7, 0, 3, 6 },
 };
 
-int rotation_match(const struct recipe *r, struct array *inv, int *rot, struct item *rval)
+int rotation_match(const Recipe *r, std::vector<Item> *inv, int *rot, Item *rval)
 {
 	int k;
-	struct item s;
-	struct ingredient i;
+	Item s;
+	Ingredient i;
 	for (k = 0; k < 9; ++k)	{
-		s = inventory_get(inv, k);
+		s = (*inv)[k];
 		i = r->pattern[rot[k]];
 		if (i.obj < 0) {
 			if (s.num > 0)
@@ -158,10 +158,10 @@ int rotation_match(const struct recipe *r, struct array *inv, int *rot, struct i
 		}
 	}
 	for (k = 0; k < 9; ++k)	{
-		s = inventory_get(inv, k);
+		s = (*inv)[k];
 		i = r->pattern[rot[k]];
 		if (i.obj >= 0)
-			inventory_set_num(inv, k, s.num - 1);
+			--(*inv)[k].num;
 	}
 	rval->obj = r->result.obj;
 	rval->mat = r->result.mat;
@@ -169,7 +169,7 @@ int rotation_match(const struct recipe *r, struct array *inv, int *rot, struct i
 	return 1;
 }
 
-int recipe_match(struct array *inv, struct item *rval)
+int recipe_match(std::vector<Item> *inv, Item *rval)
 {
 	int i, j;
 	for (i = 0; i < sizeof(recipes) / sizeof(*recipes); ++i) {

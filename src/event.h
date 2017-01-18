@@ -5,7 +5,9 @@
 
 #include <SDL2/SDL.h>
 
-void event(const SDL_Event *e, void *data);
+#include "context.h"
+
+void event(const SDL_Event *e, Context *ctx);
 
 #endif
 

@@ -21,7 +21,7 @@ localstatedir = $(prefix)/var/tnt
 
 # There are so many tools needed...
 
-CC = cc
+CXX = clang++
 AR = ar
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
@@ -31,32 +31,30 @@ INSTALL_DATA = $(INSTALL) -m 644
 
 CPPFLAGS =
 
-CFLAGS = -g \
-	 -std=gnu99 \
-	 -Werror \
-	 -Wfatal-errors
+CXXFLAGS = -g -std=c++11 -Werror -Wfatal-errors
 
-LDFLAGS = -lm
+LDFLAGS =
 
 # These flags are necessary
 
-ALL_CFLAGS = $(CPPFLAGS) $(CFLAGS)
+ALL_CXXFLAGS = $(CPPFLAGS) $(CXXFLAGS)
 ALL_LDFLAGS = $(LDFLAGS)
 
-ALL_CFLAGS += -DVX_VERSION=\"$(VERSION)\"
-ALL_CFLAGS += -DVX_LIBDIR=\"$(libdir)\"
-ALL_CFLAGS += -DVX_DATADIR=\"$(datadir)\"
-ALL_CFLAGS += -DVX_LOCALSTATEDIR=\"$(localstatedir)\"
-ALL_CFLAGS += -MD
-ALL_CFLAGS += -fPIC
-ALL_CFLAGS += -I/usr/include/tcl
+ALL_CXXFLAGS += -DVX_VERSION=\"$(VERSION)\"
+ALL_CXXFLAGS += -DVX_LIBDIR=\"$(libdir)\"
+ALL_CXXFLAGS += -DVX_DATADIR=\"$(datadir)\"
+ALL_CXXFLAGS += -DVX_LOCALSTATEDIR=\"$(localstatedir)\"
+ALL_CXXFLAGS += -MD
+ALL_CXXFLAGS += -I/usr/include/tcl
 
 ALL_LDFLAGS += -pthread
 ALL_LDFLAGS += -ltcl
+ALL_LDFLAGS += -lm
+ALL_LDFLAGS += -lstdc++
 
 # A little function to print relevant text
 
-QUIET_CC = @echo CC $@;
+QUIET_CXX = @echo CXX $@;
 QUIET_LINK = @echo LINK $@;
 QUIET_AR = @echo AR $@;
 QUIET_GEN = @echo GEN $@;
@@ -64,13 +62,13 @@ QUIET_INSTALL = @echo INSTALL $@;
 
 # Some generic targets that are the same for all Makefiles
 
-%: %.c 
+%: %.cc 
 
 %: %.o
-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $^
+	$(QUIET_LINK)$(CXX) $(ALL_CXXFLAGS) $(ALL_LDFLAGS) -o $@ $^
 
-%.o: %.c
-	$(QUIET_CC)$(CC) $(ALL_CFLAGS) -c -o $@ $<
+%.o: %.cc
+	$(QUIET_CXX)$(CXX) $(ALL_CXXFLAGS) -c -o $@ $<
 
 %.a: %.o
 	$(QUIET_AR)$(AR) rc $@ $^

@@ -6,30 +6,21 @@
 #include <float.h>
 #include <stdio.h>
 
-struct body *body(struct space *s)
+Body::Body(Space *s)
 {
-	struct body *b = calloc(1, sizeof(*b));
-	list_link(&s->body, &b->list);
-	return b;
 }
 
-void body_destroy(struct body *b)
+Body::~Body()
 {
-	list_unlink(&b->list);
-	free(b);
 }
 
-struct space *space(struct world *world)
+Space::Space(World *w)
+	: world(w)
 {
-	struct space *s = calloc(1, sizeof(*s));
-	s->world = world;
-	list_init(&s->body);
-	return s;
 }
 
-void space_destroy(struct space *s)
+Space::~Space()
 {
-	free(s);
 }
 
 static const int shape_masks[] = {
@@ -65,15 +56,15 @@ static const int shape_masks[] = {
 	0xff,
 };
 
-int cell_at(struct space *s, const int *masks, int64_t x, int64_t y, int64_t z)
+int Space::cell_at(const int *masks, int64_t x, int64_t y, int64_t z)
 {
 	int shape, mask;
-	shape = world_get_shape(s->world, v3ll(x >> 1, y >> 1, z >> 1));
+	shape = world->get_shape(v3ll(x >> 1, y >> 1, z >> 1));
 	mask = (1 << (((x & 1) * 4) + ((y & 1) * 2) + (z & 1)));
 	return masks[shape] & mask;
 }
 
-void move_xpos(struct space *s, struct body *b, float dt)
+void Space::move_xpos(Body *b, float dt)
 {
 	int64_t x, y, z, y0, y1, z0, z1;
 	int step_up = 0;
@@ -85,27 +76,27 @@ void move_xpos(struct space *s, struct body *b, float dt)
 	z1 = floor(b->bb.z1 * 2);
 	for (y = y0; y <= y1; ++y) {
 		for (z = z0; z <= z1; ++z) {
-			if (cell_at(s, shape_masks, x, y, z)) {
+			if (cell_at(shape_masks, x, y, z)) {
 				if (y < y0 + b->step_size) {
 					step_up = 1;
 					continue;
 				}
 				b->v.x = 0;
-				b->p.x = 0.5 * x - b->s.x - s->impulse;
-				if (b->cb_func != NULL) {
-					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
-					b->cb_func(b, b->cb_data, p, FACE_LF);
+				b->p.x = 0.5 * x - b->s.x - impulse;
+				if (b->cb_func) {
+					v3ll p(x >> 1, y >> 1, z >> 1);
+					b->cb_func(b, p, FACE_LF);
 				}
 				return;
 			}
 		}
 	}
 	if (step_up)
-		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + s->impulse;
+		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + impulse;
 	b->p.x += b->v.x * dt;
 }
 
-void move_xneg(struct space *s, struct body *b, float dt)
+void Space::move_xneg(Body *b, float dt)
 {
 	int64_t x, y, z, y0, y1, z0, z1;
 	int step_up = 0;
@@ -117,27 +108,27 @@ void move_xneg(struct space *s, struct body *b, float dt)
 	z1 = floor(b->bb.z1 * 2);
 	for (y = y0; y <= y1; ++y) {
 		for (z = z0; z <= z1; ++z) {
-			if (cell_at(s, shape_masks, x, y, z)) {
+			if (cell_at(shape_masks, x, y, z)) {
 				if (y < y0 + b->step_size) {
 					step_up = 1;
 					continue;
 				}
 				b->v.x = 0;
-				b->p.x = 0.5 * (x + 1) + b->s.x + s->impulse;
-				if (b->cb_func != NULL) {
-					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
-					b->cb_func(b, b->cb_data, p, FACE_RT);
+				b->p.x = 0.5 * (x + 1) + b->s.x + impulse;
+				if (b->cb_func) {
+					v3ll p(x >> 1, y >> 1, z >> 1);
+					b->cb_func(b, p, FACE_RT);
 				}
 				return;
 			}
 		}
 	}
 	if (step_up)
-		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + s->impulse;
+		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + impulse;
 	b->p.x += b->v.x * dt;
 }
 
-void move_zpos(struct space *s, struct body *b, float dt)
+void Space::move_zpos(Body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, y0, y1;
 	int step_up = 0;
@@ -149,27 +140,27 @@ void move_zpos(struct space *s, struct body *b, float dt)
 	y1 = floor(b->bb.y1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (y = y0; y <= y1; ++y) {
-			if (cell_at(s, shape_masks, x, y, z)) {
+			if (cell_at(shape_masks, x, y, z)) {
 				if (y < y0 + b->step_size) {
 					step_up = 1;
 					continue;
 				}
 				b->v.z = 0;
-				b->p.z = 0.5 * z - b->s.x - s->impulse;
-				if (b->cb_func != NULL) {
-					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
-					b->cb_func(b, b->cb_data, p, FACE_FT);
+				b->p.z = 0.5 * z - b->s.x - impulse;
+				if (b->cb_func) {
+					v3ll p(x >> 1, y >> 1, z >> 1);
+					b->cb_func(b, p, FACE_FT);
 				}
 				return;
 			}
 		}
 	}
 	if (step_up)
-		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + s->impulse;
+		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + impulse;
 	b->p.z += b->v.z * dt;
 }
 
-void move_zneg(struct space *s, struct body *b, float dt)
+void Space::move_zneg(Body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, y0, y1;
 	int step_up = 0;
@@ -181,27 +172,27 @@ void move_zneg(struct space *s, struct body *b, float dt)
 	y1 = floor(b->bb.y1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (y = y0; y <= y1; ++y) {
-			if (cell_at(s, shape_masks, x, y, z)) {
+			if (cell_at(shape_masks, x, y, z)) {
 				if (y < y0 + b->step_size) {
 					step_up = 1;
 					continue;
 				}
 				b->v.z = 0;
-				b->p.z = 0.5 * (z + 1) + b->s.x + s->impulse;
-				if (b->cb_func != NULL) {
-					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
-					b->cb_func(b, b->cb_data, p, FACE_BK);
+				b->p.z = 0.5 * (z + 1) + b->s.x + impulse;
+				if (b->cb_func) {
+					v3ll p(x >> 1, y >> 1, z >> 1);
+					b->cb_func(b, p, FACE_BK);
 				}
 				return;
 			}
 		}
 	}
 	if (step_up)
-		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + s->impulse;
+		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + impulse;
 	b->p.z += b->v.z * dt;
 }
 
-void move_ypos(struct space *s, struct body *b, float dt)
+void Space::move_ypos(Body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, z0, z1;
 
@@ -212,12 +203,12 @@ void move_ypos(struct space *s, struct body *b, float dt)
 	z1 = floor(b->bb.z1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (z = z0; z <= z1; ++z) {
-			if (cell_at(s, shape_masks, x, y, z)) {
+			if (cell_at(shape_masks, x, y, z)) {
 				b->v.y = 0;
-				b->p.y = 0.5 * y - b->s.y - s->impulse;
-				if (b->cb_func != NULL) {
-					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
-					b->cb_func(b, b->cb_data, p, FACE_DN);
+				b->p.y = 0.5 * y - b->s.y - impulse;
+				if (b->cb_func) {
+					v3ll p(x >> 1, y >> 1, z >> 1);
+					b->cb_func(b, p, FACE_DN);
 				}
 				return;
 			}
@@ -226,7 +217,7 @@ void move_ypos(struct space *s, struct body *b, float dt)
 	b->p.y += b->v.y * dt;
 }
 
-void move_yneg(struct space *s, struct body *b, float dt)
+void Space::move_yneg(Body *b, float dt)
 {
 	int64_t x, y, z, x0, x1, z0, z1;
 
@@ -237,12 +228,12 @@ void move_yneg(struct space *s, struct body *b, float dt)
 	z1 = floor(b->bb.z1 * 2);
 	for (x = x0; x <= x1; ++x) {
 		for (z = z0; z <= z1; ++z) {
-			if (cell_at(s, shape_masks, x, y, z)) {
+			if (cell_at(shape_masks, x, y, z)) {
 				b->v.y = 0;
-				b->p.y = 0.5 * (y + 1) + b->s.y + s->impulse;
-				if (b->cb_func != NULL) {
-					struct v3ll p = { x >> 1, y >> 1, z >> 1 };
-					b->cb_func(b, b->cb_data, p, FACE_UP);
+				b->p.y = 0.5 * (y + 1) + b->s.y + impulse;
+				if (b->cb_func) {
+					v3ll p(x >> 1, y >> 1, z >> 1);
+					b->cb_func(b, p, FACE_UP);
 				}
 				return;
 			}
@@ -251,27 +242,25 @@ void move_yneg(struct space *s, struct body *b, float dt)
 	b->p.y += b->v.y * dt;
 }
 
-void space_step(struct space *s, float dt)
+void Space::step(float dt)
 {
-	struct body *b;
-
-	list_foreach(b, &s->body, list) {
-		b->v = v3_addx(b->v, s->gravity, dt);
-		if (b->v.x < -s->terminal_speed)
-			b->v.x = -s->terminal_speed;
-		else if (b->v.x > s->terminal_speed)
-			b->v.x = s->terminal_speed;
-		if (b->v.y < -s->terminal_speed)
-			b->v.y = -s->terminal_speed;
-		else if (b->v.y > s->terminal_speed)
-			b->v.y = s->terminal_speed;
-		if (b->v.z < -s->terminal_speed)
-			b->v.z = -s->terminal_speed;
-		else if (b->v.z > s->terminal_speed)
-			b->v.z = s->terminal_speed;
+	for (auto &b : bodies) {
+		b->v.y += gravity * dt;
+		if (b->v.x < -terminal_speed)
+			b->v.x = -terminal_speed;
+		else if (b->v.x > terminal_speed)
+			b->v.x = terminal_speed;
+		if (b->v.y < -terminal_speed)
+			b->v.y = -terminal_speed;
+		else if (b->v.y > terminal_speed)
+			b->v.y = terminal_speed;
+		if (b->v.z < -terminal_speed)
+			b->v.z = -terminal_speed;
+		else if (b->v.z > terminal_speed)
+			b->v.z = terminal_speed;
 	}
 
-	list_foreach(b, &s->body, list) {
+	for (auto &b : bodies) {
 		b->bb.x0 = b->p.x - b->s.x;
 		b->bb.x1 = b->p.x + b->s.x;
 		b->bb.z0 = b->p.z - b->s.x;
@@ -279,43 +268,43 @@ void space_step(struct space *s, float dt)
 		b->bb.y0 = b->p.y - b->s.y;
 		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.x > 0)
-			move_xpos(s, b, dt);
+			move_xpos(b, dt);
 		else if (b->v.x < 0)
-			move_xneg(s, b, dt);
+			move_xneg(b, dt);
 		b->bb.x0 = b->p.x - b->s.x;
 		b->bb.x1 = b->p.x + b->s.x;
 		b->bb.y0 = b->p.y - b->s.y;
 		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.z > 0)
-			move_zpos(s, b, dt);
+			move_zpos(b, dt);
 		else if (b->v.z < 0)
-			move_zneg(s, b, dt);
+			move_zneg(b, dt);
 		b->bb.z0 = b->p.z - b->s.x;
 		b->bb.z1 = b->p.z + b->s.x;
 		b->bb.y0 = b->p.y - b->s.y;
 		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.y > 0)
-			move_ypos(s, b, dt);
+			move_ypos(b, dt);
 		else if (b->v.y < 0)
-			move_yneg(s, b, dt);
+			move_yneg(b, dt);
 		b->bb.y0 = b->p.y - b->s.y;
 		b->bb.y1 = b->p.y + b->s.y;
 	}
 }
 
-void space_run(struct space *s)
+void Space::run()
 {
 	int i;
-	for (i = 0; i < s->iterations; ++i)
-		space_step(s, 1.0 / s->iterations);
+	for (i = 0; i < iterations; ++i)
+		step(1.0 / iterations);
 }
 
 
-int query_xpos(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
+int Space::query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	int64_t x0, x1, x, y, z;
 	float t;
-	struct v3f p1;
+	v3f p1;
 
 	x0 = ceil(p.x * 2);
 	x1 = floor((p.x + v.x) * 2);
@@ -323,13 +312,13 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * x - p.x) / v.x;
 		if (t >= *best_t)
 			return 0;
-		p1 = v3_addx(p, v, t);
+		p1 = p + v * t;
 		y = floor(p1.y * 2);
 		z = floor(p1.z * 2);
-		if (cell_at(s, shape_masks, x, y, z)) {
+		if (cell_at(shape_masks, x, y, z)) {
 			q->face = FACE_LF;
 			q->p = v3ll(x >> 1, y >> 1, z >> 1);
-			q->q = v3_sub(p1, q->p);
+			q->q = p1 - v3f(q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -337,11 +326,11 @@ int query_xpos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 	return 0;
 }
 
-int query_xneg(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
+int Space::query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	int64_t x0, x1, x, y, z;
 	float t;
-	struct v3f p1;
+	v3f p1;
 
 	x0 = floor(p.x * 2);
 	x1 = floor((p.x + v.x) * 2);
@@ -349,13 +338,13 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * x - p.x) / v.x;
 		if (t >= *best_t)
 			return 0;
-		p1 = v3_addx(p, v, t);
+		p1 = p + v * t;
 		y = floor(p1.y * 2);
 		z = floor(p1.z * 2);
-		if (cell_at(s, shape_masks, x - 1, y, z)) {
+		if (cell_at(shape_masks, x - 1, y, z)) {
 			q->face = FACE_RT;
 			q->p = v3ll((x - 1) >> 1, y >> 1, z >> 1);
-			q->q = v3_sub(p1, q->p);
+			q->q = p1 - v3f(q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -363,11 +352,11 @@ int query_xneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 	return 0;
 }
 
-int query_zpos(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
+int Space::query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	int64_t z0, z1, x, y, z;
 	float t;
-	struct v3f p1;
+	v3f p1;
 
 	z0 = ceil(p.z * 2);
 	z1 = floor((p.z + v.z) * 2);
@@ -375,13 +364,13 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * z - p.z) / v.z;
 		if (t >= *best_t)
 			return 0;
-		p1 = v3_addx(p, v, t);
+		p1 = p + v * t;
 		x = floor(p1.x * 2);
 		y = floor(p1.y * 2);
-		if (cell_at(s, shape_masks, x, y, z)) {
+		if (cell_at(shape_masks, x, y, z)) {
 			q->face = FACE_BK;
 			q->p = v3ll(x >> 1, y >> 1, z >> 1);
-			q->q = v3_sub(p1, q->p);
+			q->q = p1 - v3f(q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -389,11 +378,11 @@ int query_zpos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 	return 0;
 }
 
-int query_zneg(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
+int Space::query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	int64_t z0, z1, x, y, z;
 	float t;
-	struct v3f p1;
+	v3f p1;
 
 	z0 = floor(p.z * 2);
 	z1 = floor((p.z + v.z) * 2);
@@ -401,13 +390,13 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * z - p.z) / v.z;
 		if (t >= *best_t)
 			return 0;
-		p1 = v3_addx(p, v, t);
+		p1 = p + v * t;
 		x = floor(p1.x * 2);
 		y = floor(p1.y * 2);
-		if (cell_at(s, shape_masks, x, y, z - 1)) {
+		if (cell_at(shape_masks, x, y, z - 1)) {
 			q->face = FACE_FT;
 			q->p = v3ll(x >> 1, y >> 1, (z - 1) >> 1);
-			q->q = v3_sub(p1, q->p);
+			q->q = p1 - v3f(q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -415,11 +404,11 @@ int query_zneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 	return 0;
 }
 
-int query_ypos(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
+int Space::query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	int64_t y0, y1, x, y, z;
 	float t;
-	struct v3f p1;
+	v3f p1;
 
 	y0 = ceil(p.y * 2);
 	y1 = floor((p.y + v.y) * 2);
@@ -427,13 +416,13 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * y - p.y) / v.y;
 		if (t >= *best_t)
 			return 0;
-		p1 = v3_addx(p, v, t);
+		p1 = p + v * t;
 		x = floor(p1.x * 2);
 		z = floor(p1.z * 2);
-		if (cell_at(s, shape_masks, x, y, z)) {
+		if (cell_at(shape_masks, x, y, z)) {
 			q->face = FACE_DN;
 			q->p = v3ll(x >> 1, y >> 1, z >> 1);
-			q->q = v3_sub(p1, q->p);
+			q->q = p1 - v3f(q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -441,11 +430,11 @@ int query_ypos(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 	return 0;
 }
 
-int query_yneg(struct space *s, struct v3f p, struct v3f v, struct query *q, float *best_t)
+int Space::query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	int64_t y0, y1, x, y, z;
 	float t;
-	struct v3f p1;
+	v3f p1;
 
 	y0 = floor(p.y * 2);
 	y1 = floor((p.y + v.y) * 2);
@@ -453,13 +442,13 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 		t = (0.5 * y - p.y) / v.y;
 		if (t >= *best_t)
 			return 0;
-		p1 = v3_addx(p, v, t);
+		p1 = p + v * t;
 		x = floor(p1.x * 2);
 		z = floor(p1.z * 2);
-		if (cell_at(s, shape_masks, x, y - 1, z)) {
+		if (cell_at(shape_masks, x, y - 1, z)) {
 			q->face = FACE_UP;
 			q->p = v3ll(x >> 1, (y - 1) >> 1, z >> 1);
-			q->q = v3_sub(p1, q->p);
+			q->q = p1 - v3f(q->p);
 			*best_t = t;
 			return 1;
 		}
@@ -467,22 +456,22 @@ int query_yneg(struct space *s, struct v3f p, struct v3f v, struct query *q, flo
 	return 0;
 }
 
-int space_query(struct space *s, struct v3f p, struct v3f v, struct query *q)
+int Space::query(const v3f &p, const v3f &v, Query *q)
 {
 	float t = FLT_MAX;
 
 	q->face = -1;
 	if (v.x < 0)
-		query_xneg(s, p, v, q, &t);
+		query_xneg(p, v, q, &t);
 	else if (v.x > 0)
-		query_xpos(s, p, v, q, &t);
+		query_xpos(p, v, q, &t);
 	if (v.y < 0)
-		query_yneg(s, p, v, q, &t);
+		query_yneg(p, v, q, &t);
 	else if (v.y > 0)
-		query_ypos(s, p, v, q, &t);
+		query_ypos(p, v, q, &t);
 	if (v.z < 0)
-		query_zneg(s, p, v, q, &t);
+		query_zneg(p, v, q, &t);
 	else if (v.z > 0)
-		query_zpos(s, p, v, q, &t);
+		query_zpos(p, v, q, &t);
 	return q->face;
 }

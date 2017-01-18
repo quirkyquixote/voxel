@@ -4,58 +4,51 @@
 
 #include <string.h>
 
-int inventory_add(struct array *a, struct item s)
+int inventory_add(Inventory *a, Item s)
 {
-	int i, acc, max;
-	struct item s2;
+	int acc, max;
 
 	acc = 0;
-	for (i = 0; i < a->size; ++i) {
-		array_get(a, i, &s2);
+	for (Item &s2 : *a) {
 		if (s2.num > 0 && s2.mat == s.mat && s2.obj == s.obj) {
 			max = 64 - s2.num;
 			if (s.num <= max) {
 				acc += s.num;
 				s2.num += s.num;
-				array_set(a, i, &s2);
 				return acc;
 			} else {
 				acc += max;
 				s2.num += max;
-				array_set(a, i, &s2);
 				s.num -= max;
 			}
 		}
 	}
-	for (i = 0; i < a->size; ++i) {
-		array_get(a, i, &s2);
+	for (Item &s2 : *a) {
 		if (s2.num == 0) {
 			acc += s.num;
-			array_set(a, i, &s);
+			s2 = s;
 			return acc;
 		}
 	}
 	return acc;
 }
 
-int inventory_add_to_item(struct array *a, int i, struct item s)
+int inventory_add_to_item(Inventory *a, int i, Item s)
 {
 	int max;
-	struct item s2;
-
-	array_get(a, i, &s2);
+	Item s2 = (*a)[i];
 	if (s2.num == 0) {
-		array_set(a, i, &s);
+		(*a)[i] = s;
 		return s.num;
 	} else if (s2.mat == s.mat && s2.obj == s.obj) {
 		max = 64 - s2.num;
 		if (s.num <= max) {
 			s2.num += s.num;
-			array_set(a, i, &s2);
+			(*a)[i] = s2;
 			return s.num;
 		} else {
 			s2.num += max;
-			array_set(a, i, &s2);
+			(*a)[i] = s2;
 			return max;
 		}
 	} else {
@@ -63,24 +56,20 @@ int inventory_add_to_item(struct array *a, int i, struct item s)
 	}
 }
 
-int inventory_remove(struct array *a, struct item s)
+int inventory_remove(Inventory *a, Item s)
 {
-	int i, acc, max;
-	struct item s2;
+	int acc, max;
 
-	for (i = 0; i < a->size; ++i) {
-		array_get(a, i, &s2);
+	for (Item &s2 : *a) {
 		if (s2.num > 0 && s2.mat == s.mat && s2.obj == s.obj) {
 			max = s2.num;
 			if (s.num <= max) {
 				acc += s.num;
 				s2.num -= s.num;
-				array_set(a, i, &s2);
 				return acc;
 			} else {
 				acc += max;
 				s2.num -= max;
-				array_set(a, i, &s2);
 				s.num -= max;
 			}
 		}
@@ -88,21 +77,18 @@ int inventory_remove(struct array *a, struct item s)
 	return acc;
 }
 
-int inventory_remove_from_item(struct array *a, int i, struct item s)
+int inventory_remove_from_item(Inventory *a, int i, Item s)
 {
 	int max;
-	struct item s2;
 
-	array_get(a, i, &s2);
+	Item s2 = (*a)[i];
 	if (s2.num > 0 && s2.mat == s.mat && s2.obj == s.obj) {
 		max = s2.num;
 		if (s.num <= max) {
 			s2.num -= s.num;
-			array_set(a, i, &s2);
 			return s.num;
 		} else {
 			s2.num -= max;
-			array_set(a, i, &s2);
 			return max;
 		}
 	} else {

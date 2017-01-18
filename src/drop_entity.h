@@ -4,15 +4,23 @@
 
 #include "roaming_entity.h"
 
-struct drop_entity {
-	struct roaming_entity roaming;
-	struct item item;
+class DropEntity : public RoamingEntity {
+public:
+	DropEntity(Context *ctx, Item item);
+	~DropEntity();
+
+	void update();
+	void render();
+	void load(sz_Tag *root);
+	sz_Tag *save();
+
+	const char *get_name() { return "drop"; }
+
+private:
 	int ticks;
+
+	void callback(Body *b, const v3ll &p, int face);
 };
-
-extern struct entity_traits drop_traits;
-
-struct drop_entity *drop_entity(struct context *ctx, struct item item);
 
 #endif
 

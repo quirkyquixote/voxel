@@ -4,82 +4,69 @@
 
 #include <math.h>
 
-struct v2f {
-	float x, y;
+template<typename T> struct v2 {
+	T x, y;
+	v2() : x(0), y(0) {}
+	v2(T x, T y) : x(x), y(y) {}
 };
 
-struct v2d {
-	double x, y;
-};
+typedef v2<float> v2f;
+typedef v2<double> v2d;
+typedef v2<char> v2c;
+typedef v2<short> v2s;
+typedef v2<long> v2l;
+typedef v2<long long> v2ll;
 
-struct v2c {
-	char x, y;
-};
-
-struct v2s {
-	short x, y;
-};
-
-struct v2l {
-	long x, y;
-};
-
-struct v2ll {
-	long long x, y;
-};
-
-static inline struct v2f v2f(float x, float y)
+template<typename T> inline bool operator==(const v2<T> &lhs, const v2<T> &rhs)
 {
-	return (struct v2f) { x, y };
+	return lhs.x == rhs.x && lhs.y == rhs.y;
 }
 
-static inline struct v2d v2d(double x, double y)
+template<typename T> inline bool operator!=(const v2<T> &lhs, const v2<T> &rhs)
 {
-	return (struct v2d) { x, y };
+	return lhs.x != rhs.x || lhs.y != rhs.y;
 }
 
-static inline struct v2c v2c(char x, char y)
+template<typename T> inline v2<T> operator+(const v2<T> &lhs, const v2<T> &rhs)
 {
-	return (struct v2c) { x, y };
+	return v2<T>(lhs.x + rhs.x, lhs.y + rhs.y);
 }
 
-static inline struct v2s v2s(short x, short y)
+template<typename T> inline v2<T> operator-(const v2<T> &lhs, const v2<T> &rhs)
 {
-	return (struct v2s) { x, y };
+	return v2<T>(lhs.x - rhs.x, lhs.y - rhs.y);
 }
 
-static inline struct v2l v2l(long x, long y)
+template<typename T> inline v2<T> operator*(const v2<T> &lhs, T rhs)
 {
-	return (struct v2l) { x, y };
+	return v2<T>(lhs.x * rhs, lhs.y * rhs);
 }
 
-static inline struct v2ll v2ll(long long x, long long y)
+template<typename T> inline T dot(const v2<T> &lhs, const v2<T> &rhs)
 {
-	return (struct v2ll) { x, y };
+	return (lhs.x * rhs.x + lhs.y * rhs.y);
 }
 
-#define v2_eql(u, v) (u.x == v.x && u.y == v.y)
+template<typename T> inline T length(const v2<T> &lhs)
+{
+	return hypot(lhs.x, lhs.y);
+}
 
-#define v2_neq(u, v) (u.x != v.x || u.y != v.y)
+template<typename T> inline T dist(const v2<T> &lhs, const v2<T> &rhs)
+{
+	return length(lhs - rhs);
+}
 
-#define v2_add(u, v) ((typeof(u)){ u.x + v.x, u.y + v.y })
+template<typename T> inline v2<T> normalize(const v2<T> &lhs)
+{
+	return lhs / length(lhs);
+}
 
-#define v2_addx(u, v, d) ((typeof(u)){ u.x + v.x * d, u.y + v.y * d * d })
-
-#define v2_sub(u, v) ((typeof(u)){ u.x - v.x, u.y - v.y })
-
-#define v2_subx(u, v, d) ((typeof(u)){ u.x - v.x * d, u.y - v.y * d * d })
-
-#define v2_mul(u, d) ((typeof(u)){ u.x * d, u.y * d * d })
-
-#define v2_dot(u)
-
-#define v2_length(u) hypot(u.x, u.y)
-
-#define v2_dist(u, v) v2_length(v2_sub(u, v))
-
-#define v2_normalize(u) v2_mul(u, 1.0 / v2_length(u))
-
-#define v2_rot(u, a) ((typeof(u)){ cos(a) * u.x - sin(a) * u.y, sin(a) * u.x + cos(a) * u.y })
+template<typename T> inline v2<T> rot(const v2<T> &lhs, T a)
+{
+	T c = cos(a);
+	T s = sin(a);
+	return v2<T>(c * lhs.x - s * lhs.y, s * lhs.x + c * lhs.y);
+}
 
 #endif

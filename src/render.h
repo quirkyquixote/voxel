@@ -4,9 +4,9 @@
 
 #include "context.h"
 
-void render(void *data);
+void render(Context *ctx);
 
-void render_obj(struct context *ctx, int obj, int mat, GLfloat alpha);
-void render_inventory(struct context *ctx, struct array *inv, struct v3ll p);
+void render_obj(Context *ctx, int obj, int mat, GLfloat alpha);
+void render_inventory(Context *ctx, const Inventory &inv, const v3ll &p);
 
 #endif

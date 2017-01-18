@@ -1,5 +1,4 @@
 
-
 #ifndef VOXEL_SHARD_H_
 #define VOXEL_SHARD_H_
 
@@ -7,9 +6,11 @@
 #include <assert.h>
 
 #include "sz.h"
+#include "v2.h"
 #include "v3.h"
 #include "box3.h"
 #include "types.h"
+#include "entity.h"
 
 #define SHARD_W 16
 #define SHARD_H 16
@@ -41,256 +42,255 @@ enum {
 	CHUNK_UNRENDERED = 1 << 2,
 };
 
-struct context;
+class Context;
 
-struct shard {
+class Shard {
+public:
+	Shard(int id, int y);
+	~Shard();
+
+	void load(sz_Tag *root);
+	sz_Tag *save();
+
+	inline int get_id() const { return id; }
+	inline int get_y() const { return y; }
+
+	inline int get_mat(const v3ll &p) const
+	{
+		assert(p.x >= 0 && p.x < SHARD_W);
+		assert(p.y >= 0 && p.y < SHARD_H);
+		assert(p.z >= 0 && p.z < SHARD_D);
+		return mat[p.x][p.y][p.z];
+	}
+
+	inline int get_shape(const v3ll &p) const
+	{
+		assert(p.x >= 0 && p.x < SHARD_W);
+		assert(p.y >= 0 && p.y < SHARD_H);
+		assert(p.z >= 0 && p.z < SHARD_D);
+		return shape[p.x][p.y][p.z];
+	}
+
+	inline int get_light(const v3ll &p) const
+	{
+		assert(p.x >= 0 && p.x < SHARD_W);
+		assert(p.y >= 0 && p.y < SHARD_H);
+		assert(p.z >= 0 && p.z < SHARD_D);
+		return light[p.x][p.y][p.z];
+	}
+
+	inline Entity * get_data(const v3ll &p) const
+	{
+		assert(p.x >= 0 && p.x < SHARD_W);
+		assert(p.y >= 0 && p.y < SHARD_H);
+		assert(p.z >= 0 && p.z < SHARD_D);
+		return data[p.x][p.y][p.z];
+	}
+
+	inline void set_mat(const v3ll &p, int val)
+	{
+		assert(p.x >= 0 && p.x < SHARD_W);
+		assert(p.y >= 0 && p.y < SHARD_H);
+		assert(p.z >= 0 && p.z < SHARD_D);
+		mat[p.x][p.y][p.z] = val;
+	}
+
+	inline void set_shape(const v3ll &p, int val)
+	{
+		assert(p.x >= 0 && p.x < SHARD_W);
+		assert(p.y >= 0 && p.y < SHARD_H);
+		assert(p.z >= 0 && p.z < SHARD_D);
+		shape[p.x][p.y][p.z] = val;
+	}
+
+	inline void set_light(const v3ll &p, int val)
+	{
+		assert(p.x >= 0 && p.x < SHARD_W);
+		assert(p.y >= 0 && p.y < SHARD_H);
+		assert(p.z >= 0 && p.z < SHARD_D);
+		light[p.x][p.y][p.z] = val;
+	}
+
+	inline void set_data(const v3ll &p, Entity *val)
+	{
+		assert(p.x >= 0 && p.x < SHARD_W);
+		assert(p.y >= 0 && p.y < SHARD_H);
+		assert(p.z >= 0 && p.z < SHARD_D);
+		data[p.x][p.y][p.z] = val;
+	}
+
+private:
 	int id;
 	int8_t y;
 	uint8_t mat[SHARD_W][SHARD_H][SHARD_D];
 	uint8_t shape[SHARD_W][SHARD_H][SHARD_D];
 	uint8_t light[SHARD_W][SHARD_H][SHARD_D];
-	void *data[SHARD_W][SHARD_H][SHARD_D];
+	Entity *data[SHARD_W][SHARD_H][SHARD_D];
 };
 
-struct chunk {
+class Chunk {
+public:
+	Chunk(Context *ctx, int id);
+	~Chunk();
+
+	void load(sz_Tag *root);
+	sz_Tag *save();
+
+	inline int get_id() const { return id; }
+	inline void set_flags(int mask) { flags |= mask; }
+	inline void unset_flags(int mask) { flags &= ~mask; }
+	inline int get_flags() { return flags; }
+	inline void set_p(const v2ll &p) { x = p.x; z = p.y; }
+	inline v2ll get_p() { return v2ll(x, z); }
+	inline Shard *get_shard(int y) { return shards[y]; }
+
+	inline int get_mat(const v3ll &p) const
+	{
+		assert(p.x >= 0 && p.x < CHUNK_W);
+		assert(p.z >= 0 && p.z < CHUNK_D);
+		int y = (p.y >> 4) & 0xf;
+		return shards[y]->get_mat(v3ll(p.x, p.y & 0xf, p.z));
+	}
+
+	inline int get_shape(const v3ll &p) const
+	{
+		assert(p.x >= 0 && p.x < CHUNK_W);
+		assert(p.z >= 0 && p.z < CHUNK_D);
+		int y = (p.y >> 4) & 0xf;
+		return shards[y]->get_shape(v3ll(p.x, p.y & 0xf, p.z));
+	}
+
+	inline int get_light(const v3ll &p) const
+	{
+		assert(p.x >= 0 && p.x < CHUNK_W);
+		assert(p.z >= 0 && p.z < CHUNK_D);
+		int y = (p.y >> 4) & 0xf;
+		return shards[y]->get_light(v3ll(p.x, p.y & 0xf, p.z));
+	}
+
+	inline Entity *get_data(const v3ll &p) const
+	{
+		assert(p.x >= 0 && p.x < CHUNK_W);
+		assert(p.z >= 0 && p.z < CHUNK_D);
+		int y = (p.y >> 4) & 0xf;
+		return shards[y]->get_data(v3ll(p.x, p.y & 0xf, p.z));
+	}
+
+	inline void set_mat(const v3ll &p, int val)
+	{
+		assert(p.x >= 0 && p.x < CHUNK_W);
+		assert(p.z >= 0 && p.z < CHUNK_D);
+		int y = (p.y >> 4) & 0xf;
+		shards[y]->set_mat(v3ll(p.x, p.y & 0xf, p.z), val);
+	}
+
+	inline void set_shape(const v3ll &p, int val)
+	{
+		assert(p.x >= 0 && p.x < CHUNK_W);
+		assert(p.z >= 0 && p.z < CHUNK_D);
+		int y = (p.y >> 4) & 0xf;
+		shards[y]->set_shape(v3ll(p.x, p.y & 0xf, p.z), val);
+	}
+
+	inline void set_light(const v3ll &p, int val)
+	{
+		assert(p.x >= 0 && p.x < CHUNK_W);
+		assert(p.z >= 0 && p.z < CHUNK_D);
+		int y = (p.y >> 4) & 0xf;
+		shards[y]->set_light(v3ll(p.x, p.y & 0xf, p.z), val);
+	}
+
+	inline void set_data(const v3ll &p, Entity *val)
+	{
+		assert(p.x >= 0 && p.x < CHUNK_W);
+		assert(p.z >= 0 && p.z < CHUNK_D);
+		int y = (p.y >> 4) & 0xf;
+		shards[y]->set_data(v3ll(p.x, p.y & 0xf, p.z), val);
+	}
+
+private:
 	int id;
 	int flags;
 	int priority;
-	struct context *ctx;
+	Context *ctx;
 	int64_t x, z;
-	struct shard *shards[SHARDS_PER_CHUNK];
+	Shard *shards[SHARDS_PER_CHUNK];
 };
 
-struct world {
-	struct context *ctx;
-	uint64_t x, z;
-	struct chunk *chunks[CHUNKS_PER_WORLD][CHUNKS_PER_WORLD];
+class World {
+public:
+	World(Context *ctx);
+	~World();
+
+	void load(sz_Tag *root);
+	sz_Tag *save();
+
+	void set_block(const v3ll &p, int shape, int mat);
+	void set_flags(const box3ll &bb, int flags);
+	inline Chunk *get_chunk(const v2ll &p) { return chunks[p.x][p.y]; }
+	inline const v2ll &get_p() { return p; }
+
+	inline int get_mat(const v3ll &p) const
+	{
+		int x = (p.x >> 4) & 0xf;
+		int z = (p.z >> 4) & 0xf;
+		return chunks[x][z]->get_mat(v3ll(p.x & 0xf, p.y, p.z & 0xf));
+	}
+
+	inline int get_shape(const v3ll &p) const
+	{
+		int x = (p.x >> 4) & 0xf;
+		int z = (p.z >> 4) & 0xf;
+		return chunks[x][z]->get_shape(v3ll(p.x & 0xf, p.y, p.z & 0xf));
+	}
+
+	inline int get_light(const v3ll &p) const
+	{
+		int x = (p.x >> 4) & 0xf;
+		int z = (p.z >> 4) & 0xf;
+		return chunks[x][z]->get_light(v3ll(p.x & 0xf, p.y, p.z & 0xf));
+	}
+
+	inline Entity *get_data(const v3ll &p) const
+	{
+		int x = (p.x >> 4) & 0xf;
+		int z = (p.z >> 4) & 0xf;
+		return chunks[x][z]->get_data(v3ll(p.x & 0xf, p.y, p.z & 0xf));
+	}
+
+	inline void set_mat(const v3ll &p, int val)
+	{
+		int x = (p.x >> 4) & 0xf;
+		int z = (p.z >> 4) & 0xf;
+		chunks[x][z]->set_mat(v3ll(p.x & 0xf, p.y, p.z & 0xf), val);
+	}
+
+	inline void set_shape(const v3ll &p, int val)
+	{
+		int x = (p.x >> 4) & 0xf;
+		int z = (p.z >> 4) & 0xf;
+		chunks[x][z]->set_shape(v3ll(p.x & 0xf, p.y, p.z & 0xf), val);
+	}
+
+	inline void set_light(const v3ll &p, int val)
+	{
+		int x = (p.x >> 4) & 0xf;
+		int z = (p.z >> 4) & 0xf;
+		chunks[x][z]->set_light(v3ll(p.x & 0xf, p.y, p.z & 0xf), val);
+	}
+
+	inline void set_data(const v3ll &p, Entity *val)
+	{
+		int x = (p.x >> 4) & 0xf;
+		int z = (p.z >> 4) & 0xf;
+		chunks[x][z]->set_data(v3ll(p.x & 0xf, p.y, p.z & 0xf), val);
+	}
+
+private:
+	Context *ctx;
+	v2ll p;
+	Chunk *chunks[CHUNKS_PER_WORLD][CHUNKS_PER_WORLD];
 };
-
-struct shard *shard(int id, int y);
-void shard_destroy(struct shard *s);
-int shard_load(struct shard *s, union sz_tag *root);
-int shard_save(struct shard *s, union sz_tag **root);
-
-static inline int shard_get_mat(struct shard *s, struct v3ll p)
-{
-	assert(p.x >= 0 && p.x < SHARD_W);
-	assert(p.y >= 0 && p.y < SHARD_H);
-	assert(p.z >= 0 && p.z < SHARD_D);
-	return s->mat[p.x][p.y][p.z];
-}
-
-static inline int shard_get_shape(struct shard *s, struct v3ll p)
-{
-	assert(p.x >= 0 && p.x < SHARD_W);
-	assert(p.y >= 0 && p.y < SHARD_H);
-	assert(p.z >= 0 && p.z < SHARD_D);
-	return s->shape[p.x][p.y][p.z];
-}
-
-static inline int shard_get_light(struct shard *s, struct v3ll p)
-{
-	assert(p.x >= 0 && p.x < SHARD_W);
-	assert(p.y >= 0 && p.y < SHARD_H);
-	assert(p.z >= 0 && p.z < SHARD_D);
-	return s->light[p.x][p.y][p.z];
-}
-
-static inline void *shard_get_data(struct shard *s, struct v3ll p)
-{
-	assert(p.x >= 0 && p.x < SHARD_W);
-	assert(p.y >= 0 && p.y < SHARD_H);
-	assert(p.z >= 0 && p.z < SHARD_D);
-	return s->data[p.x][p.y][p.z];
-}
-
-static inline int shard_set_mat(struct shard *s, struct v3ll p, int val)
-{
-	assert(p.x >= 0 && p.x < SHARD_W);
-	assert(p.y >= 0 && p.y < SHARD_H);
-	assert(p.z >= 0 && p.z < SHARD_D);
-	s->mat[p.x][p.y][p.z] = val;
-}
-
-static inline int shard_set_shape(struct shard *s, struct v3ll p, int val)
-{
-	assert(p.x >= 0 && p.x < SHARD_W);
-	assert(p.y >= 0 && p.y < SHARD_H);
-	assert(p.z >= 0 && p.z < SHARD_D);
-	s->shape[p.x][p.y][p.z] = val;
-}
-
-static inline int shard_set_light(struct shard *s, struct v3ll p, int val)
-{
-	assert(p.x >= 0 && p.x < SHARD_W);
-	assert(p.y >= 0 && p.y < SHARD_H);
-	assert(p.z >= 0 && p.z < SHARD_D);
-	s->light[p.x][p.y][p.z] = val;
-}
-
-static inline void *shard_set_data(struct shard *s, struct v3ll p, void *val)
-{
-	assert(p.x >= 0 && p.x < SHARD_W);
-	assert(p.y >= 0 && p.y < SHARD_H);
-	assert(p.z >= 0 && p.z < SHARD_D);
-	s->data[p.x][p.y][p.z] = val;
-}
-
-struct chunk *chunk(struct context *ctx, int id);
-void chunk_destroy(struct chunk *c);
-int chunk_load(struct chunk *c, union sz_tag *root);
-int chunk_save(struct chunk *c, union sz_tag **root);
-
-static inline int chunk_get_mat(struct chunk *c, struct v3ll p)
-{
-	assert(p.x >= 0 && p.x < CHUNK_W);
-	assert(p.z >= 0 && p.z < CHUNK_D);
-	int y = (p.y >> 4) & 0xf;
-	p.y &= 0xf;
-	return shard_get_mat(c->shards[y], p);
-}
-
-static inline int chunk_get_shape(struct chunk *c, struct v3ll p)
-{
-	assert(p.x >= 0 && p.x < CHUNK_W);
-	assert(p.z >= 0 && p.z < CHUNK_D);
-	int y = (p.y >> 4) & 0xf;
-	p.y &= 0xf;
-	return shard_get_shape(c->shards[y], p);
-}
-
-static inline int chunk_get_light(struct chunk *c, struct v3ll p)
-{
-	assert(p.x >= 0 && p.x < CHUNK_W);
-	assert(p.z >= 0 && p.z < CHUNK_D);
-	int y = (p.y >> 4) & 0xf;
-	p.y &= 0xf;
-	return shard_get_light(c->shards[y], p);
-}
-
-static inline void *chunk_get_data(struct chunk *c, struct v3ll p)
-{
-	assert(p.x >= 0 && p.x < CHUNK_W);
-	assert(p.z >= 0 && p.z < CHUNK_D);
-	int y = (p.y >> 4) & 0xf;
-	p.y &= 0xf;
-	return shard_get_data(c->shards[y], p);
-}
-
-static inline void chunk_set_mat(struct chunk *c, struct v3ll p, int val)
-{
-	assert(p.x >= 0 && p.x < CHUNK_W);
-	assert(p.z >= 0 && p.z < CHUNK_D);
-	int y = (p.y >> 4) & 0xf;
-	p.y &= 0xf;
-	shard_set_mat(c->shards[y], p, val);
-}
-
-static inline void chunk_set_shape(struct chunk *c, struct v3ll p, int val)
-{
-	assert(p.x >= 0 && p.x < CHUNK_W);
-	assert(p.z >= 0 && p.z < CHUNK_D);
-	int y = (p.y >> 4) & 0xf;
-	p.y &= 0xf;
-	shard_set_shape(c->shards[y], p, val);
-}
-
-static inline void chunk_set_light(struct chunk *c, struct v3ll p, int val)
-{
-	assert(p.x >= 0 && p.x < CHUNK_W);
-	assert(p.z >= 0 && p.z < CHUNK_D);
-	int y = (p.y >> 4) & 0xf;
-	p.y &= 0xf;
-	shard_set_light(c->shards[y], p, val);
-}
-
-static inline void chunk_set_data(struct chunk *c, struct v3ll p, void *val)
-{
-	assert(p.x >= 0 && p.x < CHUNK_W);
-	assert(p.z >= 0 && p.z < CHUNK_D);
-	int y = (p.y >> 4) & 0xf;
-	p.y &= 0xf;
-	shard_set_data(c->shards[y], p, val);
-}
-
-struct world *world(struct context *ctx);
-void world_destroy(struct world *w);
-int world_load(struct world *w, union sz_tag *root);
-int world_save(struct world *w, union sz_tag **root);
-void world_set(struct world *w, struct v3ll p, int shape, int mat);
-void world_set_flags(struct world *w, struct box3ll bb, int flags);
-
-static inline int world_get_mat(struct world *w, struct v3ll p)
-{
-	int x = (p.x >> 4) & 0xf;
-	int z = (p.z >> 4) & 0xf;
-	p.x &= 0xf;
-	p.z &= 0xf;
-	return chunk_get_mat(w->chunks[x][z], p);
-}
-
-static inline int world_get_shape(struct world *w, struct v3ll p)
-{
-	int x = (p.x >> 4) & 0xf;
-	int z = (p.z >> 4) & 0xf;
-	p.x &= 0xf;
-	p.z &= 0xf;
-	return chunk_get_shape(w->chunks[x][z], p);
-}
-
-static inline int world_get_light(struct world *w, struct v3ll p)
-{
-	int x = (p.x >> 4) & 0xf;
-	int z = (p.z >> 4) & 0xf;
-	p.x &= 0xf;
-	p.z &= 0xf;
-	return chunk_get_light(w->chunks[x][z], p);
-}
-
-static inline void *world_get_data(struct world *w, struct v3ll p)
-{
-	int x = (p.x >> 4) & 0xf;
-	int z = (p.z >> 4) & 0xf;
-	p.x &= 0xf;
-	p.z &= 0xf;
-	return chunk_get_data(w->chunks[x][z], p);
-}
-
-static inline void world_set_mat(struct world *w, struct v3ll p, int val)
-{
-	int x = (p.x >> 4) & 0xf;
-	int z = (p.z >> 4) & 0xf;
-	p.x &= 0xf;
-	p.z &= 0xf;
-	chunk_set_mat(w->chunks[x][z], p, val);
-}
-
-static inline void world_set_shape(struct world *w, struct v3ll p, int val)
-{
-	int x = (p.x >> 4) & 0xf;
-	int z = (p.z >> 4) & 0xf;
-	p.x &= 0xf;
-	p.z &= 0xf;
-	chunk_set_shape(w->chunks[x][z], p, val);
-}
-
-static inline void world_set_light(struct world *w, struct v3ll p, int val)
-{
-	int x = (p.x >> 4) & 0xf;
-	int z = (p.z >> 4) & 0xf;
-	p.x &= 0xf;
-	p.z &= 0xf;
-	chunk_set_light(w->chunks[x][z], p, val);
-}
-
-static inline void world_set_data(struct world *w, struct v3ll p, void *val)
-{
-	int x = (p.x >> 4) & 0xf;
-	int z = (p.z >> 4) & 0xf;
-	p.x &= 0xf;
-	p.z &= 0xf;
-	chunk_set_data(w->chunks[x][z], p, val);
-}
 
 #endif
 

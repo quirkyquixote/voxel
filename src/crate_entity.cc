@@ -1,0 +1,42 @@
+
+#include "crate_entity.h"
+
+#include "render.h"
+#include "update.h"
+
+CrateEntity::CrateEntity(Context *ctx) : BlockEntity(ctx, 16)
+{
+}
+
+CrateEntity::~CrateEntity()
+{
+}
+
+void CrateEntity::update()
+{
+}
+
+void CrateEntity::render()
+{
+	render_inventory(ctx, items, p);
+}
+
+void CrateEntity::load(sz_Tag *tag)
+{
+	BlockEntity::load(tag);
+}
+
+sz_Tag *CrateEntity::save()
+{
+	return BlockEntity::save();
+}
+
+bool CrateEntity::use()
+{
+	if (ctx->cur.face == FACE_UP) {
+		use_inventory(ctx, &items);
+		return true;
+	}
+	return false;
+}
+

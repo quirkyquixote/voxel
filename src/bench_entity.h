@@ -4,12 +4,18 @@
 
 #include "block_entity.h"
 
-struct bench_entity {
-	struct block_entity block;
+class BenchEntity : public BlockEntity {
+public:
+	BenchEntity(Context *ctx);
+	~BenchEntity();
+
+	void update();
+	void render();
+	sz_Tag *save();
+	void load(sz_Tag *val);
+	bool use();
+
+	const char *get_name() { return "bench"; }
 };
-
-struct entity_traits bench_traits;
-
-struct bench_entity *bench_entity(struct context *ctx);
 
 #endif

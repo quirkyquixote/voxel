@@ -4,88 +4,89 @@
 
 #include <math.h>
 
-struct v3f {
-	float x, y, z;
+template<typename T> struct v3 {
+	T x, y, z;
+	v3() : x(0), y(0), z(0) {}
+	v3(T x, T y, T z) : x(x), y(y), z(z) {}
+	template<typename U> v3(const v3<U> &rhs) : x(rhs.x), y(rhs.y), z(rhs.z) {}
 };
 
-struct v3d {
-	double x, y, z;
-};
+typedef v3<float> v3f;
+typedef v3<double> v3d;
+typedef v3<char> v3c;
+typedef v3<short> v3s;
+typedef v3<long> v3l;
+typedef v3<long long> v3ll;
 
-struct v3c {
-	char x, y, z;
-};
-
-struct v3s {
-	short x, y, z;
-};
-
-struct v3l {
-	long x, y, z;
-};
-
-struct v3ll {
-	long long x, y, z;
-};
-
-static inline struct v3f v3f(float x, float y, float z)
+template<typename T> inline bool operator==(const v3<T> &lhs, const v3<T> &rhs)
 {
-	return (struct v3f) { x, y, z };
+	return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
 }
 
-static inline struct v3d v3d(double x, double y, double z)
+template<typename T> inline bool operator!=(const v3<T> &lhs, const v3<T> &rhs)
 {
-	return (struct v3d) { x, y, z };
+	return lhs.x != rhs.x || lhs.y != rhs.y || lhs.z != rhs.z;
 }
 
-static inline struct v3c v3c(char x, char y, char z)
+template<typename T> inline v3<T> operator+(const v3<T> &lhs, const v3<T> &rhs)
 {
-	return (struct v3c) { x, y, z };
+	return v3<T>(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z);
 }
 
-static inline struct v3s v3s(short x, short y, short z)
+template<typename T> inline v3<T> operator-(const v3<T> &lhs, const v3<T> &rhs)
 {
-	return (struct v3s) { x, y, z };
+	return v3<T>(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z);
 }
 
-static inline struct v3l v3l(long x, long y, long z)
+template<typename T> inline v3<T> operator*(const v3<T> &lhs, T rhs)
 {
-	return (struct v3l) { x, y, z };
+	return v3<T>(lhs.x * rhs, lhs.y * rhs, lhs.z * rhs);
 }
 
-static inline struct v3ll v3ll(long long x, long long y, long long z)
+template<typename T> inline T dot(const v3<T> &lhs, const v3<T> &rhs)
 {
-	return (struct v3ll) { x, y, z };
+	return (lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z);
 }
 
-#define v3_eql(u, v) (u.x == v.x && u.y == v.y && u.z == v.z)
+template<typename T> inline T length(const v3<T> &lhs)
+{
+	return hypot(hypot(lhs.x, lhs.y), lhs.z);
+}
 
-#define v3_neq(u, v) (u.x != v.x || u.y != v.y || u.z != v.z)
+template<typename T> inline T dist(const v3<T> &lhs, const v3<T> &rhs)
+{
+	return length(lhs - rhs);
+}
 
-#define v3_add(u, v) ((typeof(u)){ u.x + v.x, u.y + v.y, u.z + v.z })
+template<typename T> inline v3<T> normalize(const v3<T> &lhs)
+{
+	return lhs / length(lhs);
+}
 
-#define v3_addx(u, v, d) ((typeof(u)){ u.x + v.x * d, u.y + v.y * d, u.z + v.z * d })
+template<typename T> inline v3<T> rotx(const v3<T> &lhs, T a)
+{
+	T c = cos(a);
+	T s = sin(a);
+	return v3<T>(lhs.x, c * lhs.y - s * lhs.z, s * lhs.y + c * lhs.z);
+}
 
-#define v3_sub(u, v) ((typeof(u)){ u.x - v.x, u.y - v.y, u.z - v.z })
+template<typename T> inline v3<T> roty(const v3<T> &lhs, T a)
+{
+	T c = cos(a);
+	T s = sin(a);
+	return v3<T>(c * lhs.x - s * lhs.z, lhs.y, s * lhs.x + c * lhs.z);
+}
 
-#define v3_subx(u, v, d) ((typeof(u)){ u.x - v.x * d, u.y - v.y * d, u.z - v.z * d })
+template<typename T> inline v3<T> rotz(const v3<T> &lhs, T a)
+{
+	T c = cos(a);
+	T s = sin(a);
+	return v3<T>(c * lhs.x - s * lhs.y, s * lhs.x + c * lhs.y, lhs.z);
+}
 
-#define v3_mul(u, d) ((typeof(u)){ u.x * d, u.y * d, u.z * d })
-
-#define v3_dot(u, v) (u.x * v.x + u.y * v.y + u.z * v.z)
-
-#define v3_length(u) (hypot(hypot(u.x, u.y), u.z))
-
-#define v3_dist(u, v) v3_length(v3_sub(u, v))
-
-#define v3_normalize(u) v3_mul(u, 1.0 / v3_length(u))
-
-#define v3_rotx(u, a) ((typeof(u)){ u.x, cos(a) * u.y - sin(a) * u.z, sin(a) * u.y + cos(a) * u.z })
-
-#define v3_roty(u, a) ((typeof(u)){ cos(a) * u.x - sin(a) * u.z, u.y, sin(a) * u.x + cos(a) * u.z })
-
-#define v3_rotz(u, a) ((typeof(u)){ cos(a) * u.x - sin(a) * u.y, sin(a) * u.x + cos(a) * u.y, u.z })
-
-#define v3_rot(u, a) v3_rotz(v3_roty(v3_rotx(u, r.x), r.y), r.z)
+template<typename T> inline v3<T> rot(const v3<T> &lhs, const v3<T> &a)
+{
+	return rotx(roty(rotx(lhs, a.x), a.y), a.z);
+}
 
 #endif

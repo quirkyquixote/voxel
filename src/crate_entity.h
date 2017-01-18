@@ -4,12 +4,18 @@
 
 #include "block_entity.h"
 
-struct crate_entity {
-	struct block_entity block;
+class CrateEntity : public BlockEntity {
+public:
+	CrateEntity(Context *ctx);
+	~CrateEntity();
+
+	void update();
+	void render();
+	sz_Tag *save();
+	void load(sz_Tag *val);
+	bool use();
+
+	const char *get_name() { return "crate"; }
 };
-
-struct entity_traits crate_traits;
-
-struct crate_entity *crate_entity(struct context *ctx);
 
 #endif
