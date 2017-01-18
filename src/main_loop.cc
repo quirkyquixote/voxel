@@ -64,7 +64,7 @@ void MainLoop::run()
 			if (e.type == SDL_QUIT)
 				keep_going = false;
 			else
-				event_func(&e);
+				event_func(e);
 		}
 		update_func();
 		window->redraw();

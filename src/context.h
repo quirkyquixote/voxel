@@ -39,7 +39,7 @@ class Context {
 	int chunks_per_tick;
 	uint64_t tick;
 
-	void event(const SDL_Event *e);
+	void event(const SDL_Event &e);
 	void update();
 
 	void spill_inventory(const v3ll &p);

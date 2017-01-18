@@ -54,7 +54,7 @@ class Window {
 
 class MainLoop {
  public:
-	typedef void EventFunc(const SDL_Event *);
+	typedef void EventFunc(const SDL_Event &);
 	typedef void UpdateFunc(void);
 
 	explicit MainLoop(int fps);
