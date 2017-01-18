@@ -26,64 +26,66 @@ int mkpath(const char *path, mode_t mode);
 
 int main(int argc, char *argv[])
 {
-	Context *ctx = new Context();
-
-	ctx->dir = "foo";
 	block_traits_init();
-	ctx->world = new World(ctx);
-	//ctx->prof_mgr = profile_manager();
-	ctx->chunks_per_tick = 1;
-
-	/* Setup main loop */
-	ctx->ml = new MainLoop(30);
-	ctx->ml->set_event_callback([ctx](const SDL_Event &e){ctx->event(e);});
-	ctx->ml->set_update_callback([ctx](){ctx->update();});
-	ctx->ml->set_window(new Window("voxel", 0, 0, 1280, 768, 0));
-
-	/* Create renderer */
-	ctx->renderer = new Renderer(ctx);
-	ctx->ml->get_window()->set_render_callback(*ctx->renderer);
-
-	/* Initialize Tcl */
-	ctx->tcl = Tcl_CreateInterp();
-	Tcl_CreateObjCommand(ctx->tcl, "help", cmd_help, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "ls", cmd_ls, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "give", cmd_give, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "take", cmd_take, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "q", cmd_query, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "a", cmd_seta, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "b", cmd_setb, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "box", cmd_box, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "hbox", cmd_hbox, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "walls", cmd_walls, ctx, NULL);
-	Tcl_CreateObjCommand(ctx->tcl, "relit", cmd_relit, ctx, NULL);
-	ctx->cli = new CommandLine();
-
-	/* Initialize physics */
-	ctx->space = new Space(ctx->world);
-	ctx->space->set_gravity(-0.05);
-	ctx->space->set_iterations(2);
-	ctx->space->set_impulse(0.001);
-	ctx->space->set_terminal_speed(1);
-
-	/* Initialize flowsim */
-	//ctx->flowsim = flowsim(ctx->world);
-
-	/* Load world */
+	Context *ctx = new Context("foo");
 	load_all(ctx);
-
-	/* Run */
 	ctx->ml->run();
-
-	/* Save the world */
 	save_all(ctx);
-
-	/* Destroy everything */
-	delete ctx->world;
-	delete ctx->ml;
-//	profile_manager_destroy(ctx->prof_mgr);
 	delete ctx;
 	return 0;
+}
+
+Context::Context(const char *dir)
+	: dir(dir)
+{
+	world = new World(this);
+	//prof_mgr = profile_manager();
+	chunks_per_tick = 1;
+
+	/* Setup main loop */
+	ml = new MainLoop(30);
+	ml->set_event_callback([this](const SDL_Event &e){event(e);});
+	ml->set_update_callback([this](){update();});
+	ml->set_window(new Window("voxel", 0, 0, 1280, 768, 0));
+
+	/* Create renderer */
+	renderer = new Renderer(this);
+	ml->get_window()->set_render_callback(*renderer);
+
+	/* Initialize Tcl */
+	tcl = Tcl_CreateInterp();
+	Tcl_CreateObjCommand(tcl, "help", cmd_help, this, NULL);
+	Tcl_CreateObjCommand(tcl, "ls", cmd_ls, this, NULL);
+	Tcl_CreateObjCommand(tcl, "give", cmd_give, this, NULL);
+	Tcl_CreateObjCommand(tcl, "take", cmd_take, this, NULL);
+	Tcl_CreateObjCommand(tcl, "q", cmd_query, this, NULL);
+	Tcl_CreateObjCommand(tcl, "a", cmd_seta, this, NULL);
+	Tcl_CreateObjCommand(tcl, "b", cmd_setb, this, NULL);
+	Tcl_CreateObjCommand(tcl, "box", cmd_box, this, NULL);
+	Tcl_CreateObjCommand(tcl, "hbox", cmd_hbox, this, NULL);
+	Tcl_CreateObjCommand(tcl, "walls", cmd_walls, this, NULL);
+	Tcl_CreateObjCommand(tcl, "relit", cmd_relit, this, NULL);
+	cli = new CommandLine();
+
+	/* Initialize physics */
+	space = new Space(world);
+	space->set_gravity(-0.05);
+	space->set_iterations(2);
+	space->set_impulse(0.001);
+	space->set_terminal_speed(1);
+
+	/* Initialize flowsim */
+	//flowsim = flowsim(world);
+}
+
+Context::~Context()
+{
+	delete world;
+	delete ml;
+	delete renderer;
+	/* close Tcl */
+	delete cli;
+	delete space;
 }
 
 int load_all(Context *ctx)

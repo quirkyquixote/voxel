@@ -39,6 +39,9 @@ class Context {
 	int chunks_per_tick;
 	uint64_t tick;
 
+	Context(const char *dir);
+	~Context();
+
 	void event(const SDL_Event &e);
 	void update();
 
