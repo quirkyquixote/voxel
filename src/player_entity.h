@@ -4,6 +4,7 @@
 #define SRC_PLAYER_ENTITY_H_
 
 #include "roaming_entity.h"
+#include "main_loop.h"
 
 class PlayerEntity : public RoamingEntity {
  public:
@@ -47,6 +48,8 @@ class PlayerEntity : public RoamingEntity {
 
 	void use_inventory(std::vector<Item> *inv);
 	void use_workbench(std::vector<Item> *inv);
+
+	void handle_event(const SDL_Event &e);
 
  private:
 	box3c move;
