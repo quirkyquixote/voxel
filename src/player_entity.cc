@@ -8,7 +8,7 @@
 #include "recipes.h"
 
 PlayerEntity::PlayerEntity(Context *ctx)
-	: RoamingEntity(ctx, 9), tool(0)
+	: RoamingEntity(ctx, 9), act(0), use(0), pick(0), run(0), tool(0)
 {
 	body->set_p(v3f(p.x, WORLD_H, p.y));
 	body->set_size(v2f(0.325, 0.825));
@@ -308,8 +308,11 @@ void PlayerEntity::use_tool()
 void PlayerEntity::render()
 {
 	render_cursor();
+	glDisable(GL_DEPTH_TEST);
 	render_held_item();
 	render_hotbar();
+	glEnable(GL_DEPTH_TEST);
+
 }
 
 void PlayerEntity::render_cursor()
@@ -376,8 +379,6 @@ void PlayerEntity::render_cursor()
 
 void PlayerEntity::render_held_item()
 {
-	glDisable(GL_DEPTH_TEST);
-
 	Item s = items[tool];
 	if (s.num > 0) {
 		glMatrixMode(GL_MODELVIEW);

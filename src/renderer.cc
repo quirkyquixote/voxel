@@ -67,10 +67,10 @@ Renderer::~Renderer()
 void Renderer::operator()()
 {
 	render_shards();
-	ctx->player->render();
 //	render_flowsim(this);
 	render_block_entities();
 	render_roaming_entities();
+	ctx->player->render();
 	render_commandline();
 }
 
@@ -259,7 +259,7 @@ void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 
 void Renderer::render_block_entities()
 {
-	v3f p = ctx->player->get_p();
+	v3f p = ctx->player->get_body()->get_p();
 	box3ll bb;
 	bb.x0 = floor(p.x - 4);
 	bb.y0 = floor(p.y - 4);
