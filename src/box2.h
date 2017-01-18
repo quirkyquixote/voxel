@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_AAB2_H_
-#define VOXEL_AAB2_H_
+#ifndef SRC_BOX2_H_
+#define SRC_BOX2_H_
 
 template<typename T> struct box2 {
 	struct iterator {
@@ -58,4 +59,4 @@ template<typename T> bool overlap(const box2<T> &b1, const box2<T> &b2)
 			b2.y0 <= b1.y1 && b2.y1 >= b1.y0);
 }
 
-#endif
+#endif  // SRC_BOX2_H_

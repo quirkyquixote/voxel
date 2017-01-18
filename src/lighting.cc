@@ -1,3 +1,4 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
 #include "lighting.h"
 
@@ -66,13 +67,13 @@ void copy_value(World *w, const v3ll &p, int *k)
 void update_lighting(World *w, const box3ll &bb, box3ll *rbb)
 {
 	Lighting *l = new Lighting();
-	v3ll p;
 	int k;
 	box3ll bb2;
+	v3ll p;
 
 	l->w = w;
 
-	box3_foreach(p, bb) {
+	for (auto p : bb) {
 		l->s1.push_back(p);
 		l->s2.push_back(p);
 	}
@@ -128,7 +129,7 @@ void update_lighting(World *w, const box3ll &bb, box3ll *rbb)
 	}
 	delete l;
 
-	box3_foreach(p, bb2) {
+	for (auto p : bb2) {
 		int s = w->get_shape(p);
 		if (s == SHAPE_SLAB_DN) {
 			k = w->get_light(p);

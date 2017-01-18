@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_V2_H_
-#define VOXEL_V2_H_
+#ifndef SRC_V2_H_
+#define SRC_V2_H_
 
 #include <math.h>
 
@@ -69,4 +70,4 @@ template<typename T> inline v2<T> rot(const v2<T> &lhs, T a)
 	return v2<T>(c * lhs.x - s * lhs.y, s * lhs.x + c * lhs.y);
 }
 
-#endif
+#endif  // SRC_V2_H_

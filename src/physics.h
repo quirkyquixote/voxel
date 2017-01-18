@@ -1,9 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-
-
-
-#ifndef VOXEL_PHYSICS_H_
-#define VOXEL_PHYSICS_H_
+#ifndef SRC_PHYSICS_H_
+#define SRC_PHYSICS_H_
 
 #include <list>
 #include <functional>
@@ -31,8 +29,10 @@ struct Query;
 class Body {
 	friend class Space;
 
-public:
-	Body(Space *s);
+ public:
+	typedef void(Callback)(Body *, const v3ll &, int);
+
+	explicit Body(Space *s);
 	~Body();
 
 	inline v3f get_p() const { return p; }
@@ -48,24 +48,24 @@ public:
 	inline void set_size(const v2f &new_s) { s = new_s; }
 	inline void set_step_size(int s) { step_size = s; }
 
-	inline void set_callback(const std::function<void(Body *, const v3ll &, int)> &func)
+	inline void set_callback(const std::function<Callback> &func)
 	{
 		cb_func = func;
 	}
 
-private:
+ private:
 	v3f p;
 	v3f r;
 	v3f v;
 	v2f s;
 	box3f bb;
 	int step_size;
-	std::function<void(Body *, const v3ll, int)> cb_func;
+	std::function<Callback> cb_func;
 };
 
 class Space {
-public:
-	Space(World *w);
+ public:
+	explicit Space(World *w);
 	~Space();
 
 	void run();
@@ -89,7 +89,7 @@ public:
 		delete b;
 	}
 
-private:
+ private:
 	int iterations;
 	float impulse;
 	float gravity;
@@ -120,5 +120,5 @@ struct Query {
 	v3f q;
 };
 
-#endif
+#endif  // SRC_PHYSICS_H_
 

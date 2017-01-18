@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_TYPES_H_
-#define VOXEL_TYPES_H_
+#ifndef SRC_TYPES_H_
+#define SRC_TYPES_H_
 
 #include <string.h>
 #include <stdint.h>
@@ -220,4 +221,4 @@ extern struct BlockTraits block_traits[256][256];
 
 void block_traits_init(void);
 
-#endif
+#endif  // SRC_TYPES_H_

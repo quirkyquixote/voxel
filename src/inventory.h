@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_INVENTORY_H_
-#define VOXEL_INVENTORY_H_
+#ifndef SRC_INVENTORY_H_
+#define SRC_INVENTORY_H_
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -16,4 +17,4 @@ int inventory_add_to_item(Inventory *i, int slot, Item s);
 int inventory_remove(Inventory *i, Item s);
 int inventory_remove_from_item(Inventory *i, int slot, Item s);
 
-#endif
+#endif  // SRC_INVENTORY_H_

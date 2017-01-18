@@ -1,11 +1,12 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_DROP_ENTITY_H_
-#define VOXEL_DROP_ENTITY_H_
+#ifndef SRC_DROP_ENTITY_H_
+#define SRC_DROP_ENTITY_H_
 
 #include "roaming_entity.h"
 
 class DropEntity : public RoamingEntity {
-public:
+ public:
 	DropEntity(Context *ctx, Item item);
 	~DropEntity();
 
@@ -16,11 +17,11 @@ public:
 
 	const char *get_name() { return "drop"; }
 
-private:
+ private:
 	int ticks;
 
 	void callback(Body *b, const v3ll &p, int face);
 };
 
-#endif
+#endif  // SRC_DROP_ENTITY_H_
 

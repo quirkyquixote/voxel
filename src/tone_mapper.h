@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_TONE_MAPPER_H_
-#define VOXEL_TONE_MAPPER_H_
+#ifndef SRC_TONE_MAPPER_H_
+#define SRC_TONE_MAPPER_H_
 
 #define GL_GLEXT_PROTOTYPES 1
 #include "SDL2/SDL_opengl.h"
@@ -11,14 +12,14 @@
 #include "v2.h"
 
 class ToneMapper {
-public:
+ public:
 	ToneMapper(float dt, size_t samples);
 	~ToneMapper();
 
 	void update(float sky, float spot);
 	inline GLuint get_texture() const { return texture; }
 
-private:
+ private:
 	float k;               /* luminosity adjustment in one step */
 	float luminance;       /* current luminance value */
 	float time;            /* current time */
@@ -49,4 +50,4 @@ static inline v2f texcoord_from_light(int l)
 	return v2f((l & 0xf) / 15., (l >> 4) / 15.);
 }
 
-#endif
+#endif  // SRC_TONE_MAPPER_H_

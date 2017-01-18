@@ -1,14 +1,15 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_BLOCK_ENTITY_H_
-#define VOXEL_BLOCK_ENTITY_H_
+#ifndef SRC_BLOCK_ENTITY_H_
+#define SRC_BLOCK_ENTITY_H_
 
 #include "entity.h"
 
 class BlockEntity : public Entity {
-public:
+ public:
 	BlockEntity(Context *ctx, int capacity) : Entity(ctx, capacity) { }
 
 	virtual ~BlockEntity() { }
 };
 
-#endif
+#endif  // SRC_BLOCK_ENTITY_H_

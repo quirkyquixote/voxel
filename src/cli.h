@@ -1,12 +1,13 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_CLI_H_
-#define VOXEL_CLI_H_
+#ifndef SRC_CLI_H_
+#define SRC_CLI_H_
 
 #include <string>
 #include <vector>
 
 class CommandLine {
-public:
+ public:
 	CommandLine();
 	~CommandLine();
 
@@ -25,7 +26,7 @@ public:
 	inline int get_cur_char() const  { return cur_char; }
 	inline int get_cur_line() const  { return cur_line; }
 
-private:
+ private:
 	std::string buf;
 	std::vector<char *> history;
 	const char *visible;
@@ -33,4 +34,4 @@ private:
 	int cur_char;
 };
 
-#endif
+#endif  // SRC_CLI_H_

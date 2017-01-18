@@ -1,13 +1,14 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_ROAMING_ENTITY_H_
-#define VOXEL_ROAMING_ENTITY_H_
+#ifndef SRC_ROAMING_ENTITY_H_
+#define SRC_ROAMING_ENTITY_H_
 
 #include "entity.h"
 
 #include "physics.h"
 
 class RoamingEntity : public Entity {
-public:
+ public:
 	RoamingEntity(Context *ctx, int capacity);
 	virtual ~RoamingEntity();
 
@@ -17,9 +18,9 @@ public:
 	inline Body *get_body() { return body; }
 	inline bool get_die() { return die; }
 
-protected:
+ protected:
 	Body *body;
 	bool die;
 };
 
-#endif
+#endif  // SRC_ROAMING_ENTITY_H_

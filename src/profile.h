@@ -1,48 +1,48 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-
-#ifndef VOXEL_PROFILE_H_
-#define VOXEL_PROFILE_H_
+#ifndef SRC_PROFILE_H_
+#define SRC_PROFILE_H_
 
 #include <stdint.h>
 
 class Profile {
-public:
-	Profile(const char *tag);
+ public:
+	explicit Profile(const char *tag);
 	virtual ~Profile();
 	virtual void begin();
 	virtual void end();
 	virtual void update();
 
-protected:
+ protected:
 	char *tag;
 	long long acc;
 	long long samples;
 };
 
 class CpuProfile : public Profile {
-public:
+ public:
 	CpuProfile();
 	~CpuProfile();
 	void begin();
 	void end();
 	void update();
 
-private:
+ private:
 	long long time;
 };
 
 class GpuProfile : public Profile {
-public:
+ public:
 	GpuProfile();
 	~GpuProfile();
 	void begin();
 	void end();
 	void update();
 
-private:
+ private:
 	long long time;
 };
 
 
-#endif
+#endif  // SRC_PROFILE_H_
 

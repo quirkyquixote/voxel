@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_AAB3_H_
-#define VOXEL_AAB3_H_
+#ifndef SRC_BOX3_H_
+#define SRC_BOX3_H_
 
 template<typename T> struct box3 {
 	struct iterator {
@@ -65,9 +66,4 @@ template<typename T> bool overlap(const box3<T> &b1, const box3<T> &b2)
 			b2.z0 <= b1.z1 && b2.z1 >= b1.z0);
 }
 
-#define box3_foreach(_iter,_bbox) \
-	for (_iter.x = _bbox.x0; _iter.x < _bbox.x1; ++_iter.x) \
-for (_iter.y = _bbox.y0; _iter.y < _bbox.y1; ++_iter.y) \
-for (_iter.z = _bbox.z0; _iter.z < _bbox.z1; ++_iter.z)
-
-#endif
+#endif  // SRC_BOX3_H_

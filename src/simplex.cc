@@ -1,3 +1,4 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
 #include <math.h>
 #include "simplex.h"

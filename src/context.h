@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_H_
-#define VOXEL_H_
+#ifndef SRC_CONTEXT_H_
+#define SRC_CONTEXT_H_
 
 #include <tcl.h>
 
@@ -27,7 +28,7 @@ enum {
 };
 
 class Context {
-public:
+ public:
 	const char *dir;
 	MainLoop *ml;
 	Tcl_Interp *tcl;
@@ -61,8 +62,11 @@ public:
 unsigned long long next_id(void);
 unsigned long long max_id(void);
 
-#define log_info(fmt,...) fprintf(stderr, "INFO: %s: " fmt "\n", __func__, ##__VA_ARGS__)
-#define log_warning(fmt,...) fprintf(stderr, "WARNING: %s: " fmt "\n", __func__, ##__VA_ARGS__)
-#define log_error(fmt,...) fprintf(stderr, "ERROR: %s: " fmt "\n", __func__, ##__VA_ARGS__)
+#define log_info(fmt, ...) \
+	fprintf(stderr, "INFO: %s: " fmt "\n", __func__, ##__VA_ARGS__)
+#define log_warning(fmt, ...) \
+	fprintf(stderr, "WARNING: %s: " fmt "\n", __func__, ##__VA_ARGS__)
+#define log_error(fmt, ...) \
+	fprintf(stderr, "ERROR: %s: " fmt "\n", __func__, ##__VA_ARGS__)
 
-#endif
+#endif  // SRC_CONTEXT_H_

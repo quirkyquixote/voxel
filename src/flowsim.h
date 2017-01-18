@@ -1,7 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-
-#ifndef VOXEL_FLOWSIM_H_
-#define VOXEL_FLOWSIM_H_
+#ifndef SRC_FLOWSIM_H_
+#define SRC_FLOWSIM_H_
 
 #include "v3.h"
 #include "chunk.h"
@@ -43,4 +43,4 @@ void flowsim_destroy(struct flowsim *f);
 void flowsim_step(struct flowsim *f);
 int flowsim_add(struct flowsim *f, struct v3ll p, float v);
 
-#endif
+#endif  // SRC_FLOWSIM_H_

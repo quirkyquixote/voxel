@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_RENDERER_H_
-#define VOXEL_RENDERER_H_
+#ifndef SRC_VERTEX_BUFFER_H_
+#define SRC_VERTEX_BUFFER_H_
 
 #include <vector>
 
@@ -34,7 +35,7 @@ struct VertexDesc {
 
 class VertexBuffer {
 public:
-	VertexBuffer(int nbufs);
+	explicit VertexBuffer(int nbufs);
 	~VertexBuffer();
 
 	void enable();
@@ -86,8 +87,8 @@ extern VertexDesc vertices_pane_rt[];
 extern VertexDesc vertices_pane_bk[];
 extern VertexDesc vertices_pane_ft[];
 
-static inline void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf, size_t len,
-	v3f p, v2f t1, const v2f *t2, const int *tilted)
+static inline void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf,
+		size_t len, v3f p, v2f t1, const v2f *t2, const int *tilted)
 {
 	int i;
 	Vertex v;
@@ -210,5 +211,5 @@ static inline void texcoord_ft(int mat, v2f *ret, int *tilted)
 
 void populate_material_texcoord_table();
 
-#endif
+#endif  // SRC_VERTEX_BUFFER_H_
 

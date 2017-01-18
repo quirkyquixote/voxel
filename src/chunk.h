@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_SHARD_H_
-#define VOXEL_SHARD_H_
+#ifndef SRC_CHUNK_H_
+#define SRC_CHUNK_H_
 
 #include <stdint.h>
 #include <assert.h>
@@ -45,7 +46,7 @@ enum {
 class Context;
 
 class Shard {
-public:
+ public:
 	Shard(int id, int y);
 	~Shard();
 
@@ -119,7 +120,7 @@ public:
 		data[p.x][p.y][p.z] = val;
 	}
 
-private:
+ private:
 	int id;
 	int8_t y;
 	uint8_t mat[SHARD_W][SHARD_H][SHARD_D];
@@ -129,7 +130,7 @@ private:
 };
 
 class Chunk {
-public:
+ public:
 	Chunk(Context *ctx, int id);
 	~Chunk();
 
@@ -208,7 +209,7 @@ public:
 		shards[y]->set_data(v3ll(p.x, p.y & 0xf, p.z), val);
 	}
 
-private:
+ private:
 	int id;
 	int flags;
 	int priority;
@@ -218,8 +219,8 @@ private:
 };
 
 class World {
-public:
-	World(Context *ctx);
+ public:
+	explicit World(Context *ctx);
 	~World();
 
 	void load(sz_Tag *root);
@@ -286,12 +287,12 @@ public:
 		chunks[x][z]->set_data(v3ll(p.x & 0xf, p.y, p.z & 0xf), val);
 	}
 
-private:
+ private:
 	Context *ctx;
 	v2ll p;
 	Chunk *chunks[CHUNKS_PER_WORLD][CHUNKS_PER_WORLD];
 };
 
-#endif
+#endif  // SRC_CHUNK_H_
 
 

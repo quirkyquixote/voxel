@@ -1,7 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-
-#ifndef SZ_H_
-#define SZ_H_
+#ifndef SRC_SZ_H_
+#define SRC_SZ_H_
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <string>
+#include <utility>
 
 enum sz_typeid {
 	SZ_NULL = 0,
@@ -25,13 +26,13 @@ enum sz_typeid {
 };
 
 class sz_Exception {
-public:
+ public:
 	sz_Exception() { }
 	~sz_Exception() { }
 };
 
 class sz_Tag {
-public:
+ public:
 	typedef std::vector<sz_Tag *> List;
 	typedef std::vector<std::pair<char *, sz_Tag *> > Dict;
 
@@ -53,87 +54,88 @@ public:
 };
 
 class sz_i8 : public sz_Tag {
-public:
-	sz_i8(int8_t val) : val(val) {}
+ public:
+	explicit sz_i8(int8_t val) : val(val) {}
 	~sz_i8() { }
 	inline uint8_t get_tag() const { return SZ_I8; }
 	inline int8_t get_i8() const { return val; }
-private:
+ private:
 	int8_t val;
 };
 
 class sz_i16 : public sz_Tag {
-public:
-	sz_i16(int16_t val) : val(val) {}
+ public:
+	explicit sz_i16(int16_t val) : val(val) {}
 	~sz_i16() { }
 	inline uint8_t get_tag() const { return SZ_I16; }
 	inline int16_t get_i16() const { return val; }
-private:
+ private:
 	int16_t val;
 };
 
 class sz_i32 : public sz_Tag {
-public:
-	sz_i32(int32_t val) : val(val) {}
+ public:
+	explicit sz_i32(int32_t val) : val(val) {}
 	~sz_i32() { }
 	inline uint8_t get_tag() const { return SZ_I32; }
 	inline int32_t get_i32() const { return val; }
-private:
+ private:
 	int32_t val;
 };
 
 class sz_i64 : public sz_Tag {
-public:
-	sz_i64(int64_t val) : val(val) {}
+ public:
+	explicit sz_i64(int64_t val) : val(val) {}
 	~sz_i64() { }
 	inline uint8_t get_tag() const { return SZ_I64; }
 	inline int64_t get_i64() const { return val; }
-private:
+ private:
 	int64_t val;
 };
 
 class sz_f32 : public sz_Tag {
-public:
-	sz_f32(float val) : val(val) {}
+ public:
+	explicit sz_f32(float val) : val(val) {}
 	~sz_f32() { }
 	inline uint8_t get_tag() const { return SZ_F32; }
 	inline float get_f32() const { return val; }
-private:
+ private:
 	float val;
 };
 
 class sz_f64 : public sz_Tag {
-public:
-	sz_f64(double val) : val(val) {}
+ public:
+	explicit sz_f64(double val) : val(val) {}
 	~sz_f64() { }
 	inline uint8_t get_tag() const { return SZ_F64; }
 	inline double get_f64() const { return val; }
-private:
+ private:
 	double val;
 };
 
 class sz_Str : public sz_Tag {
-public:
-	sz_Str(const char *val) : val(strdup(val)) { }
+ public:
+	explicit sz_Str(const char *val) : val(strdup(val)) { }
 	~sz_Str() { free(val); }
 	inline uint8_t get_tag() const { return SZ_STR; }
 	inline const char *get_str() const { return val; }
-private:
+ private:
 	char *val;
 };
 
 class sz_Raw : public sz_Tag {
-public:
-	sz_Raw(const void *buf, size_t bytes) : data(reinterpret_cast<const char *>(buf), bytes) { }
+ public:
+	sz_Raw(const void *buf, size_t bytes)
+		: data(reinterpret_cast<const char *>(buf), bytes) { }
 	~sz_Raw() { }
 	inline uint8_t get_tag() const { return SZ_RAW; }
 	inline const std::string &get_raw() const { return data; }
-private:
+ private:
 	std::string data;
 };
 
 class sz_List : public sz_Tag {
-public:
+ public:
 	sz_List() { }
 	~sz_List()
 	{
@@ -142,12 +144,12 @@ public:
 	}
 	inline uint8_t get_tag() const { return SZ_LIST; }
 	inline List &get_list() { return val; }
-private:
+ private:
 	List val;
 };
 
 class sz_Dict : public sz_Tag {
-public:
+ public:
 	sz_Dict() { }
 	~sz_Dict()
 	{
@@ -158,7 +160,7 @@ public:
 	}
 	inline uint8_t get_tag() const { return SZ_DICT; }
 	inline Dict &get_dict() { return val; }
-private:
+ private:
 	Dict val;
 };
 
@@ -175,5 +177,5 @@ static inline void sz_dict_add(sz_Tag *d, const char *k, sz_Tag *v)
 	d->get_dict().push_back(std::make_pair(strdup(k), v));
 }
 
-#endif
+#endif  // SRC_SZ_H_
 

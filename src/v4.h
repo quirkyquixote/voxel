@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_V4_H_
-#define VOXEL_V4_H_
+#ifndef SRC_V4_H_
+#define SRC_V4_H_
 
 #include <math.h>
 
@@ -8,7 +9,8 @@ template<typename T> struct v4 {
 	T x, y, z, w;
 	v4() : x(0), y(0), z(0), w(0) {}
 	v4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {}
-	template<typename U> v4(const v4<U> &rhs) : x(rhs.x), y(rhs.y), z(rhs.z), w(rhs.w) {}
+	template<typename U> v4(const v4<U> &rhs)
+		: x(rhs.x), y(rhs.y), z(rhs.z), w(rhs.w) {}
 };
 
 typedef v4<float> v4f;
@@ -63,4 +65,4 @@ template<typename T> inline v4<T> normalize(const v4<T> &lhs)
 	return lhs / length(lhs);
 }
 
-#endif
+#endif  // SRC_V4_H_

@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_COMMANDS_H_
-#define VOXEL_COMMANDS_H_
+#ifndef SRC_TCL_COMMANDS_H_
+#define SRC_TCL_COMMANDS_H_
 
 #include <tcl.h>
 
@@ -16,4 +17,4 @@ int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 
-#endif
+#endif  // SRC_TCL_COMMANDS_H_

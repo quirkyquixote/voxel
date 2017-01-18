@@ -1,12 +1,13 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
 
-#ifndef VOXEL_CAMERA_H_
-#define VOXEL_CAMERA_H_
+#ifndef SRC_CAMERA_H_
+#define SRC_CAMERA_H_
 
 #include "v3.h"
 
 class Camera {
-public:
+ public:
 	Camera();
 	~Camera();
 
@@ -25,11 +26,11 @@ public:
 	inline void set_max_distance(float f) { max_distance = f; }
 	inline void set_aspect_ratio(float f) { aspect_ratio = f; }
 
-private:
+ private:
 	v3f p;		// position of the camera
 	v3f r;		// euler angles for the camera
 	float fovy;
-	float max_distance;		// shards farther than this will not be drawn. Also determines fog
+	float max_distance;     // shards farther than this will not be drawn
 	float aspect_ratio;
 	v3f nlf;		// normal of the left clipping plane
 	v3f nrt;		// normal of the right clipping plane
@@ -37,4 +38,4 @@ private:
 	v3f ndn;		// normal of the bottom clipping plane
 };
 
-#endif
+#endif  // SRC_CAMERA_H_

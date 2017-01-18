@@ -1,6 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_MAIN_LOOP_H_
-#define VOXEL_MAIN_LOOP_H_
+#ifndef SRC_MAIN_LOOP_H_
+#define SRC_MAIN_LOOP_H_
 
 #include <functional>
 
@@ -14,7 +15,9 @@
 #include "GL/glu.h"
 
 class Window {
-public:
+ public:
+	typedef void RenderFunc(void);
+
 	Window(const char *title, int x, int y, int w, int h, int flags);
 	~Window();
 
@@ -35,7 +38,7 @@ public:
 		return SDL_GetMouseFocus() == sdl_window;
 	}
 
-	inline void set_render_callback(const std::function<void(void)> &func)
+	inline void set_render_callback(const std::function<RenderFunc> &func)
 	{
 		render_func = func;
 	}
@@ -43,15 +46,18 @@ public:
 	inline SDL_Window *get_sdl_window() { return sdl_window; }
 	inline SDL_GLContext get_gl_context() { return gl_context; }
 
-private:
+ private:
 	SDL_Window *sdl_window;
 	SDL_GLContext gl_context;
-	std::function<void(void)> render_func;
+	std::function<RenderFunc> render_func;
 };
 
 class MainLoop {
-public:
-	MainLoop(int fps);
+ public:
+	typedef void EventFunc(const SDL_Event *);
+	typedef void UpdateFunc(void);
+
+	explicit MainLoop(int fps);
 	~MainLoop();
 
 	void run();
@@ -60,24 +66,24 @@ public:
 	inline void set_window(Window *w) { window = w; }
 	inline Window *get_window() { return window; }
 
-	inline void set_update_callback(const std::function<void(void)> &func)
+	inline void set_update_callback(const std::function<UpdateFunc> &func)
 	{
 		update_func = func;
 	}
 
-	inline void set_event_callback(const std::function<void(const SDL_Event *)> &func)
+	inline void set_event_callback(const std::function<EventFunc> &func)
 	{
 		event_func = func;
 	}
 
-private:
-	std::function<void(void)> update_func;
-	std::function<void(const SDL_Event *)> event_func;
+ private:
+	std::function<UpdateFunc> update_func;
+	std::function<EventFunc> event_func;
 	Window *window;
 	int fps;
 	int keep_going;
 };
 
 
-#endif
+#endif  // SRC_MAIN_LOOP_H_
 

@@ -1,12 +1,13 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_BENCH_ENTITY_H_
-#define VOXEL_BENCH_ENTITY_H_
+#ifndef SRC_BENCH_ENTITY_H_
+#define SRC_BENCH_ENTITY_H_
 
 #include "block_entity.h"
 
 class BenchEntity : public BlockEntity {
-public:
-	BenchEntity(Context *ctx);
+ public:
+	explicit BenchEntity(Context *ctx);
 	~BenchEntity();
 
 	void update();
@@ -18,4 +19,4 @@ public:
 	const char *get_name() { return "bench"; }
 };
 
-#endif
+#endif  // SRC_BENCH_ENTITY_H_

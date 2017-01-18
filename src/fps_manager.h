@@ -1,15 +1,16 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_FPS_MANAGER_H_
-#define VOXEL_FPS_MANAGER_H_
+#ifndef SRC_FPS_MANAGER_H_
+#define SRC_FPS_MANAGER_H_
 
 class FpsManager {
-public:
-	FpsManager(int fps);
+ public:
+	explicit FpsManager(int fps);
 	~FpsManager();
 
 	int sync();
 
-private:
+ private:
 	/* Timestamp of the last call to sync that did not happen after the
 	 * expected time. It is reset to the current time when sync is called too
 	 * late. */
@@ -27,4 +28,4 @@ private:
 	int fps;
 };
 
-#endif
+#endif  // SRC_FPS_MANAGER_H_

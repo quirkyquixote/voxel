@@ -1,12 +1,13 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_CRATE_ENTITY_H_
-#define VOXEL_CRATE_ENTITY_H_
+#ifndef SRC_CRATE_ENTITY_H_
+#define SRC_CRATE_ENTITY_H_
 
 #include "block_entity.h"
 
 class CrateEntity : public BlockEntity {
-public:
-	CrateEntity(Context *ctx);
+ public:
+	explicit CrateEntity(Context *ctx);
 	~CrateEntity();
 
 	void update();
@@ -18,4 +19,4 @@ public:
 	const char *get_name() { return "crate"; }
 };
 
-#endif
+#endif  // SRC_CRATE_ENTITY_H_

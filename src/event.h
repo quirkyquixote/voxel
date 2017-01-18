@@ -1,7 +1,7 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-
-#ifndef VOXEL_EVENT_H_
-#define VOXEL_EVENT_H_
+#ifndef SRC_EVENT_H_
+#define SRC_EVENT_H_
 
 #include <SDL2/SDL.h>
 
@@ -9,5 +9,5 @@
 
 void event(const SDL_Event *e, Context *ctx);
 
-#endif
+#endif  // SRC_EVENT_H_
 

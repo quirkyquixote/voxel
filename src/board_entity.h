@@ -1,12 +1,13 @@
+/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef VOXEL_BOARD_ENTITY_H_
-#define VOXEL_BOARD_ENTITY_H_
+#ifndef SRC_BOARD_ENTITY_H_
+#define SRC_BOARD_ENTITY_H_
 
 #include "block_entity.h"
 
 class BoardEntity : public BlockEntity {
-public:
-	BoardEntity(Context *ctx);
+ public:
+	explicit BoardEntity(Context *ctx);
 	~BoardEntity();
 
 	void update();
@@ -18,4 +19,4 @@ public:
 	const char *get_name() { return "board"; }
 };
 
-#endif
+#endif  // SRC_BOARD_ENTITY_H_
