@@ -28,7 +28,7 @@ sz_Tag *PipeEntity::save()
 	return BlockEntity::save();
 }
 
-bool PipeEntity::use()
+bool PipeEntity::use(PlayerEntity *player)
 {
 	return false;
 }

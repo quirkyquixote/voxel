@@ -67,12 +67,10 @@ Renderer::~Renderer()
 void Renderer::operator()()
 {
 	render_shards();
-	render_cursor();
+	ctx->player->render();
 //	render_flowsim(this);
 	render_block_entities();
 	render_roaming_entities();
-	render_held_item();
-	render_hotbar();
 	render_commandline();
 }
 
@@ -158,68 +156,6 @@ void render_flowsim(Renderer *ctx)
 	glDisable(GL_BLEND);
 }
 */
-void Renderer::render_cursor()
-{
-	if (ctx->cur.face == -1)
-		return;
-
-	GLfloat x = ctx->cur.p.x;
-	GLfloat y = ctx->cur.p.y;
-	GLfloat z = ctx->cur.p.z;
-
-	if (ctx->cur.face == FACE_UP && ctx->world->get_data(ctx->cur.p) != nullptr)
-		return;
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glTranslatef(x, y, z);
-	glColor3f(0, 0, 0);
-	glLineWidth(2);
-
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(0, 0, 0);
-	glVertex3f(0, 0, 1);
-	glVertex3f(0, 1, 1);
-	glVertex3f(0, 1, 0);
-	glEnd();
-
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(1, 0, 0);
-	glVertex3f(1, 0, 1);
-	glVertex3f(1, 1, 1);
-	glVertex3f(1, 1, 0);
-	glEnd();
-
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(0, 0, 0);
-	glVertex3f(0, 0, 1);
-	glVertex3f(1, 0, 1);
-	glVertex3f(1, 0, 0);
-	glEnd();
-
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(0, 1, 0);
-	glVertex3f(0, 1, 1);
-	glVertex3f(1, 1, 1);
-	glVertex3f(1, 1, 0);
-	glEnd();
-
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(0, 0, 0);
-	glVertex3f(1, 0, 0);
-	glVertex3f(1, 1, 0);
-	glVertex3f(0, 1, 0);
-	glEnd();
-
-	glBegin(GL_LINE_LOOP);
-	glVertex3f(0, 0, 1);
-	glVertex3f(1, 0, 1);
-	glVertex3f(1, 1, 1);
-	glVertex3f(0, 1, 1);
-	glEnd();
-	glPopMatrix();
-}
-
 
 void Renderer::render_item(int obj, int mat, GLfloat alpha)
 {
@@ -269,7 +205,7 @@ void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 	int side = sqrt(inv.size());
 	Item s;
 
-	GLfloat d = dist(ctx->player->get_p(), v3f(p));
+	GLfloat d = dist(ctx->player->get_body()->get_p(), v3f(p));
 	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -343,62 +279,6 @@ void Renderer::render_roaming_entities()
 {
 	for (auto &e : ctx->entities)
 		e->render();
-}
-
-void Renderer::render_held_item()
-{
-	glDisable(GL_DEPTH_TEST);
-
-	Item s = ctx->inv[ctx->tool];
-	if (s.num > 0) {
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		v3f p = cam->get_p();
-		glTranslatef(p.x, p.y, p.z);
-		glRotatef(180.0 * cam->get_r().y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * cam->get_r().x / M_PI, 1, 0, 0);
-		glTranslatef(.4, -.4, -.8);
-		glScalef(.125, .125, .125);
-		render_item(s.obj, s.mat, 255);
-		glPopMatrix();
-	}
-}
-
-void Renderer::render_hotbar()
-{
-	for (int i = 0; i < 9; ++i) {
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();
-		v3f p = cam->get_p();
-		glTranslatef(p.x, p.y, p.z);
-		glRotatef(180.0 * cam->get_r().y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * cam->get_r().x / M_PI, 1, 0, 0);
-		glTranslatef(i * .06 - .30, -.4, -.8);
-		glScalef(.03125, .03125, .03125);
-		if (i == ctx->tool)
-			glColor3ub(255, 255, 255);
-		else
-			glColor3ub(64, 64, 64);
-		glBegin(GL_LINE_LOOP);
-		glVertex3f(-.25, 0, -.25);
-		glVertex3f(-.25, 0, 1.25);
-		glVertex3f(1.25, 0, 1.25);
-		glVertex3f(1.25, 0, -.25);
-		glEnd();
-		Item s = ctx->inv[i];
-		if (s.num > 0)
-			render_item(s.obj, s.mat, 255);
-		if (s.num > 1) {
-			glEnable(GL_BLEND);
-			glColor3f(1, 1, 1);
-			glTranslatef(0, -1.5, 0);
-			char buf[3];
-			snprintf(buf, sizeof(buf), "%02d", s.num);
-			render_string(buf);
-			glDisable(GL_BLEND);
-		}
-		glPopMatrix();
-	}
 }
 
 void Renderer::render_commandline()
@@ -768,9 +648,9 @@ void Renderer::update_shard(int id, int64_t x0, int64_t y0, int64_t z0)
 
 void Renderer::update_camera()
 {
-	cam->set_fovy((cam->get_fovy() + (ctx->run ? 70.f : 60.f)) * 0.5);
-	cam->set_p(ctx->player->get_p() + v3f(0, .8, 0));
-	cam->set_r(ctx->player->get_r());
+	cam->set_fovy((cam->get_fovy() + (ctx->player->get_run() ? 70.f : 60.f)) * 0.5);
+	cam->set_p(ctx->player->get_body()->get_p() + v3f(0, .8, 0));
+	cam->set_r(ctx->player->get_body()->get_r());
 	v3ll p(cam->get_p());
 	tone_mapper->update((ctx->world->get_light(p) << 4) / 255., 0);
 }

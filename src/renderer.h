@@ -21,11 +21,8 @@ class Renderer {
 	inline Camera *get_cam() { return cam; }
 
 	void render_shards();
-	void render_cursor();
 	void render_block_entities();
 	void render_roaming_entities();
-	void render_held_item();
-	void render_hotbar();
 	void render_commandline();
 	void render_string(const char *str);
 	void render_inventory(const std::vector<Item> &items, const v3ll &p);

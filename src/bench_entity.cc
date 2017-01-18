@@ -31,13 +31,13 @@ sz_Tag *BenchEntity::save()
 	return BlockEntity::save();
 }
 
-bool BenchEntity::use()
+bool BenchEntity::use(PlayerEntity *player)
 {
-	if (ctx->cur.face == FACE_UP) {
-		ctx->use_inventory(&items);
+	if (player->get_cur().face == FACE_UP) {
+		player->use_inventory(&items);
 		return true;
 	} else {
-		ctx->use_workbench(&items);
+		player->use_workbench(&items);
 		return true;
 	}
 	return false;

@@ -145,7 +145,7 @@ int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		if (Tcl_GetIntFromObj(interp, objv[2], &num) != TCL_OK)
 			goto fail;
 	}
-	inventory_add(&ctx->inv, Item(obj, mat, num));
+	inventory_add(ctx->player->get_items(), Item(obj, mat, num));
 	log_info("given %s_%s %d", mat_names[mat], obj_names[obj], num);
 	return 0;
 fail:
@@ -167,7 +167,7 @@ int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		if (Tcl_GetIntFromObj(interp, objv[2], &num) != TCL_OK)
 			goto fail;
 	}
-	inventory_remove(&ctx->inv, Item(obj, mat, num));
+	inventory_remove(ctx->player->get_items(), Item(obj, mat, num));
 	log_info("taken %s_%s %d", mat_names[mat], obj_names[obj], num);
 	return 0;
 fail:
@@ -179,22 +179,23 @@ int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: query";
 	Context *ctx = static_cast<Context *>(data);
+	const Query &cur = ctx->player->get_cur();
 
 	if (objc != 1)
 		goto fail;
-	if (ctx->cur.face == -1) {
+	if (cur.face == -1) {
 		log_info("no block selected");
 		return TCL_OK;
 	}
-	log_info("block: %lld,%lld,%lld", ctx->cur.p.x, ctx->cur.p.y, ctx->cur.p.z);
-	log_info("offset: %.02g,%.02g,%.02g", ctx->cur.q.x, ctx->cur.q.y, ctx->cur.q.z);
-	log_info("face: %s", face_names[ctx->cur.face]);
+	log_info("block: %lld,%lld,%lld", cur.p.x, cur.p.y, cur.p.z);
+	log_info("offset: %.02g,%.02g,%.02g", cur.q.x, cur.q.y, cur.q.z);
+	log_info("face: %s", face_names[cur.face]);
 	log_info("type: %s.%s",
-			mat_names[ctx->world->get_mat(ctx->cur.p)],
-			shape_names[ctx->world->get_shape(ctx->cur.p)]);
-	log_info("light level: %d", ctx->world->get_light(ctx->cur.p));
+			mat_names[ctx->world->get_mat(cur.p)],
+			shape_names[ctx->world->get_shape(cur.p)]);
+	log_info("light level: %d", ctx->world->get_light(cur.p));
 /*
-	struct array *inv = world_get_data(ctx->w, ctx->cur.p);
+	struct array *inv = world_get_data(ctx->w, cur.p);
 	if (inv != NULL) {
 		log_info("inventory:");
 		struct item s;
@@ -218,16 +219,17 @@ int cmd_seta(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: a";
 	Context *ctx = static_cast<Context *>(data);
+	const Query &cur = ctx->player->get_cur();
 
 	if (objc != 1)
 		goto fail;
-	if (ctx->cur.face == -1) {
+	if (cur.face == -1) {
 		log_info("no block selected");
 		return TCL_OK;
 	}
-	sel_bb.x0 = ctx->cur.p.x;
-	sel_bb.y0 = ctx->cur.p.y;
-	sel_bb.z0 = ctx->cur.p.z;
+	sel_bb.x0 = cur.p.x;
+	sel_bb.y0 = cur.p.y;
+	sel_bb.z0 = cur.p.z;
 	log_info("a set to %lld,%lld,%lld", sel_bb.x0, sel_bb.y0, sel_bb.z0);
 	return TCL_OK;
 
@@ -240,16 +242,17 @@ int cmd_setb(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: b";
 	Context *ctx = static_cast<Context *>(data);
+	const Query &cur = ctx->player->get_cur();
 
 	if (objc != 1)
 		goto fail;
-	if (ctx->cur.face == -1) {
+	if (cur.face == -1) {
 		log_info("no block selected");
 		return TCL_OK;
 	}
-	sel_bb.x1 = ctx->cur.p.x;
-	sel_bb.y1 = ctx->cur.p.y;
-	sel_bb.z1 = ctx->cur.p.z;
+	sel_bb.x1 = cur.p.x;
+	sel_bb.y1 = cur.p.y;
+	sel_bb.z1 = cur.p.z;
 	log_info("b set to %lld,%lld,%lld", sel_bb.x1, sel_bb.y1, sel_bb.z1);
 	return TCL_OK;
 

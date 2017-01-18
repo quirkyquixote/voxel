@@ -6,8 +6,10 @@
 #include "sz.h"
 #include "inventory.h"
 #include "v3.h"
+#include "physics.h"
 
 class Context;
+class PlayerEntity;
 
 class Entity {
  public:
@@ -20,7 +22,7 @@ class Entity {
 	virtual void render() { }
 	virtual sz_Tag *save();
 	virtual void load(sz_Tag *val);
-	virtual bool use() { return false; }
+	virtual bool use(PlayerEntity *player) { return false; }
 	virtual Inventory *get_items() { return &items; }
 
 	inline const v3ll &get_p() const { return p; }

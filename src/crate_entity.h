@@ -14,7 +14,7 @@ class CrateEntity : public BlockEntity {
 	void render();
 	sz_Tag *save();
 	void load(sz_Tag *val);
-	bool use();
+	bool use(PlayerEntity *player);
 
 	const char *get_name() { return "crate"; }
 };

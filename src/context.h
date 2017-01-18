@@ -17,6 +17,7 @@
 #include "cli.h"
 #include "tcl_commands.h"
 #include "roaming_entity.h"
+#include "player_entity.h"
 
 enum {
 	MODE_ROAM,
@@ -32,18 +33,9 @@ class Context {
 	World *world;
 	Renderer *renderer;
 	Space *space;
-	Body *player;
-	Query cur;
-	box3c move;
-	Inventory inv;
+	PlayerEntity *player;
 	std::list<RoamingEntity*> entities;
 	char mode;
-	char act;
-	char use;
-	char pick;
-	char run;
-	char tool;
-	v2c rot;
 	int chunks_per_tick;
 	uint64_t tick;
 
@@ -51,11 +43,7 @@ class Context {
 	void update();
 
 	void spill_inventory(const v3ll &p);
-	void use_inventory(std::vector<Item> *items);
 	void drop_block(const v3ll &p);
-	void use_workbench(std::vector<Item> *inv);
-	void use_tool();
-	void update_player();
 	void update_chunks();
 	void update_entities();
 };

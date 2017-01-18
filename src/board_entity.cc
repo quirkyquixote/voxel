@@ -31,10 +31,10 @@ sz_Tag *BoardEntity::save()
 	return BlockEntity::save();
 }
 
-bool BoardEntity::use()
+bool BoardEntity::use(PlayerEntity *player)
 {
-	if (ctx->cur.face == FACE_UP) {
-		ctx->use_inventory(&items);
+	if (player->get_cur().face == FACE_UP) {
+		player->use_inventory(&items);
 		return true;
 	}
 	return false;

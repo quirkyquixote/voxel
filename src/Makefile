@@ -36,6 +36,7 @@ voxel_objs += board_entity.o
 voxel_objs += crate_entity.o
 voxel_objs += pipe_entity.o
 voxel_objs += drop_entity.o
+voxel_objs += player_entity.o
 
 szcat_objs += sz.o
 

@@ -9,7 +9,6 @@
 #include "v2.h"
 #include "v3.h"
 #include "box3.h"
-#include "chunk.h"
 
 enum {
 	CELL_LDB = 1 << 0,
@@ -22,6 +21,7 @@ enum {
 	CELL_RUF = 1 << 7,
 };
 
+class World;
 class Space;
 class Body;
 struct Query;

@@ -113,12 +113,8 @@ int load_all(Context *ctx)
 	v2ll p = ctx->world->get_p();
 	p.x += CHUNK_W * CHUNKS_PER_WORLD / 2;
 	p.y += CHUNK_W * CHUNKS_PER_WORLD / 2;
-	ctx->player = ctx->space->create_body();
-	ctx->player->set_p(v3f(p.x, WORLD_H, p.y));
-	ctx->player->set_size(v2f(0.325, 0.825));
-	ctx->player->set_step_size(1);
-	ctx->inv.resize(9);
-	ctx->tool = 0;
+	ctx->player = new PlayerEntity(ctx);
+	ctx->player->get_body()->set_p(v3f(p.x, WORLD_H, p.y));
 	return 0;
 }
 
