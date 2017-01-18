@@ -13,11 +13,11 @@ prefix = /usr/local
 suffix = $(shell echo $(VERSION) | grep -o '^[0-9]*\.[0-9]*')
 bindir = $(prefix)/bin
 libdir = $(prefix)/lib
-datadir = $(prefix)/share/tnt$(suffix)
-docdir = $(prefix)/share/doc/tnt$(suffix)
+datadir = $(prefix)/share/voxel$(suffix)
+docdir = $(prefix)/share/doc/voxel$(suffix)
 htmldir = $(docdir)
 pdfdir = $(docdir)
-localstatedir = $(prefix)/var/tnt
+localstatedir = $(prefix)/var/voxel
 
 # There are so many tools needed...
 
@@ -40,10 +40,10 @@ LDFLAGS =
 ALL_CXXFLAGS = $(CPPFLAGS) $(CXXFLAGS)
 ALL_LDFLAGS = $(LDFLAGS)
 
-ALL_CXXFLAGS += -DVX_VERSION=\"$(VERSION)\"
-ALL_CXXFLAGS += -DVX_LIBDIR=\"$(libdir)\"
-ALL_CXXFLAGS += -DVX_DATADIR=\"$(datadir)\"
-ALL_CXXFLAGS += -DVX_LOCALSTATEDIR=\"$(localstatedir)\"
+ALL_CXXFLAGS += -DVOXEL_VERSION=\"$(VERSION)\"
+ALL_CXXFLAGS += -DVOXEL_LIBDIR=\"$(libdir)\"
+ALL_CXXFLAGS += -DVOXEL_DATADIR=\"$(datadir)\"
+ALL_CXXFLAGS += -DVOXEL_LOCALSTATEDIR=\"$(localstatedir)\"
 ALL_CXXFLAGS += -MD
 ALL_CXXFLAGS += -I/usr/include/tcl
 
