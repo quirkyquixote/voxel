@@ -207,9 +207,6 @@ struct BlockTraits {
 	unsigned char capacity;
 	Item drop;
 	Entity *(*entity)(Context *);
-	int is_workbench : 1;
-	int is_inventory : 1;
-	int is_board : 1;
 };
 
 extern const char *obj_names[];
