@@ -216,6 +216,6 @@ extern const char *shape_names[];
 
 extern struct BlockTraits block_traits[256][256];
 
-void block_traits_init(void);
+void populate_block_traits_table(void);
 
 #endif  // SRC_TYPES_H_

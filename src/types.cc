@@ -275,7 +275,7 @@ template<typename T>Entity *construct_entity(Context *ctx)
 	return new T(ctx);
 }
 
-void block_traits_init(void)
+void populate_block_traits_table(void)
 {
 	COMMON_DROPS(MAT_GRASS, MAT_DIRT);
 	COMMON_DROPS(MAT_DIRT, MAT_DIRT);

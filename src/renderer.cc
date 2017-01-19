@@ -9,8 +9,6 @@
 Renderer::Renderer(Context *ctx)
 	:ctx(ctx)
 {
-	populate_material_texcoord_table();
-
 	/* Load textures */
 	tex_terrain = texture("data/materials.png");
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);

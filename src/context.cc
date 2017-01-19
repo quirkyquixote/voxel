@@ -19,7 +19,9 @@ int mkpath(const char *path, mode_t mode);
 
 int main(int argc, char *argv[])
 {
-	block_traits_init();
+	populate_block_traits_table();
+	populate_material_texcoord_table();
+
 	Context *ctx = new Context("foo");
 	ctx->load_all();
 	ctx->ml->run();
