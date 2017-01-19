@@ -56,7 +56,14 @@ template<typename T> box3<T> fix(const box3<T> &b)
 
 template<typename T> box3<T> grow(const box3<T> &b, T k)
 {
-	return box3<T>(b.x0 - k, b.y0 - k, b.z0 - k, b.x0 + k, b.y0 + k, b.z0 + k);
+	return box3<T>(b.x0 - k, b.y0 - k, b.z0 - k,
+			b.x1 + k, b.y1 + k, b.z1 + k);
+}
+
+template<typename T> box3<T> shift(const box3<T> &b, const v3<T> &p)
+{
+	return box3<T>(b.x0 + p.x, b.y0 + p.y, b.z0 + p.z,
+			b.x1 + p.x, b.y1 + p.y, b.z1 + p.z);
 }
 
 template<typename T> bool overlap(const box3<T> &b1, const box3<T> &b2)

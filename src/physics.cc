@@ -87,12 +87,7 @@ void Space::move_xpos(Body *b, float dt)
 
 	for (auto p : bbc) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
-			bb2.x0 += p.x;
-			bb2.y0 += p.y;
-			bb2.z0 += p.z;
-			bb2.x1 += p.x;
-			bb2.y1 += p.y;
-			bb2.z1 += p.z;
+			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best > bb2.x0) {
 				collide = true;
 				best = bb2.x0;
@@ -148,12 +143,7 @@ void Space::move_xneg(Body *b, float dt)
 
 	for (auto p : bbc) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
-			bb2.x0 += p.x;
-			bb2.y0 += p.y;
-			bb2.z0 += p.z;
-			bb2.x1 += p.x;
-			bb2.y1 += p.y;
-			bb2.z1 += p.z;
+			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best < bb2.x1) {
 				collide = true;
 				best = bb2.x1;
@@ -209,12 +199,7 @@ void Space::move_zpos(Body *b, float dt)
 
 	for (auto p : bbc) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
-			bb2.x0 += p.x;
-			bb2.y0 += p.y;
-			bb2.z0 += p.z;
-			bb2.x1 += p.x;
-			bb2.y1 += p.y;
-			bb2.z1 += p.z;
+			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best > bb2.z0) {
 				collide = true;
 				best = bb2.z0;
@@ -270,12 +255,7 @@ void Space::move_zneg(Body *b, float dt)
 
 	for (auto p : bbc) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
-			bb2.x0 += p.x;
-			bb2.y0 += p.y;
-			bb2.z0 += p.z;
-			bb2.x1 += p.x;
-			bb2.y1 += p.y;
-			bb2.z1 += p.z;
+			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best < bb2.z1) {
 				collide = true;
 				best = bb2.z1;
@@ -331,12 +311,7 @@ void Space::move_ypos(Body *b, float dt)
 
 	for (auto p : bbc) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
-			bb2.x0 += p.x;
-			bb2.y0 += p.y;
-			bb2.z0 += p.z;
-			bb2.x1 += p.x;
-			bb2.y1 += p.y;
-			bb2.z1 += p.z;
+			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best > bb2.y0) {
 				collide = true;
 				best = bb2.y0;
@@ -378,12 +353,7 @@ void Space::move_yneg(Body *b, float dt)
 
 	for (auto p : bbc) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
-			bb2.x0 += p.x;
-			bb2.y0 += p.y;
-			bb2.z0 += p.z;
-			bb2.x1 += p.x;
-			bb2.y1 += p.y;
-			bb2.z1 += p.z;
+			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best < bb2.y1) {
 				collide = true;
 				best = bb2.y1;
@@ -470,12 +440,7 @@ void Space::query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
-			bb2.x0 += c.x;
-			bb2.y0 += c.y;
-			bb2.z0 += c.z;
-			bb2.x1 += c.x;
-			bb2.y1 += c.y;
-			bb2.z1 += c.z;
+			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.x0 - p.x) / v.x;
 			if (t < *best_t) {
 				float y = p.y + t * v.y;
@@ -506,12 +471,7 @@ void Space::query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
-			bb2.x0 += c.x;
-			bb2.y0 += c.y;
-			bb2.z0 += c.z;
-			bb2.x1 += c.x;
-			bb2.y1 += c.y;
-			bb2.z1 += c.z;
+			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.x1 - p.x) / v.x;
 			if (t < *best_t) {
 				float y = p.y + t * v.y;
@@ -542,12 +502,7 @@ void Space::query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
-			bb2.x0 += c.x;
-			bb2.y0 += c.y;
-			bb2.z0 += c.z;
-			bb2.x1 += c.x;
-			bb2.y1 += c.y;
-			bb2.z1 += c.z;
+			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.z0 - p.z) / v.z;
 			if (t < *best_t) {
 				float y = p.y + t * v.y;
@@ -578,12 +533,7 @@ void Space::query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
-			bb2.x0 += c.x;
-			bb2.y0 += c.y;
-			bb2.z0 += c.z;
-			bb2.x1 += c.x;
-			bb2.y1 += c.y;
-			bb2.z1 += c.z;
+			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.z1 - p.z) / v.z;
 			if (t < *best_t) {
 				float y = p.y + t * v.y;
@@ -614,12 +564,7 @@ void Space::query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t)
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
-			bb2.x0 += c.x;
-			bb2.y0 += c.y;
-			bb2.z0 += c.z;
-			bb2.x1 += c.x;
-			bb2.y1 += c.y;
-			bb2.z1 += c.z;
+			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.y0 - p.y) / v.y;
 			if (t < *best_t) {
 				float x = p.x + t * v.x;
@@ -650,12 +595,7 @@ void Space::query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
-			bb2.x0 += c.x;
-			bb2.y0 += c.y;
-			bb2.z0 += c.z;
-			bb2.x1 += c.x;
-			bb2.y1 += c.y;
-			bb2.z1 += c.z;
+			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.y1 - p.y) / v.y;
 			if (t < *best_t) {
 				float x = p.x + t * v.x;
