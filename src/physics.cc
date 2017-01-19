@@ -9,78 +9,6 @@
 
 #include "world.h"
 
-class BlockGeom : public Geom {
- public:
-	BlockGeom() : Geom() { }
-	~BlockGeom() { }
-
-	bool test_xpos(const v3ll &p, const box3f &bb, float *best)
-	{
-		box3f bb2(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1);
-		if (!overlap(bb, bb2))
-			return false;
-		if (*best < bb2.x0)
-			return false;
-		*best = bb2.x0;
-		return true;
-	}
-
-	bool test_xneg(const v3ll &p, const box3f &bb, float *best)
-	{
-		box3f bb2(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1);
-		if (!overlap(bb, bb2))
-			return false;
-		if (*best > bb2.x1)
-			return false;
-		*best = bb2.x1;
-		return true;
-	}
-
-	bool test_ypos(const v3ll &p, const box3f &bb, float *best)
-	{
-		box3f bb2(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1);
-		if (!overlap(bb, bb2))
-			return false;
-		if (*best < bb2.y0)
-			return false;
-		*best = bb2.y0;
-		return true;
-	}
-
-	bool test_yneg(const v3ll &p, const box3f &bb, float *best)
-	{
-		box3f bb2(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1);
-		if (!overlap(bb, bb2))
-			return false;
-		if (*best > bb2.y1)
-			return false;
-		*best = bb2.y1;
-		return true;
-	}
-
-	bool test_zpos(const v3ll &p, const box3f &bb, float *best)
-	{
-		box3f bb2(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1);
-		if (!overlap(bb, bb2))
-			return false;
-		if (*best < bb2.z0)
-			return false;
-		*best = bb2.z0;
-		return true;
-	}
-
-	bool test_zneg(const v3ll &p, const box3f &bb, float *best)
-	{
-		box3f bb2(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1);
-		if (!overlap(bb, bb2))
-			return false;
-		if (*best > bb2.z1)
-			return false;
-		*best = bb2.z1;
-		return true;
-	}
-};
-
 Body::Body(Space *s)
 {
 }
@@ -92,13 +20,43 @@ Body::~Body()
 Space::Space(World *w)
 	: world(w)
 {
-	memset(geom, 0, sizeof(geom));
-	geom[SHAPE_BLOCK_DN] = new BlockGeom();
-	geom[SHAPE_BLOCK_UP] = new BlockGeom();
-	geom[SHAPE_BLOCK_LF] = new BlockGeom();
-	geom[SHAPE_BLOCK_RT] = new BlockGeom();
-	geom[SHAPE_BLOCK_BK] = new BlockGeom();
-	geom[SHAPE_BLOCK_FT] = new BlockGeom();
+	geom[SHAPE_BLOCK_DN].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_BLOCK_UP].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_BLOCK_LF].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_BLOCK_RT].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_BLOCK_BK].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_BLOCK_FT].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_SLAB_DN].push_back(box3f(0., 0., 0., 1., .5, 1.));
+	geom[SHAPE_SLAB_UP].push_back(box3f(0., .5, 0., 1., 1., 1.));
+	geom[SHAPE_SLAB_LF].push_back(box3f(0., 0., 0., .5, 1., 1.));
+	geom[SHAPE_SLAB_RT].push_back(box3f(.5, 0., 0., 1., 1., 1.));
+	geom[SHAPE_SLAB_BK].push_back(box3f(0., 0., 0., 1., 1., .5));
+	geom[SHAPE_SLAB_FT].push_back(box3f(0., 0., .5, 1., 1., 1.));
+	geom[SHAPE_STAIRS_DB].push_back(box3f(0., 0., 0., 1., .5, 1.));
+	geom[SHAPE_STAIRS_DB].push_back(box3f(0., 0., 0., 1., 1., .5));
+	geom[SHAPE_STAIRS_DL].push_back(box3f(0., 0., 0., 1., .5, 1.));
+	geom[SHAPE_STAIRS_DL].push_back(box3f(0., 0., 0., .5, 1., 1.));
+	geom[SHAPE_STAIRS_DF].push_back(box3f(0., 0., 0., 1., .5, 1.));
+	geom[SHAPE_STAIRS_DF].push_back(box3f(0., 0., .5, 1., 1., 1.));
+	geom[SHAPE_STAIRS_DR].push_back(box3f(0., 0., 0., 1., .5, 1.));
+	geom[SHAPE_STAIRS_DR].push_back(box3f(.5, 0., 0., 1., 1., 1.));
+	geom[SHAPE_STAIRS_UB].push_back(box3f(0., .5, 0., 1., 1., 1.));
+	geom[SHAPE_STAIRS_UB].push_back(box3f(0., 0., 0., 1., 1., .5));
+	geom[SHAPE_STAIRS_UL].push_back(box3f(0., .5, 0., 1., 1., 1.));
+	geom[SHAPE_STAIRS_UL].push_back(box3f(0., 0., 0., .5, 1., 1.));
+	geom[SHAPE_STAIRS_UF].push_back(box3f(0., .5, 0., 1., 1., 1.));
+	geom[SHAPE_STAIRS_UF].push_back(box3f(0., 0., .5, 1., 1., 1.));
+	geom[SHAPE_STAIRS_UR].push_back(box3f(0., .5, 0., 1., 1., 1.));
+	geom[SHAPE_STAIRS_UR].push_back(box3f(.5, 0., 0., 1., 1., 1.));
+	geom[SHAPE_PANE_X].push_back(box3f(.46875, 0., 0., .53125, 1., 1.));
+	geom[SHAPE_PANE_Y].push_back(box3f(0., .46875, 0., 1., .53125, 1.));
+	geom[SHAPE_PANE_Z].push_back(box3f(0., 0., .46875, 1., 1., .53125));
+	geom[SHAPE_PANE_DN].push_back(box3f(0., 0., 0., 1., .0625, 1.));
+	geom[SHAPE_PANE_UP].push_back(box3f(0., .9375, 0., 1., 1., 1.));
+	geom[SHAPE_PANE_LF].push_back(box3f(0., 0., 0., .0625, 1., 1.));
+	geom[SHAPE_PANE_RT].push_back(box3f(.9375, 0., 0., 1., 1., 1.));
+	geom[SHAPE_PANE_BK].push_back(box3f(0., 0., 0., 1., 1., .0625));
+	geom[SHAPE_PANE_FT].push_back(box3f(0., 0., .9375, 1., 1., 1.));
 }
 
 Space::~Space()
@@ -150,7 +108,7 @@ int Space::cell_at(const int *masks, int64_t x, int64_t y, int64_t z)
 
 void Space::move_xpos(Body *b, float dt)
 {
-	box3f bb;
+	box3f bb, bb2;
 	box3ll bbc;
 	bool collide;
 	float best;
@@ -171,10 +129,18 @@ void Space::move_xpos(Body *b, float dt)
 	best = bb.x1;
 
 	for (auto p : bbc) {
-		Geom *g = geom[world->get_shape(p)];
-		if (g != nullptr && g->test_xpos(p, bb, &best)) {
-			collide = true;
-			best_p = p;
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2.x0 += p.x;
+			bb2.y0 += p.y;
+			bb2.z0 += p.z;
+			bb2.x1 += p.x;
+			bb2.y1 += p.y;
+			bb2.z1 += p.z;
+			if (overlap(bb, bb2) && best > bb2.x0) {
+				collide = true;
+				best = bb2.x0;
+				best_p = p;
+			}
 		}
 	}
 	if (collide) {
@@ -189,7 +155,7 @@ void Space::move_xpos(Body *b, float dt)
 
 void Space::move_xneg(Body *b, float dt)
 {
-	box3f bb;
+	box3f bb, bb2;
 	box3ll bbc;
 	bool collide;
 	float best;
@@ -210,10 +176,18 @@ void Space::move_xneg(Body *b, float dt)
 	best = bb.x0;
 
 	for (auto p : bbc) {
-		Geom *g = geom[world->get_shape(p)];
-		if (g != nullptr && g->test_xneg(p, bb, &best)) {
-			collide = true;
-			best_p = p;
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2.x0 += p.x;
+			bb2.y0 += p.y;
+			bb2.z0 += p.z;
+			bb2.x1 += p.x;
+			bb2.y1 += p.y;
+			bb2.z1 += p.z;
+			if (overlap(bb, bb2) && best < bb2.x1) {
+				collide = true;
+				best = bb2.x1;
+				best_p = p;
+			}
 		}
 	}
 	if (collide) {
@@ -228,7 +202,7 @@ void Space::move_xneg(Body *b, float dt)
 
 void Space::move_zpos(Body *b, float dt)
 {
-	box3f bb;
+	box3f bb, bb2;
 	box3ll bbc;
 	bool collide;
 	float best;
@@ -249,10 +223,18 @@ void Space::move_zpos(Body *b, float dt)
 	best = bb.z1;
 
 	for (auto p : bbc) {
-		Geom *g = geom[world->get_shape(p)];
-		if (g != nullptr && g->test_zpos(p, bb, &best)) {
-			collide = true;
-			best_p = p;
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2.x0 += p.x;
+			bb2.y0 += p.y;
+			bb2.z0 += p.z;
+			bb2.x1 += p.x;
+			bb2.y1 += p.y;
+			bb2.z1 += p.z;
+			if (overlap(bb, bb2) && best > bb2.z0) {
+				collide = true;
+				best = bb2.z0;
+				best_p = p;
+			}
 		}
 	}
 	if (collide) {
@@ -267,7 +249,7 @@ void Space::move_zpos(Body *b, float dt)
 
 void Space::move_zneg(Body *b, float dt)
 {
-	box3f bb;
+	box3f bb, bb2;
 	box3ll bbc;
 	bool collide;
 	float best;
@@ -288,10 +270,18 @@ void Space::move_zneg(Body *b, float dt)
 	best = bb.z0;
 
 	for (auto p : bbc) {
-		Geom *g = geom[world->get_shape(p)];
-		if (g != nullptr && g->test_zneg(p, bb, &best)) {
-			collide = true;
-			best_p = p;
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2.x0 += p.x;
+			bb2.y0 += p.y;
+			bb2.z0 += p.z;
+			bb2.x1 += p.x;
+			bb2.y1 += p.y;
+			bb2.z1 += p.z;
+			if (overlap(bb, bb2) && best < bb2.z1) {
+				collide = true;
+				best = bb2.z1;
+				best_p = p;
+			}
 		}
 	}
 	if (collide) {
@@ -312,7 +302,7 @@ void Space::move_zneg(Body *b, float dt)
 
 void Space::move_ypos(Body *b, float dt)
 {
-	box3f bb;
+	box3f bb, bb2;
 	box3ll bbc;
 	bool collide;
 	float best;
@@ -333,10 +323,18 @@ void Space::move_ypos(Body *b, float dt)
 	best = bb.y1;
 
 	for (auto p : bbc) {
-		Geom *g = geom[world->get_shape(p)];
-		if (g != nullptr && g->test_ypos(p, bb, &best)) {
-			collide = true;
-			best_p = p;
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2.x0 += p.x;
+			bb2.y0 += p.y;
+			bb2.z0 += p.z;
+			bb2.x1 += p.x;
+			bb2.y1 += p.y;
+			bb2.z1 += p.z;
+			if (overlap(bb, bb2) && best > bb2.y0) {
+				collide = true;
+				best = bb2.y0;
+				best_p = p;
+			}
 		}
 	}
 	if (collide) {
@@ -351,7 +349,7 @@ void Space::move_ypos(Body *b, float dt)
 
 void Space::move_yneg(Body *b, float dt)
 {
-	box3f bb;
+	box3f bb, bb2;
 	box3ll bbc;
 	bool collide;
 	float best;
@@ -372,10 +370,18 @@ void Space::move_yneg(Body *b, float dt)
 	best = bb.y0;
 
 	for (auto p : bbc) {
-		Geom *g = geom[world->get_shape(p)];
-		if (g != nullptr && g->test_yneg(p, bb, &best)) {
-			collide = true;
-			best_p = p;
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2.x0 += p.x;
+			bb2.y0 += p.y;
+			bb2.z0 += p.z;
+			bb2.x1 += p.x;
+			bb2.y1 += p.y;
+			bb2.z1 += p.z;
+			if (overlap(bb, bb2) && best < bb2.y1) {
+				collide = true;
+				best = bb2.y1;
+				best_p = p;
+			}
 		}
 	}
 	if (collide) {

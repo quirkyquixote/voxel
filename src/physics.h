@@ -5,6 +5,7 @@
 
 #include <list>
 #include <functional>
+#include <vector>
 
 #include "v2.h"
 #include "v3.h"
@@ -25,18 +26,6 @@ class World;
 class Space;
 class Body;
 struct Query;
-
-class Geom {
- public:
-	Geom() { }
-	virtual ~Geom() { }
-	virtual bool test_xpos(const v3ll &p, const box3f &bb, float *best) = 0;
-	virtual bool test_xneg(const v3ll &p, const box3f &bb, float *best) = 0;
-	virtual bool test_ypos(const v3ll &p, const box3f &bb, float *best) = 0;
-	virtual bool test_yneg(const v3ll &p, const box3f &bb, float *best) = 0;
-	virtual bool test_zpos(const v3ll &p, const box3f &bb, float *best) = 0;
-	virtual bool test_zneg(const v3ll &p, const box3f &bb, float *best) = 0;
-};
 
 class Body {
 	friend class Space;
@@ -108,7 +97,7 @@ class Space {
 	float terminal_speed;
 	World *world;
 	std::list<Body *> bodies;
-	Geom *geom[256];
+	std::vector<box3f> geom[256];
 
 	int cell_at(const int *masks, int64_t x, int64_t y, int64_t z);
 	void move_xpos(Body *b, float dt);
