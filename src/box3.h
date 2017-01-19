@@ -33,9 +33,6 @@ template<typename T> struct box3 {
 	iterator end() const { return iterator(v3<T>(x1, y0, z0), *this); }
 };
 
-template<typename T> struct box3_iterator {
-};
-
 typedef box3<float> box3f;
 typedef box3<double> box3d;
 typedef box3<char> box3c;

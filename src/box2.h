@@ -29,9 +29,6 @@ template<typename T> struct box2 {
 	iterator end() const { return iterator(v2<T>(x1, y0), *this); }
 };
 
-template<typename T> struct box2_iterator {
-};
-
 typedef box2<float> box2f;
 typedef box2<double> box2d;
 typedef box2<char> box2c;
