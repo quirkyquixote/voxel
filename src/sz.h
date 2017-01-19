@@ -33,6 +33,7 @@ class sz_Exception {
 
 class sz_Tag {
  public:
+	typedef std::string Raw;
 	typedef std::vector<sz_Tag *> List;
 	typedef std::vector<std::pair<char *, sz_Tag *> > Dict;
 
@@ -48,7 +49,7 @@ class sz_Tag {
 	virtual inline float get_f32() const { throw sz_Exception(); }
 	virtual inline double get_f64() const { throw sz_Exception(); }
 	virtual inline const char *get_str() const { throw sz_Exception(); }
-	virtual inline const std::string &get_raw() const { throw sz_Exception(); }
+	virtual inline Raw &get_raw() { throw sz_Exception(); }
 	virtual inline List &get_list() { throw sz_Exception(); }
 	virtual inline Dict &get_dict() { throw sz_Exception(); }
 };
@@ -129,9 +130,9 @@ class sz_Raw : public sz_Tag {
 		: data(reinterpret_cast<const char *>(buf), bytes) { }
 	~sz_Raw() { }
 	inline uint8_t get_tag() const { return SZ_RAW; }
-	inline const std::string &get_raw() const { return data; }
+	inline Raw &get_raw() { return data; }
  private:
-	std::string data;
+	Raw data;
 };
 
 class sz_List : public sz_Tag {
