@@ -49,15 +49,18 @@ class Context {
 
 	void spill_inventory(const v3ll &p);
 	void drop_block(const v3ll &p);
+
+	bool load_all();
+	void save_all();
+
+ private:
 	void update_chunks();
 	void update_entities();
 
-	bool load_all();
 	bool load_world();
 	bool load_player();
 	bool load_chunk(Chunk *c);
 
-	void save_all();
 	void save_world();
 	void save_player();
 	void save_chunk(Chunk *c);
