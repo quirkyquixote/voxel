@@ -69,6 +69,9 @@ Context::Context(const char *dir)
 	space->set_impulse(0.001);
 	space->set_terminal_speed(1);
 
+	/* Initialize lighting */
+	light = new Lighting(world);
+
 	/* Initialize flowsim */
 	//flowsim = flowsim(world);
 

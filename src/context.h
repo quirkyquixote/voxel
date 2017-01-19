@@ -14,6 +14,7 @@
 #include "profile.h"
 #include "renderer.h"
 #include "inventory.h"
+#include "lighting.h"
 #include "cli.h"
 #include "tcl_commands.h"
 #include "roaming_entity.h"
@@ -33,6 +34,7 @@ class Context {
 	World *world;
 	Renderer *renderer;
 	Space *space;
+	Lighting *light;
 	PlayerEntity *player;
 	std::list<RoamingEntity*> entities;
 	char mode;

@@ -369,7 +369,7 @@ int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	++bb.x1;
 	++bb.y1;
 	++bb.z1;
-	update_lighting(ctx->world, bb, &bb2);
+	ctx->light->update(bb, &bb2);
 	ctx->world->set_flags(bb2, CHUNK_UNRENDERED);
 	return TCL_OK;
 fail:

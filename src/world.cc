@@ -54,7 +54,7 @@ void World::set_block(const v3ll &p, int shape, int mat)
 	} else {
 		set_data(p, NULL);
 	}
-	update_lighting(this, box3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
+	ctx->light->update(box3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
 	set_flags(bb, CHUNK_UNRENDERED);
 }
 

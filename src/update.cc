@@ -97,8 +97,14 @@ void Context::update_chunks()
 		}
 		if ((c->get_flags() & CHUNK_UNLIT) != 0) {
 //			log_info("lit up");
-			update_lighting(world, box3ll(c->get_p().x, 0, c->get_p().y,
-						c->get_p().x + CHUNK_W, CHUNK_H, c->get_p().y + CHUNK_D), NULL);
+			box3ll bb;
+			bb.x0 = c->get_p().x;
+			bb.y0 = 0;
+			bb.z0 = c->get_p().y;
+			bb.x1 = c->get_p().x + CHUNK_W;
+			bb.y1 = CHUNK_H;
+			bb.z1 = c->get_p().y + CHUNK_D;
+			light->update(bb, NULL);
 			c->unset_flags(CHUNK_UNLIT);
 			c->set_flags(CHUNK_UNRENDERED);
 		}
