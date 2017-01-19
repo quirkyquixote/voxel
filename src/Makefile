@@ -6,7 +6,9 @@ include ../config.mk
 ALL_CFLAGS += -I$(shell pwd)
 
 voxel_objs += camera.o
+voxel_objs += shard.o
 voxel_objs += chunk.o
+voxel_objs += world.o
 voxel_objs += cli.o
 voxel_objs += context.o
 voxel_objs += event.o

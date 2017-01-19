@@ -7,7 +7,7 @@
 #include <float.h>
 #include <stdio.h>
 
-#include "chunk.h"
+#include "world.h"
 
 Body::Body(Space *s)
 {

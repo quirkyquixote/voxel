@@ -7,7 +7,7 @@
 
 #include <list>
 
-#include "chunk.h"
+#include "world.h"
 #include "terraform.h"
 #include "main_loop.h"
 #include "physics.h"

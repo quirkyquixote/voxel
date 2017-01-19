@@ -3,7 +3,7 @@
 #ifndef SRC_LIGHTING_H_
 #define SRC_LIGHTING_H_
 
-#include "chunk.h"
+#include "world.h"
 
 void update_lighting(World *w, const box3ll &bb, box3ll *rbb);
 
