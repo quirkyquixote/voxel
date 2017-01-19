@@ -273,9 +273,6 @@ int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	if (parse_block(Tcl_GetString(objv[1]), &mat, &shape) != 0)
 		goto fail;
 	bb = fix(sel_bb);
-	++bb.x1;
-	++bb.y1;
-	++bb.z1;
 	for (auto &p : bb)
 		ctx->world->set_block(p, shape, mat);
 	return 0;
@@ -366,9 +363,6 @@ int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	if (objc != 1)
 		goto fail;
 	bb = fix(sel_bb);
-	++bb.x1;
-	++bb.y1;
-	++bb.z1;
 	ctx->light->update(bb, &bb2);
 	ctx->world->set_flags(bb2, CHUNK_UNRENDERED);
 	return TCL_OK;

@@ -264,9 +264,9 @@ void Renderer::render_block_entities()
 	bb.x0 = floor(p.x - 4);
 	bb.y0 = floor(p.y - 4);
 	bb.z0 = floor(p.z - 4);
-	bb.x1 = ceil(p.x + 4);
-	bb.y1 = ceil(p.y + 4);
-	bb.z1 = ceil(p.z + 4);
+	bb.x1 = floor(p.x + 4);
+	bb.y1 = floor(p.y + 4);
+	bb.z1 = floor(p.z + 4);
 
 	for (auto &p : bb) {
 		Entity *e = ctx->world->get_data(p);

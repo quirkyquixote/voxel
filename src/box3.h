@@ -10,14 +10,16 @@ template<typename T> struct box3 {
 		iterator(v3<T> cur, box3<T> box) : cur(cur), box(box) { }
 		inline void operator++()
 		{
-			++cur.z;
 			if (cur.z == box.z1) {
 				cur.z = box.z0;
-				++cur.y;
 				if (cur.y == box.y1) {
 					cur.y = box.y0;
 					++cur.x;
+				} else {
+					++cur.y;
 				}
+			} else {
+				++cur.z;
 			}
 		}
 		inline bool operator!=(const iterator &rhs) { return cur != rhs.cur; }
@@ -30,7 +32,7 @@ template<typename T> struct box3 {
 	box3() : x0(0), y0(0), z0(0), x1(0), y1(0), z1(0) {}
 
 	iterator begin() const { return iterator(v3<T>(x0, y0, z0), *this); }
-	iterator end() const { return iterator(v3<T>(x1, y0, z0), *this); }
+	iterator end() const { return iterator(v3<T>(x1 + 1, y0, z0), *this); }
 };
 
 typedef box3<float> box3f;

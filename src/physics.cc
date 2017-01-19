@@ -78,9 +78,9 @@ void Space::move_xpos(Body *b, float dt)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	collide = false;
 	best = bb.x1;
@@ -134,9 +134,9 @@ void Space::move_xneg(Body *b, float dt)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	collide = false;
 	best = bb.x0;
@@ -190,9 +190,9 @@ void Space::move_zpos(Body *b, float dt)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	collide = false;
 	best = bb.z1;
@@ -246,9 +246,9 @@ void Space::move_zneg(Body *b, float dt)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	collide = false;
 	best = bb.z0;
@@ -302,9 +302,9 @@ void Space::move_ypos(Body *b, float dt)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	collide = false;
 	best = bb.y1;
@@ -344,9 +344,9 @@ void Space::move_yneg(Body *b, float dt)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	collide = false;
 	best = bb.y0;
@@ -434,9 +434,9 @@ void Space::query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
@@ -465,9 +465,9 @@ void Space::query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
@@ -496,9 +496,9 @@ void Space::query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
@@ -527,9 +527,9 @@ void Space::query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
@@ -558,9 +558,9 @@ void Space::query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
@@ -589,9 +589,9 @@ void Space::query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 	bbc.x0 = floor(bb.x0);
 	bbc.y0 = floor(bb.y0);
 	bbc.z0 = floor(bb.z0);
-	bbc.x1 = ceil(bb.x1);
-	bbc.y1 = ceil(bb.y1);
-	bbc.z1 = ceil(bb.z1);
+	bbc.x1 = floor(bb.x1);
+	bbc.y1 = floor(bb.y1);
+	bbc.z1 = floor(bb.z1);
 
 	for (auto c : bbc) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
