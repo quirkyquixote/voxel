@@ -41,13 +41,13 @@ class Body {
 	inline v3f get_v() const { return v; }
 	inline v2f get_size() const { return s; }
 	inline box3f get_box() const { return bb; }
-	inline int get_step_size() const { return step_size; }
+	inline float get_step_size() const { return step_size; }
 
 	inline void set_p(const v3f &new_p) { p = new_p; }
 	inline void set_r(const v3f &new_r) { r = new_r; }
 	inline void set_v(const v3f &new_v) { v = new_v; }
 	inline void set_size(const v2f &new_s) { s = new_s; }
-	inline void set_step_size(int s) { step_size = s; }
+	inline void set_step_size(float s) { step_size = s; }
 
 	inline void set_callback(const std::function<Callback> &func)
 	{
@@ -60,7 +60,7 @@ class Body {
 	v3f v;
 	v2f s;
 	box3f bb;
-	int step_size;
+	float step_size;
 	std::function<Callback> cb_func;
 };
 

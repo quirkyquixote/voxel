@@ -68,7 +68,7 @@ void Space::move_xpos(Body *b, float dt)
 	box3f bb, bb2;
 	box3ll bbc;
 	bool collide;
-	float best;
+	float best, best_y;
 	v3ll best_p;
 
 	bb = b->bb;
@@ -96,11 +96,25 @@ void Space::move_xpos(Body *b, float dt)
 			if (overlap(bb, bb2) && best > bb2.x0) {
 				collide = true;
 				best = bb2.x0;
+				best_y = bb2.y1;
 				best_p = p;
 			}
 		}
 	}
 	if (collide) {
+		if (best_y < b->bb.y0 + b->step_size) {
+			auto p = b->p;
+			b->p.y = best_y + b->s.y + impulse;
+			b->bb.y0 = b->p.y - b->s.y;
+			b->bb.y1 = b->p.y + b->s.y;
+			move_xpos(b, dt);
+			if (p.x == b->p.x) {
+				b->p.y = p.y;
+				b->bb.y0 = b->p.y - b->s.y;
+				b->bb.y1 = b->p.y + b->s.y;
+			}
+			return;
+		}
 		b->v.x = 0;
 		b->p.x = best - b->s.x - impulse;
 		if (b->cb_func)
@@ -115,7 +129,7 @@ void Space::move_xneg(Body *b, float dt)
 	box3f bb, bb2;
 	box3ll bbc;
 	bool collide;
-	float best;
+	float best, best_y;
 	v3ll best_p;
 
 	bb = b->bb;
@@ -143,11 +157,25 @@ void Space::move_xneg(Body *b, float dt)
 			if (overlap(bb, bb2) && best < bb2.x1) {
 				collide = true;
 				best = bb2.x1;
+				best_y = bb2.y1;
 				best_p = p;
 			}
 		}
 	}
 	if (collide) {
+		if (best_y < b->bb.y0 + b->step_size) {
+			auto p = b->p;
+			b->p.y = best_y + b->s.y + impulse;
+			b->bb.y0 = b->p.y - b->s.y;
+			b->bb.y1 = b->p.y + b->s.y;
+			move_xneg(b, dt);
+			if (p.x == b->p.x) {
+				b->p.y = p.y;
+				b->bb.y0 = b->p.y - b->s.y;
+				b->bb.y1 = b->p.y + b->s.y;
+			}
+			return;
+		}
 		b->v.x = 0;
 		b->p.x = best + b->s.x + impulse;
 		if (b->cb_func)
@@ -162,7 +190,7 @@ void Space::move_zpos(Body *b, float dt)
 	box3f bb, bb2;
 	box3ll bbc;
 	bool collide;
-	float best;
+	float best, best_y;
 	v3ll best_p;
 
 	bb = b->bb;
@@ -190,11 +218,25 @@ void Space::move_zpos(Body *b, float dt)
 			if (overlap(bb, bb2) && best > bb2.z0) {
 				collide = true;
 				best = bb2.z0;
+				best_y = bb2.y1;
 				best_p = p;
 			}
 		}
 	}
 	if (collide) {
+		if (best_y < b->bb.y0 + b->step_size) {
+			auto p = b->p;
+			b->p.y = best_y + b->s.y + impulse;
+			b->bb.y0 = b->p.y - b->s.y;
+			b->bb.y1 = b->p.y + b->s.y;
+			move_zpos(b, dt);
+			if (p.z == b->p.z) {
+				b->p.y = p.y;
+				b->bb.y0 = b->p.y - b->s.y;
+				b->bb.y1 = b->p.y + b->s.y;
+			}
+			return;
+		}
 		b->v.z = 0;
 		b->p.z = best - b->s.x - impulse;
 		if (b->cb_func)
@@ -209,7 +251,7 @@ void Space::move_zneg(Body *b, float dt)
 	box3f bb, bb2;
 	box3ll bbc;
 	bool collide;
-	float best;
+	float best, best_y;
 	v3ll best_p;
 
 	bb = b->bb;
@@ -237,11 +279,25 @@ void Space::move_zneg(Body *b, float dt)
 			if (overlap(bb, bb2) && best < bb2.z1) {
 				collide = true;
 				best = bb2.z1;
+				best_y = bb2.y1;
 				best_p = p;
 			}
 		}
 	}
 	if (collide) {
+		if (best_y < b->bb.y0 + b->step_size) {
+			auto p = b->p;
+			b->p.y = best_y + b->s.y + impulse;
+			b->bb.y0 = b->p.y - b->s.y;
+			b->bb.y1 = b->p.y + b->s.y;
+			move_zneg(b, dt);
+			if (p.z == b->p.z) {
+				b->p.y = p.y;
+				b->bb.y0 = b->p.y - b->s.y;
+				b->bb.y1 = b->p.y + b->s.y;
+			}
+			return;
+		}
 		b->v.z = 0;
 		b->p.z = best + b->s.x + impulse;
 		if (b->cb_func)
@@ -250,12 +306,6 @@ void Space::move_zneg(Body *b, float dt)
 	}
 	b->p.z += b->v.z * dt;
 }
-
-/*
-	if (step_up)
-		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + impulse;
-	b->p.z += b->v.z * dt;
-*/
 
 void Space::move_ypos(Body *b, float dt)
 {
@@ -382,16 +432,12 @@ void Space::step(float dt)
 			move_xneg(b, dt);
 		b->bb.x0 = b->p.x - b->s.x;
 		b->bb.x1 = b->p.x + b->s.x;
-		b->bb.y0 = b->p.y - b->s.y;
-		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.z > 0)
 			move_zpos(b, dt);
 		else if (b->v.z < 0)
 			move_zneg(b, dt);
 		b->bb.z0 = b->p.z - b->s.x;
 		b->bb.z1 = b->p.z + b->s.x;
-		b->bb.y0 = b->p.y - b->s.y;
-		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.y > 0)
 			move_ypos(b, dt);
 		else if (b->v.y < 0)
