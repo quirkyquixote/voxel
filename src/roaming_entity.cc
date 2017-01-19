@@ -22,17 +22,17 @@ sz_Tag *RoamingEntity::save()
 	tmp = new sz_List();
 	sz_list_add(tmp, new sz_f64(body->get_p().x));
 	sz_list_add(tmp, new sz_f64(body->get_p().y));
-	sz_list_add(tmp, new sz_f64(body->get_p().y));
+	sz_list_add(tmp, new sz_f64(body->get_p().z));
 	sz_dict_add(root, "pos", tmp);
 	tmp = new sz_List();
 	sz_list_add(tmp, new sz_f64(body->get_r().x));
 	sz_list_add(tmp, new sz_f64(body->get_r().y));
-	sz_list_add(tmp, new sz_f64(body->get_r().y));
+	sz_list_add(tmp, new sz_f64(body->get_r().z));
 	sz_dict_add(root, "rot", tmp);
 	tmp = new sz_List();
 	sz_list_add(tmp, new sz_f64(body->get_v().x));
 	sz_list_add(tmp, new sz_f64(body->get_v().y));
-	sz_list_add(tmp, new sz_f64(body->get_v().y));
+	sz_list_add(tmp, new sz_f64(body->get_v().z));
 	sz_dict_add(root, "vel", tmp);
 	return root;
 }
