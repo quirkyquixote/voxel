@@ -365,12 +365,10 @@ int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 	if (objc != 1)
 		goto fail;
-	bb.x0 = ctx->world->get_p().x;
-	bb.y0 = WORLD_H - 1;
-	bb.z0 = ctx->world->get_p().y;
-	bb.x1 = bb.x0 + WORLD_W;
-	bb.y1 = bb.y0 + 1;
-	bb.z1 = bb.z0 + WORLD_W;
+	bb = fix(sel_bb);
+	++bb.x1;
+	++bb.y1;
+	++bb.z1;
 	update_lighting(ctx->world, bb, &bb2);
 	ctx->world->set_flags(bb2, CHUNK_UNRENDERED);
 	return TCL_OK;
