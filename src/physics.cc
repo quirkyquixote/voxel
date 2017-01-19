@@ -63,49 +63,6 @@ Space::~Space()
 {
 }
 
-static const int shape_masks[] = {
-	0x00,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF,
-	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF,
-	CELL_LUB | CELL_LUF | CELL_LDB | CELL_LDF,
-	CELL_RUB | CELL_RUF | CELL_RDB | CELL_RDF,
-	CELL_LDB | CELL_LUB | CELL_RDB | CELL_RDB,
-	CELL_LDF | CELL_LUF | CELL_RDF | CELL_RDF,
-	0xff,
-	0xff,
-	0xff,
-	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF | CELL_LUF | CELL_RUF,
-	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF | CELL_LUF | CELL_LUB,
-	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF | CELL_LUB | CELL_RUB,
-	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF | CELL_RUF | CELL_RUB,
-	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF | CELL_LDF | CELL_RDF,
-	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF | CELL_LDF | CELL_LDB,
-	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF | CELL_LDB | CELL_RDB,
-	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF | CELL_RDF | CELL_RDB,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-};
-
-
-
-int Space::cell_at(const int *masks, int64_t x, int64_t y, int64_t z)
-{
-	int shape, mask;
-	shape = world->get_shape(v3ll(x >> 1, y >> 1, z >> 1));
-	mask = (1 << (((x & 1) * 4) + ((y & 1) * 2) + (z & 1)));
-	return masks[shape] & mask;
-}
-
 void Space::move_xpos(Body *b, float dt)
 {
 	box3f bb, bb2;
@@ -452,160 +409,220 @@ void Space::run()
 }
 
 
-int Space::query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t x0, x1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	box3ll bbc;
 
-	x0 = ceil(p.x * 2);
-	x1 = floor((p.x + v.x) * 2);
-	for (x = x0; x <= x1; ++x) {
-		t = (0.5 * x - p.x) / v.x;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		y = floor(p1.y * 2);
-		z = floor(p1.z * 2);
-		if (cell_at(shape_masks, x, y, z)) {
-			q->face = FACE_LF;
-			q->p = v3ll(x >> 1, y >> 1, z >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
+	bbc.x0 = floor(bb.x0);
+	bbc.y0 = floor(bb.y0);
+	bbc.z0 = floor(bb.z0);
+	bbc.x1 = ceil(bb.x1) + 1;
+	bbc.y1 = ceil(bb.y1) + 1;
+	bbc.z1 = ceil(bb.z1) + 1;
+
+	for (auto c : bbc) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2.x0 += c.x;
+			bb2.y0 += c.y;
+			bb2.z0 += c.z;
+			bb2.x1 += c.x;
+			bb2.y1 += c.y;
+			bb2.z1 += c.z;
+			float t = (bb2.x0 - p.x) / v.x;
+			if (t < *best_t) {
+				float y = p.y + t * v.y;
+				float z = p.z + t * v.z;
+				if (y >= bb2.y0 && y <= bb2.y1 && z >= bb2.z0 && z <= bb2.z1) {
+					q->face = FACE_LF;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
-int Space::query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t x0, x1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	box3ll bbc;
 
-	x0 = floor(p.x * 2);
-	x1 = floor((p.x + v.x) * 2);
-	for (x = x0; x >= x1; --x) {
-		t = (0.5 * x - p.x) / v.x;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		y = floor(p1.y * 2);
-		z = floor(p1.z * 2);
-		if (cell_at(shape_masks, x - 1, y, z)) {
-			q->face = FACE_RT;
-			q->p = v3ll((x - 1) >> 1, y >> 1, z >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
+	bbc.x0 = floor(bb.x0);
+	bbc.y0 = floor(bb.y0);
+	bbc.z0 = floor(bb.z0);
+	bbc.x1 = ceil(bb.x1) + 1;
+	bbc.y1 = ceil(bb.y1) + 1;
+	bbc.z1 = ceil(bb.z1) + 1;
+
+	for (auto c : bbc) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2.x0 += c.x;
+			bb2.y0 += c.y;
+			bb2.z0 += c.z;
+			bb2.x1 += c.x;
+			bb2.y1 += c.y;
+			bb2.z1 += c.z;
+			float t = (bb2.x1 - p.x) / v.x;
+			if (t < *best_t) {
+				float y = p.y + t * v.y;
+				float z = p.z + t * v.z;
+				if (y >= bb2.y0 && y <= bb2.y1 && z >= bb2.z0 && z <= bb2.z1) {
+					q->face = FACE_RT;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
-int Space::query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t z0, z1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	box3ll bbc;
 
-	z0 = ceil(p.z * 2);
-	z1 = floor((p.z + v.z) * 2);
-	for (z = z0; z <= z1; ++z) {
-		t = (0.5 * z - p.z) / v.z;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		x = floor(p1.x * 2);
-		y = floor(p1.y * 2);
-		if (cell_at(shape_masks, x, y, z)) {
-			q->face = FACE_BK;
-			q->p = v3ll(x >> 1, y >> 1, z >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
+	bbc.x0 = floor(bb.x0);
+	bbc.y0 = floor(bb.y0);
+	bbc.z0 = floor(bb.z0);
+	bbc.x1 = ceil(bb.x1) + 1;
+	bbc.y1 = ceil(bb.y1) + 1;
+	bbc.z1 = ceil(bb.z1) + 1;
+
+	for (auto c : bbc) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2.x0 += c.x;
+			bb2.y0 += c.y;
+			bb2.z0 += c.z;
+			bb2.x1 += c.x;
+			bb2.y1 += c.y;
+			bb2.z1 += c.z;
+			float t = (bb2.z0 - p.z) / v.z;
+			if (t < *best_t) {
+				float y = p.y + t * v.y;
+				float x = p.x + t * v.x;
+				if (y >= bb2.y0 && y <= bb2.y1 && x >= bb2.x0 && x <= bb2.x1) {
+					q->face = FACE_BK;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
-int Space::query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t z0, z1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	box3ll bbc;
 
-	z0 = floor(p.z * 2);
-	z1 = floor((p.z + v.z) * 2);
-	for (z = z0; z >= z1; --z) {
-		t = (0.5 * z - p.z) / v.z;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		x = floor(p1.x * 2);
-		y = floor(p1.y * 2);
-		if (cell_at(shape_masks, x, y, z - 1)) {
-			q->face = FACE_FT;
-			q->p = v3ll(x >> 1, y >> 1, (z - 1) >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
+	bbc.x0 = floor(bb.x0);
+	bbc.y0 = floor(bb.y0);
+	bbc.z0 = floor(bb.z0);
+	bbc.x1 = ceil(bb.x1) + 1;
+	bbc.y1 = ceil(bb.y1) + 1;
+	bbc.z1 = ceil(bb.z1) + 1;
+
+	for (auto c : bbc) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2.x0 += c.x;
+			bb2.y0 += c.y;
+			bb2.z0 += c.z;
+			bb2.x1 += c.x;
+			bb2.y1 += c.y;
+			bb2.z1 += c.z;
+			float t = (bb2.z1 - p.z) / v.z;
+			if (t < *best_t) {
+				float y = p.y + t * v.y;
+				float x = p.x + t * v.x;
+				if (y >= bb2.y0 && y <= bb2.y1 && x >= bb2.x0 && x <= bb2.x1) {
+					q->face = FACE_FT;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
-int Space::query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t y0, y1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	box3ll bbc;
 
-	y0 = ceil(p.y * 2);
-	y1 = floor((p.y + v.y) * 2);
-	for (y = y0; y <= y1; ++y) {
-		t = (0.5 * y - p.y) / v.y;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		x = floor(p1.x * 2);
-		z = floor(p1.z * 2);
-		if (cell_at(shape_masks, x, y, z)) {
-			q->face = FACE_DN;
-			q->p = v3ll(x >> 1, y >> 1, z >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
+	bbc.x0 = floor(bb.x0);
+	bbc.y0 = floor(bb.y0);
+	bbc.z0 = floor(bb.z0);
+	bbc.x1 = ceil(bb.x1) + 1;
+	bbc.y1 = ceil(bb.y1) + 1;
+	bbc.z1 = ceil(bb.z1) + 1;
+
+	for (auto c : bbc) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2.x0 += c.x;
+			bb2.y0 += c.y;
+			bb2.z0 += c.z;
+			bb2.x1 += c.x;
+			bb2.y1 += c.y;
+			bb2.z1 += c.z;
+			float t = (bb2.y0 - p.y) / v.y;
+			if (t < *best_t) {
+				float x = p.x + t * v.x;
+				float z = p.z + t * v.z;
+				if (x >= bb2.x0 && x <= bb2.x1 && z >= bb2.z0 && z <= bb2.z1) {
+					q->face = FACE_DN;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
-int Space::query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t y0, y1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	box3ll bbc;
 
-	y0 = floor(p.y * 2);
-	y1 = floor((p.y + v.y) * 2);
-	for (y = y0; y >= y1; --y) {
-		t = (0.5 * y - p.y) / v.y;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		x = floor(p1.x * 2);
-		z = floor(p1.z * 2);
-		if (cell_at(shape_masks, x, y - 1, z)) {
-			q->face = FACE_UP;
-			q->p = v3ll(x >> 1, (y - 1) >> 1, z >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
+	bbc.x0 = floor(bb.x0);
+	bbc.y0 = floor(bb.y0);
+	bbc.z0 = floor(bb.z0);
+	bbc.x1 = ceil(bb.x1) + 1;
+	bbc.y1 = ceil(bb.y1) + 1;
+	bbc.z1 = ceil(bb.z1) + 1;
+
+	for (auto c : bbc) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2.x0 += c.x;
+			bb2.y0 += c.y;
+			bb2.z0 += c.z;
+			bb2.x1 += c.x;
+			bb2.y1 += c.y;
+			bb2.z1 += c.z;
+			float t = (bb2.y1 - p.y) / v.y;
+			if (t < *best_t) {
+				float x = p.x + t * v.x;
+				float z = p.z + t * v.z;
+				if (x >= bb2.x0 && x <= bb2.x1 && z >= bb2.z0 && z <= bb2.z1) {
+					q->face = FACE_UP;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
 int Space::query(const v3f &p, const v3f &v, Query *q)

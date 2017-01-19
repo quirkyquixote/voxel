@@ -108,12 +108,12 @@ class Space {
 	void move_yneg(Body *b, float dt);
 	void step(float dt);
 
-	int query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t);
-	int query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t);
-	int query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t);
-	int query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t);
-	int query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t);
-	int query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t);
+	void query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t);
+	void query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t);
+	void query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t);
+	void query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t);
+	void query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t);
+	void query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t);
 };
 
 struct Query {
