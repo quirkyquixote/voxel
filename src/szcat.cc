@@ -49,7 +49,7 @@ int sz_print(sz_Tag *tag, int depth)
 		for (auto &iter : tag->get_dict()) {
 			for (i = 0; i < depth + 1; ++i)
 				putchar('\t');
-			printf("%s:", iter.first);
+			printf("%s:", iter.first.c_str());
 			sz_print(iter.second, depth + 1);
 			putchar('\n');
 		}

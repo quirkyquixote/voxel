@@ -40,25 +40,30 @@ sz_Tag *RoamingEntity::save()
 void RoamingEntity::load(sz_Tag *root)
 {
 	Entity::load(root);
-	for (auto &it : root->get_dict()) {
-		if (strcmp(it.first, "pos") == 0) {
-			v3f p;
-			p.x = it.second->get_list()[0]->get_f64();
-			p.y = it.second->get_list()[1]->get_f64();
-			p.z = it.second->get_list()[2]->get_f64();
-			body->set_p(p);
-		} else if (strcmp(it.first, "rot") == 0) {
-			v3f r;
-			r.x = it.second->get_list()[0]->get_f64();
-			r.y = it.second->get_list()[1]->get_f64();
-			r.z = it.second->get_list()[2]->get_f64();
-			body->set_r(r);
-		} else if (strcmp(it.first, "vel") == 0) {
-			v3f v;
-			v.x = it.second->get_list()[0]->get_f64();
-			v.y = it.second->get_list()[1]->get_f64();
-			v.z = it.second->get_list()[2]->get_f64();
-			body->set_v(v);
-		}
+
+	sz_Tag *tag;
+	tag = sz_dict_lookup(root, "pos");
+	{
+		v3f p;
+		p.x = tag->get_list()[0]->get_f64();
+		p.y = tag->get_list()[1]->get_f64();
+		p.z = tag->get_list()[2]->get_f64();
+		body->set_p(p);
+	}
+	tag = sz_dict_lookup(root, "rot");
+	{
+		v3f r;
+		r.x = tag->get_list()[0]->get_f64();
+		r.y = tag->get_list()[1]->get_f64();
+		r.z = tag->get_list()[2]->get_f64();
+		body->set_r(r);
+	}
+	tag = sz_dict_lookup(root, "vel");
+	{
+		v3f v;
+		v.x = tag->get_list()[0]->get_f64();
+		v.y = tag->get_list()[1]->get_f64();
+		v.z = tag->get_list()[2]->get_f64();
+		body->set_v(v);
 	}
 }

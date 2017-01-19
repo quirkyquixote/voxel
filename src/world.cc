@@ -25,15 +25,12 @@ World::~World()
 
 void World::load(sz_Tag *root)
 {
-	for (auto &it : root->get_dict()) {
-		if (strcmp(it.first, "x") == 0) {
-			p.x = it.second->get_i64();
-		} else if (strcmp(it.first, "z") == 0) {
-			p.y = it.second->get_i64();
-		} else {
-			log_error("bad tag: %s", it.first);
-		}
-	}
+	sz_Tag *tag;
+
+	tag = sz_dict_lookup(root, "x");
+	p.x = tag->get_i64();
+	tag = sz_dict_lookup(root, "z");
+	p.y = tag->get_i64();
 }
 
 sz_Tag *World::save()

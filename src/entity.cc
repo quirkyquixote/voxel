@@ -10,22 +10,20 @@
 
 Entity *load_entity(Context *ctx, sz_Tag *root)
 {
-	auto &kv = root->get_dict()[0];
+	sz_Tag *tag;
 	Entity *e;
-	if (strcmp(kv.first, "name") != 0) {
-		log_error("first entity tag must be name; got %s", kv.first);
-		throw sz_Exception();
-	}
-	if (strcmp(kv.second->get_str(), "crate") == 0) {
+
+	tag = sz_dict_lookup(root, "name");
+	if (strcmp(tag->get_str(), "crate") == 0) {
 		e = new CrateEntity(ctx);
-	} else if (strcmp(kv.second->get_str(), "bench") == 0) {
+	} else if (strcmp(tag->get_str(), "bench") == 0) {
 		e = new BenchEntity(ctx);
-	} else if (strcmp(kv.second->get_str(), "board") == 0) {
+	} else if (strcmp(tag->get_str(), "board") == 0) {
 		e = new BoardEntity(ctx);
-	} else if (strcmp(kv.second->get_str(), "pipe") == 0) {
+	} else if (strcmp(tag->get_str(), "pipe") == 0) {
 		e = new PipeEntity(ctx);
 	} else {
-		log_error("bad entity type: %s", kv.second->get_str());
+		log_error("bad entity type: %s", tag->get_str());
 		throw sz_Exception();
 	}
 	e->load(root);
@@ -51,13 +49,17 @@ sz_Tag *Entity::save()
 
 void Entity::load(sz_Tag *root)
 {
-	for (auto &it : root->get_dict()) {
-		if (strcmp(it.first, "p") == 0) {
-			p.x = it.second->get_list()[0]->get_i64();
-			p.y = it.second->get_list()[1]->get_i64();
-			p.z = it.second->get_list()[2]->get_i64();
-		} else if (strcmp(it.first, "items") == 0) {
-			memcpy(items.data(), it.second->get_raw().data(), sizeof(Item) * items.size());
-		}
+	sz_Tag *tag;
+
+	tag = sz_dict_lookup(root, "p");
+	p.x = tag->get_list()[0]->get_i64();
+	p.y = tag->get_list()[1]->get_i64();
+	p.z = tag->get_list()[2]->get_i64();
+
+	try {
+		tag = sz_dict_lookup(root, "items");
+		memcpy(items.data(), tag->get_raw().data(), sizeof(Item) * items.size());
+	} catch (sz_Exception &ex) {
+		/* do nothing */
 	}
 }

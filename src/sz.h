@@ -10,6 +10,9 @@
 #include <vector>
 #include <string>
 #include <utility>
+#include <unordered_map>
+
+#include "log.h"
 
 enum sz_typeid {
 	SZ_NULL = 0,
@@ -35,23 +38,53 @@ class sz_Tag {
  public:
 	typedef std::string Raw;
 	typedef std::vector<sz_Tag *> List;
-	typedef std::vector<std::pair<char *, sz_Tag *> > Dict;
+	typedef std::unordered_map<std::string, sz_Tag *> Dict;
 
 	sz_Tag() { }
 	virtual ~sz_Tag() { }
 
 	virtual inline uint8_t get_tag() const { return SZ_NULL; }
 
-	virtual inline int8_t get_i8() const { throw sz_Exception(); }
-	virtual inline int16_t get_i16() const { throw sz_Exception(); }
-	virtual inline int32_t get_i32() const { throw sz_Exception(); }
-	virtual inline int64_t get_i64() const { throw sz_Exception(); }
-	virtual inline float get_f32() const { throw sz_Exception(); }
-	virtual inline double get_f64() const { throw sz_Exception(); }
-	virtual inline const char *get_str() const { throw sz_Exception(); }
-	virtual inline Raw &get_raw() { throw sz_Exception(); }
-	virtual inline List &get_list() { throw sz_Exception(); }
-	virtual inline Dict &get_dict() { throw sz_Exception(); }
+	virtual inline int8_t get_i8() const {
+		log_error("expected i8");
+		throw sz_Exception();
+	}
+	virtual inline int16_t get_i16() const {
+		log_error("expected i16");
+		throw sz_Exception();
+	}
+	virtual inline int32_t get_i32() const {
+		log_error("expected i32");
+		throw sz_Exception();
+	}
+	virtual inline int64_t get_i64() const {
+		log_error("expected i64");
+		throw sz_Exception();
+	}
+	virtual inline float get_f32() const {
+		log_error("expected f32");
+		throw sz_Exception();
+	}
+	virtual inline double get_f64() const {
+		log_error("expected f64");
+		throw sz_Exception();
+	}
+	virtual inline const char *get_str() const {
+		log_error("expected str");
+		throw sz_Exception();
+	}
+	virtual inline Raw &get_raw() {
+		log_error("expected raw");
+		throw sz_Exception();
+	}
+	virtual inline List &get_list() {
+		log_error("expected list");
+		throw sz_Exception();
+	}
+	virtual inline Dict &get_dict() {
+		log_error("expected dict");
+		throw sz_Exception();
+	}
 };
 
 class sz_i8 : public sz_Tag {
@@ -155,7 +188,6 @@ class sz_Dict : public sz_Tag {
 	~sz_Dict()
 	{
 		for (auto &it : val) {
-			free(it.first);
 			delete it.second;
 		}
 	}
@@ -175,7 +207,17 @@ static inline void sz_list_add(sz_Tag *d, sz_Tag *v)
 
 static inline void sz_dict_add(sz_Tag *d, const char *k, sz_Tag *v)
 {
-	d->get_dict().push_back(std::make_pair(strdup(k), v));
+	d->get_dict().insert(std::make_pair(std::string(k), v));
+}
+
+static inline sz_Tag *sz_dict_lookup(sz_Tag *d, const char *k)
+{
+	auto v = d->get_dict().find(k);
+	if (v == d->get_dict().end()) {
+		log_error("expected \"%s\"", k);
+		throw sz_Exception();
+	}
+	return v->second;
 }
 
 #endif  // SRC_SZ_H_

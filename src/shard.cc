@@ -24,19 +24,16 @@ Shard::~Shard()
 void Shard::load(sz_Tag *root)
 {
 	memset(data, 0, sizeof(data));
-	for (auto &it : root->get_dict()) {
-		if (strcmp(it.first, "y") == 0) {
-			y = it.second->get_i64();
-		} else if (strcmp(it.first, "mat") == 0) {
-			memcpy(mat, it.second->get_raw().data(), sizeof(mat));
-		} else if (strcmp(it.first, "shape") == 0) {
-			memcpy(shape, it.second->get_raw().data(), sizeof(shape));
-		} else if (strcmp(it.first, "light") == 0) {
-			memcpy(light, it.second->get_raw().data(), sizeof(light));
-		} else {
-			log_error("bad tag: %s", it.first);
-		}
-	}
+	sz_Tag *tag;
+
+	tag = sz_dict_lookup(root, "y");
+	y = tag->get_i64();
+	tag = sz_dict_lookup(root, "mat");
+	memcpy(mat, tag->get_raw().data(), sizeof(mat));
+	tag = sz_dict_lookup(root, "shape");
+	memcpy(shape, tag->get_raw().data(), sizeof(shape));
+	tag = sz_dict_lookup(root, "light");
+	memcpy(light, tag->get_raw().data(), sizeof(light));
 }
 
 sz_Tag *Shard::save()

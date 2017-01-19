@@ -27,22 +27,23 @@ Chunk::~Chunk()
 
 void Chunk::load(sz_Tag *root)
 {
-	for (auto &it : root->get_dict()) {
-		if (strcmp(it.first, "x") == 0) {
-			x = it.second->get_i64();
-		} else if (strcmp(it.first, "z") == 0) {
-			z = it.second->get_i64();
-		} else if (strcmp(it.first, "shards") == 0) {
-			int i = 0;
-			for (auto &it2 : it.second->get_list())
-				shards[i++]->load(it2);
-		} else if (strcmp(it.first, "entities") == 0) {
-			for (auto &it2 : it.second->get_list()) {
-				Entity *e = load_entity(ctx, it2);
-				ctx->world->set_data(e->get_p(), e);
-			}
-		} else {
-			log_error("bad tag: %s", it.first);
+	sz_Tag *tag;
+
+	tag = sz_dict_lookup(root, "x");
+	x = tag->get_i64();
+	tag = sz_dict_lookup(root, "z");
+	z = tag->get_i64();
+	tag = sz_dict_lookup(root, "shards");
+	{
+		int i = 0;
+		for (auto &it2 : tag->get_list())
+			shards[i++]->load(it2);
+	}
+	tag = sz_dict_lookup(root, "entities");
+	{
+		for (auto &it2 : tag->get_list()) {
+			Entity *e = load_entity(ctx, it2);
+			ctx->world->set_data(e->get_p(), e);
 		}
 	}
 	flags = CHUNK_UNRENDERED;

@@ -59,10 +59,9 @@ sz_Tag *read_list(int fd)
 
 	root = new sz_List();
 	read_atom(fd, &size);
-	root->get_list().resize(size);
 	for (i = 0; i < size; ++i) {
 		tag = sz_read(fd);
-		root->get_list()[i] = tag;
+		root->get_list().push_back(tag);
 	}
 	return root;
 }
@@ -76,11 +75,10 @@ sz_Tag *read_dict(int fd)
 
 	root = new sz_Dict();
 	read_atom(fd, &size);
-	root->get_dict().resize(size);
 	for (i = 0; i < size; ++i) {
 		read_str(fd, &key, NULL);
 		tag = sz_read(fd);
-		root->get_dict()[i] = std::make_pair(key, tag);
+		root->get_dict().insert(std::make_pair(key, tag));
 	}
 	return root;
 }
@@ -177,7 +175,7 @@ void write_dict(int fd, sz_Tag *root)
 	int32_t size = root->get_dict().size();
 	write_atom(fd, size);
 	for (auto &iter : root->get_dict()) {
-		write_str(fd, iter.first, strlen(iter.first));
+		write_str(fd, iter.first.data(), iter.first.size());
 		sz_write(fd, iter.second);
 	}
 }
