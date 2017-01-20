@@ -118,58 +118,30 @@ void PlayerEntity::use_inventory(std::vector<Item> *inv)
 	Item &s2 = (*inv)[i];
 	if (act == 1) {
 		if (move.y0) {
-			if (s2.num == 0) {
-				log_info("nothing to take");
+			if (s2.num == 0)
 				return;
-			}
 			int acc = inventory_add(&items, s2);
 			s2.num -= acc;
-			if (acc == 0)
-				log_info("no space to take");
-			else
-				log_info("take %s %s %d", mat_names[s1.mat],
-						obj_names[s1.obj], acc);
 		} else {
-			if (s2.num)
-				log_info("take %s %s %d", mat_names[s2.mat],
-						obj_names[s2.obj], s2.num);
-			if (s1.num)
-				log_info("left %s %s %d", mat_names[s1.mat],
-						obj_names[s1.obj], s1.num);
 			std::swap(s1, s2);
 		}
 	} else if (use == 1) {
 		if (move.y0) {
-			if (s2.num == 0) {
-				log_info("nothing to take");
+			if (s2.num == 0)
 				return;
-			}
 			int acc = inventory_add(&items, Item(s2.obj, s2.mat, 1));
 			s2.num -= acc;
-			if (acc == 0)
-				log_info("no space to take");
-			else
-				log_info("take %s %s 1", mat_names[s1.mat],
-						obj_names[s1.obj]);
 		} else {
-			if (s1.num == 0) {
-				log_info("nothing to leave");
+			if (s1.num == 0)
 				return;
-			}
-			if (s2.num >= 64) {
-				log_info("no space to leave");
+			if (s2.num >= 64)
 				return;
-			}
-			if (s2.num == 0) {
+			if (s2.num == 0)
 				s2 = Item(s1.obj, s1.mat, 0);
-			} else if (s1.obj != s2.obj || s1.mat != s2.mat) {
-				log_info("not the same object");
+			else if (s1.obj != s2.obj || s1.mat != s2.mat)
 				return;
-			}
 			++s2.num;
 			--s1.num;
-			log_info("left %s %s 1", mat_names[s1.mat],
-					obj_names[s1.obj]);
 		}
 	}
 }
@@ -184,8 +156,6 @@ void PlayerEntity::use_workbench(std::vector<Item> *inv)
 				inventory_add(&items, s);
 				++i;
 			} while (recipe_match(inv, &s));
-			log_info("take %s %s %d", mat_names[s.mat],
-					obj_names[s.obj], s.num * i);
 		} else {
 			log_info("not a recipe");
 		}
@@ -193,8 +163,6 @@ void PlayerEntity::use_workbench(std::vector<Item> *inv)
 		Item s;
 		if (recipe_match(inv, &s)) {
 			inventory_add(&items, s);
-			log_info("take %s %s %d", mat_names[s.mat],
-					obj_names[s.obj], s.num);
 		} else {
 			log_info("not a recipe");
 		}
