@@ -511,8 +511,7 @@ void Space::query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 
 int Space::query(const v3f &p, const v3f &v, Query *q)
 {
-	float t = FLT_MAX;
-
+	float t = 1;
 	q->face = -1;
 	if (v.x < 0)
 		query_xneg(p, v, q, &t);
