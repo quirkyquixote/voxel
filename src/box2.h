@@ -22,9 +22,11 @@ template<typename T> struct box2 {
 	};
 
 	T x0, y0, x1, y1;
+	box2() : x0(0), y0(0), x1(0), y1(0) {}
 	box2(T x0, T y0, T x1, T y1)
 		: x0(x0), y0(y0), x1(x1), y1(y1) {}
-	box2() : x0(0), y0(0), x1(0), y1(0) {}
+	template<typename U> box2(const box2<U> &b)
+		: x0(b.x0), y0(b.y0), x1(b.x1), y1(b.y1) {}
 
 	iterator begin() const { return iterator(v2<T>(x0, y0), *this); }
 	iterator end() const { return iterator(v2<T>(x1 + 1, y0), *this); }
@@ -60,6 +62,11 @@ template<typename T> bool overlap(const box2<T> &b1, const box2<T> &b2)
 {
 	return (b2.x0 <= b1.x1 && b2.x1 >= b1.x0 &&
 			b2.y0 <= b1.y1 && b2.y1 >= b1.y0);
+}
+
+template<typename T> box2<T> floor(const box2<T> &b)
+{
+	return box2<T>(floor(b.x0), floor(b.y0), floor(b.x1), floor(b.y1));
 }
 
 #endif  // SRC_BOX2_H_

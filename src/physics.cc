@@ -66,7 +66,6 @@ Space::~Space()
 void Space::move_xpos(Body *b, float dt)
 {
 	box3f bb, bb2;
-	box3ll bbc;
 	bool collide;
 	float best, best_y;
 	v3ll best_p;
@@ -74,18 +73,10 @@ void Space::move_xpos(Body *b, float dt)
 	bb = b->bb;
 	bb.x0 = bb.x1;
 	bb.x1 += b->v.x * dt;
-
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
-
 	collide = false;
 	best = bb.x1;
 
-	for (auto p : bbc) {
+	for (auto p : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
 			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best > bb2.x0) {
@@ -122,7 +113,6 @@ void Space::move_xpos(Body *b, float dt)
 void Space::move_xneg(Body *b, float dt)
 {
 	box3f bb, bb2;
-	box3ll bbc;
 	bool collide;
 	float best, best_y;
 	v3ll best_p;
@@ -130,18 +120,10 @@ void Space::move_xneg(Body *b, float dt)
 	bb = b->bb;
 	bb.x1 = bb.x0;
 	bb.x0 += b->v.x * dt;
-
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
-
 	collide = false;
 	best = bb.x0;
 
-	for (auto p : bbc) {
+	for (auto p : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
 			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best < bb2.x1) {
@@ -178,7 +160,6 @@ void Space::move_xneg(Body *b, float dt)
 void Space::move_zpos(Body *b, float dt)
 {
 	box3f bb, bb2;
-	box3ll bbc;
 	bool collide;
 	float best, best_y;
 	v3ll best_p;
@@ -186,18 +167,10 @@ void Space::move_zpos(Body *b, float dt)
 	bb = b->bb;
 	bb.z0 = bb.z1;
 	bb.z1 += b->v.z * dt;
-
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
-
 	collide = false;
 	best = bb.z1;
 
-	for (auto p : bbc) {
+	for (auto p : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
 			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best > bb2.z0) {
@@ -234,7 +207,6 @@ void Space::move_zpos(Body *b, float dt)
 void Space::move_zneg(Body *b, float dt)
 {
 	box3f bb, bb2;
-	box3ll bbc;
 	bool collide;
 	float best, best_y;
 	v3ll best_p;
@@ -242,18 +214,10 @@ void Space::move_zneg(Body *b, float dt)
 	bb = b->bb;
 	bb.z1 = bb.z0;
 	bb.z0 += b->v.z * dt;
-
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
-
 	collide = false;
 	best = bb.z0;
 
-	for (auto p : bbc) {
+	for (auto p : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
 			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best < bb2.z1) {
@@ -290,7 +254,6 @@ void Space::move_zneg(Body *b, float dt)
 void Space::move_ypos(Body *b, float dt)
 {
 	box3f bb, bb2;
-	box3ll bbc;
 	bool collide;
 	float best;
 	v3ll best_p;
@@ -298,18 +261,10 @@ void Space::move_ypos(Body *b, float dt)
 	bb = b->bb;
 	bb.y0 = bb.y1;
 	bb.y1 += b->v.y * dt;
-
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
-
 	collide = false;
 	best = bb.y1;
 
-	for (auto p : bbc) {
+	for (auto p : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
 			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best > bb2.y0) {
@@ -332,7 +287,6 @@ void Space::move_ypos(Body *b, float dt)
 void Space::move_yneg(Body *b, float dt)
 {
 	box3f bb, bb2;
-	box3ll bbc;
 	bool collide;
 	float best;
 	v3ll best_p;
@@ -340,18 +294,10 @@ void Space::move_yneg(Body *b, float dt)
 	bb = b->bb;
 	bb.y1 = bb.y0;
 	bb.y0 += b->v.y * dt;
-
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
-
 	collide = false;
 	best = bb.y0;
 
-	for (auto p : bbc) {
+	for (auto p : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
 			bb2 = shift(bb2, v3f(p));
 			if (overlap(bb, bb2) && best < bb2.y1) {
@@ -428,17 +374,9 @@ void Space::run()
 void Space::query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	box3f bb;
-	box3ll bbc;
-
 	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
 
-	for (auto c : bbc) {
+	for (auto c : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
 			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.x0 - p.x) / v.x;
@@ -459,17 +397,9 @@ void Space::query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 void Space::query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	box3f bb;
-	box3ll bbc;
-
 	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
 
-	for (auto c : bbc) {
+	for (auto c : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
 			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.x1 - p.x) / v.x;
@@ -490,17 +420,9 @@ void Space::query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 void Space::query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	box3f bb;
-	box3ll bbc;
-
 	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
 
-	for (auto c : bbc) {
+	for (auto c : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
 			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.z0 - p.z) / v.z;
@@ -521,17 +443,9 @@ void Space::query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 void Space::query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	box3f bb;
-	box3ll bbc;
-
 	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
 
-	for (auto c : bbc) {
+	for (auto c : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
 			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.z1 - p.z) / v.z;
@@ -552,17 +466,9 @@ void Space::query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 void Space::query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	box3f bb;
-	box3ll bbc;
-
 	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
 
-	for (auto c : bbc) {
+	for (auto c : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
 			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.y0 - p.y) / v.y;
@@ -583,17 +489,9 @@ void Space::query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t)
 void Space::query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
 	box3f bb;
-	box3ll bbc;
-
 	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
-	bbc.x0 = floor(bb.x0);
-	bbc.y0 = floor(bb.y0);
-	bbc.z0 = floor(bb.z0);
-	bbc.x1 = floor(bb.x1);
-	bbc.y1 = floor(bb.y1);
-	bbc.z1 = floor(bb.z1);
 
-	for (auto c : bbc) {
+	for (auto c : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(c)]) {
 			bb2 = shift(bb2, v3f(c));
 			float t = (bb2.y1 - p.y) / v.y;
