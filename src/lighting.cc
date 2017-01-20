@@ -109,16 +109,16 @@ void Lighting::update(const box3ll &bb, box3ll *rbb)
 		s2.pop_back();
 		if (p.x < bb2.x0)
 			bb2.x0 = p.x;
-		else if (p.x >= bb2.x1)
-			bb2.x1 = p.x + 1;
+		else if (p.x > bb2.x1)
+			bb2.x1 = p.x;
 		if (p.y < bb2.y0)
 			bb2.y0 = p.y;
-		else if (p.y >= bb2.y1)
-			bb2.y1 = p.y + 1;
+		else if (p.y > bb2.y1)
+			bb2.y1 = p.y;
 		if (p.z < bb2.z0)
 			bb2.z0 = p.z;
-		else if (p.z >= bb2.z1)
-			bb2.z1 = p.z + 1;
+		else if (p.z > bb2.z1)
+			bb2.z1 = p.z;
 		k = w->get_light(p);
 		lit_up(v3ll(p.x, p.y - 1, p.z), k, 0, 1);
 		lit_up(v3ll(p.x, p.y + 1, p.z), k, 1, 0);
