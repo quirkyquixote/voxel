@@ -168,6 +168,11 @@ int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 
 	if (objc < 2 || objc > 3)
 		goto fail;
+	if (strcmp(Tcl_GetString(objv[1]), "all") == 0) {
+		for (auto &i : *ctx->player->get_items())
+			i.num = 0;
+		return TCL_OK;
+	}
 	if (parse_item(Tcl_GetString(objv[1]), &mat, &obj) != 0)
 		goto fail;
 	if (objc == 3) {
