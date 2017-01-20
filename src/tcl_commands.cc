@@ -91,7 +91,7 @@ int cmd_help(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	log_info("box <block>: fill a box with the given block");
 	log_info("hbox <block>: fill a hollow box with the given block");
 	log_info("walls <block>: fill the walls of a box with the given block");
-	log_info("relit: recalculate lighting for all loaded chunks");
+	log_info("relit: recalculate lighting for current selection");
 	return TCL_OK;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -100,28 +100,35 @@ fail:
 
 int cmd_ls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: ls [mat|obj|sha]";
+	static const char *usage = "usage: ls [item|block]";
 	Context *ctx = static_cast<Context *>(data);
 	char *str;
 
 	if (objc < 2)
 		goto fail;
 	str = Tcl_GetString(objv[1]);
-	if (strncmp(str, "mat", 3) == 0) {
-		log_info("all materials:");
-		for (int i = 0; i < MAT_COUNT; ++i)
-			if (mat_names[i])
-			log_info("%s", mat_names[i]);
-	} else if (strncmp(str, "obj", 3) == 0) {
-		log_info("all objects:");
-		for (int i = 0; i < OBJ_COUNT; ++i)
-			if (obj_names[i])
-			log_info("%s", obj_names[i]);
-	} else if (strncmp(str, "sha", 3) == 0) {
-		log_info("all shapes:");
-		for (int i = 0; i < SHAPE_COUNT; ++i)
-			if (shape_names[i])
-			log_info("%s", shape_names[i]);
+	if (strcmp(str, "item") == 0) {
+		log_info("all items:");
+		for (int i = 0; i < MAT_COUNT; ++i) {
+			if (mat_names[i]) {
+				for (int j = 0; j < OBJ_COUNT; ++j) {
+					if (obj_names[j]) {
+						log_info("%s_%s", mat_names[i], obj_names[j]);
+					}
+				}
+			}
+		}
+	} else if (strcmp(str, "block") == 0) {
+		log_info("all blocks:");
+		for (int i = 0; i < MAT_COUNT; ++i) {
+			if (mat_names[i]) {
+				for (int j = 0; j < SHAPE_COUNT; ++j) {
+					if (shape_names[j]) {
+						log_info("%s_%s", mat_names[i], shape_names[j]);
+					}
+				}
+			}
+		}
 	} else {
 		goto fail;
 	}
@@ -133,7 +140,7 @@ fail:
 
 int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: give <material>[_<object>] [<amount>]";
+	static const char *usage = "usage: give <item> [<amount>]";
 	Context *ctx = static_cast<Context *>(data);
 	int mat, obj, num = 1;
 
@@ -155,7 +162,7 @@ fail:
 
 int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: take <material>[_<object>] [<amount>]";
+	static const char *usage = "usage: take <item> [<amount>]";
 	Context *ctx = static_cast<Context *>(data);
 	int mat, obj, num = 1;
 
@@ -263,7 +270,7 @@ fail:
 
 int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: box <material>[_<shape>]";
+	static const char *usage = "usage: box <block>";
 	Context *ctx = static_cast<Context *>(data);
 	int mat, shape;
 	box3ll bb;
@@ -283,7 +290,7 @@ fail:
 
 int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: hbox <material>[_<shape>]";
+	static const char *usage = "usage: hbox <block>";
 	Context *ctx = static_cast<Context *>(data);
 	int mat, shape;
 	box3ll bb;
@@ -323,7 +330,7 @@ fail:
 
 int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: walls <material>[_<shape>]";
+	static const char *usage = "usage: walls <block>";
 	Context *ctx = static_cast<Context *>(data);
 	int mat, shape;
 	box3ll bb;
