@@ -7,7 +7,8 @@ template<typename T> struct box3 {
 	struct iterator {
 		v3<T> cur;
 		box3<T> box;
-		iterator(v3<T> cur, box3<T> box) : cur(cur), box(box) { }
+		iterator(const v3<T> &cur, const box3<T> &box)
+			: cur(cur), box(box) { }
 		inline void operator++()
 		{
 			if (cur.z == box.z1) {
