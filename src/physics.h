@@ -69,11 +69,10 @@ class Space {
 	explicit Space(World *w);
 	~Space();
 
-	void run();
+	void step();
 	int query(const v3f &p, const v3f &v, Query *q);
 
 	inline void set_gravity(float g) { gravity = g; }
-	inline void set_iterations(int i) { iterations = i; }
 	inline void set_impulse(float i) { impulse = i; }
 	inline void set_terminal_speed(float t) { terminal_speed = t; }
 
@@ -91,7 +90,6 @@ class Space {
 	}
 
  private:
-	int iterations;
 	float impulse;
 	float gravity;
 	float terminal_speed;
@@ -99,14 +97,12 @@ class Space {
 	std::list<Body *> bodies;
 	std::vector<box3f> geom[256];
 
-	int cell_at(const int *masks, int64_t x, int64_t y, int64_t z);
-	void move_xpos(Body *b, float dt);
-	void move_xneg(Body *b, float dt);
-	void move_zpos(Body *b, float dt);
-	void move_zneg(Body *b, float dt);
-	void move_ypos(Body *b, float dt);
-	void move_yneg(Body *b, float dt);
-	void step(float dt);
+	void move_xpos(Body *b);
+	void move_xneg(Body *b);
+	void move_zpos(Body *b);
+	void move_zneg(Body *b);
+	void move_ypos(Body *b);
+	void move_yneg(Body *b);
 
 	void query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t);
 	void query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t);

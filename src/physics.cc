@@ -63,7 +63,7 @@ Space::~Space()
 {
 }
 
-void Space::move_xpos(Body *b, float dt)
+void Space::move_xpos(Body *b)
 {
 	box3f bb, bb2;
 	bool collide;
@@ -72,7 +72,7 @@ void Space::move_xpos(Body *b, float dt)
 
 	bb = b->bb;
 	bb.x0 = bb.x1;
-	bb.x1 += b->v.x * dt;
+	bb.x1 += b->v.x;
 	collide = false;
 	best = bb.x1;
 
@@ -93,7 +93,7 @@ void Space::move_xpos(Body *b, float dt)
 			b->p.y = best_y + b->s.y + impulse;
 			b->bb.y0 = b->p.y - b->s.y;
 			b->bb.y1 = b->p.y + b->s.y;
-			move_xpos(b, dt);
+			move_xpos(b);
 			if (p.x == b->p.x) {
 				b->p.y = p.y;
 				b->bb.y0 = b->p.y - b->s.y;
@@ -107,10 +107,10 @@ void Space::move_xpos(Body *b, float dt)
 			b->cb_func(b, best_p, FACE_LF);
 		return;
 	}
-	b->p.x += b->v.x * dt;
+	b->p.x += b->v.x;
 }
 
-void Space::move_xneg(Body *b, float dt)
+void Space::move_xneg(Body *b)
 {
 	box3f bb, bb2;
 	bool collide;
@@ -119,7 +119,7 @@ void Space::move_xneg(Body *b, float dt)
 
 	bb = b->bb;
 	bb.x1 = bb.x0;
-	bb.x0 += b->v.x * dt;
+	bb.x0 += b->v.x;
 	collide = false;
 	best = bb.x0;
 
@@ -140,7 +140,7 @@ void Space::move_xneg(Body *b, float dt)
 			b->p.y = best_y + b->s.y + impulse;
 			b->bb.y0 = b->p.y - b->s.y;
 			b->bb.y1 = b->p.y + b->s.y;
-			move_xneg(b, dt);
+			move_xneg(b);
 			if (p.x == b->p.x) {
 				b->p.y = p.y;
 				b->bb.y0 = b->p.y - b->s.y;
@@ -154,10 +154,10 @@ void Space::move_xneg(Body *b, float dt)
 			b->cb_func(b, best_p, FACE_RT);
 		return;
 	}
-	b->p.x += b->v.x * dt;
+	b->p.x += b->v.x;
 }
 
-void Space::move_zpos(Body *b, float dt)
+void Space::move_zpos(Body *b)
 {
 	box3f bb, bb2;
 	bool collide;
@@ -166,7 +166,7 @@ void Space::move_zpos(Body *b, float dt)
 
 	bb = b->bb;
 	bb.z0 = bb.z1;
-	bb.z1 += b->v.z * dt;
+	bb.z1 += b->v.z;
 	collide = false;
 	best = bb.z1;
 
@@ -187,7 +187,7 @@ void Space::move_zpos(Body *b, float dt)
 			b->p.y = best_y + b->s.y + impulse;
 			b->bb.y0 = b->p.y - b->s.y;
 			b->bb.y1 = b->p.y + b->s.y;
-			move_zpos(b, dt);
+			move_zpos(b);
 			if (p.z == b->p.z) {
 				b->p.y = p.y;
 				b->bb.y0 = b->p.y - b->s.y;
@@ -201,10 +201,10 @@ void Space::move_zpos(Body *b, float dt)
 			b->cb_func(b, best_p, FACE_BK);
 		return;
 	}
-	b->p.z += b->v.z * dt;
+	b->p.z += b->v.z;
 }
 
-void Space::move_zneg(Body *b, float dt)
+void Space::move_zneg(Body *b)
 {
 	box3f bb, bb2;
 	bool collide;
@@ -213,7 +213,7 @@ void Space::move_zneg(Body *b, float dt)
 
 	bb = b->bb;
 	bb.z1 = bb.z0;
-	bb.z0 += b->v.z * dt;
+	bb.z0 += b->v.z;
 	collide = false;
 	best = bb.z0;
 
@@ -234,7 +234,7 @@ void Space::move_zneg(Body *b, float dt)
 			b->p.y = best_y + b->s.y + impulse;
 			b->bb.y0 = b->p.y - b->s.y;
 			b->bb.y1 = b->p.y + b->s.y;
-			move_zneg(b, dt);
+			move_zneg(b);
 			if (p.z == b->p.z) {
 				b->p.y = p.y;
 				b->bb.y0 = b->p.y - b->s.y;
@@ -248,10 +248,10 @@ void Space::move_zneg(Body *b, float dt)
 			b->cb_func(b, best_p, FACE_FT);
 		return;
 	}
-	b->p.z += b->v.z * dt;
+	b->p.z += b->v.z;
 }
 
-void Space::move_ypos(Body *b, float dt)
+void Space::move_ypos(Body *b)
 {
 	box3f bb, bb2;
 	bool collide;
@@ -260,7 +260,7 @@ void Space::move_ypos(Body *b, float dt)
 
 	bb = b->bb;
 	bb.y0 = bb.y1;
-	bb.y1 += b->v.y * dt;
+	bb.y1 += b->v.y;
 	collide = false;
 	best = bb.y1;
 
@@ -281,10 +281,10 @@ void Space::move_ypos(Body *b, float dt)
 			b->cb_func(b, best_p, FACE_DN);
 		return;
 	}
-	b->p.y += b->v.y * dt;
+	b->p.y += b->v.y;
 }
 
-void Space::move_yneg(Body *b, float dt)
+void Space::move_yneg(Body *b)
 {
 	box3f bb, bb2;
 	bool collide;
@@ -293,7 +293,7 @@ void Space::move_yneg(Body *b, float dt)
 
 	bb = b->bb;
 	bb.y1 = bb.y0;
-	bb.y0 += b->v.y * dt;
+	bb.y0 += b->v.y;
 	collide = false;
 	best = bb.y0;
 
@@ -314,13 +314,13 @@ void Space::move_yneg(Body *b, float dt)
 			b->cb_func(b, best_p, FACE_UP);
 		return;
 	}
-	b->p.y += b->v.y * dt;
+	b->p.y += b->v.y;
 }
 
-void Space::step(float dt)
+void Space::step()
 {
 	for (auto &b : bodies) {
-		b->v.y += gravity * dt;
+		b->v.y += gravity;
 		if (b->v.x < -terminal_speed)
 			b->v.x = -terminal_speed;
 		else if (b->v.x > terminal_speed)
@@ -343,33 +343,25 @@ void Space::step(float dt)
 		b->bb.y0 = b->p.y - b->s.y;
 		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.x > 0)
-			move_xpos(b, dt);
+			move_xpos(b);
 		else if (b->v.x < 0)
-			move_xneg(b, dt);
+			move_xneg(b);
 		b->bb.x0 = b->p.x - b->s.x;
 		b->bb.x1 = b->p.x + b->s.x;
 		if (b->v.z > 0)
-			move_zpos(b, dt);
+			move_zpos(b);
 		else if (b->v.z < 0)
-			move_zneg(b, dt);
+			move_zneg(b);
 		b->bb.z0 = b->p.z - b->s.x;
 		b->bb.z1 = b->p.z + b->s.x;
 		if (b->v.y > 0)
-			move_ypos(b, dt);
+			move_ypos(b);
 		else if (b->v.y < 0)
-			move_yneg(b, dt);
+			move_yneg(b);
 		b->bb.y0 = b->p.y - b->s.y;
 		b->bb.y1 = b->p.y + b->s.y;
 	}
 }
-
-void Space::run()
-{
-	int i;
-	for (i = 0; i < iterations; ++i)
-		step(1.0 / iterations);
-}
-
 
 void Space::query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {

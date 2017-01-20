@@ -66,7 +66,6 @@ Context::Context(const char *dir)
 	/* Initialize physics */
 	space = new Space(world);
 	space->set_gravity(-0.05);
-	space->set_iterations(2);
 	space->set_impulse(0.001);
 	space->set_terminal_speed(1);
 
@@ -380,7 +379,7 @@ void Context::update()
 {
 	if (!ml->get_window()->has_mouse_focus())
 		return;
-	space->run();
+	space->step();
 /*	if ((tick & 1) == 0)
 		flowsim_step(flowsim);*/
 	player->update();
