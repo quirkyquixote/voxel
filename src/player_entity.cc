@@ -57,40 +57,27 @@ void PlayerEntity::update()
 	v = roty(v, r.y);
 	ctx->space->query(ctx->renderer->get_cam()->get_p(), v, &cur);
 
-	v3ll p = cur.p;
-	int s = ctx->world->get_shape(p);
-	int m = ctx->world->get_mat(p);
-	Entity *e = ctx->world->get_data(p);
+	if (cur.face != -1) {
+		v3ll p = cur.p;
+		int s = ctx->world->get_shape(p);
+		int m = ctx->world->get_mat(p);
+		Entity *e = ctx->world->get_data(p);
 
-	if (e == nullptr || !e->use(this)) {
-		if (act == 1) {
-			if (cur.face != -1) {
+		if (e == nullptr || !e->use(this)) {
+			if (act == 1) {
 				if (s != SHAPE_NONE) {
 					ctx->spill_inventory(p);
 					ctx->drop_block(p);
 					ctx->world->set_block(p, 0, 0);
 				}
 			}
-		}
-		if (use == 1) {
-			if (cur.face != -1) {
+			if (use == 1) {
 				use_tool();
 			}
-		}
-		if (pick == 1) {
-			if (cur.face != -1) {
-				int s = ctx->world->get_shape(cur.p);
-				int m = ctx->world->get_mat(cur.p);
-				int o;
-				if (s >= SHAPE_BLOCK_DN && s <= SHAPE_BLOCK_FT)
-					o = OBJ_BLOCK;
-				else if (s >= SHAPE_SLAB_DN && s <= SHAPE_SLAB_FT)
-					o = OBJ_SLAB;
-				else if (s >= SHAPE_PANE_X && s <= SHAPE_PANE_Z)
-					o = OBJ_PANE;
-				else if (s >= SHAPE_STAIRS_DF && s <= SHAPE_STAIRS_UR)
-					o = OBJ_STAIRS;
-				items[tool] = Item(o, m, 1);
+			if (pick == 1) {
+				items[tool].obj = block_traits[m][s].drop.obj;
+				items[tool].mat = m;
+				items[tool].num = 1;
 			}
 		}
 	}
@@ -267,10 +254,10 @@ void PlayerEntity::use_tool()
 			else
 				ctx->world->set_block(p, SHAPE_PANE_Z, s.mat);
 		}
-/*	} else if (s.obj == OBJ_FLUID) {
-		flowsim_add(flowsim, p, 1);*/
-	}
-	--s.num;
+		/*	} else if (s.obj == OBJ_FLUID) {
+			flowsim_add(flowsim, p, 1);*/
+}
+--s.num;
 }
 
 void PlayerEntity::render()
