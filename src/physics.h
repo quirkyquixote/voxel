@@ -11,17 +11,6 @@
 #include "v3.h"
 #include "box3.h"
 
-enum {
-	CELL_LDB = 1 << 0,
-	CELL_LDF = 1 << 1,
-	CELL_LUB = 1 << 2,
-	CELL_LUF = 1 << 3,
-	CELL_RDB = 1 << 4,
-	CELL_RDF = 1 << 5,
-	CELL_RUB = 1 << 6,
-	CELL_RUF = 1 << 7,
-};
-
 class World;
 class Space;
 class Body;
