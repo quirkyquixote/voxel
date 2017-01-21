@@ -13,7 +13,7 @@ struct Recipe {
 	Ingredient pattern[9];
 };
 
-#define PATTERN_1x1(o1,m1,num,o2,m2) \
+#define PATTERN_1x1(o1, m1, num, o2, m2) \
 	{ { o1, m1 }, num, { \
 		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
 		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
@@ -30,7 +30,7 @@ struct Recipe {
 		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
 	} }
 
-#define PATTERN_2x1(o1,m1,num,o2,m2) \
+#define PATTERN_2x1(o1, m1, num, o2, m2) \
 	{ { o1, m1 }, num, { \
 		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
 		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
@@ -47,7 +47,7 @@ struct Recipe {
 		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
 	} }
 
-#define PATTERN_3x1(o1,m1,num,o2,m2) \
+#define PATTERN_3x1(o1, m1, num, o2, m2) \
 	{ { o1, m1 }, num, { \
 		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
 		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
@@ -59,21 +59,21 @@ struct Recipe {
 		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
 	} }
 
-#define PATTERN_2x2(o1,m1,num,o2,m2) \
+#define PATTERN_2x2(o1, m1, num, o2, m2) \
 	{ { o1, m1 }, num, { \
 		{ o2, m2 }, { o2, m2 }, { -1, -1 }, \
 		{ o2, m2 }, { o2, m2 }, { -1, -1 }, \
 		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
 	} }
 
-#define PATTERN_DIAMOND(o1,m1,num,o2,m2) \
+#define PATTERN_DIAMOND(o1, m1, num, o2, m2) \
 	{ { o1, m1 }, num, { \
 		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
 		{ o2, m2 }, { -1, -1 }, { o2, m2 }, \
 		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
 	} }
 
-#define PATTERN_CROSS(o1,m1,num,o2,m2) \
+#define PATTERN_CROSS(o1, m1, num, o2, m2) \
 	{ { o1, m1 }, num, { \
 		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
 		{ o2, m2 }, { o2, m2 }, { o2, m2 }, \
@@ -85,24 +85,24 @@ struct Recipe {
 	PATTERN_3x1(OBJ_SLAB, mat, 6, OBJ_BLOCK, mat), \
 	PATTERN_3x1(OBJ_PANE, mat, 6, OBJ_SLAB, mat), \
 	{ { OBJ_STAIRS, mat }, 6, {\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ OBJ_BLOCK, mat },\
-		{ -1, -1 },\
-		{ -1, -1 },\
+		{ OBJ_BLOCK, mat }, \
+		{ OBJ_BLOCK, mat }, \
+		{ OBJ_BLOCK, mat }, \
+		{ OBJ_BLOCK, mat }, \
+		{ OBJ_BLOCK, mat }, \
+		{ -1, -1 }, \
+		{ OBJ_BLOCK, mat }, \
+		{ -1, -1 }, \
+		{ -1, -1 }, \
 	} }
 
 #define STONE_RECIPES(mat) \
-	COMMON_RECIPES(mat),\
-	COMMON_RECIPES(mat##_COBBLE),\
-	COMMON_RECIPES(mat##_LBRICK),\
-	COMMON_RECIPES(mat##_SBRICK),\
-	COMMON_RECIPES(mat##_TILE),\
-	COMMON_RECIPES(mat##_COLUMN),\
+	COMMON_RECIPES(mat), \
+	COMMON_RECIPES(mat##_COBBLE), \
+	COMMON_RECIPES(mat##_LBRICK), \
+	COMMON_RECIPES(mat##_SBRICK), \
+	COMMON_RECIPES(mat##_TILE), \
+	COMMON_RECIPES(mat##_COLUMN), \
 	COMMON_RECIPES(mat##_BLOCK), \
 	PATTERN_1x1(OBJ_BLOCK, mat##_BLOCK, 1, OBJ_BLOCK, mat), \
 	PATTERN_1x1(OBJ_BLOCK, mat##_LBRICK, 1, OBJ_BLOCK, mat##_BLOCK), \

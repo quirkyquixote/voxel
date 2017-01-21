@@ -67,8 +67,8 @@ void ToneMapper::update(float sky, float spot)
 	c2 = c2 * scale;
 
 	for (int i = 0; i < samples; ++i) {
-		mapped_sky_color[i] = c1 * (float)i;
-		mapped_spot_color[i] = c2 * (float)i;
+		mapped_sky_color[i] = c1 * static_cast<float>(i);
+		mapped_spot_color[i] = c2 * static_cast<float>(i);
 	}
 
 	for (int j = 0, k = 0; j < samples; ++j) {

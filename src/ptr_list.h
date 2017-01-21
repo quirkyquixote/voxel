@@ -32,9 +32,9 @@ template<typename T> class PtrList : public PtrNode {
  public:
 	class iterator {
 	 public:
-		iterator(PtrNode *node) : node(node), next(node->next) { }
+		explicit iterator(PtrNode *node) : node(node), next(node->next) { }
 		~iterator() { }
-		void operator++() { node = next; next = node->next; };
+		void operator++() { node = next; next = node->next; }
 		bool operator!=(const iterator &rhs) const { return node != rhs.node; }
 		T* operator*() { return static_cast<T*>(node); }
 	 private:

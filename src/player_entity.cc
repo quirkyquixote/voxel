@@ -308,7 +308,6 @@ void PlayerEntity::render()
 	render_held_item();
 	render_hotbar();
 	glEnable(GL_DEPTH_TEST);
-
 }
 
 void PlayerEntity::render_cursor()

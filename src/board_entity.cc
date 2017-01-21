@@ -6,10 +6,10 @@
 
 BoardEntity::BoardEntity(Context *ctx) : BlockEntity(ctx, 64)
 {
-	update_func.reset(new Callback([ctx,this](){
+	update_func.reset(new Callback([ctx, this](){
 		this->update();
 	}));
-	render_func.reset(new Callback([ctx,this](){
+	render_func.reset(new Callback([ctx, this](){
 		ctx->renderer->render_board(this->items, this->p);
 	}));
 	ctx->add_callback(update_func.get());

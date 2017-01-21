@@ -6,7 +6,7 @@
 
 CrateEntity::CrateEntity(Context *ctx) : BlockEntity(ctx, 16)
 {
-	render_callback.reset(new Callback([ctx,this](){
+	render_callback.reset(new Callback([ctx, this](){
 		ctx->renderer->render_inventory(this->items, this->p);
 	}));
 	ctx->renderer->add_callback(render_callback.get());

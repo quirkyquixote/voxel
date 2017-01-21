@@ -124,9 +124,10 @@ void gpu_profile_update(struct profile *p)
 {
 	GLint done;
 	GLuint dt;
-	do
+	do {
 		glGetQueryObjectiv(p->gpu, GL_QUERY_RESULT_AVAILABLE, &done);
-	while (!done);
+	} while (!done);
+
 	glGetQueryObjectuiv(p->gpu, GL_QUERY_RESULT, &dt);
 	p->acc += dt / 1000;
 	++p->samples;

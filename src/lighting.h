@@ -9,7 +9,7 @@
 
 class Lighting {
  public:
-	Lighting(World *w);
+	explicit Lighting(World *w);
 	~Lighting();
 
 	void update(const box3ll &bb, box3ll *rbb);

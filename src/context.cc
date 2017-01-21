@@ -35,7 +35,7 @@ Context::Context(const char *dir)
 	: dir(dir)
 {
 	world = new World(this);
-	//prof_mgr = profile_manager();
+	// prof_mgr = profile_manager();
 	chunks_per_tick = 1;
 
 	/* Setup main loop */
@@ -73,7 +73,7 @@ Context::Context(const char *dir)
 	light = new Lighting(world);
 
 	/* Initialize flowsim */
-	//flowsim = flowsim(world);
+	// flowsim = flowsim(world);
 
 	/* Create player */
 	player = new PlayerEntity(this);

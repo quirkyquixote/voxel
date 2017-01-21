@@ -43,7 +43,7 @@ class Context {
 	int chunks_per_tick;
 	uint64_t tick;
 
-	Context(const char *dir);
+	explicit Context(const char *dir);
 	~Context();
 
 	void event(const SDL_Event &e);
@@ -68,7 +68,6 @@ class Context {
 	void save_world();
 	void save_player();
 	void save_chunk(Chunk *c);
-
 };
 
 unsigned long long next_id(void);

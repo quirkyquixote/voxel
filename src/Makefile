@@ -3,7 +3,7 @@ include ../config.mk
 
 # Independently of where the files being compiled are, they search for C
 # headers in the current directory.
-ALL_CFLAGS += -I$(shell pwd)
+ALL_CXXFLAGS += -I$(shell pwd)/..
 
 voxel_objs += camera.o
 voxel_objs += shard.o

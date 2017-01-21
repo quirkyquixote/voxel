@@ -19,7 +19,7 @@ class BenchEntity : public BlockEntity {
 
 	const char *get_name() { return "bench"; }
 
-private:
+ private:
 	std::unique_ptr<Callback> render_callback;
 };
 

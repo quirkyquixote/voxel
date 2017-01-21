@@ -9,7 +9,7 @@
 
 class Callback : public PtrNode {
  public:
-	Callback(const std::function<void(void)> &func) : func(func) { }
+	explicit Callback(const std::function<void(void)> &func) : func(func) { }
 	~Callback() { }
 	inline void operator()() { func(); }
 

@@ -10,7 +10,8 @@ static box3ll sel_bb = { 0, 0, 0, 0, 0, 0 };
 int parse_item(const char *str, int *mat, int *obj)
 {
 	for (*mat = MAT_COUNT - 1; *mat >= 0; --*mat) {
-		if (mat_names[*mat] && strncmp(str, mat_names[*mat], strlen(mat_names[*mat])) == 0)
+		if (mat_names[*mat] && strncmp(str, mat_names[*mat],
+					strlen(mat_names[*mat])) == 0)
 			break;
 	}
 	if (*mat < 0) {
@@ -28,7 +29,8 @@ int parse_item(const char *str, int *mat, int *obj)
 	}
 	++str;
 	for (*obj = OBJ_COUNT - 1; *obj >= 0; --*obj) {
-		if (obj_names[*obj] && strncmp(str, obj_names[*obj], strlen(obj_names[*obj])) == 0)
+		if (obj_names[*obj] && strncmp(str, obj_names[*obj],
+					strlen(obj_names[*obj])) == 0)
 			break;
 	}
 	if (*obj < 0) {
@@ -46,7 +48,8 @@ int parse_block(const char *str, int *mat, int *shape)
 		return 0;
 	}
 	for (*mat = MAT_COUNT - 1; *mat >= 0; --*mat) {
-		if (mat_names[*mat] && strncmp(str, mat_names[*mat], strlen(mat_names[*mat])) == 0)
+		if (mat_names[*mat] && strncmp(str, mat_names[*mat],
+					strlen(mat_names[*mat])) == 0)
 			break;
 	}
 	if (*mat < 0) {
@@ -64,7 +67,8 @@ int parse_block(const char *str, int *mat, int *shape)
 	}
 	++str;
 	for (*shape = SHAPE_COUNT - 1; *shape >= 0; --*shape) {
-		if (shape_names[*shape] && strncmp(str, shape_names[*shape], strlen(shape_names[*shape])) == 0)
+		if (shape_names[*shape] && strncmp(str, shape_names[*shape],
+					strlen(shape_names[*shape])) == 0)
 			break;
 	}
 	if (*shape < 0) {
@@ -114,7 +118,8 @@ int cmd_ls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 			if (mat_names[i]) {
 				for (int j = 0; j < OBJ_COUNT; ++j) {
 					if (obj_names[j]) {
-						log_info("%s_%s", mat_names[i], obj_names[j]);
+						log_info("%s_%s", mat_names[i],
+								obj_names[j]);
 					}
 				}
 			}
@@ -125,7 +130,8 @@ int cmd_ls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 			if (mat_names[i]) {
 				for (int j = 0; j < SHAPE_COUNT; ++j) {
 					if (shape_names[j]) {
-						log_info("%s_%s", mat_names[i], shape_names[j]);
+						log_info("%s_%s", mat_names[i],
+								shape_names[j]);
 					}
 				}
 			}

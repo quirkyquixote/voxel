@@ -12,20 +12,20 @@
 #define Z_COL .6
 #define B_COL .4
 
-#define TC(mat,a0,b0,a1,b1,a2,b2)\
+#define TC(mat, a0, b0, a1, b1, a2, b2)\
 do {\
 	texcoord_from_mat[mat][0] = v2f(a0 / 32., b0 / 32.);\
 	texcoord_from_mat[mat][1] = v2f(a1 / 32., b1 / 32.);\
 	texcoord_from_mat[mat][2] = v2f(a2 / 32., b2 / 32.);\
 } while (0)
 
-#define COMMON_TC(mat,y) \
+#define COMMON_TC(mat, y) \
 	TC(mat##_CRATE, 16, y, 17, y, 0, y);\
 	TC(mat##_BENCH, 18, y, 19, y, 0, y);\
 	TC(mat##_PIPE, 20, y, 21, y, 21, y);\
 	TC(mat##_BOARD, 22, y, 23, y, 0, y)
 
-#define STONE_TC(mat,y)\
+#define STONE_TC(mat, y)\
 	TC(mat, 0, y, 0, y, 0, y);\
 	TC(mat##_COBBLE, 1, y, 1, y, 1, y);\
 	TC(mat##_LBRICK, 6, y, 7, y, 8, y);\
@@ -36,7 +36,7 @@ do {\
 	TC(mat##_SAND, 15, y, 15, y, 16, y);\
 	COMMON_TC(mat, y)
 
-#define WOOD_TC(mat,y)\
+#define WOOD_TC(mat, y)\
 	TC(mat, 1, y, 1, y, 1, y);\
 	TC(mat##_LOG, 3, y, 2, y, 2, y);\
 	COMMON_TC(mat, y)
@@ -1166,7 +1166,8 @@ void VertexBuffer::enable()
 	assert(glGetError() == GL_NO_ERROR);
 }
 
-void VertexBuffer::draw_slice(GLenum mode, size_t buf, size_t first, size_t count)
+void VertexBuffer::draw_slice(GLenum mode, size_t buf, size_t first,
+		size_t count)
 {
 	assert(buf < vbo_count);
 	assert(first + count <= vbo_sizes[buf]);
@@ -1174,9 +1175,12 @@ void VertexBuffer::draw_slice(GLenum mode, size_t buf, size_t first, size_t coun
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(3, GL_FLOAT, sizeof(Vertex), (char *)0);
-	glTexCoordPointer(4, GL_FLOAT, sizeof(Vertex), (char *)offsetof(Vertex, u0));
-	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex), (char *)offsetof(Vertex, r));
+	glVertexPointer(3, GL_FLOAT, sizeof(Vertex),
+		reinterpret_cast<char *>(0));
+	glTexCoordPointer(4, GL_FLOAT, sizeof(Vertex),
+		reinterpret_cast<char *>(offsetof(Vertex, u0)));
+	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex),
+		reinterpret_cast<char *>(offsetof(Vertex, r)));
 	glDrawArrays(mode, first, count);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);

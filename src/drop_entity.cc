@@ -25,7 +25,9 @@ DropEntity::DropEntity(Context *ctx, Item item)
 	ctx->add_callback(update_func.get());
 	ctx->renderer->add_callback(render_func.get());
 	body->set_size(v2f(.0625, .0625));
-	body->set_callback([this](Body *b, const v3ll &p, int face){this->callback(b, p, face);});
+	body->set_callback([this](Body *b, const v3ll &p, int face){
+		this->callback(b, p, face);
+	});
 	items[0] = item;
 }
 

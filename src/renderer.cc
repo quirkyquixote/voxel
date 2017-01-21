@@ -7,8 +7,45 @@
 #include "block_entity.h"
 #include "board_entity.h"
 
+void populate_obj_vertex_buffer(VertexBuffer *vbo)
+{
+	std::vector<Vertex> a;
+	for (int i = 0; i < MAT_COUNT; ++i) {
+		v2f lt(1, 1);
+		v2f mt[6];
+		int tilted[6];
+		v3f p;
+		texcoord_up(i, mt, tilted);
+		p = v3f(0, 0, 0);
+		vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted);
+		vertices_add(&a, vertices_face_lf, 6, p, lt, mt, tilted);
+		vertices_add(&a, vertices_face_bk, 6, p, lt, mt, tilted);
+		vertices_add(&a, vertices_face_up, 6, p, lt, mt, tilted);
+		vertices_add(&a, vertices_face_rt, 6, p, lt, mt, tilted);
+		vertices_add(&a, vertices_face_ft, 6, p, lt, mt, tilted);
+
+		vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted);
+		vertices_add(&a, vertices_slab_dn, 30, p, lt, mt, tilted);
+
+		vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted);
+		vertices_add(&a, vertices_face_lf, 6, p, lt, mt, tilted);
+		vertices_add(&a, vertices_stairs_dl, 42, p, lt, mt, tilted);
+
+		vertices_add(&a, vertices_pane_z, 36, p, lt, mt, tilted);
+
+		vertices_add(&a, vertices_token_lf, 30, p, lt, mt, tilted);
+
+		vertices_add(&a, vertices_token_bk, 30, p, lt, mt, tilted);
+
+		vertices_add(&a, vertices_token_rt, 30, p, lt, mt, tilted);
+
+		vertices_add(&a, vertices_token_ft, 30, p, lt, mt, tilted);
+	}
+	vbo->update(0, a.data(), a.size());
+}
+
 Renderer::Renderer(Context *ctx)
-	:ctx(ctx)
+	: ctx(ctx)
 {
 	/* Load textures */
 	tex_terrain = texture("data/materials.png");
@@ -26,42 +63,7 @@ Renderer::Renderer(Context *ctx)
 	/* Create vertex_buffers */
 	shard_vertex_buffer = new VertexBuffer(SHARDS_PER_WORLD);
 	obj_vertex_buffer = new VertexBuffer(1);
-
-	{
-		std::vector<Vertex> a;
-		for (int i = 0; i < MAT_COUNT; ++i) {
-			v2f lt(1, 1);
-			v2f mt[6];
-			int tilted[6];
-			v3f p;
-			texcoord_up(i, mt, tilted);
-			p = v3f(0, 0, 0);
-			vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted);
-			vertices_add(&a, vertices_face_lf, 6, p, lt, mt, tilted);
-			vertices_add(&a, vertices_face_bk, 6, p, lt, mt, tilted);
-			vertices_add(&a, vertices_face_up, 6, p, lt, mt, tilted);
-			vertices_add(&a, vertices_face_rt, 6, p, lt, mt, tilted);
-			vertices_add(&a, vertices_face_ft, 6, p, lt, mt, tilted);
-
-			vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted);
-			vertices_add(&a, vertices_slab_dn, 30, p, lt, mt, tilted);
-
-			vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted);
-			vertices_add(&a, vertices_face_lf, 6, p, lt, mt, tilted);
-			vertices_add(&a, vertices_stairs_dl, 42, p, lt, mt, tilted);
-
-			vertices_add(&a, vertices_pane_z, 36, p, lt, mt, tilted);
-
-			vertices_add(&a, vertices_token_lf, 30, p, lt, mt, tilted);
-
-			vertices_add(&a, vertices_token_bk, 30, p, lt, mt, tilted);
-
-			vertices_add(&a, vertices_token_rt, 30, p, lt, mt, tilted);
-
-			vertices_add(&a, vertices_token_ft, 30, p, lt, mt, tilted);
-		}
-		obj_vertex_buffer->update(0, a.data(), a.size());
-	}
+	populate_obj_vertex_buffer(obj_vertex_buffer);
 
 	tone_mapper = new ToneMapper(1. / 30., 16);
 	shader = new Shader("data/shader.vert", "data/shader.frag");
@@ -75,9 +77,7 @@ void Renderer::operator()()
 {
 	glEnable(GL_DEPTH_TEST);
 	render_shards();
-//	render_flowsim(this);
-	render_block_entities();
-	render_roaming_entities();
+	// render_flowsim(this);
 	for (auto f : callback_list)
 		(*f)();
 	ctx->player->render();
@@ -120,59 +120,56 @@ void Renderer::render_string(const char *str)
 	glPopMatrix();
 }
 /*
-void render_flowsim(Renderer *ctx)
-{
-	struct fs_volume *v;
-	struct fs_layer *l;
-	v3ll p;
+   void render_flowsim(Renderer *ctx)
+   {
+   struct fs_volume *v;
+   struct fs_layer *l;
+   v3ll p;
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor4f(1, 0, 0, .5);
-	glBegin(GL_TRIANGLES);
-	list_foreach(v, &flowsim->volumes, volumes) {
-		list_foreach(l, &v->layers, layers) {
-			if (!l->is_top) {
-				array_foreach(p, l->cells) {
-					float y = l->y + 1;
-					glVertex3f(p.x + 1, y, p.z + 1);
-					glVertex3f(p.x + 1, y, p.z);
-					glVertex3f(p.x, y, p.z + 1);
-					glVertex3f(p.x, y, p.z + 1);
-					glVertex3f(p.x + 1, y, p.z);
-					glVertex3f(p.x, y, p.z);
-				}
-			}
-		}
-	}
-	glEnd();
-	glColor4f(0, 0, 1, .5);
-	glBegin(GL_TRIANGLES);
-	list_foreach(v, &flowsim->volumes, volumes) {
-		list_foreach(l, &v->layers, layers) {
-			if (l->is_top) {
-				array_foreach(p, l->cells) {
-					float y = v->top + l->y + .001;
-					glVertex3f(p.x + 1, y, p.z + 1);
-					glVertex3f(p.x + 1, y, p.z);
-					glVertex3f(p.x, y, p.z + 1);
-					glVertex3f(p.x, y, p.z + 1);
-					glVertex3f(p.x + 1, y, p.z);
-					glVertex3f(p.x, y, p.z);
-				}
-			}
-		}
-	}
-	glEnd();
-	glDisable(GL_BLEND);
-}
-*/
+   glEnable(GL_BLEND);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   glColor4f(1, 0, 0, .5);
+   glBegin(GL_TRIANGLES);
+   list_foreach(v, &flowsim->volumes, volumes) {
+   list_foreach(l, &v->layers, layers) {
+   if (!l->is_top) {
+   array_foreach(p, l->cells) {
+   float y = l->y + 1;
+   glVertex3f(p.x + 1, y, p.z + 1);
+   glVertex3f(p.x + 1, y, p.z);
+   glVertex3f(p.x, y, p.z + 1);
+   glVertex3f(p.x, y, p.z + 1);
+   glVertex3f(p.x + 1, y, p.z);
+   glVertex3f(p.x, y, p.z);
+   }
+   }
+   }
+   }
+   glEnd();
+   glColor4f(0, 0, 1, .5);
+   glBegin(GL_TRIANGLES);
+   list_foreach(v, &flowsim->volumes, volumes) {
+   list_foreach(l, &v->layers, layers) {
+   if (l->is_top) {
+   array_foreach(p, l->cells) {
+   float y = v->top + l->y + .001;
+   glVertex3f(p.x + 1, y, p.z + 1);
+   glVertex3f(p.x + 1, y, p.z);
+   glVertex3f(p.x, y, p.z + 1);
+   glVertex3f(p.x, y, p.z + 1);
+   glVertex3f(p.x + 1, y, p.z);
+   glVertex3f(p.x, y, p.z);
+   }
+   }
+   }
+   }
+   glEnd();
+   glDisable(GL_BLEND);
+   }
+   */
 
 void Renderer::render_item(int obj, int mat, GLfloat alpha)
 {
-	//glEnable(GL_TEXTURE_2D);
-	//glTexCoord2f(0.5, 0.5);
-
 	if (mat >= MAT_COUNT)
 		mat = 0;
 
@@ -223,7 +220,6 @@ void Renderer::render_item(int obj, int mat, GLfloat alpha)
 		obj_vertex_buffer->disable();
 	}
 	shader->disable();
-	//glDisable(GL_TEXTURE_2D);
 }
 
 void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
@@ -259,14 +255,16 @@ void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 			if (s.num > 0) {
 				glColor4ub(0, 0, 0, alpha);
 				glPushMatrix();
-				glTranslatef(.5 / side - .0625, 0, .5 / side - .0625); /*
+				glTranslatef(.5 / side - .0625, 0, .5 / side - .0625);
+#if 0
 				if (s.obj == OBJ_TOKEN) {
 					v3f r = ctx->renderer->get_cam()->get_r();
 					glTranslatef(.25 / side, .25 / side, .25 / side);
 					glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
 					glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
 					glTranslatef(-.25 / side, -.25 / side, -.25 / side);
-				}*/
+				}
+#endif
 				glScalef(.125, .125, .125);
 				render_item(s.obj, s.mat, alpha);
 				glPopMatrix();
@@ -324,14 +322,16 @@ void Renderer::render_board(const std::vector<Item> &inv, const v3ll &p)
 			if (s.num > 0) {
 				glColor4ub(0, 0, 0, alpha);
 				glPushMatrix();
-				glTranslatef(.5 / side - .06, 0, .5 / side - .06); /*
+				glTranslatef(.5 / side - .06, 0, .5 / side - .06);
+#if 0
 				if (s.obj == OBJ_TOKEN) {
 					v3f r = ctx->renderer->get_cam()->get_r();
 					glTranslatef(.25 / side, .25 / side, .25 / side);
 					glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
 					glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
 					glTranslatef(-.25 / side, -.25 / side, -.25 / side);
-				}*/
+				}
+#endif
 				glScalef(.12, .12, .12);
 				render_item(s.obj, s.mat, alpha);
 				glPopMatrix();
@@ -352,30 +352,6 @@ void Renderer::render_board(const std::vector<Item> &inv, const v3ll &p)
 		}
 	}
 	glDisable(GL_BLEND);
-}
-
-void Renderer::render_block_entities()
-{/*
-	v3f p = ctx->player->get_body()->get_p();
-	box3ll bb;
-	bb.x0 = floor(p.x - 4);
-	bb.y0 = floor(p.y - 4);
-	bb.z0 = floor(p.z - 4);
-	bb.x1 = floor(p.x + 4);
-	bb.y1 = floor(p.y + 4);
-	bb.z1 = floor(p.z + 4);
-
-	for (auto &p : bb) {
-		Entity *e = ctx->world->get_data(p);
-		if (e != NULL)
-			e->render();
-	}*/
-}
-
-void Renderer::render_roaming_entities()
-{/*
-	for (auto &e : ctx->entities)
-		e->render();*/
 }
 
 void Renderer::render_commandline()
@@ -540,7 +516,8 @@ void Renderer::update_face_ft(std::vector<Vertex> *buf,
 	vertices_add(buf, vertices_face_ft, 6, v3f(x, y, z), lt, mt, tilted);
 }
 
-void Renderer::update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z)
+void Renderer::update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y,
+		int64_t z)
 {
 	int8_t s, sl, sd, sb, sr, su, sf;
 	v2f mt[6];
@@ -745,7 +722,8 @@ void Renderer::update_shard(int id, int64_t x0, int64_t y0, int64_t z0)
 
 void Renderer::update_camera()
 {
-	cam->set_fovy((cam->get_fovy() + (ctx->player->get_run() ? 70.f : 60.f)) * 0.5);
+	float fovy = ctx->player->get_run() ? 70.f : 60.f;
+	cam->set_fovy((cam->get_fovy() + fovy) * 0.5);
 	cam->set_p(ctx->player->get_body()->get_p() + v3f(0, .8, 0));
 	cam->set_r(ctx->player->get_body()->get_r());
 	v3ll p(cam->get_p());
