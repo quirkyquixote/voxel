@@ -51,6 +51,14 @@ Renderer::Renderer(Context *ctx)
 			vertices_add(&a, vertices_stairs_dl, 42, p, lt, mt, tilted);
 
 			vertices_add(&a, vertices_pane_z, 36, p, lt, mt, tilted);
+
+			vertices_add(&a, vertices_token_lf, 30, p, lt, mt, tilted);
+
+			vertices_add(&a, vertices_token_bk, 30, p, lt, mt, tilted);
+
+			vertices_add(&a, vertices_token_rt, 30, p, lt, mt, tilted);
+
+			vertices_add(&a, vertices_token_ft, 30, p, lt, mt, tilted);
 		}
 		obj_vertex_buffer->update(0, a.data(), a.size());
 	}
@@ -183,35 +191,35 @@ void Renderer::render_item(int obj, int mat, GLfloat alpha)
 	glActiveTexture(GL_TEXTURE0);
 	if (obj == OBJ_BLOCK) {
 		obj_vertex_buffer->enable();
-		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 0, 36);
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 282 * mat + 0, 36);
 		obj_vertex_buffer->disable();
 	} else if (obj == OBJ_SLAB) {
 		obj_vertex_buffer->enable();
-		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 282 * mat + 36, 36);
 		obj_vertex_buffer->disable();
 	} else if (obj == OBJ_STAIRS) {
 		obj_vertex_buffer->enable();
-		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 72, 54);
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 282 * mat + 72, 54);
 		obj_vertex_buffer->disable();
 	} else if (obj == OBJ_PANE) {
 		obj_vertex_buffer->enable();
-		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 126, 36);
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 282 * mat + 126, 36);
 		obj_vertex_buffer->disable();
 	} else if (obj == OBJ_TOKEN_LF) {
 		obj_vertex_buffer->enable();
-		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 282 * mat + 162, 36);
 		obj_vertex_buffer->disable();
 	} else if (obj == OBJ_TOKEN_BK) {
 		obj_vertex_buffer->enable();
-		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 282 * mat + 192, 36);
 		obj_vertex_buffer->disable();
 	} else if (obj == OBJ_TOKEN_RT) {
 		obj_vertex_buffer->enable();
-		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 282 * mat + 222, 36);
 		obj_vertex_buffer->disable();
 	} else if (obj == OBJ_TOKEN_FT) {
 		obj_vertex_buffer->enable();
-		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 282 * mat + 252, 36);
 		obj_vertex_buffer->disable();
 	}
 	shader->disable();

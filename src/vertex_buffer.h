@@ -87,6 +87,11 @@ extern VertexDesc vertices_pane_rt[];
 extern VertexDesc vertices_pane_bk[];
 extern VertexDesc vertices_pane_ft[];
 
+extern VertexDesc vertices_token_lf[];
+extern VertexDesc vertices_token_bk[];
+extern VertexDesc vertices_token_rt[];
+extern VertexDesc vertices_token_ft[];
+
 static inline void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf,
 		size_t len, v3f p, v2f t1, const v2f *t2, const int *tilted)
 {
