@@ -28,7 +28,6 @@ struct Vertex {
 
 struct VertexDesc {
 	GLfloat x, y, z;
-	GLfloat u, v;
 	GLfloat r, g, b;
 	int face;
 };
@@ -103,13 +102,20 @@ static inline void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf,
 		v.z = buf[i].z + p.z;
 		v.u0 = t1.x;
 		v.v0 = t1.y;
-		if (tilted[buf[i].face]) {
-		v.u1 = t2[buf[i].face].x + buf[i].v / 32.;
-		v.v1 = t2[buf[i].face].y + buf[i].u / 32.;
-		} else {
-		v.u1 = t2[buf[i].face].x + buf[i].u / 32.;
-		v.v1 = t2[buf[i].face].y + buf[i].v / 32.;
+		if (buf[i].face == FACE_LF || buf[i].face == FACE_RT) {
+			v.u1 = buf[i].z;
+			v.v1 = buf[i].y;
+		} else if (buf[i].face == FACE_DN || buf[i].face == FACE_UP) {
+			v.u1 = buf[i].x;
+			v.v1 = buf[i].z;
+		} else if (buf[i].face == FACE_BK || buf[i].face == FACE_FT) {
+			v.u1 = buf[i].x;
+			v.v1 = buf[i].y;
 		}
+		if (tilted[buf[i].face])
+			std::swap(v.u1, v.v1);
+		v.u1 = t2[buf[i].face].x + v.u1 / 32.;
+		v.v1 = t2[buf[i].face].y + v.v1 / 32.;
 		v.r = buf[i].r * 255;
 		v.g = buf[i].g * 255;
 		v.b = buf[i].b * 255;
