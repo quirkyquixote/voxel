@@ -7,9 +7,9 @@
 
 #include "entity.h"
 #include "physics.h"
-#include "list.h"
+#include "ptr_list.h"
 
-class RoamingEntity : public Entity, public Node {
+class RoamingEntity : public Entity, public PtrNode {
  public:
 	RoamingEntity(Context *ctx, int capacity);
 	virtual ~RoamingEntity();

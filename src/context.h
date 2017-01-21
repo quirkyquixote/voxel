@@ -37,8 +37,8 @@ class Context {
 	Space *space;
 	Lighting *light;
 	PlayerEntity *player;
-	List<RoamingEntity> entities;
-	List<Callback> callback_list;
+	PtrList<RoamingEntity> entities;
+	PtrList<Callback> callback_list;
 	char mode;
 	int chunks_per_tick;
 	uint64_t tick;

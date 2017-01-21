@@ -9,14 +9,14 @@
 #include "v2.h"
 #include "v3.h"
 #include "box3.h"
-#include "list.h"
+#include "ptr_list.h"
 
 class World;
 class Space;
 class Body;
 struct Query;
 
-class Body : public Node {
+class Body : public PtrNode {
 	friend class Space;
 
  public:
@@ -80,7 +80,7 @@ class Space {
 	float gravity;
 	float terminal_speed;
 	World *world;
-	List<Body> bodies;
+	PtrList<Body> bodies;
 	std::vector<box3f> geom[256];
 
 	void move_xpos(Body *b);

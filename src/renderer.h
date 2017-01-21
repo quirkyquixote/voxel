@@ -51,7 +51,7 @@ class Renderer {
 	Camera *cam;
 	GLuint tex_terrain;
 	GLuint tex_font;
-	List<Callback> callback_list;
+	PtrList<Callback> callback_list;
 };
 
 #endif  // SRC_RENDERER_H_

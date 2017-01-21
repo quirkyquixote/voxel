@@ -5,9 +5,9 @@
 
 #include <functional>
 
-#include "list.h"
+#include "ptr_list.h"
 
-class Callback : public Node {
+class Callback : public PtrNode {
  public:
 	Callback(const std::function<void(void)> &func) : func(func) { }
 	~Callback() { }
