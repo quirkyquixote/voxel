@@ -41,7 +41,7 @@ Context::Context(const char *dir)
 	ml.reset(new MainLoop(30));
 	ml->set_event_callback([this](const SDL_Event &e){event(e);});
 	ml->set_update_callback([this](){update();});
-	ml->set_window(new Window("voxel", 0, 0, 1280, 768, 0));
+	ml->set_window(new Window("voxel", 0, 0, 1920, 1080, 0));
 
 	/* Create renderer */
 	renderer.reset(new Renderer(this));

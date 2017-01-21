@@ -58,7 +58,7 @@ Renderer::Renderer(Context *ctx)
 	/* Setup camera */
 	cam = new Camera();
 	cam->set_max_distance(1024);
-	cam->set_aspect_ratio(1280.0 / 768.0);
+	cam->set_aspect_ratio(1920.0 / 1080.0);
 
 	/* Create vertex_buffers */
 	shard_vertex_buffer = new VertexBuffer(SHARDS_PER_WORLD);
