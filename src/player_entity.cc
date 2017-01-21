@@ -169,6 +169,9 @@ void PlayerEntity::use_board(std::vector<Item> *inv)
 		if (move.y0) {
 			if (s2.num == 0)
 				return;
+			if (s2.obj == OBJ_TOKEN_RT || s2.obj == OBJ_TOKEN_BK
+					|| s2.obj == OBJ_TOKEN_FT)
+				s2.obj = OBJ_TOKEN_LF;
 			if (inventory_add(&items, Item(s2.obj, s2.mat, 1)) > 0)
 				s2.num = 0;
 		} else {
