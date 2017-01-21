@@ -250,6 +250,31 @@ void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 				render_item(s.obj, s.mat, alpha);
 				glPopMatrix();
 			}
+			glPopMatrix();
+			++i;
+		}
+	}
+	glDisable(GL_BLEND);
+}
+
+void Renderer::render_inventory_count(const std::vector<Item> &inv, const v3ll &p)
+{
+	int i, x, z;
+	int side = sqrt(inv.size());
+	Item s;
+
+	GLfloat d = dist(ctx->player->get_body()->get_p(), v3f(p));
+	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	i = 0;
+	for (x = 0; x < side; ++x) {
+		for (z = 0; z < side; ++z) {
+			glColor4ub(0, 0, 0, alpha / 2);
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glTranslatef(p.x + (GLfloat)x / side, p.y + 1.0001, p.z + (GLfloat)z / side);
+			Item s = inv[i];
 			if (s.num > 1) {
 				glColor4ub(255, 255, 255, alpha);
 				glMatrixMode(GL_MODELVIEW);
@@ -261,6 +286,42 @@ void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 				char buf[3];
 				snprintf(buf, sizeof(buf), "%02d", s.num);
 				render_string(buf);
+				glPopMatrix();
+			}
+			glPopMatrix();
+			++i;
+		}
+	}
+	glDisable(GL_BLEND);
+}
+
+void Renderer::render_inventory_state(const std::vector<Item> &inv, const v3ll &p)
+{
+	int i, x, z;
+	int side = sqrt(inv.size());
+	Item s;
+
+	GLfloat d = dist(ctx->player->get_body()->get_p(), v3f(p));
+	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	i = 0;
+	for (x = 0; x < side; ++x) {
+		for (z = 0; z < side; ++z) {
+			glColor4ub(0, 0, 0, alpha / 2);
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			glTranslatef(p.x + (GLfloat)x / side, p.y + 1.0001, p.z + (GLfloat)z / side);
+			Item s = inv[i];
+			if (s.num > 0) {
+				glColor4ub(255, 255, 255, alpha);
+				glMatrixMode(GL_MODELVIEW);
+				glPushMatrix();
+				glTranslatef(.5 / side, .5 / side, .5 / side);
+				glRotatef(180.0 * cam->get_r().y / M_PI, 0, -1, 0);
+				glRotatef(180.0 * cam->get_r().x / M_PI, 1, 0, 0);
+				glScalef(.05, .05, .05);
+				render_string((s.num & 2) ? "ON" : "OFF");
 				glPopMatrix();
 			}
 			glPopMatrix();

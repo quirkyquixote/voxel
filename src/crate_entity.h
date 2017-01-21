@@ -20,9 +20,7 @@ class CrateEntity : public BlockEntity {
 	const char *get_name() { return "crate"; }
 
  private:
-	std::unique_ptr<Callback> render_func;
-
-	void render();
+	std::unique_ptr<Callback> render_callback;
 };
 
 #endif  // SRC_CRATE_ENTITY_H_

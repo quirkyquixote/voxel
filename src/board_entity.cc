@@ -20,6 +20,7 @@ BoardEntity::BoardEntity(Context *ctx) : BlockEntity(ctx, 64)
 	}));
 	render_func.reset(new Callback([ctx,this](){
 		ctx->renderer->render_inventory(this->items, this->p);
+		ctx->renderer->render_inventory_state(this->items, this->p);
 	}));
 	ctx->add_callback(update_func.get());
 	ctx->renderer->add_callback(render_func.get());
