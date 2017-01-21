@@ -78,8 +78,8 @@ void Renderer::operator()()
 //	render_flowsim(this);
 	render_block_entities();
 	render_roaming_entities();
-	for (auto &f : callback_list)
-		f();
+	for (auto f : callback_list)
+		(*f)();
 	ctx->player->render();
 	glDisable(GL_DEPTH_TEST);
 	render_commandline();

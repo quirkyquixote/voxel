@@ -36,7 +36,7 @@ template<typename T> class List : public Node {
 		~iterator() { }
 		void operator++() { node = next; next = node->next; };
 		bool operator!=(const iterator &rhs) const { return node != rhs.node; }
-		T& operator*() { return *static_cast<T*>(node); }
+		T* operator*() { return static_cast<T*>(node); }
 	 private:
 		Node *node;
 		Node *next;

@@ -378,8 +378,8 @@ void Context::update()
 	player->update();
 	renderer->update_camera();
 	update_chunks();
-	for (auto &f : callback_list)
-		f();
+	for (auto f : callback_list)
+		(*f)();
 	++tick;
 }
 void Context::event(const SDL_Event &e)
