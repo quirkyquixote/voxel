@@ -5,13 +5,15 @@
 
 #include "block_entity.h"
 
+#include <memory>
+
+#include "context.h"
+
 class BoardEntity : public BlockEntity {
  public:
 	explicit BoardEntity(Context *ctx);
 	~BoardEntity();
 
-	void update();
-	void render();
 	sz_Tag *save();
 	void load(sz_Tag *val);
 	bool use(PlayerEntity *player);
@@ -19,8 +21,11 @@ class BoardEntity : public BlockEntity {
 	const char *get_name() { return "board"; }
 
  private:
+	std::unique_ptr<Callback> update_func;
+	std::unique_ptr<Callback> render_func;
 	unsigned char tmp[64];
 
+	void update();
 	void test(const v2s &p, int i, int min, int max);
 };
 

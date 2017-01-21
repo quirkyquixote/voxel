@@ -46,7 +46,7 @@ Context::Context(const char *dir)
 
 	/* Create renderer */
 	renderer = new Renderer(this);
-	ml->get_window()->set_render_callback(*renderer);
+	ml->get_window()->set_render_callback([this](){(*this->renderer)();});
 
 	/* Initialize Tcl */
 	tcl = Tcl_CreateInterp();
@@ -370,8 +370,6 @@ void Context::update_chunks()
 
 void Context::update_entities()
 {
-	for (auto &e : entities)
-		e->update();
 	entities.remove_if([](RoamingEntity *e){ return e->get_die(); });
 }
 
@@ -385,6 +383,8 @@ void Context::update()
 	player->update();
 	renderer->update_camera();
 	update_chunks();
+	for (auto &f : callback_list)
+		f();
 	update_entities();
 	++tick;
 }

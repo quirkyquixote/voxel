@@ -8,6 +8,7 @@
 #include "shader.h"
 #include "camera.h"
 #include "media.h"
+#include "callback.h"
 
 class Context;
 
@@ -38,6 +39,8 @@ class Renderer {
 	void update_shard(int id, int64_t x0, int64_t y0, int64_t z0);
 	void update_camera();
 
+	inline void add_callback(Callback *cb) { callback_list.append(cb); }
+
  private:
 	Context *ctx;
 	VertexBuffer *shard_vertex_buffer;
@@ -47,6 +50,7 @@ class Renderer {
 	Camera *cam;
 	GLuint tex_terrain;
 	GLuint tex_font;
+	List<Callback> callback_list;
 };
 
 #endif  // SRC_RENDERER_H_

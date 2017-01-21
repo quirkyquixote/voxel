@@ -19,6 +19,7 @@
 #include "tcl_commands.h"
 #include "roaming_entity.h"
 #include "player_entity.h"
+#include "callback.h"
 
 enum {
 	MODE_ROAM,
@@ -37,6 +38,7 @@ class Context {
 	Lighting *light;
 	PlayerEntity *player;
 	std::list<RoamingEntity*> entities;
+	List<Callback> callback_list;
 	char mode;
 	int chunks_per_tick;
 	uint64_t tick;
@@ -52,6 +54,8 @@ class Context {
 
 	bool load_all();
 	void save_all();
+
+	inline void add_callback(Callback *cb) { callback_list.append(cb); }
 
  private:
 	void update_chunks();

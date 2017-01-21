@@ -69,6 +69,8 @@ void Renderer::operator()()
 //	render_flowsim(this);
 	render_block_entities();
 	render_roaming_entities();
+	for (auto &f : callback_list)
+		f();
 	ctx->player->render();
 	glDisable(GL_DEPTH_TEST);
 	render_commandline();
@@ -269,7 +271,7 @@ void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 }
 
 void Renderer::render_block_entities()
-{
+{/*
 	v3f p = ctx->player->get_body()->get_p();
 	box3ll bb;
 	bb.x0 = floor(p.x - 4);
@@ -283,13 +285,13 @@ void Renderer::render_block_entities()
 		Entity *e = ctx->world->get_data(p);
 		if (e != NULL)
 			e->render();
-	}
+	}*/
 }
 
 void Renderer::render_roaming_entities()
-{
+{/*
 	for (auto &e : ctx->entities)
-		e->render();
+		e->render();*/
 }
 
 void Renderer::render_commandline()

@@ -4,15 +4,14 @@
 
 #include "context.h"
 
-CrateEntity::CrateEntity(Context *ctx) : BlockEntity(ctx, 16)
+CrateEntity::CrateEntity(Context *ctx)
+	: BlockEntity(ctx, 16),
+	render_func(new Callback([this](){this->render();}))
 {
+	ctx->renderer->add_callback(render_func.get());
 }
 
 CrateEntity::~CrateEntity()
-{
-}
-
-void CrateEntity::update()
 {
 }
 

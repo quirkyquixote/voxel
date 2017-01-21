@@ -20,6 +20,10 @@ void DropEntity::callback(Body *b, const v3ll &cp, int face)
 DropEntity::DropEntity(Context *ctx, Item item)
 	: RoamingEntity(ctx, 1)
 {
+	update_func.reset(new Callback([this](){this->update();}));
+	render_func.reset(new Callback([this](){this->render();}));
+	ctx->add_callback(update_func.get());
+	ctx->renderer->add_callback(render_func.get());
 	body->set_size(v2f(.0625, .0625));
 	body->set_callback([this](Body *b, const v3ll &p, int face){this->callback(b, p, face);});
 	items[0] = item;

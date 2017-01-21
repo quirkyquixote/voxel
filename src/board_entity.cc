@@ -15,6 +15,14 @@ enum {
 
 BoardEntity::BoardEntity(Context *ctx) : BlockEntity(ctx, 64)
 {
+	update_func.reset(new Callback([ctx,this](){
+		this->update();
+	}));
+	render_func.reset(new Callback([ctx,this](){
+		ctx->renderer->render_inventory(this->items, this->p);
+	}));
+	ctx->add_callback(update_func.get());
+	ctx->renderer->add_callback(render_func.get());
 }
 
 BoardEntity::~BoardEntity()
@@ -85,11 +93,6 @@ void BoardEntity::update()
 	}
 	for (i = 0; i < 64; ++i)
 		items[i].num = tmp[i];
-}
-
-void BoardEntity::render()
-{
-	ctx->renderer->render_inventory(items, p);
 }
 
 void BoardEntity::load(sz_Tag *tag)
