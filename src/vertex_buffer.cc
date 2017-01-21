@@ -61,6 +61,13 @@ void populate_material_texcoord_table()
 	WOOD_TC(MAT_WOOD5, 12);
 	WOOD_TC(MAT_WOOD6, 13);
 	WOOD_TC(MAT_WOOD7, 14);
+	TC(MAT_RUNE_O, 7, 15, 0, 15, 7, 15);
+	TC(MAT_RUNE_K, 7, 15, 1, 15, 7, 15);
+	TC(MAT_RUNE_A, 7, 15, 2, 15, 7, 15);
+	TC(MAT_RUNE_N, 7, 15, 3, 15, 7, 15);
+	TC(MAT_RUNE_J, 7, 15, 4, 15, 7, 15);
+	TC(MAT_RUNE_C, 7, 15, 5, 15, 7, 15);
+	TC(MAT_RUNE_E, 7, 15, 6, 15, 7, 15);
 };
 
 struct VertexDesc vertices_face_dn[] = {

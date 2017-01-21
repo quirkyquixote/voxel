@@ -17,6 +17,11 @@ class BoardEntity : public BlockEntity {
 	bool use(PlayerEntity *player);
 
 	const char *get_name() { return "board"; }
+
+ private:
+	unsigned char tmp[64];
+
+	void test(const v2s &p, int i, int min, int max);
 };
 
 #endif  // SRC_BOARD_ENTITY_H_

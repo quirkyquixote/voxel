@@ -13,6 +13,7 @@ const char *obj_names[256] = {
 	[OBJ_STAIRS] = "stairs",
 	[OBJ_PANE] = "pane",
 	[OBJ_FLUID] = "fluid",
+	[OBJ_TOKEN] = "token",
 };
 
 const char *mat_names[256] = {
@@ -144,6 +145,13 @@ const char *mat_names[256] = {
 	[MAT_WOOD7_PIPE] = "wood7_pipe",
 	[MAT_WOOD7_LOG] = "wood7_log",
 	[MAT_WOOD7_BOARD] = "wood7_board",
+	[MAT_RUNE_O] = "rune_o",
+	[MAT_RUNE_K] = "rune_k",
+	[MAT_RUNE_A] = "rune_a",
+	[MAT_RUNE_N] = "rune_n",
+	[MAT_RUNE_J] = "rune_j",
+	[MAT_RUNE_C] = "rune_c",
+	[MAT_RUNE_E] = "rune_e",
 };
 
 const char *shape_names[256] = {

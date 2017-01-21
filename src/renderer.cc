@@ -194,6 +194,10 @@ void Renderer::render_item(int obj, int mat, GLfloat alpha)
 		obj_vertex_buffer->enable();
 		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 126, 36);
 		obj_vertex_buffer->disable();
+	} else if (obj == OBJ_TOKEN) {
+		obj_vertex_buffer->enable();
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		obj_vertex_buffer->disable();
 	}
 	shader->disable();
 	//glDisable(GL_TEXTURE_2D);
@@ -232,8 +236,15 @@ void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 			if (s.num > 0) {
 				glColor4ub(0, 0, 0, alpha);
 				glPushMatrix();
-				glTranslatef(.25 / side, 0, .25 / side);
-				glScalef(.5 / side, .5 / side, .5 / side);
+				glTranslatef(.5 / side - .0625, 0, .5 / side - .0625); /*
+				if (s.obj == OBJ_TOKEN) {
+					v3f r = ctx->renderer->get_cam()->get_r();
+					glTranslatef(.25 / side, .25 / side, .25 / side);
+					glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
+					glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
+					glTranslatef(-.25 / side, -.25 / side, -.25 / side);
+				}*/
+				glScalef(.125, .125, .125);
 				render_item(s.obj, s.mat, alpha);
 				glPopMatrix();
 			}

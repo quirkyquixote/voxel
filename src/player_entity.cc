@@ -254,10 +254,13 @@ void PlayerEntity::use_tool()
 			else
 				ctx->world->set_block(p, SHAPE_PANE_Z, s.mat);
 		}
-		/*	} else if (s.obj == OBJ_FLUID) {
-			flowsim_add(flowsim, p, 1);*/
-}
---s.num;
+	} else if (s.obj == OBJ_FLUID) {
+		/*	flowsim_add(flowsim, p, 1);*/
+	} else {
+		/* Not a placeable object */
+		return;
+	}
+	--s.num;
 }
 
 void PlayerEntity::render()
