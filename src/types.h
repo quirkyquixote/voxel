@@ -12,6 +12,10 @@ enum {
 	OBJ_STAIRS,	/* stairs */
 	OBJ_PANE,	/* thin pane in the middle */
 	OBJ_FLUID,	/* object for flowsims (debug only) */
+	OBJ_TOKEN_LF,	/* A bit of something */
+	OBJ_TOKEN_BK,	/* A bit of something */
+	OBJ_TOKEN_RT,	/* A bit of something */
+	OBJ_TOKEN_FT,	/* A bit of something */
 	OBJ_COUNT
 };
 
@@ -144,6 +148,13 @@ enum {
 	MAT_WOOD7_PIPE,
 	MAT_WOOD7_LOG,
 	MAT_WOOD7_BOARD,
+	MAT_RUNE_O = 0xF0,/* Signal generator */
+	MAT_RUNE_K,	/* boolean "and" */
+	MAT_RUNE_A,	/* boolean "or" */
+	MAT_RUNE_N,	/* boolean "not" */
+	MAT_RUNE_J,	/* boolean "xor" */
+	MAT_RUNE_C,	/* boolean "->" */
+	MAT_RUNE_E,	/* boolean "<->" */
 	MAT_COUNT,
 };
 

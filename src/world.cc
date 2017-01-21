@@ -47,6 +47,9 @@ void World::set_block(const v3ll &p, int shape, int mat)
 	box3ll bb;
 	set_shape(p, shape);
 	set_mat(p, mat);
+	Entity *e = get_data(p);
+	if (e != NULL)
+		delete e;
 	if (block_traits[mat][shape].entity != NULL) {
 		Entity *e = block_traits[mat][shape].entity(ctx);
 		e->set_p(p);

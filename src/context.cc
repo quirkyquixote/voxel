@@ -35,7 +35,7 @@ Context::Context(const char *dir)
 	: dir(dir)
 {
 	world = new World(this);
-	//prof_mgr = profile_manager();
+	// prof_mgr = profile_manager();
 	chunks_per_tick = 1;
 
 	/* Setup main loop */
@@ -46,7 +46,7 @@ Context::Context(const char *dir)
 
 	/* Create renderer */
 	renderer = new Renderer(this);
-	ml->get_window()->set_render_callback(*renderer);
+	ml->get_window()->set_render_callback([this](){(*this->renderer)();});
 
 	/* Initialize Tcl */
 	tcl = Tcl_CreateInterp();
@@ -73,7 +73,7 @@ Context::Context(const char *dir)
 	light = new Lighting(world);
 
 	/* Initialize flowsim */
-	//flowsim = flowsim(world);
+	// flowsim = flowsim(world);
 
 	/* Create player */
 	player = new PlayerEntity(this);
@@ -368,13 +368,6 @@ void Context::update_chunks()
 //		log_info("update %d of %zd chunks (max: %d)", i, out_of_date.size(), chunks_per_tick);
 }
 
-void Context::update_entities()
-{
-	for (auto &e : entities)
-		e->update();
-	entities.remove_if([](RoamingEntity *e){ return e->get_die(); });
-}
-
 void Context::update()
 {
 	if (!ml->get_window()->has_mouse_focus())
@@ -385,7 +378,8 @@ void Context::update()
 	player->update();
 	renderer->update_camera();
 	update_chunks();
-	update_entities();
+	for (auto f : callback_list)
+		(*f)();
 	++tick;
 }
 void Context::event(const SDL_Event &e)

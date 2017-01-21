@@ -18,8 +18,6 @@ class Entity {
 
 	virtual ~Entity() { }
 
-	virtual void update() { }
-	virtual void render() { }
 	virtual sz_Tag *save();
 	virtual void load(sz_Tag *val);
 	virtual bool use(PlayerEntity *player) { return false; }

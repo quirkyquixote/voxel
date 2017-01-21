@@ -12,20 +12,20 @@
 #define Z_COL .6
 #define B_COL .4
 
-#define TC(mat,a0,b0,a1,b1,a2,b2)\
+#define TC(mat, a0, b0, a1, b1, a2, b2)\
 do {\
 	texcoord_from_mat[mat][0] = v2f(a0 / 32., b0 / 32.);\
 	texcoord_from_mat[mat][1] = v2f(a1 / 32., b1 / 32.);\
 	texcoord_from_mat[mat][2] = v2f(a2 / 32., b2 / 32.);\
 } while (0)
 
-#define COMMON_TC(mat,y) \
+#define COMMON_TC(mat, y) \
 	TC(mat##_CRATE, 16, y, 17, y, 0, y);\
 	TC(mat##_BENCH, 18, y, 19, y, 0, y);\
 	TC(mat##_PIPE, 20, y, 21, y, 21, y);\
 	TC(mat##_BOARD, 22, y, 23, y, 0, y)
 
-#define STONE_TC(mat,y)\
+#define STONE_TC(mat, y)\
 	TC(mat, 0, y, 0, y, 0, y);\
 	TC(mat##_COBBLE, 1, y, 1, y, 1, y);\
 	TC(mat##_LBRICK, 6, y, 7, y, 8, y);\
@@ -36,7 +36,7 @@ do {\
 	TC(mat##_SAND, 15, y, 15, y, 16, y);\
 	COMMON_TC(mat, y)
 
-#define WOOD_TC(mat,y)\
+#define WOOD_TC(mat, y)\
 	TC(mat, 1, y, 1, y, 1, y);\
 	TC(mat##_LOG, 3, y, 2, y, 2, y);\
 	COMMON_TC(mat, y)
@@ -61,6 +61,13 @@ void populate_material_texcoord_table()
 	WOOD_TC(MAT_WOOD5, 12);
 	WOOD_TC(MAT_WOOD6, 13);
 	WOOD_TC(MAT_WOOD7, 14);
+	TC(MAT_RUNE_O, 7, 15, 0, 15, 7, 15);
+	TC(MAT_RUNE_K, 7, 15, 1, 15, 7, 15);
+	TC(MAT_RUNE_A, 7, 15, 2, 15, 7, 15);
+	TC(MAT_RUNE_N, 7, 15, 3, 15, 7, 15);
+	TC(MAT_RUNE_J, 7, 15, 4, 15, 7, 15);
+	TC(MAT_RUNE_C, 7, 15, 5, 15, 7, 15);
+	TC(MAT_RUNE_E, 7, 15, 6, 15, 7, 15);
 };
 
 struct VertexDesc vertices_face_dn[] = {
@@ -1005,6 +1012,138 @@ struct VertexDesc vertices_pane_ft[] = {
 	{ 0., 1., .9375, 1., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
 };
 
+struct VertexDesc vertices_token_lf[] = {
+	{ 1., .5, 1., 0., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 1., .5, 0., 1., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 1., 0., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 1., 0., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 1., .5, 0., 1., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 0., 1., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., 0., 0., 0., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., 0., 1., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 0., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 0., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., 0., 1., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 1., 1., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 1., 0., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 1., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 1., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 0., 1., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 0., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 0., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 0., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 0., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 0., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 0., 1., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 1., 0., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., 0., 1., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 1., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 1., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., 0., 1., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 1., 1., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+};
+
+struct VertexDesc vertices_token_bk[] = {
+	{ 1., .5, 1., 1., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 1., .5, 0., 1., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 1., 0., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 1., 0., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 1., .5, 0., 1., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 0., 0., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., 0., 0., 0., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., 0., 1., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 0., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 0., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., 0., 1., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 1., 1., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 1., 0., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 1., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 1., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 0., 1., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 0., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 0., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 0., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 0., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 0., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 0., 1., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 1., 0., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., 0., 1., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 1., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 1., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., 0., 1., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 1., 1., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+};
+
+struct VertexDesc vertices_token_rt[] = {
+	{ 1., .5, 1., 1., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 1., .5, 0., 0., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 1., 1., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 1., 1., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 1., .5, 0., 0., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 0., 0., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., 0., 0., 0., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., 0., 1., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 0., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 0., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., 0., 1., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 1., 1., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 1., 0., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 1., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 1., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 0., 1., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 0., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 0., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 0., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 0., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 0., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 0., 1., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 1., 0., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., 0., 1., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 1., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 1., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., 0., 1., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 1., 1., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+};
+
+struct VertexDesc vertices_token_ft[] = {
+	{ 1., .5, 1., 0., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 1., .5, 0., 0., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 1., 1., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 1., 1., 0., T_COL, T_COL, T_COL, FACE_UP },
+	{ 1., .5, 0., 0., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., .5, 0., 1., 1., T_COL, T_COL, T_COL, FACE_UP },
+	{ 0., 0., 0., 0., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., 0., 1., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 0., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 0., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., 0., 1., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 0., .5, 1., 1., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 1., 0., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 1., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 1., 0., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 1., .5, X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., .5, 0., 1., 0., X_COL, X_COL, X_COL, FACE_LF },
+	{ 1., 0., 0., 0., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 0., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 0., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 0., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 0., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 0., 1., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., 0., 1., 0., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., 0., 1., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 1., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 0., .5, 1., 0., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., 0., 1., 1., .5, Z_COL, Z_COL, Z_COL, FACE_BK },
+	{ 1., .5, 1., 1., 0., Z_COL, Z_COL, Z_COL, FACE_BK },
+};
+
 VertexBuffer::VertexBuffer(int vbo_count) : vbo_count(vbo_count)
 {
 	vbo_names = new GLuint[vbo_count];
@@ -1027,7 +1166,8 @@ void VertexBuffer::enable()
 	assert(glGetError() == GL_NO_ERROR);
 }
 
-void VertexBuffer::draw_slice(GLenum mode, size_t buf, size_t first, size_t count)
+void VertexBuffer::draw_slice(GLenum mode, size_t buf, size_t first,
+		size_t count)
 {
 	assert(buf < vbo_count);
 	assert(first + count <= vbo_sizes[buf]);
@@ -1035,9 +1175,12 @@ void VertexBuffer::draw_slice(GLenum mode, size_t buf, size_t first, size_t coun
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
-	glVertexPointer(3, GL_FLOAT, sizeof(Vertex), (char *)0);
-	glTexCoordPointer(4, GL_FLOAT, sizeof(Vertex), (char *)offsetof(Vertex, u0));
-	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex), (char *)offsetof(Vertex, r));
+	glVertexPointer(3, GL_FLOAT, sizeof(Vertex),
+		reinterpret_cast<char *>(0));
+	glTexCoordPointer(4, GL_FLOAT, sizeof(Vertex),
+		reinterpret_cast<char *>(offsetof(Vertex, u0)));
+	glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex),
+		reinterpret_cast<char *>(offsetof(Vertex, r)));
 	glDrawArrays(mode, first, count);
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);

@@ -6,19 +6,14 @@
 
 BenchEntity::BenchEntity(Context *ctx) : BlockEntity(ctx, 9)
 {
+	render_callback.reset(new Callback([ctx, this](){
+		ctx->renderer->render_inventory(this->items, this->p);
+	}));
+	ctx->renderer->add_callback(render_callback.get());
 }
 
 BenchEntity::~BenchEntity()
 {
-}
-
-void BenchEntity::update()
-{
-}
-
-void BenchEntity::render()
-{
-	ctx->renderer->render_inventory(items, p);
 }
 
 void BenchEntity::load(sz_Tag *tag)

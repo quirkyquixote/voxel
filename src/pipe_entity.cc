@@ -10,14 +10,6 @@ PipeEntity::~PipeEntity()
 {
 }
 
-void PipeEntity::update()
-{
-}
-
-void PipeEntity::render()
-{
-}
-
 void PipeEntity::load(sz_Tag *tag)
 {
 	BlockEntity::load(tag);

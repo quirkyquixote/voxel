@@ -34,7 +34,7 @@ struct VertexDesc {
 };
 
 class VertexBuffer {
-public:
+ public:
 	explicit VertexBuffer(int nbufs);
 	~VertexBuffer();
 
@@ -48,7 +48,7 @@ public:
 	inline GLuint get_name(int i) const { return vbo_names[i]; }
 	inline size_t get_size(int i) const { return vbo_sizes[i]; }
 
-private:
+ private:
 	size_t vbo_count;
 	GLuint *vbo_names;
 	size_t *vbo_sizes;
@@ -86,6 +86,11 @@ extern VertexDesc vertices_pane_lf[];
 extern VertexDesc vertices_pane_rt[];
 extern VertexDesc vertices_pane_bk[];
 extern VertexDesc vertices_pane_ft[];
+
+extern VertexDesc vertices_token_lf[];
+extern VertexDesc vertices_token_bk[];
+extern VertexDesc vertices_token_rt[];
+extern VertexDesc vertices_token_ft[];
 
 static inline void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf,
 		size_t len, v3f p, v2f t1, const v2f *t2, const int *tilted)

@@ -319,7 +319,7 @@ void Space::move_yneg(Body *b)
 
 void Space::step()
 {
-	for (auto &b : bodies) {
+	for (auto b : bodies) {
 		b->v.y += gravity;
 		if (b->v.x < -terminal_speed)
 			b->v.x = -terminal_speed;
@@ -335,7 +335,7 @@ void Space::step()
 			b->v.z = terminal_speed;
 	}
 
-	for (auto &b : bodies) {
+	for (auto b : bodies) {
 		b->bb.x0 = b->p.x - b->s.x;
 		b->bb.x1 = b->p.x + b->s.x;
 		b->bb.z0 = b->p.z - b->s.x;

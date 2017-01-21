@@ -3,25 +3,28 @@
 #ifndef SRC_PHYSICS_H_
 #define SRC_PHYSICS_H_
 
-#include <list>
 #include <functional>
 #include <vector>
 
 #include "v2.h"
 #include "v3.h"
 #include "box3.h"
+#include "ptr_list.h"
 
 class World;
 class Space;
 class Body;
 struct Query;
 
-class Body {
+class Body : public PtrNode {
 	friend class Space;
 
  public:
 	typedef void(Callback)(Body *, const v3ll &, int);
 
+	Body() = delete;
+	Body(const Body &other) = delete;
+	Body(Body &&other) = delete;
 	explicit Body(Space *s);
 	~Body();
 
@@ -38,7 +41,7 @@ class Body {
 	inline void set_size(const v2f &new_s) { s = new_s; }
 	inline void set_step_size(float s) { step_size = s; }
 
-	inline void set_callback(const std::function<Callback> &func)
+	inline void set_callback(const std::function<Body::Callback> &func)
 	{
 		cb_func = func;
 	}
@@ -72,18 +75,12 @@ class Space {
 		return b;
 	}
 
-	inline void destroy_body(Body *b)
-	{
-		bodies.remove(b);
-		delete b;
-	}
-
  private:
 	float impulse;
 	float gravity;
 	float terminal_speed;
 	World *world;
-	std::list<Body *> bodies;
+	PtrList<Body> bodies;
 	std::vector<box3f> geom[256];
 
 	void move_xpos(Body *b);
