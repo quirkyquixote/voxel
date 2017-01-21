@@ -23,29 +23,28 @@ int main(int argc, char *argv[])
 	populate_block_traits_table();
 	populate_material_texcoord_table();
 
-	Context *ctx = new Context("foo");
+	std::unique_ptr<Context> ctx(new Context("foo"));
 	ctx->load_all();
 	ctx->ml->run();
 	ctx->save_all();
-	delete ctx;
 	return 0;
 }
 
 Context::Context(const char *dir)
 	: dir(dir)
 {
-	world = new World(this);
+	world.reset(new World(this));
 	// prof_mgr = profile_manager();
 	chunks_per_tick = 1;
 
 	/* Setup main loop */
-	ml = new MainLoop(30);
+	ml.reset(new MainLoop(30));
 	ml->set_event_callback([this](const SDL_Event &e){event(e);});
 	ml->set_update_callback([this](){update();});
 	ml->set_window(new Window("voxel", 0, 0, 1280, 768, 0));
 
 	/* Create renderer */
-	renderer = new Renderer(this);
+	renderer.reset(new Renderer(this));
 	ml->get_window()->set_render_callback([this](){(*this->renderer)();});
 
 	/* Initialize Tcl */
@@ -62,32 +61,27 @@ Context::Context(const char *dir)
 	Tcl_CreateObjCommand(tcl, "walls", cmd_walls, this, NULL);
 	Tcl_CreateObjCommand(tcl, "relit", cmd_relit, this, NULL);
 	Tcl_CreateObjCommand(tcl, "replace", cmd_replace, this, NULL);
-	cli = new CommandLine();
+	cli.reset(new CommandLine());
 
 	/* Initialize physics */
-	space = new Space(world);
+	space.reset(new Space(world.get()));
 	space->set_gravity(-0.05);
 	space->set_impulse(0.001);
 	space->set_terminal_speed(1);
 
 	/* Initialize lighting */
-	light = new Lighting(world);
+	light.reset(new Lighting(world.get()));
 
 	/* Initialize flowsim */
 	// flowsim = flowsim(world);
 
 	/* Create player */
-	player = new PlayerEntity(this);
+	player.reset(new PlayerEntity(this));
 }
 
 Context::~Context()
 {
-	delete world;
-	delete ml;
-	delete renderer;
 	/* close Tcl */
-	delete cli;
-	delete space;
 }
 
 bool Context::load_all()

@@ -29,14 +29,14 @@ enum {
 class Context {
  public:
 	const char *dir;
-	MainLoop *ml;
+	std::unique_ptr<MainLoop> ml;
 	Tcl_Interp *tcl;
-	CommandLine *cli;
-	World *world;
-	Renderer *renderer;
-	Space *space;
-	Lighting *light;
-	PlayerEntity *player;
+	std::unique_ptr<CommandLine> cli;
+	std::unique_ptr<World> world;
+	std::unique_ptr<Renderer> renderer;
+	std::unique_ptr<Space> space;
+	std::unique_ptr<Lighting> light;
+	std::unique_ptr<PlayerEntity> player;
 	PtrList<RoamingEntity> entities;
 	PtrList<Callback> callback_list;
 	char mode;
