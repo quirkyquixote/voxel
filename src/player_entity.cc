@@ -4,6 +4,7 @@
 
 #include "context.h"
 #include "block_entity.h"
+#include "board_entity.h"
 #include "drop_entity.h"
 #include "recipes.h"
 
@@ -164,7 +165,7 @@ void PlayerEntity::use_board(std::vector<Item> *inv)
 	int i = side * floor(q.x * side) + floor(q.z * side);
 	Item &s1 = items[tool];
 	Item &s2 = (*inv)[i];
-	if (act == 1 || use == 1) {
+	if (act == 1) {
 		if (move.y0) {
 			if (s2.num == 0)
 				return;
@@ -176,6 +177,17 @@ void PlayerEntity::use_board(std::vector<Item> *inv)
 			s2 = Item(s1.obj, s1.mat, 1);
 			--s1.num;
 		}
+	} else if (use == 1) {
+		if (s2.num == 0)
+			return;
+		if (s2.obj == OBJ_TOKEN_LF)
+			s2.obj = OBJ_TOKEN_BK;
+		else if (s2.obj == OBJ_TOKEN_BK)
+			s2.obj = OBJ_TOKEN_RT;
+		else if (s2.obj == OBJ_TOKEN_RT)
+			s2.obj = OBJ_TOKEN_FT;
+		else if (s2.obj == OBJ_TOKEN_FT)
+			s2.obj = OBJ_TOKEN_LF;
 	}
 }
 

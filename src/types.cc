@@ -13,7 +13,10 @@ const char *obj_names[256] = {
 	[OBJ_STAIRS] = "stairs",
 	[OBJ_PANE] = "pane",
 	[OBJ_FLUID] = "fluid",
-	[OBJ_TOKEN] = "token",
+	[OBJ_TOKEN_LF] = "token_lf",
+	[OBJ_TOKEN_BK] = "token_bk",
+	[OBJ_TOKEN_RT] = "token_rt",
+	[OBJ_TOKEN_FT] = "token_ft",
 };
 
 const char *mat_names[256] = {

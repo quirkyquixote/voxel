@@ -27,8 +27,7 @@ class Renderer {
 	void render_commandline();
 	void render_string(const char *str);
 	void render_inventory(const std::vector<Item> &items, const v3ll &p);
-	void render_inventory_count(const std::vector<Item> &inv, const v3ll &p);
-	void render_inventory_state(const std::vector<Item> &inv, const v3ll &p);
+	void render_board(const std::vector<Item> &inv, const v3ll &p);
 	void render_item(int obj, int mat, GLfloat alpha);
 
 	void update_face_lf(std::vector<Vertex> *buf, int64_t x, int64_t y, int64_t z, const v2f *mt, const int *tilted);

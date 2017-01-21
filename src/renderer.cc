@@ -5,6 +5,7 @@
 #include "context.h"
 #include "roaming_entity.h"
 #include "block_entity.h"
+#include "board_entity.h"
 
 Renderer::Renderer(Context *ctx)
 	:ctx(ctx)
@@ -196,7 +197,19 @@ void Renderer::render_item(int obj, int mat, GLfloat alpha)
 		obj_vertex_buffer->enable();
 		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 126, 36);
 		obj_vertex_buffer->disable();
-	} else if (obj == OBJ_TOKEN) {
+	} else if (obj == OBJ_TOKEN_LF) {
+		obj_vertex_buffer->enable();
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		obj_vertex_buffer->disable();
+	} else if (obj == OBJ_TOKEN_BK) {
+		obj_vertex_buffer->enable();
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		obj_vertex_buffer->disable();
+	} else if (obj == OBJ_TOKEN_RT) {
+		obj_vertex_buffer->enable();
+		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
+		obj_vertex_buffer->disable();
+	} else if (obj == OBJ_TOKEN_FT) {
 		obj_vertex_buffer->enable();
 		obj_vertex_buffer->draw_slice(GL_TRIANGLES, 0, 162 * mat + 36, 36);
 		obj_vertex_buffer->disable();
@@ -250,31 +263,6 @@ void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 				render_item(s.obj, s.mat, alpha);
 				glPopMatrix();
 			}
-			glPopMatrix();
-			++i;
-		}
-	}
-	glDisable(GL_BLEND);
-}
-
-void Renderer::render_inventory_count(const std::vector<Item> &inv, const v3ll &p)
-{
-	int i, x, z;
-	int side = sqrt(inv.size());
-	Item s;
-
-	GLfloat d = dist(ctx->player->get_body()->get_p(), v3f(p));
-	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	i = 0;
-	for (x = 0; x < side; ++x) {
-		for (z = 0; z < side; ++z) {
-			glColor4ub(0, 0, 0, alpha / 2);
-			glMatrixMode(GL_MODELVIEW);
-			glPushMatrix();
-			glTranslatef(p.x + (GLfloat)x / side, p.y + 1.0001, p.z + (GLfloat)z / side);
-			Item s = inv[i];
 			if (s.num > 1) {
 				glColor4ub(255, 255, 255, alpha);
 				glMatrixMode(GL_MODELVIEW);
@@ -295,7 +283,7 @@ void Renderer::render_inventory_count(const std::vector<Item> &inv, const v3ll &
 	glDisable(GL_BLEND);
 }
 
-void Renderer::render_inventory_state(const std::vector<Item> &inv, const v3ll &p)
+void Renderer::render_board(const std::vector<Item> &inv, const v3ll &p)
 {
 	int i, x, z;
 	int side = sqrt(inv.size());
@@ -312,8 +300,35 @@ void Renderer::render_inventory_state(const std::vector<Item> &inv, const v3ll &
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glTranslatef(p.x + (GLfloat)x / side, p.y + 1.0001, p.z + (GLfloat)z / side);
+			glPushMatrix();
+			glTranslatef(.125 / side, 0, .125 / side);
+			glScalef(.75 / side, .75 / side, .75 / side);
+			glBegin(GL_TRIANGLES);
+			glVertex3f(0, 0, 0);
+			glVertex3f(0, 0, 1);
+			glVertex3f(1, 0, 0);
+			glVertex3f(1, 0, 0);
+			glVertex3f(0, 0, 1);
+			glVertex3f(1, 0, 1);
+			glEnd();
+			glPopMatrix();
 			Item s = inv[i];
 			if (s.num > 0) {
+				glColor4ub(0, 0, 0, alpha);
+				glPushMatrix();
+				glTranslatef(.5 / side - .0625, 0, .5 / side - .0625); /*
+				if (s.obj == OBJ_TOKEN) {
+					v3f r = ctx->renderer->get_cam()->get_r();
+					glTranslatef(.25 / side, .25 / side, .25 / side);
+					glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
+					glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
+					glTranslatef(-.25 / side, -.25 / side, -.25 / side);
+				}*/
+				glScalef(.125, .125, .125);
+				render_item(s.obj, s.mat, alpha);
+				glPopMatrix();
+			}
+			if ((s.num & 2) != 0) {
 				glColor4ub(255, 255, 255, alpha);
 				glMatrixMode(GL_MODELVIEW);
 				glPushMatrix();
@@ -321,7 +336,7 @@ void Renderer::render_inventory_state(const std::vector<Item> &inv, const v3ll &
 				glRotatef(180.0 * cam->get_r().y / M_PI, 0, -1, 0);
 				glRotatef(180.0 * cam->get_r().x / M_PI, 1, 0, 0);
 				glScalef(.05, .05, .05);
-				render_string((s.num & 2) ? "ON" : "OFF");
+				render_string("ON");
 				glPopMatrix();
 			}
 			glPopMatrix();

@@ -9,6 +9,9 @@
 
 #include "context.h"
 
+#define BOARD_EXISTS 0x1
+#define BOARD_ON 0x2
+
 class BoardEntity : public BlockEntity {
  public:
 	explicit BoardEntity(Context *ctx);

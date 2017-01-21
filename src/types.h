@@ -12,7 +12,10 @@ enum {
 	OBJ_STAIRS,	/* stairs */
 	OBJ_PANE,	/* thin pane in the middle */
 	OBJ_FLUID,	/* object for flowsims (debug only) */
-	OBJ_TOKEN,	/* A bit of something */
+	OBJ_TOKEN_LF,	/* A bit of something */
+	OBJ_TOKEN_BK,	/* A bit of something */
+	OBJ_TOKEN_RT,	/* A bit of something */
+	OBJ_TOKEN_FT,	/* A bit of something */
 	OBJ_COUNT
 };
 
