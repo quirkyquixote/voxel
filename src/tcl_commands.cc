@@ -41,6 +41,7 @@ int parse_item(const char *str, int *mat, int *obj)
 int parse_block(const char *str, int *mat, int *shape)
 {
 	if (strcmp(str, "air") == 0) {
+		*mat = 0;
 		*shape = SHAPE_NONE;
 		return 0;
 	}
