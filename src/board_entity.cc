@@ -29,35 +29,35 @@ BoardEntity::~BoardEntity()
 {
 }
 
-void BoardEntity::test(const v2s &p, int i, int min, int max)
+void BoardEntity::test(int i, int min, int max)
 {
 	int acc = 0;
-	if (p.x > 0) {
-		int j = (p.x - 1) * 8 + p.y;
+	if (i >= 8) {
+		int j = i - 8;
 		if ((items[j].num & FLAG_ON) != 0
 				&& (items[j].num & FLAG_RT) == 0) {
 			tmp[i] |= FLAG_LF;
 			++acc;
 		}
 	}
-	if (p.x < 7) {
-		int j = (p.x + 1) * 8 + p.y;
+	if (i < 64 - 8) {
+		int j = i + 8;
 		if ((items[j].num & FLAG_ON) != 0
 				&& (items[j].num & FLAG_LF) == 0) {
 			tmp[i] |= FLAG_RT;
 			++acc;
 		}
 	}
-	if (p.y > 0) {
-		int j = p.x * 8 + (p.y - 1);
+	if (i > 0) {
+		int j = i - 1;
 		if ((items[j].num & FLAG_ON) != 0
 				&& (items[j].num & FLAG_FT) == 0) {
 			tmp[i] |= FLAG_BK;
 			++acc;
 		}
 	}
-	if (p.y < 7) {
-		int j = p.x * 8 + (p.y + 1);
+	if (i < 64 - 1) {
+		int j = i + 1;
 		if ((items[j].num & FLAG_ON) != 0
 				&& (items[j].num & FLAG_BK) == 0) {
 			tmp[i] |= FLAG_FT;
@@ -71,27 +71,24 @@ void BoardEntity::test(const v2s &p, int i, int min, int max)
 
 void BoardEntity::update()
 {
-	int i = 0;
-	for (auto p : box2s(0, 0, 8, 8)) {
-		if (items[i].num > 0) {
+	for (int i = 0; i < 64; ++i) {
+		if (items[i].num != 0) {
 			tmp[i] = FLAG_EXISTS;
-			if (items[i].mat == MAT_RUNE_O) {
-				items[i].num |= FLAG_ON;
-			} else if (items[i].mat == MAT_RUNE_K) {
-				test(p, i, 2, 4);
-			} else if (items[i].mat == MAT_RUNE_A) {
-				test(p, i, 1, 4);
-			} else if (items[i].mat == MAT_RUNE_N) {
-				test(p, i, 0, 0);
-			} else if (items[i].mat == MAT_RUNE_J) {
-				test(p, i, 1, 1);
-			}
+			if (items[i].mat == MAT_RUNE_O)
+				tmp[i] |= FLAG_ON;
+			else if (items[i].mat == MAT_RUNE_K)
+				test(i, 2, 4);
+			else if (items[i].mat == MAT_RUNE_A)
+				test(i, 1, 4);
+			else if (items[i].mat == MAT_RUNE_N)
+				test(i, 0, 0);
+			else if (items[i].mat == MAT_RUNE_J)
+				test(i, 1, 1);
 		} else {
 			tmp[i] = 0;
 		}
-		++i;
 	}
-	for (i = 0; i < 64; ++i)
+	for (int i = 0; i < 64; ++i)
 		items[i].num = tmp[i];
 }
 

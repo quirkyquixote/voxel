@@ -26,7 +26,7 @@ class BoardEntity : public BlockEntity {
 	unsigned char tmp[64];
 
 	void update();
-	void test(const v2s &p, int i, int min, int max);
+	void test(int i, int min, int max);
 };
 
 #endif  // SRC_BOARD_ENTITY_H_
