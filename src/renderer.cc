@@ -324,7 +324,7 @@ void Renderer::render_board(const std::vector<Item> &inv, const v3ll &p)
 			if (s.num > 0) {
 				glColor4ub(0, 0, 0, alpha);
 				glPushMatrix();
-				glTranslatef(.5 / side - .0625, 0, .5 / side - .0625); /*
+				glTranslatef(.5 / side - .06, 0, .5 / side - .06); /*
 				if (s.obj == OBJ_TOKEN) {
 					v3f r = ctx->renderer->get_cam()->get_r();
 					glTranslatef(.25 / side, .25 / side, .25 / side);
@@ -332,7 +332,7 @@ void Renderer::render_board(const std::vector<Item> &inv, const v3ll &p)
 					glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
 					glTranslatef(-.25 / side, -.25 / side, -.25 / side);
 				}*/
-				glScalef(.125, .125, .125);
+				glScalef(.12, .12, .12);
 				render_item(s.obj, s.mat, alpha);
 				glPopMatrix();
 			}

@@ -30,7 +30,18 @@ void BoardEntity::update()
 		tmp[i] = 0;
 
 	for (int i = 0; i < 64; ++i) {
-		if (items[i].num & BOARD_ON) {
+		if (items[i].num == 0)
+			continue;
+		if (items[i].mat == MAT_RUNE_O) {
+			if (i >= 8)
+				++tmp[i - 8];
+			if (i < 64 - 8)
+				++tmp[i + 8];
+			if (i > 0)
+				++tmp[i - 1];
+			if (i < 64 - 1)
+				++tmp[i + 1];
+		} else if (items[i].num & BOARD_ON) {
 			if (i >= 8 && items[i].obj == OBJ_TOKEN_LF)
 				++tmp[i - 8];
 			if (i < 64 - 8 && items[i].obj == OBJ_TOKEN_RT)
