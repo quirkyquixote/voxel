@@ -15,7 +15,7 @@
 
 #define SHARDS_PER_WORLD (CHUNKS_PER_WORLD * CHUNKS_PER_WORLD * SHARDS_PER_CHUNK)
 
-class World {
+class World : public NonCopyable {
  public:
 	explicit World(Context *ctx);
 	~World();

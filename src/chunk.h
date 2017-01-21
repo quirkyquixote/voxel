@@ -21,7 +21,7 @@ enum {
 
 class Context;
 
-class Chunk {
+class Chunk : public NonCopyable {
  public:
 	Chunk(Context *ctx, int id);
 	~Chunk();

@@ -7,7 +7,7 @@
 
 #include "world.h"
 
-class Lighting {
+class Lighting : public NonCopyable {
  public:
 	explicit Lighting(World *w);
 	~Lighting();

@@ -12,7 +12,7 @@
 
 class Context;
 
-class Renderer {
+class Renderer : public NonCopyable {
  public:
 	explicit Renderer(Context *ctx);
 	~Renderer();

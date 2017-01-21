@@ -23,8 +23,6 @@ class Body : public PtrNode {
 	typedef void(Callback)(Body *, const v3ll &, int);
 
 	Body() = delete;
-	Body(const Body &other) = delete;
-	Body(Body &&other) = delete;
 	explicit Body(Space *s);
 	~Body();
 
@@ -56,8 +54,9 @@ class Body : public PtrNode {
 	std::function<Callback> cb_func;
 };
 
-class Space {
+class Space : public NonCopyable {
  public:
+	Space() = delete;
 	explicit Space(World *w);
 	~Space();
 

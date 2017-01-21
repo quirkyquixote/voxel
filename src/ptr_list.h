@@ -3,11 +3,11 @@
 #ifndef SRC_PTR_LIST_H_
 #define SRC_PTR_LIST_H_
 
-class PtrNode {
+#include "noncopyable.h"
+
+class PtrNode : public NonCopyable {
  public:
 	PtrNode() : next(this), prev(this) { }
-	PtrNode(const PtrNode &other) = delete;
-	PtrNode(PtrNode &&other) = delete;
 	virtual ~PtrNode() { unlink(); }
 
 	inline void link(PtrNode *n)

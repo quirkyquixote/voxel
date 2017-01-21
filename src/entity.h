@@ -11,8 +11,9 @@
 class Context;
 class PlayerEntity;
 
-class Entity {
+class Entity : public NonCopyable {
  public:
+	Entity() = delete;
 	Entity(Context *ctx, int capacity)
 		: ctx(ctx), items(capacity, Item(0, 0, 0)) { }
 
