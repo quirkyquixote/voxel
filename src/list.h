@@ -32,14 +32,14 @@ template<typename T> class List : public Node {
  public:
 	class iterator {
 	 public:
-		iterator(Node *node) : node(node) { }
+		iterator(Node *node) : node(node), next(node->next) { }
 		~iterator() { }
-		void operator++() { node = node->next; };
-		void operator--() { node = node->prev; };
+		void operator++() { node = next; next = node->next; };
 		bool operator!=(const iterator &rhs) const { return node != rhs.node; }
 		T& operator*() { return *static_cast<T*>(node); }
 	 private:
 		Node *node;
+		Node *next;
 	};
 
 	List() : Node() { }
@@ -47,20 +47,18 @@ template<typename T> class List : public Node {
 	List(List &&other) = delete;
 	~List() { }
 
-	inline void append(Node *n)
+	inline void push_back(Node *n)
 	{
 		n->link(this);
 	}
 
-	inline void prepend(Node *n)
+	inline void push_front(Node *n)
 	{
 		n->link(this->next);
 	}
 
 	inline iterator begin() { return iterator(next); }
 	inline iterator end() { return iterator(this); }
-	inline iterator rbegin() { return iterator(prev); }
-	inline iterator rend() { return iterator(this); }
 };
 
 #endif  // SRC_LIST_H_

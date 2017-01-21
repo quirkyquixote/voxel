@@ -5,7 +5,7 @@
 #include "context.h"
 
 RoamingEntity::RoamingEntity(Context *ctx, int capacity)
-	: Entity(ctx, capacity), die(false)
+	: Entity(ctx, capacity)
 {
 	body = ctx->space->create_body();
 }

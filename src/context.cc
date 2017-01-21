@@ -368,11 +368,6 @@ void Context::update_chunks()
 //		log_info("update %d of %zd chunks (max: %d)", i, out_of_date.size(), chunks_per_tick);
 }
 
-void Context::update_entities()
-{
-	entities.remove_if([](RoamingEntity *e){ return e->get_die(); });
-}
-
 void Context::update()
 {
 	if (!ml->get_window()->has_mouse_focus())
@@ -385,7 +380,6 @@ void Context::update()
 	update_chunks();
 	for (auto &f : callback_list)
 		f();
-	update_entities();
 	++tick;
 }
 void Context::event(const SDL_Event &e)

@@ -40,7 +40,7 @@ class Renderer {
 	void update_shard(int id, int64_t x0, int64_t y0, int64_t z0);
 	void update_camera();
 
-	inline void add_callback(Callback *cb) { callback_list.append(cb); }
+	inline void add_callback(Callback *cb) { callback_list.push_back(cb); }
 
  private:
 	Context *ctx;

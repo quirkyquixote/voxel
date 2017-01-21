@@ -39,7 +39,7 @@ void DropEntity::update()
 	if (ticks > 10 && overlap(grow(body->get_box(), 1.f), ctx->player->get_body()->get_box()))
 		items[0].num -= inventory_add(ctx->player->get_items(), items[0]);
 	if (ticks > 1800 || items[0].num == 0)
-		die = true;
+		delete this;
 }
 
 void DropEntity::render()

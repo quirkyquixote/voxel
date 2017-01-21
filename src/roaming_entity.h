@@ -4,10 +4,10 @@
 #define SRC_ROAMING_ENTITY_H_
 
 #include "entity.h"
-
 #include "physics.h"
+#include "list.h"
 
-class RoamingEntity : public Entity {
+class RoamingEntity : public Entity, public Node {
  public:
 	RoamingEntity(Context *ctx, int capacity);
 	virtual ~RoamingEntity();
@@ -16,11 +16,9 @@ class RoamingEntity : public Entity {
 	virtual void load(sz_Tag *root);
 
 	inline Body *get_body() { return body; }
-	inline bool get_die() { return die; }
 
  protected:
 	Body *body;
-	bool die;
 };
 
 #endif  // SRC_ROAMING_ENTITY_H_
