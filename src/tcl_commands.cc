@@ -97,6 +97,7 @@ int cmd_help(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	log_info("hbox <block>: fill a hollow box with the given block");
 	log_info("walls <block>: fill the walls of a box with the given block");
 	log_info("relit: recalculate lighting for current selection");
+	log_info("replace <from-block> <to-block>: replace blocks in region");
 	return TCL_OK;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -389,3 +390,29 @@ fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
 	return TCL_ERROR;
 }
+
+int cmd_replace(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: replace <from-block> <to-block>";
+	Context *ctx = static_cast<Context *>(data);
+	int m1, s1, m2, s2;
+	box3ll bb;
+
+	if (objc != 3)
+		goto fail;
+	if (parse_block(Tcl_GetString(objv[1]), &m1, &s1) != 0)
+		goto fail;
+	if (parse_block(Tcl_GetString(objv[2]), &m2, &s2) != 0)
+		goto fail;
+	bb = fix(sel_bb);
+	for (auto &p : bb) {
+		if (ctx->world->get_mat(p) == m1
+				&& ctx->world->get_shape(p) == s1)
+			ctx->world->set_block(p, s2, m2);
+	}
+	return 0;
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+

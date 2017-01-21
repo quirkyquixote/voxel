@@ -61,6 +61,7 @@ Context::Context(const char *dir)
 	Tcl_CreateObjCommand(tcl, "hbox", cmd_hbox, this, NULL);
 	Tcl_CreateObjCommand(tcl, "walls", cmd_walls, this, NULL);
 	Tcl_CreateObjCommand(tcl, "relit", cmd_relit, this, NULL);
+	Tcl_CreateObjCommand(tcl, "replace", cmd_replace, this, NULL);
 	cli = new CommandLine();
 
 	/* Initialize physics */
