@@ -156,6 +156,29 @@ void PlayerEntity::use_workbench(std::vector<Item> *inv)
 	}
 }
 
+void PlayerEntity::use_board(std::vector<Item> *inv)
+{
+	v3ll p = cur.p;
+	v3f q = cur.q;
+	int side = sqrt(inv->size());
+	int i = side * floor(q.x * side) + floor(q.z * side);
+	Item &s1 = items[tool];
+	Item &s2 = (*inv)[i];
+	if (act == 1 || use == 1) {
+		if (move.y0) {
+			if (s2.num == 0)
+				return;
+			if (inventory_add(&items, Item(s2.obj, s2.mat, 1)) > 0)
+				s2.num = 0;
+		} else {
+			if (s2.num != 0)
+				return;
+			s2 = Item(s1.obj, s1.mat, 1);
+			--s1.num;
+		}
+	}
+}
+
 void PlayerEntity::use_tool()
 {
 	v3ll p = cur.p;

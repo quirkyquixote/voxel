@@ -47,6 +47,7 @@ class PlayerEntity : public RoamingEntity {
 	inline const Query &get_cur() { return cur; }
 
 	void use_inventory(std::vector<Item> *inv);
+	void use_board(std::vector<Item> *inv);
 	void use_workbench(std::vector<Item> *inv);
 
 	void handle_event(const SDL_Event &e);

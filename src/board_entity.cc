@@ -106,7 +106,7 @@ sz_Tag *BoardEntity::save()
 bool BoardEntity::use(PlayerEntity *player)
 {
 	if (player->get_cur().face == FACE_UP) {
-		player->use_inventory(&items);
+		player->use_board(&items);
 		return true;
 	}
 	return false;
