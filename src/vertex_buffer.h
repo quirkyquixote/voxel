@@ -104,13 +104,13 @@ static inline void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf,
 		v.v0 = t1.y;
 		if (buf[i].face == FACE_LF || buf[i].face == FACE_RT) {
 			v.u1 = buf[i].z;
-			v.v1 = buf[i].y;
+			v.v1 = 1. - buf[i].y;
 		} else if (buf[i].face == FACE_DN || buf[i].face == FACE_UP) {
 			v.u1 = buf[i].x;
 			v.v1 = buf[i].z;
 		} else if (buf[i].face == FACE_BK || buf[i].face == FACE_FT) {
 			v.u1 = buf[i].x;
-			v.v1 = buf[i].y;
+			v.v1 = 1. - buf[i].y;
 		}
 		if (tilted[buf[i].face])
 			std::swap(v.u1, v.v1);
