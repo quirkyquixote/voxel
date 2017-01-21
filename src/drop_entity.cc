@@ -18,7 +18,7 @@ void DropEntity::callback(Body *b, const v3ll &cp, int face)
 }
 
 DropEntity::DropEntity(Context *ctx, Item item)
-	: RoamingEntity(ctx, 1)
+	: RoamingEntity(ctx, 1), ticks(0)
 {
 	update_func.reset(new Callback([this](){this->update();}));
 	render_func.reset(new Callback([this](){this->render();}));
