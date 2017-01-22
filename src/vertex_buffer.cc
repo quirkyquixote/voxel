@@ -1244,101 +1244,101 @@ void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf, size_t len,
 				--q.x;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.y;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.z;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				++q.y;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 			} else if (d->face == FACE_RT) {
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.y;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.z;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				++q.y;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 			} else if (d->face == FACE_DN) {
 				--q.y;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.x;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.z;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				++q.x;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 			} else if (d->face == FACE_UP) {
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.x;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.z;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				++q.x;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 			} else if (d->face == FACE_BK) {
 				--q.z;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.y;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.x;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				++q.y;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 			} else if (d->face == FACE_FT) {
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.y;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				--q.x;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 				++q.y;
 				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
-					v.r -= .25;
+					v.r -= .125;
 			}
 			v.g = l.x;
 			v.b = l.y;
