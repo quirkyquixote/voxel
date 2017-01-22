@@ -51,6 +51,7 @@ class Renderer : public NonCopyable {
 	Context *ctx;
 	VertexBuffer *shard_vertex_buffer;
 	VertexBuffer *obj_vertex_buffer;
+	VertexBuffer *text_vertex_buffer;
 	ToneMapper *tone_mapper;
 	Shader *shader;
 	Camera *cam;
