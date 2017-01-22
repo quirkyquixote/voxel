@@ -15,6 +15,7 @@
 #include "v4.h"
 #include "box2.h"
 #include "types.h"
+#include "world.h"
 
 struct Vertex {
 	GLfloat x, y, z;
@@ -86,8 +87,8 @@ extern VertexDesc vertices_token_bk[];
 extern VertexDesc vertices_token_rt[];
 extern VertexDesc vertices_token_ft[];
 
-void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf,
-		size_t len, v3f p, v2f t1, const v2f *t2, const int *tilted);
+void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf, size_t len,
+		v3f p, v2f t1, const v2f *t2, const int *tilted, World *w);
 
 void texcoord_up(int mat, v2f *ret, int *tilted);
 void texcoord_dn(int mat, v2f *ret, int *tilted);

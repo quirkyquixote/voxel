@@ -17,29 +17,29 @@ void populate_obj_vertex_buffer(VertexBuffer *vbo)
 		v3f p;
 		texcoord_up(i, mt, tilted);
 		p = v3f(0, 0, 0);
-		vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted);
-		vertices_add(&a, vertices_face_lf, 6, p, lt, mt, tilted);
-		vertices_add(&a, vertices_face_bk, 6, p, lt, mt, tilted);
-		vertices_add(&a, vertices_face_up, 6, p, lt, mt, tilted);
-		vertices_add(&a, vertices_face_rt, 6, p, lt, mt, tilted);
-		vertices_add(&a, vertices_face_ft, 6, p, lt, mt, tilted);
+		vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted, nullptr);
+		vertices_add(&a, vertices_face_lf, 6, p, lt, mt, tilted, nullptr);
+		vertices_add(&a, vertices_face_bk, 6, p, lt, mt, tilted, nullptr);
+		vertices_add(&a, vertices_face_up, 6, p, lt, mt, tilted, nullptr);
+		vertices_add(&a, vertices_face_rt, 6, p, lt, mt, tilted, nullptr);
+		vertices_add(&a, vertices_face_ft, 6, p, lt, mt, tilted, nullptr);
 
-		vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted);
-		vertices_add(&a, vertices_slab_dn, 30, p, lt, mt, tilted);
+		vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted, nullptr);
+		vertices_add(&a, vertices_slab_dn, 30, p, lt, mt, tilted, nullptr);
 
-		vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted);
-		vertices_add(&a, vertices_face_lf, 6, p, lt, mt, tilted);
-		vertices_add(&a, vertices_stairs_dl, 42, p, lt, mt, tilted);
+		vertices_add(&a, vertices_face_dn, 6, p, lt, mt, tilted, nullptr);
+		vertices_add(&a, vertices_face_lf, 6, p, lt, mt, tilted, nullptr);
+		vertices_add(&a, vertices_stairs_dl, 42, p, lt, mt, tilted, nullptr);
 
-		vertices_add(&a, vertices_pane_z, 36, p, lt, mt, tilted);
+		vertices_add(&a, vertices_pane_z, 36, p, lt, mt, tilted, nullptr);
 
-		vertices_add(&a, vertices_token_lf, 30, p, lt, mt, tilted);
+		vertices_add(&a, vertices_token_lf, 30, p, lt, mt, tilted, nullptr);
 
-		vertices_add(&a, vertices_token_bk, 30, p, lt, mt, tilted);
+		vertices_add(&a, vertices_token_bk, 30, p, lt, mt, tilted, nullptr);
 
-		vertices_add(&a, vertices_token_rt, 30, p, lt, mt, tilted);
+		vertices_add(&a, vertices_token_rt, 30, p, lt, mt, tilted, nullptr);
 
-		vertices_add(&a, vertices_token_ft, 30, p, lt, mt, tilted);
+		vertices_add(&a, vertices_token_ft, 30, p, lt, mt, tilted, nullptr);
 	}
 	vbo->update(0, a.data(), a.size());
 }
@@ -488,7 +488,7 @@ void Renderer::update_face_lf(std::vector<Vertex> *buf,
 	if (has_right_side[ctx->world->get_shape(v3ll(x - 1, y, z))])
 		return;
 	lt = texcoord_from_light(ctx->world->get_light(v3ll(x - 1, y, z)));
-	vertices_add(buf, vertices_face_lf, 6, v3f(x, y, z), lt, mt, tilted);
+	vertices_add(buf, vertices_face_lf, 6, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 }
 
 void Renderer::update_face_rt(std::vector<Vertex> *buf,
@@ -498,7 +498,7 @@ void Renderer::update_face_rt(std::vector<Vertex> *buf,
 	if (has_left_side[ctx->world->get_shape(v3ll(x + 1, y, z))])
 		return;
 	lt = texcoord_from_light(ctx->world->get_light(v3ll(x + 1, y, z)));
-	vertices_add(buf, vertices_face_rt, 6, v3f(x, y, z), lt, mt, tilted);
+	vertices_add(buf, vertices_face_rt, 6, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 }
 
 void Renderer::update_face_dn(std::vector<Vertex> *buf,
@@ -508,7 +508,7 @@ void Renderer::update_face_dn(std::vector<Vertex> *buf,
 	if (has_up_side[ctx->world->get_shape(v3ll(x, y - 1, z))])
 		return;
 	lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y - 1, z)));
-	vertices_add(buf, vertices_face_dn, 6, v3f(x, y, z), lt, mt, tilted);
+	vertices_add(buf, vertices_face_dn, 6, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 }
 
 void Renderer::update_face_up(std::vector<Vertex> *buf,
@@ -518,7 +518,7 @@ void Renderer::update_face_up(std::vector<Vertex> *buf,
 	if (has_down_side[ctx->world->get_shape(v3ll(x, y + 1, z))])
 		return;
 	lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y + 1, z)));
-	vertices_add(buf, vertices_face_up, 6, v3f(x, y, z), lt, mt, tilted);
+	vertices_add(buf, vertices_face_up, 6, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 }
 
 void Renderer::update_face_bk(std::vector<Vertex> *buf,
@@ -528,7 +528,7 @@ void Renderer::update_face_bk(std::vector<Vertex> *buf,
 	if (has_front_side[ctx->world->get_shape(v3ll(x, y, z - 1))])
 		return;
 	lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z - 1)));
-	vertices_add(buf, vertices_face_bk, 6, v3f(x, y, z), lt, mt, tilted);
+	vertices_add(buf, vertices_face_bk, 6, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 }
 
 void Renderer::update_face_ft(std::vector<Vertex> *buf,
@@ -538,7 +538,7 @@ void Renderer::update_face_ft(std::vector<Vertex> *buf,
 	if (has_back_side[ctx->world->get_shape(v3ll(x, y, z + 1))])
 		return;
 	lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z + 1)));
-	vertices_add(buf, vertices_face_ft, 6, v3f(x, y, z), lt, mt, tilted);
+	vertices_add(buf, vertices_face_ft, 6, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 }
 
 void Renderer::update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y,
@@ -604,122 +604,122 @@ void Renderer::update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y,
 	} else if (s == SHAPE_SLAB_DN) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_dn, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_slab_dn, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_dn(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_SLAB_UP) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_up, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_slab_up, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_up(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_SLAB_LF) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_lf, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_slab_lf, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_lf(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_SLAB_RT) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_rt, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_slab_rt, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_rt(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_SLAB_BK) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_bk, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_slab_bk, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_bk(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_SLAB_FT) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_slab_ft, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_slab_ft, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_ft(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_STAIRS_DF) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_df, 42, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_stairs_df, 42, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_dn(buf, x, y, z, mt, tilted);
 		update_face_ft(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_STAIRS_DL) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_dl, 42, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_stairs_dl, 42, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_dn(buf, x, y, z, mt, tilted);
 		update_face_lf(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_STAIRS_DB) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_db, 42, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_stairs_db, 42, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_dn(buf, x, y, z, mt, tilted);
 		update_face_bk(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_STAIRS_DR) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_dr, 42, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_stairs_dr, 42, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_dn(buf, x, y, z, mt, tilted);
 		update_face_rt(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_STAIRS_UF) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_uf, 42, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_stairs_uf, 42, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_up(buf, x, y, z, mt, tilted);
 		update_face_ft(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_STAIRS_UL) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_ul, 42, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_stairs_ul, 42, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_up(buf, x, y, z, mt, tilted);
 		update_face_lf(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_STAIRS_UB) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_ub, 42, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_stairs_ub, 42, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_up(buf, x, y, z, mt, tilted);
 		update_face_bk(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_STAIRS_UR) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_stairs_ur, 42, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_stairs_ur, 42, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_up(buf, x, y, z, mt, tilted);
 		update_face_rt(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_PANE_Y) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_y, 36, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_pane_y, 36, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 	} else if (s == SHAPE_PANE_X) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_x, 36, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_pane_x, 36, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 	} else if (s == SHAPE_PANE_Z) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_z, 36, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_pane_z, 36, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 	} else if (s == SHAPE_PANE_DN) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_dn, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_pane_dn, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_dn(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_PANE_UP) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_up, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_pane_up, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_up(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_PANE_LF) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_lf, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_pane_lf, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_lf(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_PANE_RT) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_rt, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_pane_rt, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_rt(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_PANE_BK) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_bk, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_pane_bk, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_bk(buf, x, y, z, mt, tilted);
 	} else if (s == SHAPE_PANE_FT) {
 		texcoord_up(ctx->world->get_mat(v3ll(x, y, z)), mt, tilted);
 		lt = texcoord_from_light(ctx->world->get_light(v3ll(x, y, z)));
-		vertices_add(buf, vertices_pane_ft, 30, v3f(x, y, z), lt, mt, tilted);
+		vertices_add(buf, vertices_pane_ft, 30, v3f(x, y, z), lt, mt, tilted, ctx->world.get());
 		update_face_ft(buf, x, y, z, mt, tilted);
 	}
 }
