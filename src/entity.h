@@ -11,15 +11,14 @@
 class Context;
 class PlayerEntity;
 
-class Entity {
+class Entity : public NonCopyable {
  public:
+	Entity() = delete;
 	Entity(Context *ctx, int capacity)
 		: ctx(ctx), items(capacity, Item(0, 0, 0)) { }
 
 	virtual ~Entity() { }
 
-	virtual void update() { }
-	virtual void render() { }
 	virtual sz_Tag *save();
 	virtual void load(sz_Tag *val);
 	virtual bool use(PlayerEntity *player) { return false; }

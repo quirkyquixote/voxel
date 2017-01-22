@@ -21,7 +21,7 @@ enum {
 
 class Context;
 
-class Chunk {
+class Chunk : public NonCopyable {
  public:
 	Chunk(Context *ctx, int id);
 	~Chunk();
@@ -110,6 +110,6 @@ class Chunk {
 	Shard *shards[SHARDS_PER_CHUNK];
 };
 
-#endif  // SRC_SHARD_H_
+#endif  // SRC_CHUNK_H_
 
 

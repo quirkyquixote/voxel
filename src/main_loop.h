@@ -14,7 +14,9 @@
 #undef GL_GLEXT_PROTOTYPES
 #include "GL/glu.h"
 
-class Window {
+#include "noncopyable.h"
+
+class Window : public NonCopyable {
  public:
 	typedef void RenderFunc(void);
 
@@ -52,7 +54,7 @@ class Window {
 	std::function<RenderFunc> render_func;
 };
 
-class MainLoop {
+class MainLoop : public NonCopyable {
  public:
 	typedef void EventFunc(const SDL_Event &);
 	typedef void UpdateFunc(void);

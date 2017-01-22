@@ -10,8 +10,6 @@ class PipeEntity : public BlockEntity {
 	explicit PipeEntity(Context *ctx);
 	~PipeEntity();
 
-	void update();
-	void render();
 	sz_Tag *save();
 	void load(sz_Tag *val);
 	bool use(PlayerEntity *player);

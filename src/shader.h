@@ -8,8 +8,9 @@
 #include "GL/glext.h"
 #undef GL_GLEXT_PROTOTYPES
 
+#include "noncopyable.h"
 
-class Shader {
+class Shader : public NonCopyable {
  public:
 	Shader(const char *vpath, const char *fpath);
 	~Shader();

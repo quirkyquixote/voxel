@@ -47,6 +47,9 @@ void World::set_block(const v3ll &p, int shape, int mat)
 	box3ll bb;
 	set_shape(p, shape);
 	set_mat(p, mat);
+	Entity *e = get_data(p);
+	if (e != NULL)
+		delete e;
 	if (block_traits[mat][shape].entity != NULL) {
 		Entity *e = block_traits[mat][shape].entity(ctx);
 		e->set_p(p);
@@ -54,7 +57,7 @@ void World::set_block(const v3ll &p, int shape, int mat)
 	} else {
 		set_data(p, NULL);
 	}
-	update_lighting(this, box3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1), &bb);
+	ctx->light->update(box3ll(p.x, p.y, p.z, p.x, p.y, p.z), &bb);
 	set_flags(bb, CHUNK_UNRENDERED);
 }
 

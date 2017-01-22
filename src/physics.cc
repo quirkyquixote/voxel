@@ -20,235 +20,307 @@ Body::~Body()
 Space::Space(World *w)
 	: world(w)
 {
+	geom[SHAPE_BLOCK_DN].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_BLOCK_UP].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_BLOCK_LF].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_BLOCK_RT].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_BLOCK_BK].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_BLOCK_FT].push_back(box3f(0., 0., 0., 1., 1., 1.));
+	geom[SHAPE_SLAB_DN].push_back(box3f(0., 0., 0., 1., .5, 1.));
+	geom[SHAPE_SLAB_UP].push_back(box3f(0., .5, 0., 1., 1., 1.));
+	geom[SHAPE_SLAB_LF].push_back(box3f(0., 0., 0., .5, 1., 1.));
+	geom[SHAPE_SLAB_RT].push_back(box3f(.5, 0., 0., 1., 1., 1.));
+	geom[SHAPE_SLAB_BK].push_back(box3f(0., 0., 0., 1., 1., .5));
+	geom[SHAPE_SLAB_FT].push_back(box3f(0., 0., .5, 1., 1., 1.));
+	geom[SHAPE_STAIRS_DB].push_back(box3f(0., 0., 0., 1., .5, 1.));
+	geom[SHAPE_STAIRS_DB].push_back(box3f(0., 0., 0., 1., 1., .5));
+	geom[SHAPE_STAIRS_DL].push_back(box3f(0., 0., 0., 1., .5, 1.));
+	geom[SHAPE_STAIRS_DL].push_back(box3f(0., 0., 0., .5, 1., 1.));
+	geom[SHAPE_STAIRS_DF].push_back(box3f(0., 0., 0., 1., .5, 1.));
+	geom[SHAPE_STAIRS_DF].push_back(box3f(0., 0., .5, 1., 1., 1.));
+	geom[SHAPE_STAIRS_DR].push_back(box3f(0., 0., 0., 1., .5, 1.));
+	geom[SHAPE_STAIRS_DR].push_back(box3f(.5, 0., 0., 1., 1., 1.));
+	geom[SHAPE_STAIRS_UB].push_back(box3f(0., .5, 0., 1., 1., 1.));
+	geom[SHAPE_STAIRS_UB].push_back(box3f(0., 0., 0., 1., 1., .5));
+	geom[SHAPE_STAIRS_UL].push_back(box3f(0., .5, 0., 1., 1., 1.));
+	geom[SHAPE_STAIRS_UL].push_back(box3f(0., 0., 0., .5, 1., 1.));
+	geom[SHAPE_STAIRS_UF].push_back(box3f(0., .5, 0., 1., 1., 1.));
+	geom[SHAPE_STAIRS_UF].push_back(box3f(0., 0., .5, 1., 1., 1.));
+	geom[SHAPE_STAIRS_UR].push_back(box3f(0., .5, 0., 1., 1., 1.));
+	geom[SHAPE_STAIRS_UR].push_back(box3f(.5, 0., 0., 1., 1., 1.));
+	geom[SHAPE_PANE_X].push_back(box3f(.46875, 0., 0., .53125, 1., 1.));
+	geom[SHAPE_PANE_Y].push_back(box3f(0., .46875, 0., 1., .53125, 1.));
+	geom[SHAPE_PANE_Z].push_back(box3f(0., 0., .46875, 1., 1., .53125));
+	geom[SHAPE_PANE_DN].push_back(box3f(0., 0., 0., 1., .0625, 1.));
+	geom[SHAPE_PANE_UP].push_back(box3f(0., .9375, 0., 1., 1., 1.));
+	geom[SHAPE_PANE_LF].push_back(box3f(0., 0., 0., .0625, 1., 1.));
+	geom[SHAPE_PANE_RT].push_back(box3f(.9375, 0., 0., 1., 1., 1.));
+	geom[SHAPE_PANE_BK].push_back(box3f(0., 0., 0., 1., 1., .0625));
+	geom[SHAPE_PANE_FT].push_back(box3f(0., 0., .9375, 1., 1., 1.));
 }
 
 Space::~Space()
 {
 }
 
-static const int shape_masks[] = {
-	0x00,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF,
-	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF,
-	CELL_LUB | CELL_LUF | CELL_LDB | CELL_LDF,
-	CELL_RUB | CELL_RUF | CELL_RDB | CELL_RDF,
-	CELL_LDB | CELL_LUB | CELL_RDB | CELL_RDB,
-	CELL_LDF | CELL_LUF | CELL_RDF | CELL_RDF,
-	0xff,
-	0xff,
-	0xff,
-	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF | CELL_LUF | CELL_RUF,
-	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF | CELL_LUF | CELL_LUB,
-	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF | CELL_LUB | CELL_RUB,
-	CELL_LDB | CELL_LDF | CELL_RDB | CELL_RDF | CELL_RUF | CELL_RUB,
-	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF | CELL_LDF | CELL_RDF,
-	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF | CELL_LDF | CELL_LDB,
-	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF | CELL_LDB | CELL_RDB,
-	CELL_LUB | CELL_LUF | CELL_RUB | CELL_RUF | CELL_RDF | CELL_RDB,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-	0xff,
-};
-
-int Space::cell_at(const int *masks, int64_t x, int64_t y, int64_t z)
+void Space::move_xpos(Body *b)
 {
-	int shape, mask;
-	shape = world->get_shape(v3ll(x >> 1, y >> 1, z >> 1));
-	mask = (1 << (((x & 1) * 4) + ((y & 1) * 2) + (z & 1)));
-	return masks[shape] & mask;
-}
+	box3f bb, bb2;
+	bool collide;
+	float best, best_y;
+	v3ll best_p;
 
-void Space::move_xpos(Body *b, float dt)
-{
-	int64_t x, y, z, y0, y1, z0, z1;
-	int step_up = 0;
+	bb = b->bb;
+	bb.x0 = bb.x1;
+	bb.x1 += b->v.x;
+	collide = false;
+	best = bb.x1;
 
-	x = floor((b->bb.x1 + b->v.x * dt) * 2);
-	y0 = floor(b->bb.y0 * 2);
-	z0 = floor(b->bb.z0 * 2);
-	y1 = floor(b->bb.y1 * 2);
-	z1 = floor(b->bb.z1 * 2);
-	for (y = y0; y <= y1; ++y) {
-		for (z = z0; z <= z1; ++z) {
-			if (cell_at(shape_masks, x, y, z)) {
-				if (y < y0 + b->step_size) {
-					step_up = 1;
-					continue;
-				}
-				b->v.x = 0;
-				b->p.x = 0.5 * x - b->s.x - impulse;
-				if (b->cb_func) {
-					v3ll p(x >> 1, y >> 1, z >> 1);
-					b->cb_func(b, p, FACE_LF);
-				}
-				return;
+	for (auto p : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2 = shift(bb2, v3f(p));
+			if (overlap(bb, bb2) && best > bb2.x0) {
+				collide = true;
+				best = bb2.x0;
+				best_y = bb2.y1;
+				best_p = p;
 			}
 		}
 	}
-	if (step_up)
-		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + impulse;
-	b->p.x += b->v.x * dt;
+	if (collide) {
+		if (best_y < b->bb.y0 + b->step_size) {
+			auto p = b->p;
+			b->p.y = best_y + b->s.y + impulse;
+			b->bb.y0 = b->p.y - b->s.y;
+			b->bb.y1 = b->p.y + b->s.y;
+			move_xpos(b);
+			if (p.x == b->p.x) {
+				b->p.y = p.y;
+				b->bb.y0 = b->p.y - b->s.y;
+				b->bb.y1 = b->p.y + b->s.y;
+			}
+			return;
+		}
+		b->v.x = 0;
+		b->p.x = best - b->s.x - impulse;
+		if (b->cb_func)
+			b->cb_func(b, best_p, FACE_LF);
+		return;
+	}
+	b->p.x += b->v.x;
 }
 
-void Space::move_xneg(Body *b, float dt)
+void Space::move_xneg(Body *b)
 {
-	int64_t x, y, z, y0, y1, z0, z1;
-	int step_up = 0;
+	box3f bb, bb2;
+	bool collide;
+	float best, best_y;
+	v3ll best_p;
 
-	x = floor((b->bb.x0 + b->v.x * dt) * 2);
-	y0 = floor(b->bb.y0 * 2);
-	z0 = floor(b->bb.z0 * 2);
-	y1 = floor(b->bb.y1 * 2);
-	z1 = floor(b->bb.z1 * 2);
-	for (y = y0; y <= y1; ++y) {
-		for (z = z0; z <= z1; ++z) {
-			if (cell_at(shape_masks, x, y, z)) {
-				if (y < y0 + b->step_size) {
-					step_up = 1;
-					continue;
-				}
-				b->v.x = 0;
-				b->p.x = 0.5 * (x + 1) + b->s.x + impulse;
-				if (b->cb_func) {
-					v3ll p(x >> 1, y >> 1, z >> 1);
-					b->cb_func(b, p, FACE_RT);
-				}
-				return;
+	bb = b->bb;
+	bb.x1 = bb.x0;
+	bb.x0 += b->v.x;
+	collide = false;
+	best = bb.x0;
+
+	for (auto p : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2 = shift(bb2, v3f(p));
+			if (overlap(bb, bb2) && best < bb2.x1) {
+				collide = true;
+				best = bb2.x1;
+				best_y = bb2.y1;
+				best_p = p;
 			}
 		}
 	}
-	if (step_up)
-		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + impulse;
-	b->p.x += b->v.x * dt;
+	if (collide) {
+		if (best_y < b->bb.y0 + b->step_size) {
+			auto p = b->p;
+			b->p.y = best_y + b->s.y + impulse;
+			b->bb.y0 = b->p.y - b->s.y;
+			b->bb.y1 = b->p.y + b->s.y;
+			move_xneg(b);
+			if (p.x == b->p.x) {
+				b->p.y = p.y;
+				b->bb.y0 = b->p.y - b->s.y;
+				b->bb.y1 = b->p.y + b->s.y;
+			}
+			return;
+		}
+		b->v.x = 0;
+		b->p.x = best + b->s.x + impulse;
+		if (b->cb_func)
+			b->cb_func(b, best_p, FACE_RT);
+		return;
+	}
+	b->p.x += b->v.x;
 }
 
-void Space::move_zpos(Body *b, float dt)
+void Space::move_zpos(Body *b)
 {
-	int64_t x, y, z, x0, x1, y0, y1;
-	int step_up = 0;
+	box3f bb, bb2;
+	bool collide;
+	float best, best_y;
+	v3ll best_p;
 
-	z = floor((b->bb.z1 + b->v.z * dt) * 2);
-	x0 = floor(b->bb.x0 * 2);
-	y0 = floor(b->bb.y0 * 2);
-	x1 = floor(b->bb.x1 * 2);
-	y1 = floor(b->bb.y1 * 2);
-	for (x = x0; x <= x1; ++x) {
-		for (y = y0; y <= y1; ++y) {
-			if (cell_at(shape_masks, x, y, z)) {
-				if (y < y0 + b->step_size) {
-					step_up = 1;
-					continue;
-				}
-				b->v.z = 0;
-				b->p.z = 0.5 * z - b->s.x - impulse;
-				if (b->cb_func) {
-					v3ll p(x >> 1, y >> 1, z >> 1);
-					b->cb_func(b, p, FACE_FT);
-				}
-				return;
+	bb = b->bb;
+	bb.z0 = bb.z1;
+	bb.z1 += b->v.z;
+	collide = false;
+	best = bb.z1;
+
+	for (auto p : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2 = shift(bb2, v3f(p));
+			if (overlap(bb, bb2) && best > bb2.z0) {
+				collide = true;
+				best = bb2.z0;
+				best_y = bb2.y1;
+				best_p = p;
 			}
 		}
 	}
-	if (step_up)
-		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + impulse;
-	b->p.z += b->v.z * dt;
+	if (collide) {
+		if (best_y < b->bb.y0 + b->step_size) {
+			auto p = b->p;
+			b->p.y = best_y + b->s.y + impulse;
+			b->bb.y0 = b->p.y - b->s.y;
+			b->bb.y1 = b->p.y + b->s.y;
+			move_zpos(b);
+			if (p.z == b->p.z) {
+				b->p.y = p.y;
+				b->bb.y0 = b->p.y - b->s.y;
+				b->bb.y1 = b->p.y + b->s.y;
+			}
+			return;
+		}
+		b->v.z = 0;
+		b->p.z = best - b->s.x - impulse;
+		if (b->cb_func)
+			b->cb_func(b, best_p, FACE_BK);
+		return;
+	}
+	b->p.z += b->v.z;
 }
 
-void Space::move_zneg(Body *b, float dt)
+void Space::move_zneg(Body *b)
 {
-	int64_t x, y, z, x0, x1, y0, y1;
-	int step_up = 0;
+	box3f bb, bb2;
+	bool collide;
+	float best, best_y;
+	v3ll best_p;
 
-	z = floor((b->bb.z0 + b->v.z * dt) * 2);
-	x0 = floor(b->bb.x0 * 2);
-	y0 = floor(b->bb.y0 * 2);
-	x1 = floor(b->bb.x1 * 2);
-	y1 = floor(b->bb.y1 * 2);
-	for (x = x0; x <= x1; ++x) {
-		for (y = y0; y <= y1; ++y) {
-			if (cell_at(shape_masks, x, y, z)) {
-				if (y < y0 + b->step_size) {
-					step_up = 1;
-					continue;
-				}
-				b->v.z = 0;
-				b->p.z = 0.5 * (z + 1) + b->s.x + impulse;
-				if (b->cb_func) {
-					v3ll p(x >> 1, y >> 1, z >> 1);
-					b->cb_func(b, p, FACE_BK);
-				}
-				return;
+	bb = b->bb;
+	bb.z1 = bb.z0;
+	bb.z0 += b->v.z;
+	collide = false;
+	best = bb.z0;
+
+	for (auto p : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2 = shift(bb2, v3f(p));
+			if (overlap(bb, bb2) && best < bb2.z1) {
+				collide = true;
+				best = bb2.z1;
+				best_y = bb2.y1;
+				best_p = p;
 			}
 		}
 	}
-	if (step_up)
-		b->p.y = 0.5 * (y0 + b->step_size) + b->s.y + impulse;
-	b->p.z += b->v.z * dt;
+	if (collide) {
+		if (best_y < b->bb.y0 + b->step_size) {
+			auto p = b->p;
+			b->p.y = best_y + b->s.y + impulse;
+			b->bb.y0 = b->p.y - b->s.y;
+			b->bb.y1 = b->p.y + b->s.y;
+			move_zneg(b);
+			if (p.z == b->p.z) {
+				b->p.y = p.y;
+				b->bb.y0 = b->p.y - b->s.y;
+				b->bb.y1 = b->p.y + b->s.y;
+			}
+			return;
+		}
+		b->v.z = 0;
+		b->p.z = best + b->s.x + impulse;
+		if (b->cb_func)
+			b->cb_func(b, best_p, FACE_FT);
+		return;
+	}
+	b->p.z += b->v.z;
 }
 
-void Space::move_ypos(Body *b, float dt)
+void Space::move_ypos(Body *b)
 {
-	int64_t x, y, z, x0, x1, z0, z1;
+	box3f bb, bb2;
+	bool collide;
+	float best;
+	v3ll best_p;
 
-	y = floor((b->bb.y1 + b->v.y * dt) * 2);
-	x0 = floor(b->bb.x0 * 2);
-	z0 = floor(b->bb.z0 * 2);
-	x1 = floor(b->bb.x1 * 2);
-	z1 = floor(b->bb.z1 * 2);
-	for (x = x0; x <= x1; ++x) {
-		for (z = z0; z <= z1; ++z) {
-			if (cell_at(shape_masks, x, y, z)) {
-				b->v.y = 0;
-				b->p.y = 0.5 * y - b->s.y - impulse;
-				if (b->cb_func) {
-					v3ll p(x >> 1, y >> 1, z >> 1);
-					b->cb_func(b, p, FACE_DN);
-				}
-				return;
+	bb = b->bb;
+	bb.y0 = bb.y1;
+	bb.y1 += b->v.y;
+	collide = false;
+	best = bb.y1;
+
+	for (auto p : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2 = shift(bb2, v3f(p));
+			if (overlap(bb, bb2) && best > bb2.y0) {
+				collide = true;
+				best = bb2.y0;
+				best_p = p;
 			}
 		}
 	}
-	b->p.y += b->v.y * dt;
+	if (collide) {
+		b->v.y = 0;
+		b->p.y = best - b->s.y - impulse;
+		if (b->cb_func)
+			b->cb_func(b, best_p, FACE_DN);
+		return;
+	}
+	b->p.y += b->v.y;
 }
 
-void Space::move_yneg(Body *b, float dt)
+void Space::move_yneg(Body *b)
 {
-	int64_t x, y, z, x0, x1, z0, z1;
+	box3f bb, bb2;
+	bool collide;
+	float best;
+	v3ll best_p;
 
-	y = floor((b->bb.y0 + b->v.y * dt) * 2);
-	x0 = floor(b->bb.x0 * 2);
-	z0 = floor(b->bb.z0 * 2);
-	x1 = floor(b->bb.x1 * 2);
-	z1 = floor(b->bb.z1 * 2);
-	for (x = x0; x <= x1; ++x) {
-		for (z = z0; z <= z1; ++z) {
-			if (cell_at(shape_masks, x, y, z)) {
-				b->v.y = 0;
-				b->p.y = 0.5 * (y + 1) + b->s.y + impulse;
-				if (b->cb_func) {
-					v3ll p(x >> 1, y >> 1, z >> 1);
-					b->cb_func(b, p, FACE_UP);
-				}
-				return;
+	bb = b->bb;
+	bb.y1 = bb.y0;
+	bb.y0 += b->v.y;
+	collide = false;
+	best = bb.y0;
+
+	for (auto p : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(p)]) {
+			bb2 = shift(bb2, v3f(p));
+			if (overlap(bb, bb2) && best < bb2.y1) {
+				collide = true;
+				best = bb2.y1;
+				best_p = p;
 			}
 		}
 	}
-	b->p.y += b->v.y * dt;
+	if (collide) {
+		b->v.y = 0;
+		b->p.y = best + b->s.y + impulse;
+		if (b->cb_func)
+			b->cb_func(b, best_p, FACE_UP);
+		return;
+	}
+	b->p.y += b->v.y;
 }
 
-void Space::step(float dt)
+void Space::step()
 {
-	for (auto &b : bodies) {
-		b->v.y += gravity * dt;
+	for (auto b : bodies) {
+		b->v.y += gravity;
 		if (b->v.x < -terminal_speed)
 			b->v.x = -terminal_speed;
 		else if (b->v.x > terminal_speed)
@@ -263,7 +335,7 @@ void Space::step(float dt)
 			b->v.z = terminal_speed;
 	}
 
-	for (auto &b : bodies) {
+	for (auto b : bodies) {
 		b->bb.x0 = b->p.x - b->s.x;
 		b->bb.x1 = b->p.x + b->s.x;
 		b->bb.z0 = b->p.z - b->s.x;
@@ -271,198 +343,167 @@ void Space::step(float dt)
 		b->bb.y0 = b->p.y - b->s.y;
 		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.x > 0)
-			move_xpos(b, dt);
+			move_xpos(b);
 		else if (b->v.x < 0)
-			move_xneg(b, dt);
+			move_xneg(b);
 		b->bb.x0 = b->p.x - b->s.x;
 		b->bb.x1 = b->p.x + b->s.x;
-		b->bb.y0 = b->p.y - b->s.y;
-		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.z > 0)
-			move_zpos(b, dt);
+			move_zpos(b);
 		else if (b->v.z < 0)
-			move_zneg(b, dt);
+			move_zneg(b);
 		b->bb.z0 = b->p.z - b->s.x;
 		b->bb.z1 = b->p.z + b->s.x;
-		b->bb.y0 = b->p.y - b->s.y;
-		b->bb.y1 = b->p.y + b->s.y;
 		if (b->v.y > 0)
-			move_ypos(b, dt);
+			move_ypos(b);
 		else if (b->v.y < 0)
-			move_yneg(b, dt);
+			move_yneg(b);
 		b->bb.y0 = b->p.y - b->s.y;
 		b->bb.y1 = b->p.y + b->s.y;
 	}
 }
 
-void Space::run()
+void Space::query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int i;
-	for (i = 0; i < iterations; ++i)
-		step(1.0 / iterations);
-}
+	box3f bb;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
 
-
-int Space::query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t)
-{
-	int64_t x0, x1, x, y, z;
-	float t;
-	v3f p1;
-
-	x0 = ceil(p.x * 2);
-	x1 = floor((p.x + v.x) * 2);
-	for (x = x0; x <= x1; ++x) {
-		t = (0.5 * x - p.x) / v.x;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		y = floor(p1.y * 2);
-		z = floor(p1.z * 2);
-		if (cell_at(shape_masks, x, y, z)) {
-			q->face = FACE_LF;
-			q->p = v3ll(x >> 1, y >> 1, z >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	for (auto c : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2 = shift(bb2, v3f(c));
+			float t = (bb2.x0 - p.x) / v.x;
+			if (t < *best_t) {
+				float y = p.y + t * v.y;
+				float z = p.z + t * v.z;
+				if (y >= bb2.y0 && y <= bb2.y1 && z >= bb2.z0 && z <= bb2.z1) {
+					q->face = FACE_LF;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
-int Space::query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t x0, x1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
 
-	x0 = floor(p.x * 2);
-	x1 = floor((p.x + v.x) * 2);
-	for (x = x0; x >= x1; --x) {
-		t = (0.5 * x - p.x) / v.x;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		y = floor(p1.y * 2);
-		z = floor(p1.z * 2);
-		if (cell_at(shape_masks, x - 1, y, z)) {
-			q->face = FACE_RT;
-			q->p = v3ll((x - 1) >> 1, y >> 1, z >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	for (auto c : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2 = shift(bb2, v3f(c));
+			float t = (bb2.x1 - p.x) / v.x;
+			if (t < *best_t) {
+				float y = p.y + t * v.y;
+				float z = p.z + t * v.z;
+				if (y >= bb2.y0 && y <= bb2.y1 && z >= bb2.z0 && z <= bb2.z1) {
+					q->face = FACE_RT;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
-int Space::query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_zpos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t z0, z1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
 
-	z0 = ceil(p.z * 2);
-	z1 = floor((p.z + v.z) * 2);
-	for (z = z0; z <= z1; ++z) {
-		t = (0.5 * z - p.z) / v.z;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		x = floor(p1.x * 2);
-		y = floor(p1.y * 2);
-		if (cell_at(shape_masks, x, y, z)) {
-			q->face = FACE_BK;
-			q->p = v3ll(x >> 1, y >> 1, z >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	for (auto c : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2 = shift(bb2, v3f(c));
+			float t = (bb2.z0 - p.z) / v.z;
+			if (t < *best_t) {
+				float y = p.y + t * v.y;
+				float x = p.x + t * v.x;
+				if (y >= bb2.y0 && y <= bb2.y1 && x >= bb2.x0 && x <= bb2.x1) {
+					q->face = FACE_BK;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
-int Space::query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_zneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t z0, z1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
 
-	z0 = floor(p.z * 2);
-	z1 = floor((p.z + v.z) * 2);
-	for (z = z0; z >= z1; --z) {
-		t = (0.5 * z - p.z) / v.z;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		x = floor(p1.x * 2);
-		y = floor(p1.y * 2);
-		if (cell_at(shape_masks, x, y, z - 1)) {
-			q->face = FACE_FT;
-			q->p = v3ll(x >> 1, y >> 1, (z - 1) >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	for (auto c : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2 = shift(bb2, v3f(c));
+			float t = (bb2.z1 - p.z) / v.z;
+			if (t < *best_t) {
+				float y = p.y + t * v.y;
+				float x = p.x + t * v.x;
+				if (y >= bb2.y0 && y <= bb2.y1 && x >= bb2.x0 && x <= bb2.x1) {
+					q->face = FACE_FT;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
-int Space::query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_ypos(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t y0, y1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
 
-	y0 = ceil(p.y * 2);
-	y1 = floor((p.y + v.y) * 2);
-	for (y = y0; y <= y1; ++y) {
-		t = (0.5 * y - p.y) / v.y;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		x = floor(p1.x * 2);
-		z = floor(p1.z * 2);
-		if (cell_at(shape_masks, x, y, z)) {
-			q->face = FACE_DN;
-			q->p = v3ll(x >> 1, y >> 1, z >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	for (auto c : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2 = shift(bb2, v3f(c));
+			float t = (bb2.y0 - p.y) / v.y;
+			if (t < *best_t) {
+				float x = p.x + t * v.x;
+				float z = p.z + t * v.z;
+				if (x >= bb2.x0 && x <= bb2.x1 && z >= bb2.z0 && z <= bb2.z1) {
+					q->face = FACE_DN;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
-int Space::query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t)
+void Space::query_yneg(const v3f &p, const v3f &v, Query *q, float *best_t)
 {
-	int64_t y0, y1, x, y, z;
-	float t;
-	v3f p1;
+	box3f bb;
+	bb = fix(box3f(p.x, p.y, p.z, p.x + v.x, p.y + v.y, p.z + v.z));
 
-	y0 = floor(p.y * 2);
-	y1 = floor((p.y + v.y) * 2);
-	for (y = y0; y >= y1; --y) {
-		t = (0.5 * y - p.y) / v.y;
-		if (t >= *best_t)
-			return 0;
-		p1 = p + v * t;
-		x = floor(p1.x * 2);
-		z = floor(p1.z * 2);
-		if (cell_at(shape_masks, x, y - 1, z)) {
-			q->face = FACE_UP;
-			q->p = v3ll(x >> 1, (y - 1) >> 1, z >> 1);
-			q->q = p1 - v3f(q->p);
-			*best_t = t;
-			return 1;
+	for (auto c : box3ll(floor(bb))) {
+		for (auto bb2 : geom[world->get_shape(c)]) {
+			bb2 = shift(bb2, v3f(c));
+			float t = (bb2.y1 - p.y) / v.y;
+			if (t < *best_t) {
+				float x = p.x + t * v.x;
+				float z = p.z + t * v.z;
+				if (x >= bb2.x0 && x <= bb2.x1 && z >= bb2.z0 && z <= bb2.z1) {
+					q->face = FACE_UP;
+					q->p = c;
+					q->q = p + v * t - v3f(c);
+					*best_t = t;
+				}
+			}
 		}
 	}
-	return 0;
 }
 
 int Space::query(const v3f &p, const v3f &v, Query *q)
 {
-	float t = FLT_MAX;
-
+	float t = 1;
 	q->face = -1;
 	if (v.x < 0)
 		query_xneg(p, v, q, &t);

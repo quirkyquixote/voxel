@@ -13,6 +13,10 @@ const char *obj_names[256] = {
 	[OBJ_STAIRS] = "stairs",
 	[OBJ_PANE] = "pane",
 	[OBJ_FLUID] = "fluid",
+	[OBJ_TOKEN_LF] = "token_lf",
+	[OBJ_TOKEN_BK] = "token_bk",
+	[OBJ_TOKEN_RT] = "token_rt",
+	[OBJ_TOKEN_FT] = "token_ft",
 };
 
 const char *mat_names[256] = {
@@ -144,6 +148,13 @@ const char *mat_names[256] = {
 	[MAT_WOOD7_PIPE] = "wood7_pipe",
 	[MAT_WOOD7_LOG] = "wood7_log",
 	[MAT_WOOD7_BOARD] = "wood7_board",
+	[MAT_RUNE_O] = "rune_o",
+	[MAT_RUNE_K] = "rune_k",
+	[MAT_RUNE_A] = "rune_a",
+	[MAT_RUNE_N] = "rune_n",
+	[MAT_RUNE_J] = "rune_j",
+	[MAT_RUNE_C] = "rune_c",
+	[MAT_RUNE_E] = "rune_e",
 };
 
 const char *shape_names[256] = {
@@ -238,7 +249,7 @@ do { \
 
 #define COMMON_DROPS(m1, m2) \
 do { \
-	BLOCK_DROPS(m1,m2);\
+	BLOCK_DROPS(m1, m2);\
 	SLAB_DROPS(m1, m2);\
 	STAIR_DROPS(m1, m2);\
 	PANE_DROPS(m1, m2);\
@@ -294,139 +305,265 @@ void populate_block_traits_table(void)
 	WOOD_DROPS(MAT_WOOD6);
 	WOOD_DROPS(MAT_WOOD7);
 
-	block_traits[MAT_LIMESTONE_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_SANDSTONE_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_MARBLE_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_GRANITE_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_BASALT_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_SLATE_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_CLAY_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_WOOD1_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_WOOD2_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_WOOD3_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_WOOD4_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_WOOD5_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_WOOD6_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
-	block_traits[MAT_WOOD7_CRATE][SHAPE_BLOCK_DN].entity = construct_entity<CrateEntity>;
+	block_traits[MAT_LIMESTONE_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_SANDSTONE_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_MARBLE_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_GRANITE_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_BASALT_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_SLATE_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_CLAY_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD1_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD2_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD3_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD4_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD5_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD6_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
+	block_traits[MAT_WOOD7_CRATE][SHAPE_BLOCK_DN].entity =
+		construct_entity<CrateEntity>;
 
-	block_traits[MAT_LIMESTONE_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_SANDSTONE_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_MARBLE_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_GRANITE_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_BASALT_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_SLATE_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_CLAY_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_WOOD1_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_WOOD2_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_WOOD3_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_WOOD4_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_WOOD5_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_WOOD6_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
-	block_traits[MAT_WOOD7_BENCH][SHAPE_BLOCK_DN].entity = construct_entity<BenchEntity>;
+	block_traits[MAT_LIMESTONE_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_SANDSTONE_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_MARBLE_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_GRANITE_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_BASALT_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_SLATE_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_CLAY_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD1_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD2_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD3_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD4_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD5_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD6_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
+	block_traits[MAT_WOOD7_BENCH][SHAPE_BLOCK_DN].entity =
+		construct_entity<BenchEntity>;
 
-	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_DN].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_DN].entity =
+		construct_entity<PipeEntity>;
 
-	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_UP].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_UP].entity =
+		construct_entity<PipeEntity>;
 
-	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_LF].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_LF].entity =
+		construct_entity<PipeEntity>;
 
-	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_RT].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_RT].entity =
+		construct_entity<PipeEntity>;
 
-	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_BK].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_BK].entity =
+		construct_entity<PipeEntity>;
 
-	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
-	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_FT].entity = construct_entity<PipeEntity>;
+	block_traits[MAT_LIMESTONE_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SANDSTONE_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_MARBLE_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_GRANITE_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_BASALT_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_SLATE_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_CLAY_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD1_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD2_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD3_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD4_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD5_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD6_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
+	block_traits[MAT_WOOD7_PIPE][SHAPE_BLOCK_FT].entity =
+		construct_entity<PipeEntity>;
 
-	block_traits[MAT_LIMESTONE_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_SANDSTONE_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_MARBLE_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_GRANITE_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_BASALT_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_SLATE_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_CLAY_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_WOOD1_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_WOOD2_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_WOOD3_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_WOOD4_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_WOOD5_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_WOOD6_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
-	block_traits[MAT_WOOD7_BOARD][SHAPE_BLOCK_DN].entity = construct_entity<BoardEntity>;
+	block_traits[MAT_LIMESTONE_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_SANDSTONE_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_MARBLE_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_GRANITE_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_BASALT_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_SLATE_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_CLAY_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD1_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD2_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD3_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD4_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD5_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD6_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
+	block_traits[MAT_WOOD7_BOARD][SHAPE_BLOCK_DN].entity =
+		construct_entity<BoardEntity>;
 }
 

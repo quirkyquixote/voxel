@@ -10,7 +10,8 @@ static box3ll sel_bb = { 0, 0, 0, 0, 0, 0 };
 int parse_item(const char *str, int *mat, int *obj)
 {
 	for (*mat = MAT_COUNT - 1; *mat >= 0; --*mat) {
-		if (mat_names[*mat] && strncmp(str, mat_names[*mat], strlen(mat_names[*mat])) == 0)
+		if (mat_names[*mat] && strncmp(str, mat_names[*mat],
+					strlen(mat_names[*mat])) == 0)
 			break;
 	}
 	if (*mat < 0) {
@@ -28,7 +29,8 @@ int parse_item(const char *str, int *mat, int *obj)
 	}
 	++str;
 	for (*obj = OBJ_COUNT - 1; *obj >= 0; --*obj) {
-		if (obj_names[*obj] && strncmp(str, obj_names[*obj], strlen(obj_names[*obj])) == 0)
+		if (obj_names[*obj] && strncmp(str, obj_names[*obj],
+					strlen(obj_names[*obj])) == 0)
 			break;
 	}
 	if (*obj < 0) {
@@ -41,11 +43,13 @@ int parse_item(const char *str, int *mat, int *obj)
 int parse_block(const char *str, int *mat, int *shape)
 {
 	if (strcmp(str, "air") == 0) {
+		*mat = 0;
 		*shape = SHAPE_NONE;
 		return 0;
 	}
 	for (*mat = MAT_COUNT - 1; *mat >= 0; --*mat) {
-		if (mat_names[*mat] && strncmp(str, mat_names[*mat], strlen(mat_names[*mat])) == 0)
+		if (mat_names[*mat] && strncmp(str, mat_names[*mat],
+					strlen(mat_names[*mat])) == 0)
 			break;
 	}
 	if (*mat < 0) {
@@ -63,7 +67,8 @@ int parse_block(const char *str, int *mat, int *shape)
 	}
 	++str;
 	for (*shape = SHAPE_COUNT - 1; *shape >= 0; --*shape) {
-		if (shape_names[*shape] && strncmp(str, shape_names[*shape], strlen(shape_names[*shape])) == 0)
+		if (shape_names[*shape] && strncmp(str, shape_names[*shape],
+					strlen(shape_names[*shape])) == 0)
 			break;
 	}
 	if (*shape < 0) {
@@ -91,7 +96,8 @@ int cmd_help(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	log_info("box <block>: fill a box with the given block");
 	log_info("hbox <block>: fill a hollow box with the given block");
 	log_info("walls <block>: fill the walls of a box with the given block");
-	log_info("relit: recalculate lighting for all loaded chunks");
+	log_info("relit: recalculate lighting for current selection");
+	log_info("replace <from-block> <to-block>: replace blocks in region");
 	return TCL_OK;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -100,28 +106,37 @@ fail:
 
 int cmd_ls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: ls [mat|obj|sha]";
+	static const char *usage = "usage: ls [item|block]";
 	Context *ctx = static_cast<Context *>(data);
 	char *str;
 
 	if (objc < 2)
 		goto fail;
 	str = Tcl_GetString(objv[1]);
-	if (strncmp(str, "mat", 3) == 0) {
-		log_info("all materials:");
-		for (int i = 0; i < MAT_COUNT; ++i)
-			if (mat_names[i])
-			log_info("%s", mat_names[i]);
-	} else if (strncmp(str, "obj", 3) == 0) {
-		log_info("all objects:");
-		for (int i = 0; i < OBJ_COUNT; ++i)
-			if (obj_names[i])
-			log_info("%s", obj_names[i]);
-	} else if (strncmp(str, "sha", 3) == 0) {
-		log_info("all shapes:");
-		for (int i = 0; i < SHAPE_COUNT; ++i)
-			if (shape_names[i])
-			log_info("%s", shape_names[i]);
+	if (strcmp(str, "item") == 0) {
+		log_info("all items:");
+		for (int i = 0; i < MAT_COUNT; ++i) {
+			if (mat_names[i]) {
+				for (int j = 0; j < OBJ_COUNT; ++j) {
+					if (obj_names[j]) {
+						log_info("%s_%s", mat_names[i],
+								obj_names[j]);
+					}
+				}
+			}
+		}
+	} else if (strcmp(str, "block") == 0) {
+		log_info("all blocks:");
+		for (int i = 0; i < MAT_COUNT; ++i) {
+			if (mat_names[i]) {
+				for (int j = 0; j < SHAPE_COUNT; ++j) {
+					if (shape_names[j]) {
+						log_info("%s_%s", mat_names[i],
+								shape_names[j]);
+					}
+				}
+			}
+		}
 	} else {
 		goto fail;
 	}
@@ -133,7 +148,7 @@ fail:
 
 int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: give <material>[_<object>] [<amount>]";
+	static const char *usage = "usage: give <item> [<amount>]";
 	Context *ctx = static_cast<Context *>(data);
 	int mat, obj, num = 1;
 
@@ -155,12 +170,17 @@ fail:
 
 int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: take <material>[_<object>] [<amount>]";
+	static const char *usage = "usage: take <item> [<amount>]";
 	Context *ctx = static_cast<Context *>(data);
 	int mat, obj, num = 1;
 
 	if (objc < 2 || objc > 3)
 		goto fail;
+	if (strcmp(Tcl_GetString(objv[1]), "all") == 0) {
+		for (auto &i : *ctx->player->get_items())
+			i.num = 0;
+		return TCL_OK;
+	}
 	if (parse_item(Tcl_GetString(objv[1]), &mat, &obj) != 0)
 		goto fail;
 	if (objc == 3) {
@@ -263,7 +283,7 @@ fail:
 
 int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: box <material>[_<shape>]";
+	static const char *usage = "usage: box <block>";
 	Context *ctx = static_cast<Context *>(data);
 	int mat, shape;
 	box3ll bb;
@@ -273,9 +293,6 @@ int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	if (parse_block(Tcl_GetString(objv[1]), &mat, &shape) != 0)
 		goto fail;
 	bb = fix(sel_bb);
-	++bb.x1;
-	++bb.y1;
-	++bb.z1;
 	for (auto &p : bb)
 		ctx->world->set_block(p, shape, mat);
 	return 0;
@@ -286,7 +303,7 @@ fail:
 
 int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: hbox <material>[_<shape>]";
+	static const char *usage = "usage: hbox <block>";
 	Context *ctx = static_cast<Context *>(data);
 	int mat, shape;
 	box3ll bb;
@@ -326,7 +343,7 @@ fail:
 
 int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
-	static const char *usage = "usage: walls <material>[_<shape>]";
+	static const char *usage = "usage: walls <block>";
 	Context *ctx = static_cast<Context *>(data);
 	int mat, shape;
 	box3ll bb;
@@ -366,13 +383,36 @@ int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	if (objc != 1)
 		goto fail;
 	bb = fix(sel_bb);
-	++bb.x1;
-	++bb.y1;
-	++bb.z1;
-	update_lighting(ctx->world, bb, &bb2);
+	ctx->light->update(bb, &bb2);
 	ctx->world->set_flags(bb2, CHUNK_UNRENDERED);
 	return TCL_OK;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
 	return TCL_ERROR;
 }
+
+int cmd_replace(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: replace <from-block> <to-block>";
+	Context *ctx = static_cast<Context *>(data);
+	int m1, s1, m2, s2;
+	box3ll bb;
+
+	if (objc != 3)
+		goto fail;
+	if (parse_block(Tcl_GetString(objv[1]), &m1, &s1) != 0)
+		goto fail;
+	if (parse_block(Tcl_GetString(objv[2]), &m2, &s2) != 0)
+		goto fail;
+	bb = fix(sel_bb);
+	for (auto &p : bb) {
+		if (ctx->world->get_mat(p) == m1
+				&& ctx->world->get_shape(p) == s1)
+			ctx->world->set_block(p, s2, m2);
+	}
+	return 0;
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+

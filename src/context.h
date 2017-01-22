@@ -14,10 +14,12 @@
 #include "profile.h"
 #include "renderer.h"
 #include "inventory.h"
+#include "lighting.h"
 #include "cli.h"
 #include "tcl_commands.h"
 #include "roaming_entity.h"
 #include "player_entity.h"
+#include "callback.h"
 
 enum {
 	MODE_ROAM,
@@ -27,19 +29,21 @@ enum {
 class Context {
  public:
 	const char *dir;
-	MainLoop *ml;
+	std::unique_ptr<MainLoop> ml;
 	Tcl_Interp *tcl;
-	CommandLine *cli;
-	World *world;
-	Renderer *renderer;
-	Space *space;
-	PlayerEntity *player;
-	std::list<RoamingEntity*> entities;
+	std::unique_ptr<CommandLine> cli;
+	std::unique_ptr<World> world;
+	std::unique_ptr<Renderer> renderer;
+	std::unique_ptr<Space> space;
+	std::unique_ptr<Lighting> light;
+	std::unique_ptr<PlayerEntity> player;
+	PtrList<RoamingEntity> entities;
+	PtrList<Callback> callback_list;
 	char mode;
 	int chunks_per_tick;
 	uint64_t tick;
 
-	Context(const char *dir);
+	explicit Context(const char *dir);
 	~Context();
 
 	void event(const SDL_Event &e);
@@ -47,19 +51,23 @@ class Context {
 
 	void spill_inventory(const v3ll &p);
 	void drop_block(const v3ll &p);
+
+	bool load_all();
+	void save_all();
+
+	inline void add_callback(Callback *cb) { callback_list.push_back(cb); }
+
+ private:
 	void update_chunks();
 	void update_entities();
 
-	bool load_all();
 	bool load_world();
 	bool load_player();
 	bool load_chunk(Chunk *c);
 
-	void save_all();
 	void save_world();
 	void save_player();
 	void save_chunk(Chunk *c);
-
 };
 
 unsigned long long next_id(void);

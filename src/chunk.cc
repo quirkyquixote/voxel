@@ -52,7 +52,7 @@ void Chunk::load(sz_Tag *root)
 sz_Tag *Chunk::save()
 {
 	sz_Tag *root, *tmp;
-	box3ll bb(0, 0, 0, CHUNK_W, CHUNK_H, CHUNK_D);
+	box3ll bb(0, 0, 0, CHUNK_W - 1, CHUNK_H - 1, CHUNK_D - 1);
 	root = new sz_Dict();
 	sz_dict_add(root, "x", new sz_i64(x));
 	sz_dict_add(root, "z", new sz_i64(z));

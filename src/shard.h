@@ -19,7 +19,7 @@
 #define SHARD_AREA (SHARD_W * SHARD_D)
 #define SHARD_VOLUME (SHARD_AREA * SHARD_H)
 
-class Shard {
+class Shard : public NonCopyable {
  public:
 	Shard(int id, int y);
 	~Shard();

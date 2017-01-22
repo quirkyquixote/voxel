@@ -1,4 +1,4 @@
-/* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
+/* Copyright 3017 Luis Sanz <luis.sanz@gmail.com> */
 
 #ifndef SRC_BOX3_H_
 #define SRC_BOX3_H_
@@ -7,17 +7,20 @@ template<typename T> struct box3 {
 	struct iterator {
 		v3<T> cur;
 		box3<T> box;
-		iterator(v3<T> cur, box3<T> box) : cur(cur), box(box) { }
+		iterator(const v3<T> &cur, const box3<T> &box)
+			: cur(cur), box(box) { }
 		inline void operator++()
 		{
-			++cur.z;
 			if (cur.z == box.z1) {
 				cur.z = box.z0;
-				++cur.y;
 				if (cur.y == box.y1) {
 					cur.y = box.y0;
 					++cur.x;
+				} else {
+					++cur.y;
 				}
+			} else {
+				++cur.z;
 			}
 		}
 		inline bool operator!=(const iterator &rhs) { return cur != rhs.cur; }
@@ -25,15 +28,14 @@ template<typename T> struct box3 {
 	};
 
 	T x0, y0, z0, x1, y1, z1;
+	box3() : x0(0), y0(0), z0(0), x1(0), y1(0), z1(0) {}
 	box3(T x0, T y0, T z0, T x1, T y1, T z1)
 		: x0(x0), y0(y0), z0(z0), x1(x1), y1(y1), z1(z1) {}
-	box3() : x0(0), y0(0), z0(0), x1(0), y1(0), z1(0) {}
+	template<typename U> box3(const box3<U> &b)
+		: x0(b.x0), y0(b.y0), z0(b.z0), x1(b.x1), y1(b.y1), z1(b.z1) {}
 
 	iterator begin() const { return iterator(v3<T>(x0, y0, z0), *this); }
-	iterator end() const { return iterator(v3<T>(x1, y0, z0), *this); }
-};
-
-template<typename T> struct box3_iterator {
+	iterator end() const { return iterator(v3<T>(x1 + 1, y0, z0), *this); }
 };
 
 typedef box3<float> box3f;
@@ -56,14 +58,27 @@ template<typename T> box3<T> fix(const box3<T> &b)
 
 template<typename T> box3<T> grow(const box3<T> &b, T k)
 {
-	return box3<T>(b.x0 - k, b.y0 - k, b.z0 - k, b.x0 + k, b.y0 + k, b.z0 + k);
+	return box3<T>(b.x0 - k, b.y0 - k, b.z0 - k,
+			b.x1 + k, b.y1 + k, b.z1 + k);
 }
 
-template<typename T> bool overlap(const box3<T> &b1, const box3<T> &b2)
+template<typename T> box3<T> shift(const box3<T> &b, const v3<T> &p)
 {
-	return (b2.x0 <= b1.x1 && b2.x1 >= b1.x0 &&
-			b2.y0 <= b1.y1 && b2.y1 >= b1.y0 &&
-			b2.z0 <= b1.z1 && b2.z1 >= b1.z0);
+	return box3<T>(b.x0 + p.x, b.y0 + p.y, b.z0 + p.z,
+			b.x1 + p.x, b.y1 + p.y, b.z1 + p.z);
+}
+
+template<typename T> bool overlap(const box3<T> &b1, const box3<T> &b3)
+{
+	return (b3.x0 <= b1.x1 && b3.x1 >= b1.x0 &&
+			b3.y0 <= b1.y1 && b3.y1 >= b1.y0 &&
+			b3.z0 <= b1.z1 && b3.z1 >= b1.z0);
+}
+
+template<typename T> box3<T> floor(const box3<T> &b)
+{
+	return box3<T>(floor(b.x0), floor(b.y0), floor(b.z0),
+			floor(b.x1), floor(b.y1), floor(b.z1));
 }
 
 #endif  // SRC_BOX3_H_
