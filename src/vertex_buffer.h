@@ -18,17 +18,12 @@
 
 struct Vertex {
 	GLfloat x, y, z;
-	GLfloat u0, v0;
-	GLfloat u1, v1;
-	GLubyte r;
-	GLubyte g;
-	GLubyte b;
-	GLubyte a;
+	GLfloat u, v;
+	GLfloat r, g, b, a;
 };
 
 struct VertexDesc {
-	GLfloat x, y, z;
-	GLfloat r, g, b;
+	GLfloat x, y, z, c;
 	int face;
 };
 
