@@ -119,54 +119,55 @@ void Renderer::render_string(const char *str)
 	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
 }
-/*
-   void render_flowsim(Renderer *ctx)
-   {
-   struct fs_volume *v;
-   struct fs_layer *l;
-   v3ll p;
 
-   glEnable(GL_BLEND);
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   glColor4f(1, 0, 0, .5);
-   glBegin(GL_TRIANGLES);
-   list_foreach(v, &flowsim->volumes, volumes) {
-   list_foreach(l, &v->layers, layers) {
-   if (!l->is_top) {
-   array_foreach(p, l->cells) {
-   float y = l->y + 1;
-   glVertex3f(p.x + 1, y, p.z + 1);
-   glVertex3f(p.x + 1, y, p.z);
-   glVertex3f(p.x, y, p.z + 1);
-   glVertex3f(p.x, y, p.z + 1);
-   glVertex3f(p.x + 1, y, p.z);
-   glVertex3f(p.x, y, p.z);
-   }
-   }
-   }
-   }
-   glEnd();
-   glColor4f(0, 0, 1, .5);
-   glBegin(GL_TRIANGLES);
-   list_foreach(v, &flowsim->volumes, volumes) {
-   list_foreach(l, &v->layers, layers) {
-   if (l->is_top) {
-   array_foreach(p, l->cells) {
-   float y = v->top + l->y + .001;
-   glVertex3f(p.x + 1, y, p.z + 1);
-   glVertex3f(p.x + 1, y, p.z);
-   glVertex3f(p.x, y, p.z + 1);
-   glVertex3f(p.x, y, p.z + 1);
-   glVertex3f(p.x + 1, y, p.z);
-   glVertex3f(p.x, y, p.z);
-   }
-   }
-   }
-   }
-   glEnd();
-   glDisable(GL_BLEND);
-   }
-   */
+#if 0
+void render_flowsim(Renderer *ctx)
+{
+	struct fs_volume *v;
+	struct fs_layer *l;
+	v3ll p;
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(1, 0, 0, .5);
+	glBegin(GL_TRIANGLES);
+	list_foreach(v, &flowsim->volumes, volumes) {
+		list_foreach(l, &v->layers, layers) {
+			if (!l->is_top) {
+				array_foreach(p, l->cells) {
+					float y = l->y + 1;
+					glVertex3f(p.x + 1, y, p.z + 1);
+					glVertex3f(p.x + 1, y, p.z);
+					glVertex3f(p.x, y, p.z + 1);
+					glVertex3f(p.x, y, p.z + 1);
+					glVertex3f(p.x + 1, y, p.z);
+					glVertex3f(p.x, y, p.z);
+				}
+			}
+		}
+	}
+	glEnd();
+	glColor4f(0, 0, 1, .5);
+	glBegin(GL_TRIANGLES);
+	list_foreach(v, &flowsim->volumes, volumes) {
+		list_foreach(l, &v->layers, layers) {
+			if (l->is_top) {
+				array_foreach(p, l->cells) {
+					float y = v->top + l->y + .001;
+					glVertex3f(p.x + 1, y, p.z + 1);
+					glVertex3f(p.x + 1, y, p.z);
+					glVertex3f(p.x, y, p.z + 1);
+					glVertex3f(p.x, y, p.z + 1);
+					glVertex3f(p.x + 1, y, p.z);
+					glVertex3f(p.x, y, p.z);
+				}
+			}
+		}
+	}
+	glEnd();
+	glDisable(GL_BLEND);
+}
+#endif
 
 void Renderer::render_item(int obj, int mat, GLfloat alpha)
 {
@@ -427,33 +428,57 @@ void Renderer::render_shards()
 }
 
 static const char has_left_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
+	0,
+	1, 1, 1, 1, 1, 1,
+	0, 0, 1, 0, 0, 0,
+	0, 0, 0,
+	0, 1, 0, 0, 0, 1, 0, 0,
+	0, 0, 1, 0, 0, 0,
 };
 
 static const char has_right_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
+	0,
+	1, 1, 1, 1, 1, 1,
+	0, 0, 0, 1, 0, 0,
+	0, 0, 0,
+	0, 0, 0, 1, 0, 0, 0, 1,
+	0, 0, 0, 1, 0, 0,
 };
 
 static const char has_down_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
+	0,
+	1, 1, 1, 1, 1, 1,
+	1, 0, 0, 0, 0, 0,
+	0, 0, 0,
+	1, 1, 1, 1, 0, 0, 0, 0,
+	1, 0, 0, 0, 0, 0,
 };
 
 static const char has_up_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
+	0,
+	1, 1, 1, 1, 1, 1,
+	0, 1, 0, 0, 0, 0,
+	0, 0, 0,
+	0, 0, 0, 0, 1, 1, 1, 1,
+	0, 1, 0, 0, 0, 0,
 };
 
 static const char has_back_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
+	0,
+	1, 1, 1, 1, 1, 1,
+	0, 0, 0, 0, 1, 0,
+	0, 0, 0,
+	0, 0, 1, 0, 0, 0, 1, 0,
+	0, 0, 0, 0, 1, 0,
 };
 
 static const char has_front_side[256] = {
-	0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1
+	0,
+	1, 1, 1, 1, 1, 1,
+	0, 0, 0, 0, 0, 1,
+	0, 0, 0,
+	1, 0, 0, 0, 1, 0, 0, 0,
+	0, 0, 0, 0, 0, 1,
 };
 
 void Renderer::update_face_lf(std::vector<Vertex> *buf,
