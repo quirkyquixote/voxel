@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "types.h"
+#include "tone_mapper.h"
 
 #define T_COL 1.
 #define X_COL .8
@@ -1238,86 +1239,114 @@ void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf, size_t len,
 				&& (d->y == 0 || d->y == 1)
 				&& (d->z == 0 || d->z == 1)) {
 			v3ll q(floor(v.x), floor(v.y), floor(v.z));
+			v2f l(0, 0);
 			if (d->face == FACE_LF) {
 				--q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.z;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				++q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 			} else if (d->face == FACE_RT) {
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.z;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				++q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 			} else if (d->face == FACE_DN) {
 				--q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.z;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				++q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 			} else if (d->face == FACE_UP) {
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.z;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				++q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 			} else if (d->face == FACE_BK) {
 				--q.z;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				++q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 			} else if (d->face == FACE_FT) {
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				--q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 				++q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
 				if (w->get_shape(q) != SHAPE_NONE)
 					v.r -= .25;
 			}
+			v.g = l.x;
+			v.b = l.y;
+		} else {
+			v.g = t1.x;
+			v.b = t1.y;
 		}
 		v.r *= d->c;
-		v.g = t1.x;
-		v.b = t1.y;
 		v.a = 1;
 		s->push_back(v);
 	}
