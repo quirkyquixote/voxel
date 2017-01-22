@@ -111,10 +111,21 @@ void Renderer::operator()()
 
 void Renderer::render_string(const char *str)
 {
+	shader->enable();
+
+	glActiveTexture(GL_TEXTURE0);
+	int tl0 = shader->get_uniform_location("Texture0");
+	glUniform1i(tl0, 0);
+	glBindTexture(GL_TEXTURE_2D, tone_mapper->get_texture());
+
+	glActiveTexture(GL_TEXTURE1);
+	int tl1 = shader->get_uniform_location("Texture1");
+	glUniform1i(tl1, 1);
+	glBindTexture(GL_TEXTURE_2D, tex_font);
+
+	glActiveTexture(GL_TEXTURE0);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, tex_font);
 	text_vertex_buffer->enable();
 	while (*str) {
 		text_vertex_buffer->draw_slice(GL_TRIANGLES, 0, *str * 6, 6);
@@ -122,8 +133,8 @@ void Renderer::render_string(const char *str)
 		++str;
 	}
 	text_vertex_buffer->disable();
-	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
+	shader->disable();
 }
 
 #if 0
