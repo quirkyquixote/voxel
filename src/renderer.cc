@@ -78,19 +78,19 @@ Renderer::Renderer(Context *ctx)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
 	/* Setup camera */
-	cam = new Camera();
+	cam.reset(new Camera());
 	cam->set_max_distance(1024);
 	cam->set_aspect_ratio(1920.0 / 1080.0);
 
 	/* Create vertex_buffers */
-	shard_vertex_buffer = new VertexBuffer(SHARDS_PER_WORLD);
-	obj_vertex_buffer = new VertexBuffer(1);
-	text_vertex_buffer = new VertexBuffer(1);
-	populate_obj_vertex_buffer(obj_vertex_buffer);
-	populate_text_vertex_buffer(text_vertex_buffer);
+	shard_vertex_buffer.reset(new VertexBuffer(SHARDS_PER_WORLD));
+	obj_vertex_buffer.reset(new VertexBuffer(1));
+	text_vertex_buffer.reset(new VertexBuffer(1));
+	populate_obj_vertex_buffer(obj_vertex_buffer.get());
+	populate_text_vertex_buffer(text_vertex_buffer.get());
 
-	tone_mapper = new ToneMapper(1. / 30., 16);
-	shader = new Shader("data/shader.vert", "data/shader.frag");
+	tone_mapper.reset(new ToneMapper(1. / 30., 16));
+	shader.reset(new Shader("data/shader.vert", "data/shader.frag"));
 }
 
 Renderer::~Renderer()

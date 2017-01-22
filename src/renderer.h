@@ -3,6 +3,8 @@
 #ifndef SRC_RENDERER_H_
 #define SRC_RENDERER_H_
 
+#include <memory>
+
 #include "vertex_buffer.h"
 #include "tone_mapper.h"
 #include "shader.h"
@@ -19,7 +21,7 @@ class Renderer : public NonCopyable {
 
 	void operator()();
 
-	inline Camera *get_cam() { return cam; }
+	inline Camera *get_cam() { return cam.get(); }
 
 	void render_shards();
 	void render_commandline();
@@ -49,12 +51,12 @@ class Renderer : public NonCopyable {
 
  private:
 	Context *ctx;
-	VertexBuffer *shard_vertex_buffer;
-	VertexBuffer *obj_vertex_buffer;
-	VertexBuffer *text_vertex_buffer;
-	ToneMapper *tone_mapper;
-	Shader *shader;
-	Camera *cam;
+	std::unique_ptr<VertexBuffer> shard_vertex_buffer;
+	std::unique_ptr<VertexBuffer> obj_vertex_buffer;
+	std::unique_ptr<VertexBuffer> text_vertex_buffer;
+	std::unique_ptr<ToneMapper> tone_mapper;
+	std::unique_ptr<Shader> shader;
+	std::unique_ptr<Camera> cam;
 	GLuint tex_terrain;
 	GLuint tex_font;
 	PtrList<Callback> callback_list;
