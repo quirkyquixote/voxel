@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "types.h"
+#include "tone_mapper.h"
 
 #define T_COL 1.
 #define X_COL .8
@@ -116,12 +117,12 @@ struct VertexDesc vertices_face_bk[] = {
 };
 
 struct VertexDesc vertices_face_ft[] = {
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., 1., 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., 1., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_slab_dn[] = {
@@ -137,24 +138,24 @@ struct VertexDesc vertices_slab_dn[] = {
 	{ 0., .5, 0., X_COL, FACE_LF },
 	{ 0., 0., 1., X_COL, FACE_LF },
 	{ 0., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
 	{ 1., 0., 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 0., .5, 0., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_slab_up[] = {
@@ -170,24 +171,24 @@ struct VertexDesc vertices_slab_up[] = {
 	{ 0., 1., 0., X_COL, FACE_LF },
 	{ 0., .5, 1., X_COL, FACE_LF },
 	{ 0., 1., 1., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
-	{ 1., 1., 0., X_COL, FACE_LF },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
+	{ 1., 1., 0., X_COL, FACE_RT },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 0., .5, 0., Z_COL, FACE_BK },
 	{ 1., 1., 0., Z_COL, FACE_BK },
 	{ 1., 1., 0., Z_COL, FACE_BK },
 	{ 0., .5, 0., Z_COL, FACE_BK },
 	{ 0., 1., 0., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
-	{ 1., 1., 1., Z_COL, FACE_BK },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
+	{ 1., 1., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_slab_lf[] = {
@@ -215,12 +216,12 @@ struct VertexDesc vertices_slab_lf[] = {
 	{ .5, 1., 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 0., 1., 0., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ .5, 0., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ .5, 0., 1., Z_COL, FACE_BK },
-	{ .5, 1., 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ .5, 0., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ .5, 0., 1., Z_COL, FACE_FT },
+	{ .5, 1., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_slab_rt[] = {
@@ -248,12 +249,12 @@ struct VertexDesc vertices_slab_rt[] = {
 	{ 1., 1., 0., Z_COL, FACE_BK },
 	{ .5, 0., 0., Z_COL, FACE_BK },
 	{ .5, 1., 0., Z_COL, FACE_BK },
-	{ .5, 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ .5, 1., 1., Z_COL, FACE_BK },
-	{ .5, 1., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., 1., 1., Z_COL, FACE_BK },
+	{ .5, 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ .5, 1., 1., Z_COL, FACE_FT },
+	{ .5, 1., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., 1., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_slab_bk[] = {
@@ -275,12 +276,12 @@ struct VertexDesc vertices_slab_bk[] = {
 	{ 0., 1., 0., X_COL, FACE_LF },
 	{ 0., 0., .5, X_COL, FACE_LF },
 	{ 0., 1., .5, X_COL, FACE_LF },
-	{ 1., 0., .5, X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., 1., .5, X_COL, FACE_LF },
-	{ 1., 1., .5, X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., 1., 0., X_COL, FACE_LF },
+	{ 1., 0., .5, X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., 1., .5, X_COL, FACE_RT },
+	{ 1., 1., .5, X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., 1., 0., X_COL, FACE_RT },
 	{ 0., 0., .5, Z_COL, FACE_BK },
 	{ 1., 0., .5, Z_COL, FACE_BK },
 	{ 0., 1., .5, Z_COL, FACE_BK },
@@ -308,12 +309,12 @@ struct VertexDesc vertices_slab_ft[] = {
 	{ 0., 1., .5, X_COL, FACE_LF },
 	{ 0., 0., 1., X_COL, FACE_LF },
 	{ 0., 1., 1., X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., .5, X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., 0., .5, X_COL, FACE_LF },
-	{ 1., 1., .5, X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., .5, X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., 0., .5, X_COL, FACE_RT },
+	{ 1., 1., .5, X_COL, FACE_RT },
 	{ 1., 0., .5, Z_COL, FACE_BK },
 	{ 0., 0., .5, Z_COL, FACE_BK },
 	{ 1., 1., .5, Z_COL, FACE_BK },
@@ -335,12 +336,12 @@ struct VertexDesc vertices_stairs_dl[] = {
 	{ 0., 1., 1., T_COL, FACE_UP },
 	{ .5, 1., 0., T_COL, FACE_UP },
 	{ 0., 1., 0., T_COL, FACE_UP },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
 	{ .5, .5, 1., X_COL, FACE_LF },
 	{ .5, .5, 0., X_COL, FACE_LF },
 	{ .5, 1., 1., X_COL, FACE_LF },
@@ -356,15 +357,15 @@ struct VertexDesc vertices_stairs_dl[] = {
 	{ .5, .5, 0., Z_COL, FACE_BK },
 	{ 0., 1., 0., Z_COL, FACE_BK },
 	{ .5, 1., 0., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ .5, .5, 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ .5, .5, 1., Z_COL, FACE_BK },
-	{ .5, 1., 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ .5, .5, 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ .5, .5, 1., Z_COL, FACE_FT },
+	{ .5, 1., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_stairs_dr[] = {
@@ -401,15 +402,15 @@ struct VertexDesc vertices_stairs_dr[] = {
 	{ 1., 1., 0., Z_COL, FACE_BK },
 	{ .5, .5, 0., Z_COL, FACE_BK },
 	{ .5, 1., 0., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., 1., 1., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ .5, .5, 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ .5, .5, 1., Z_COL, FACE_BK },
-	{ 1., 1., 1., Z_COL, FACE_BK },
-	{ .5, 1., 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., 1., 1., Z_COL, FACE_FT },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ .5, .5, 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ .5, .5, 1., Z_COL, FACE_FT },
+	{ 1., 1., 1., Z_COL, FACE_FT },
+	{ .5, 1., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_stairs_db[] = {
@@ -425,12 +426,12 @@ struct VertexDesc vertices_stairs_db[] = {
 	{ 0., 1., .5, T_COL, FACE_UP },
 	{ 1., 1., 0., T_COL, FACE_UP },
 	{ 0., 1., 0., T_COL, FACE_UP },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
 	{ 0., .5, .5, Z_COL, FACE_BK },
 	{ 1., .5, .5, Z_COL, FACE_BK },
 	{ 1., 1., .5, Z_COL, FACE_BK },
@@ -446,15 +447,15 @@ struct VertexDesc vertices_stairs_db[] = {
 	{ 0., 1., 0., X_COL, FACE_LF },
 	{ 0., .5, .5, X_COL, FACE_LF },
 	{ 0., 1., .5, X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., 1., 0., X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., .5, .5, X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., .5, .5, X_COL, FACE_LF },
-	{ 1., 1., 0., X_COL, FACE_LF },
-	{ 1., 1., .5, X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., 1., 0., X_COL, FACE_RT },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., .5, .5, X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., .5, .5, X_COL, FACE_RT },
+	{ 1., 1., 0., X_COL, FACE_RT },
+	{ 1., 1., .5, X_COL, FACE_RT },
 };
 
 struct VertexDesc vertices_stairs_df[] = {
@@ -491,15 +492,15 @@ struct VertexDesc vertices_stairs_df[] = {
 	{ 0., .5, .5, X_COL, FACE_LF },
 	{ 0., 1., 1., X_COL, FACE_LF },
 	{ 0., 1., .5, X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., .5, .5, X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., .5, .5, X_COL, FACE_LF },
-	{ 1., 1., .5, X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., .5, .5, X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., .5, .5, X_COL, FACE_RT },
+	{ 1., 1., .5, X_COL, FACE_RT },
 };
 
 struct VertexDesc vertices_stairs_ul[] = {
@@ -515,12 +516,12 @@ struct VertexDesc vertices_stairs_ul[] = {
 	{ .5, 0., 0., B_COL, FACE_DN },
 	{ 0., 0., 1., B_COL, FACE_DN },
 	{ 0., 0., 0., B_COL, FACE_DN },
-	{ 1., 1., 0., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., 1., 0., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
+	{ 1., 1., 0., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., 1., 0., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
 	{ .5, .5, 0., X_COL, FACE_LF },
 	{ .5, .5, 1., X_COL, FACE_LF },
 	{ .5, 0., 1., X_COL, FACE_LF },
@@ -536,15 +537,15 @@ struct VertexDesc vertices_stairs_ul[] = {
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ .5, .5, 0., Z_COL, FACE_BK },
 	{ .5, 0., 0., Z_COL, FACE_BK },
-	{ 1., 1., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 1., 1., Z_COL, FACE_BK },
-	{ .5, .5, 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
-	{ .5, .5, 1., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ .5, 0., 1., Z_COL, FACE_BK },
+	{ 1., 1., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 1., 1., Z_COL, FACE_FT },
+	{ .5, .5, 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
+	{ .5, .5, 1., Z_COL, FACE_FT },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ .5, 0., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_stairs_ur[] = {
@@ -581,15 +582,15 @@ struct VertexDesc vertices_stairs_ur[] = {
 	{ .5, .5, 0., Z_COL, FACE_BK },
 	{ 1., 0., 0., Z_COL, FACE_BK },
 	{ .5, 0., 0., Z_COL, FACE_BK },
-	{ 1., 1., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ .5, .5, 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ .5, .5, 1., Z_COL, FACE_BK },
-	{ .5, 0., 1., Z_COL, FACE_BK },
+	{ 1., 1., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ .5, .5, 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ .5, .5, 1., Z_COL, FACE_FT },
+	{ .5, 0., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_stairs_ub[] = {
@@ -605,12 +606,12 @@ struct VertexDesc vertices_stairs_ub[] = {
 	{ 1., 0., 0., B_COL, FACE_DN },
 	{ 0., 0., .5, B_COL, FACE_DN },
 	{ 0., 0., 0., B_COL, FACE_DN },
-	{ 1., 1., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
+	{ 1., 1., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
 	{ 1., .5, .5, Z_COL, FACE_BK },
 	{ 0., .5, .5, Z_COL, FACE_BK },
 	{ 1., 0., .5, Z_COL, FACE_BK },
@@ -626,15 +627,15 @@ struct VertexDesc vertices_stairs_ub[] = {
 	{ 0., .5, .5, X_COL, FACE_LF },
 	{ 0., 0., 0., X_COL, FACE_LF },
 	{ 0., 0., .5, X_COL, FACE_LF },
-	{ 1., 1., 0., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, .5, X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, .5, X_COL, FACE_LF },
-	{ 1., 0., .5, X_COL, FACE_LF },
+	{ 1., 1., 0., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, .5, X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, .5, X_COL, FACE_RT },
+	{ 1., 0., .5, X_COL, FACE_RT },
 };
 
 struct VertexDesc vertices_stairs_uf[] = {
@@ -671,15 +672,15 @@ struct VertexDesc vertices_stairs_uf[] = {
 	{ 0., 0., 1., X_COL, FACE_LF },
 	{ 0., .5, .5, X_COL, FACE_LF },
 	{ 0., 0., .5, X_COL, FACE_LF },
-	{ 1., 1., 0., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 1., 0., X_COL, FACE_LF },
-	{ 1., .5, .5, X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
-	{ 1., .5, .5, X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., .5, X_COL, FACE_LF },
+	{ 1., 1., 0., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 1., 0., X_COL, FACE_RT },
+	{ 1., .5, .5, X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
+	{ 1., .5, .5, X_COL, FACE_RT },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., .5, X_COL, FACE_RT },
 };
 
 struct VertexDesc vertices_pane_x[] = {
@@ -718,12 +719,12 @@ struct VertexDesc vertices_pane_x[] = {
 	{ .46875, 0., 0., Z_COL, FACE_BK },
 	{ .46875, 1., 0., Z_COL, FACE_BK },
 
-	{ .46875, 0., 1., Z_COL, FACE_BK },
-	{ .53125, 0., 1., Z_COL, FACE_BK },
-	{ .46875, 1., 1., Z_COL, FACE_BK },
-	{ .46875, 1., 1., Z_COL, FACE_BK },
-	{ .53125, 0., 1., Z_COL, FACE_BK },
-	{ .53125, 1., 1., Z_COL, FACE_BK },
+	{ .46875, 0., 1., Z_COL, FACE_FT },
+	{ .53125, 0., 1., Z_COL, FACE_FT },
+	{ .46875, 1., 1., Z_COL, FACE_FT },
+	{ .46875, 1., 1., Z_COL, FACE_FT },
+	{ .53125, 0., 1., Z_COL, FACE_FT },
+	{ .53125, 1., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_pane_y[] = {
@@ -748,12 +749,12 @@ struct VertexDesc vertices_pane_y[] = {
 	{ 0., .46875, 1., X_COL, FACE_LF },
 	{ 0., .53125, 1., X_COL, FACE_LF },
 
-	{ 1., .46875, 1., X_COL, FACE_LF },
-	{ 1., .46875, 0., X_COL, FACE_LF },
-	{ 1., .53125, 1., X_COL, FACE_LF },
-	{ 1., .53125, 1., X_COL, FACE_LF },
-	{ 1., .46875, 0., X_COL, FACE_LF },
-	{ 1., .53125, 0., X_COL, FACE_LF },
+	{ 1., .46875, 1., X_COL, FACE_RT },
+	{ 1., .46875, 0., X_COL, FACE_RT },
+	{ 1., .53125, 1., X_COL, FACE_RT },
+	{ 1., .53125, 1., X_COL, FACE_RT },
+	{ 1., .46875, 0., X_COL, FACE_RT },
+	{ 1., .53125, 0., X_COL, FACE_RT },
 
 	{ 1., .46875, 0., Z_COL, FACE_BK },
 	{ 0., .46875, 0., Z_COL, FACE_BK },
@@ -762,12 +763,12 @@ struct VertexDesc vertices_pane_y[] = {
 	{ 0., .46875, 0., Z_COL, FACE_BK },
 	{ 0., .53125, 0., Z_COL, FACE_BK },
 
-	{ 0., .46875, 1., Z_COL, FACE_BK },
-	{ 1., .46875, 1., Z_COL, FACE_BK },
-	{ 0., .53125, 1., Z_COL, FACE_BK },
-	{ 0., .53125, 1., Z_COL, FACE_BK },
-	{ 1., .46875, 1., Z_COL, FACE_BK },
-	{ 1., .53125, 1., Z_COL, FACE_BK },
+	{ 0., .46875, 1., Z_COL, FACE_FT },
+	{ 1., .46875, 1., Z_COL, FACE_FT },
+	{ 0., .53125, 1., Z_COL, FACE_FT },
+	{ 0., .53125, 1., Z_COL, FACE_FT },
+	{ 1., .46875, 1., Z_COL, FACE_FT },
+	{ 1., .53125, 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_pane_z[] = {
@@ -792,12 +793,12 @@ struct VertexDesc vertices_pane_z[] = {
 	{ 0., 0., .53125, X_COL, FACE_LF },
 	{ 0., 1., .53125, X_COL, FACE_LF },
 
-	{ 1., 0., .53125, X_COL, FACE_LF },
-	{ 1., 0., .46875, X_COL, FACE_LF },
-	{ 1., 1., .53125, X_COL, FACE_LF },
-	{ 1., 1., .53125, X_COL, FACE_LF },
-	{ 1., 0., .46875, X_COL, FACE_LF },
-	{ 1., 1., .46875, X_COL, FACE_LF },
+	{ 1., 0., .53125, X_COL, FACE_RT },
+	{ 1., 0., .46875, X_COL, FACE_RT },
+	{ 1., 1., .53125, X_COL, FACE_RT },
+	{ 1., 1., .53125, X_COL, FACE_RT },
+	{ 1., 0., .46875, X_COL, FACE_RT },
+	{ 1., 1., .46875, X_COL, FACE_RT },
 
 	{ 1., 0., .46875, Z_COL, FACE_BK },
 	{ 0., 0., .46875, Z_COL, FACE_BK },
@@ -827,24 +828,24 @@ struct VertexDesc vertices_pane_dn[] = {
 	{ 0., .0625, 0., X_COL, FACE_LF },
 	{ 0., 0., 1., X_COL, FACE_LF },
 	{ 0., .0625, 1., X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .0625, 1., X_COL, FACE_LF },
-	{ 1., .0625, 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .0625, 0., X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .0625, 1., X_COL, FACE_RT },
+	{ 1., .0625, 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .0625, 0., X_COL, FACE_RT },
 	{ 1., 0., 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 1., .0625, 0., Z_COL, FACE_BK },
 	{ 1., .0625, 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 0., .0625, 0., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 0., .0625, 1., Z_COL, FACE_BK },
-	{ 0., .0625, 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., .0625, 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 0., .0625, 1., Z_COL, FACE_FT },
+	{ 0., .0625, 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., .0625, 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_pane_up[] = {
@@ -860,24 +861,24 @@ struct VertexDesc vertices_pane_up[] = {
 	{ 0., 1., 0., X_COL, FACE_LF },
 	{ 0., .9375, 1., X_COL, FACE_LF },
 	{ 0., 1., 1., X_COL, FACE_LF },
-	{ 1., .9375, 1., X_COL, FACE_LF },
-	{ 1., .9375, 0., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., .9375, 0., X_COL, FACE_LF },
-	{ 1., 1., 0., X_COL, FACE_LF },
+	{ 1., .9375, 1., X_COL, FACE_RT },
+	{ 1., .9375, 0., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., .9375, 0., X_COL, FACE_RT },
+	{ 1., 1., 0., X_COL, FACE_RT },
 	{ 1., .9375, 0., Z_COL, FACE_BK },
 	{ 0., .9375, 0., Z_COL, FACE_BK },
 	{ 1., 1., 0., Z_COL, FACE_BK },
 	{ 1., 1., 0., Z_COL, FACE_BK },
 	{ 0., .9375, 0., Z_COL, FACE_BK },
 	{ 0., 1., 0., Z_COL, FACE_BK },
-	{ 0., .9375, 1., Z_COL, FACE_BK },
-	{ 1., .9375, 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 1., .9375, 1., Z_COL, FACE_BK },
-	{ 1., 1., 1., Z_COL, FACE_BK },
+	{ 0., .9375, 1., Z_COL, FACE_FT },
+	{ 1., .9375, 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 1., .9375, 1., Z_COL, FACE_FT },
+	{ 1., 1., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_pane_lf[] = {
@@ -905,12 +906,12 @@ struct VertexDesc vertices_pane_lf[] = {
 	{ .0625, 1., 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 0., 1., 0., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ .0625, 0., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ 0., 1., 1., Z_COL, FACE_BK },
-	{ .0625, 0., 1., Z_COL, FACE_BK },
-	{ .0625, 1., 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ .0625, 0., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ 0., 1., 1., Z_COL, FACE_FT },
+	{ .0625, 0., 1., Z_COL, FACE_FT },
+	{ .0625, 1., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_pane_rt[] = {
@@ -938,12 +939,12 @@ struct VertexDesc vertices_pane_rt[] = {
 	{ 1., 1., 0., Z_COL, FACE_BK },
 	{ .9375, 0., 0., Z_COL, FACE_BK },
 	{ .9375, 1., 0., Z_COL, FACE_BK },
-	{ .9375, 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ .9375, 1., 1., Z_COL, FACE_BK },
-	{ .9375, 1., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., 1., 1., Z_COL, FACE_BK },
+	{ .9375, 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ .9375, 1., 1., Z_COL, FACE_FT },
+	{ .9375, 1., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., 1., 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_pane_bk[] = {
@@ -965,12 +966,12 @@ struct VertexDesc vertices_pane_bk[] = {
 	{ 0., 1., 0., X_COL, FACE_LF },
 	{ 0., 0., .0625, X_COL, FACE_LF },
 	{ 0., 1., .0625, X_COL, FACE_LF },
-	{ 1., 0., .0625, X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., 1., .0625, X_COL, FACE_LF },
-	{ 1., 1., .0625, X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., 1., 0., X_COL, FACE_LF },
+	{ 1., 0., .0625, X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., 1., .0625, X_COL, FACE_RT },
+	{ 1., 1., .0625, X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., 1., 0., X_COL, FACE_RT },
 	{ 0., 0., .0625, Z_COL, FACE_BK },
 	{ 1., 0., .0625, Z_COL, FACE_BK },
 	{ 0., 1., .0625, Z_COL, FACE_BK },
@@ -998,12 +999,12 @@ struct VertexDesc vertices_pane_ft[] = {
 	{ 0., 1., .9375, X_COL, FACE_LF },
 	{ 0., 0., 1., X_COL, FACE_LF },
 	{ 0., 1., 1., X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., .9375, X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., 1., 1., X_COL, FACE_LF },
-	{ 1., 0., .9375, X_COL, FACE_LF },
-	{ 1., 1., .9375, X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., .9375, X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., 1., 1., X_COL, FACE_RT },
+	{ 1., 0., .9375, X_COL, FACE_RT },
+	{ 1., 1., .9375, X_COL, FACE_RT },
 	{ 1., 0., .9375, Z_COL, FACE_BK },
 	{ 0., 0., .9375, Z_COL, FACE_BK },
 	{ 1., 1., .9375, Z_COL, FACE_BK },
@@ -1025,24 +1026,24 @@ struct VertexDesc vertices_token_lf[] = {
 	{ 0., .5, 0., X_COL, FACE_LF },
 	{ 0., 0., 1., X_COL, FACE_LF },
 	{ 0., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
 	{ 1., 0., 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 0., .5, 0., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_token_bk[] = {
@@ -1058,24 +1059,24 @@ struct VertexDesc vertices_token_bk[] = {
 	{ 0., .5, 0., X_COL, FACE_LF },
 	{ 0., 0., 1., X_COL, FACE_LF },
 	{ 0., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
 	{ 1., 0., 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 0., .5, 0., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_token_rt[] = {
@@ -1091,24 +1092,24 @@ struct VertexDesc vertices_token_rt[] = {
 	{ 0., .5, 0., X_COL, FACE_LF },
 	{ 0., 0., 1., X_COL, FACE_LF },
 	{ 0., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
 	{ 1., 0., 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 0., .5, 0., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
 };
 
 struct VertexDesc vertices_token_ft[] = {
@@ -1124,24 +1125,24 @@ struct VertexDesc vertices_token_ft[] = {
 	{ 0., .5, 0., X_COL, FACE_LF },
 	{ 0., 0., 1., X_COL, FACE_LF },
 	{ 0., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., .5, 1., X_COL, FACE_LF },
-	{ 1., 0., 0., X_COL, FACE_LF },
-	{ 1., .5, 0., X_COL, FACE_LF },
+	{ 1., 0., 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., .5, 1., X_COL, FACE_RT },
+	{ 1., 0., 0., X_COL, FACE_RT },
+	{ 1., .5, 0., X_COL, FACE_RT },
 	{ 1., 0., 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 1., .5, 0., Z_COL, FACE_BK },
 	{ 0., 0., 0., Z_COL, FACE_BK },
 	{ 0., .5, 0., Z_COL, FACE_BK },
-	{ 0., 0., 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 0., .5, 1., Z_COL, FACE_BK },
-	{ 1., 0., 1., Z_COL, FACE_BK },
-	{ 1., .5, 1., Z_COL, FACE_BK },
+	{ 0., 0., 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 0., .5, 1., Z_COL, FACE_FT },
+	{ 1., 0., 1., Z_COL, FACE_FT },
+	{ 1., .5, 1., Z_COL, FACE_FT },
 };
 
 VertexBuffer::VertexBuffer(int vbo_count) : vbo_count(vbo_count)
@@ -1208,32 +1209,144 @@ void VertexBuffer::update(size_t buf, const void *data, size_t size)
 	assert(glGetError() == GL_NO_ERROR);
 }
 
-void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf,
-		size_t len, v3f p, v2f t1, const v2f *t2, const int *tilted)
+void vertices_add(std::vector<Vertex> *s, const VertexDesc *buf, size_t len,
+		v3f p, v2f t1, const v2f *t2, const int *tilted, World *w)
 {
 	int i;
+	const VertexDesc *d;
 	Vertex v;
 	for (i = 0; i < len; ++i) {
-		v.x = buf[i].x + p.x;
-		v.y = buf[i].y + p.y;
-		v.z = buf[i].z + p.z;
-		if (buf[i].face == FACE_LF || buf[i].face == FACE_RT) {
-			v.u = buf[i].z;
-			v.v = 1. - buf[i].y;
-		} else if (buf[i].face == FACE_DN || buf[i].face == FACE_UP) {
-			v.u = buf[i].z;
-			v.v = buf[i].x;
-		} else if (buf[i].face == FACE_BK || buf[i].face == FACE_FT) {
-			v.u = buf[i].x;
-			v.v = 1. - buf[i].y;
+		d = &buf[i];
+		v.x = d->x + p.x;
+		v.y = d->y + p.y;
+		v.z = d->z + p.z;
+		if (d->face == FACE_LF || d->face == FACE_RT) {
+			v.u = d->z;
+			v.v = 1. - d->y;
+		} else if (d->face == FACE_DN || d->face == FACE_UP) {
+			v.u = d->z;
+			v.v = d->x;
+		} else if (d->face == FACE_BK || d->face == FACE_FT) {
+			v.u = d->x;
+			v.v = 1. - d->y;
 		}
-		if (tilted[buf[i].face])
+		if (tilted[d->face])
 			std::swap(v.u, v.v);
-		v.u = t2[buf[i].face].x + v.u / 32.;
-		v.v = t2[buf[i].face].y + v.v / 32.;
-		v.r = buf[i].c;
-		v.g = t1.x;
-		v.b = t1.y;
+		v.u = t2[d->face].x + v.u / 32.;
+		v.v = t2[d->face].y + v.v / 32.;
+		v.r = 1;
+		if (w != nullptr && (d->x == 0 || d->x == 1)
+				&& (d->y == 0 || d->y == 1)
+				&& (d->z == 0 || d->z == 1)) {
+			v3ll q(floor(v.x), floor(v.y), floor(v.z));
+			v2f l(0, 0);
+			if (d->face == FACE_LF) {
+				--q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.z;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				++q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+			} else if (d->face == FACE_RT) {
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.z;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				++q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+			} else if (d->face == FACE_DN) {
+				--q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.z;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				++q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+			} else if (d->face == FACE_UP) {
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.z;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				++q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+			} else if (d->face == FACE_BK) {
+				--q.z;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				++q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+			} else if (d->face == FACE_FT) {
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				--q.x;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+				++q.y;
+				l = l + texcoord_from_light(w->get_light(q)) * .25f;
+				if (w->get_shape(q) != SHAPE_NONE)
+					v.r -= .125;
+			}
+			v.g = l.x;
+			v.b = l.y;
+		} else {
+			v.g = t1.x;
+			v.b = t1.y;
+		}
+		v.r *= d->c;
 		v.a = 1;
 		s->push_back(v);
 	}
