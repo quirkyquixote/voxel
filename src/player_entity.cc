@@ -11,7 +11,7 @@
 PlayerEntity::PlayerEntity(Context *ctx)
 	: RoamingEntity(ctx, 9), act(0), use(0), pick(0), run(0), tool(0)
 {
-	body->set_p(v3f(p.x, WORLD_H, p.y));
+	body->set_p(v3f(p.x, World::H, p.y));
 	body->set_size(v2f(0.325, 0.825));
 	body->set_step_size(.5);
 }

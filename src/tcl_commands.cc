@@ -384,7 +384,7 @@ int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		goto fail;
 	bb = fix(sel_bb);
 	ctx->light->update(bb, &bb2);
-	ctx->world->set_flags(bb2, CHUNK_UNRENDERED);
+	ctx->world->set_flags(bb2, Chunk::UNRENDERED);
 	return TCL_OK;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));

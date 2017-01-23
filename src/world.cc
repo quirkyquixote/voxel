@@ -10,16 +10,16 @@ World::World(Context *ctx)
 {
 	int x, z, id;
 	id = 0;
-	for (x = 0; x < CHUNKS_PER_WORLD; ++x)
-		for (z = 0; z < CHUNKS_PER_WORLD; ++z)
+	for (x = 0; x < CHUNK_NUM; ++x)
+		for (z = 0; z < CHUNK_NUM; ++z)
 			chunks[x][z] = new Chunk(ctx, id++);
 }
 
 World::~World()
 {
 	int x, z;
-	for (x = 0; x < CHUNKS_PER_WORLD; ++x)
-		for (z = 0; z < CHUNKS_PER_WORLD; ++z)
+	for (x = 0; x < CHUNK_NUM; ++x)
+		for (z = 0; z < CHUNK_NUM; ++z)
 			delete chunks[x][z];
 }
 
@@ -58,7 +58,7 @@ void World::set_block(const v3ll &p, int shape, int mat)
 		set_data(p, NULL);
 	}
 	ctx->light->update(box3ll(p.x, p.y, p.z, p.x, p.y, p.z), &bb);
-	set_flags(bb, CHUNK_UNRENDERED);
+	set_flags(bb, Chunk::UNRENDERED);
 }
 
 void World::set_flags(const box3ll &bb, int flags)

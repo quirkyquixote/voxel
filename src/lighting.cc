@@ -27,7 +27,7 @@ Lighting::~Lighting()
 void Lighting::find_boundary(const v3ll &p, int k)
 {
 	int k2;
-	if (p.y < 0 || p.y >= WORLD_H)
+	if (p.y < 0 || p.y >= World::H)
 		return;
 	if (opaque_shape[w->get_shape(p)])
 		return;
@@ -42,7 +42,7 @@ void Lighting::find_boundary(const v3ll &p, int k)
 void Lighting::lit_up(const v3ll &p, int k, int f1, int f2)
 {
 	int k2;
-	if (p.y < 0 || p.y >= WORLD_H) {
+	if (p.y < 0 || p.y >= World::H) {
 		return;
 	}
 	if (opaque_shape[w->get_shape(p)]) {
@@ -95,10 +95,10 @@ void Lighting::update(const box3ll &bb, box3ll *rbb)
 		}
 	}
 
-	if (bb.y1 == WORLD_H) {
+	if (bb.y1 == World::H) {
 		box2ll top(bb.x0, bb.z0, bb.x1, bb.z1);
 		for (auto &q : top)
-			w->set_light(v3ll(q.x, WORLD_H - 1, q.y), 15);
+			w->set_light(v3ll(q.x, World::H - 1, q.y), 15);
 	}
 
 	if (rbb != NULL)

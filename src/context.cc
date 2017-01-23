@@ -90,16 +90,16 @@ bool Context::load_all()
 	load_world();
 	if (!load_player()) {
 		v2ll p = world->get_p();
-		p.x += CHUNK_W * CHUNKS_PER_WORLD / 2;
-		p.y += CHUNK_W * CHUNKS_PER_WORLD / 2;
-		player->get_body()->set_p(v3f(p.x, WORLD_H, p.y));
+		p.x += Chunk::W * World::CHUNK_NUM / 2;
+		p.y += Chunk::W * World::CHUNK_NUM / 2;
+		player->get_body()->set_p(v3f(p.x, World::H, p.y));
 	}
-	for (auto p : box2ll(0, 0, CHUNKS_PER_WORLD - 1, CHUNKS_PER_WORLD -1)) {
+	for (auto p : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM -1)) {
 		Chunk *c = world->get_chunk(p);
-		c->set_p(world->get_p() + p * v2ll(CHUNK_W, CHUNK_D));
+		c->set_p(world->get_p() + p * v2ll(Chunk::W, Chunk::D));
 		if (!load_chunk(c)) {
 			terraform(0, c);
-			c->set_flags(CHUNK_UNLIT);
+			c->set_flags(Chunk::UNLIT);
 		}
 	}
 	return true;
@@ -109,7 +109,7 @@ void Context::save_all()
 {
 	save_world();
 	save_player();
-	for (auto p : box2ll(0, 0, CHUNKS_PER_WORLD - 1, CHUNKS_PER_WORLD - 1))
+	for (auto p : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1))
 		save_chunk(world->get_chunk(p));
 }
 
@@ -196,7 +196,7 @@ bool Context::load_chunk(Chunk *c)
 	bool ret;
 	char name[16];
 	v2ll p = c->get_p();
-	snprintf(name, sizeof(name), "%06llx%06llx", p.x / CHUNK_W, p.y / CHUNK_D);
+	snprintf(name, sizeof(name), "%06llx%06llx", p.x / Chunk::W, p.y / Chunk::D);
 	std::string path(dir);
 	path += "/";
 	path += name;
@@ -221,7 +221,7 @@ void Context::save_chunk(Chunk *c)
 {
 	char name[16];
 	v2ll p = c->get_p();
-	snprintf(name, sizeof(name), "%06llx%06llx", p.x / CHUNK_W, p.y / CHUNK_D);
+	snprintf(name, sizeof(name), "%06llx%06llx", p.x / Chunk::W, p.y / Chunk::D);
 	std::string path(dir);
 	path += "/";
 	path += name;
@@ -292,7 +292,7 @@ void Context::update_chunks()
 	std::map<int, Chunk *> out_of_date;
 	v2ll p(player->get_body()->get_p().x, player->get_body()->get_p().z);
 
-	for (auto q : box2ll(0, 0, CHUNKS_PER_WORLD - 1, CHUNKS_PER_WORLD - 1)) {
+	for (auto q : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
 		Chunk *c = world->get_chunk(q);
 		if (c->get_flags() != 0) {
 			int d = dist(c->get_p(), p);
@@ -310,30 +310,30 @@ void Context::update_chunks()
 			break;
 		Chunk *c = iter.second;
 		//		log_info("Update chunk %d (%lld,%lld); priority:%d", c->get_id(), c->get_p().x, c->get_p().y, iter.first);
-		if ((c->get_flags() & CHUNK_UNLOADED) != 0) {
+		if ((c->get_flags() & Chunk::UNLOADED) != 0) {
 			//			log_info("load from file");
 			/* load this chunk */
-			c->unset_flags(CHUNK_UNLOADED);
+			c->unset_flags(Chunk::UNLOADED);
 		}
-		if ((c->get_flags() & CHUNK_UNLIT) != 0) {
+		if ((c->get_flags() & Chunk::UNLIT) != 0) {
 			//			log_info("lit up");
 			box3ll bb;
 			bb.x0 = c->get_p().x;
 			bb.y0 = 0;
 			bb.z0 = c->get_p().y;
-			bb.x1 = c->get_p().x + CHUNK_W;
-			bb.y1 = CHUNK_H;
-			bb.z1 = c->get_p().y + CHUNK_D;
+			bb.x1 = c->get_p().x + Chunk::W;
+			bb.y1 = Chunk::H;
+			bb.z1 = c->get_p().y + Chunk::D;
 			light->update(bb, NULL);
-			c->unset_flags(CHUNK_UNLIT);
-			c->set_flags(CHUNK_UNRENDERED);
+			c->unset_flags(Chunk::UNLIT);
+			c->set_flags(Chunk::UNRENDERED);
 		}
-		if ((c->get_flags() & CHUNK_UNRENDERED) != 0) {
+		if ((c->get_flags() & Chunk::UNRENDERED) != 0) {
 			//			log_info("update vbos");
-			for (int k = 0; k < SHARDS_PER_CHUNK; ++k)
+			for (int k = 0; k < Chunk::SHARD_NUM; ++k)
 				renderer->update_shard(c->get_shard(k)->get_id(), c->get_p().x,
-						k * SHARD_H, c->get_p().y);
-			c->unset_flags(CHUNK_UNRENDERED);
+						k * Shard::H, c->get_p().y);
+			c->unset_flags(Chunk::UNRENDERED);
 		}
 		++i;
 	}

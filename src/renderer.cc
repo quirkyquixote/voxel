@@ -83,7 +83,7 @@ Renderer::Renderer(Context *ctx)
 	cam->set_aspect_ratio(1920.0 / 1080.0);
 
 	/* Create vertex_buffers */
-	shard_vertex_buffer.reset(new VertexBuffer(SHARDS_PER_WORLD));
+	shard_vertex_buffer.reset(new VertexBuffer(World::SHARD_NUM));
 	obj_vertex_buffer.reset(new VertexBuffer(1));
 	text_vertex_buffer.reset(new VertexBuffer(1));
 	populate_obj_vertex_buffer(obj_vertex_buffer.get());
@@ -400,10 +400,7 @@ void Renderer::render_commandline()
 
 void Renderer::render_shards()
 {
-	int64_t x, y, z;
 	v3f p;
-	Chunk *c;
-	Shard *s;
 	int shards_rendered;
 
 	shards_rendered = 0;
@@ -422,21 +419,19 @@ void Renderer::render_shards()
 
 	glActiveTexture(GL_TEXTURE0);
 	shard_vertex_buffer->enable();
-	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
-		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
-			c = ctx->world->get_chunk(v2ll(x, z));
-			p.x = c->get_p().x + CHUNK_W / 2;
-			p.z = c->get_p().y + CHUNK_W / 2;
-			for (y = 0; y < SHARDS_PER_CHUNK; ++y) {
-				s = c->get_shard(y);
-				if (shard_vertex_buffer->get_size(s->get_id()) == 0)
-					continue;
-				p.y = (s->get_y() + 0.5) * SHARD_W;
-				if (!cam->is_visible(p, SHARD_W))
-					continue;
-				shard_vertex_buffer->draw(GL_TRIANGLES, s->get_id());
-				++shards_rendered;
-			}
+	for (auto q : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
+		Chunk *c = ctx->world->get_chunk(q);
+		p.x = c->get_p().x + Chunk::W / 2;
+		p.z = c->get_p().y + Chunk::W / 2;
+		for (int y = 0; y < Chunk::SHARD_NUM; ++y) {
+			Shard *s = c->get_shard(y);
+			if (shard_vertex_buffer->get_size(s->get_id()) == 0)
+				continue;
+			p.y = (s->get_y() + 0.5) * Shard::W;
+			if (!cam->is_visible(p, Shard::W))
+				continue;
+			shard_vertex_buffer->draw(GL_TRIANGLES, s->get_id());
+			++shards_rendered;
 		}
 	}
 	shard_vertex_buffer->disable();
@@ -746,9 +741,9 @@ void Renderer::update_shard(int id, int64_t x0, int64_t y0, int64_t z0)
 	int64_t x, y, z;
 	std::vector<Vertex> buf;
 
-	x1 = x0 + SHARD_W;
-	y1 = y0 + SHARD_H;
-	z1 = z0 + SHARD_D;
+	x1 = x0 + Shard::W;
+	y1 = y0 + Shard::H;
+	z1 = z0 + Shard::D;
 
 	for (x = x0; x < x1; ++x) {
 		for (y = y0; y < y1; ++y) {

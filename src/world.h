@@ -5,18 +5,16 @@
 
 #include "chunk.h"
 
-#define CHUNKS_PER_WORLD 16
-
-#define WORLD_W (CHUNK_W * CHUNKS_PER_WORLD)
-#define WORLD_H CHUNK_H
-#define WORLD_D (CHUNK_D * CHUNKS_PER_WORLD)
-#define WORLD_AREA (WORLD_W * WORLD_D)
-#define WORLD_VOLUME (WORLD_AREA * WORLD_H)
-
-#define SHARDS_PER_WORLD (CHUNKS_PER_WORLD * CHUNKS_PER_WORLD * SHARDS_PER_CHUNK)
-
 class World : public NonCopyable {
  public:
+	static const size_t CHUNK_NUM = 16;
+	static const size_t SHARD_NUM = CHUNK_NUM * CHUNK_NUM * Chunk::SHARD_NUM;
+	static const size_t W = Chunk::W * CHUNK_NUM;
+	static const size_t H = Chunk::H;
+	static const size_t D = Chunk::D * CHUNK_NUM;
+	static const size_t AREA = W * D;
+	static const size_t VOLUME = AREA * H;
+
 	explicit World(Context *ctx);
 	~World();
 
@@ -87,7 +85,7 @@ class World : public NonCopyable {
  private:
 	Context *ctx;
 	v2ll p;
-	Chunk *chunks[CHUNKS_PER_WORLD][CHUNKS_PER_WORLD];
+	Chunk *chunks[CHUNK_NUM][CHUNK_NUM];
 };
 
 #endif  // SRC_WORLD_H_
