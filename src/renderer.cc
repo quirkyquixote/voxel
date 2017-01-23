@@ -737,22 +737,10 @@ void Renderer::update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y,
 
 void Renderer::update_shard(int id, int64_t x0, int64_t y0, int64_t z0)
 {
-	int64_t x1, y1, z1;
-	int64_t x, y, z;
+	static const box3ll shard_box(0, 0, 0, Shard::W - 1, Shard::H - 1, Shard::D - 1);
 	std::vector<Vertex> buf;
-
-	x1 = x0 + Shard::W;
-	y1 = y0 + Shard::H;
-	z1 = z0 + Shard::D;
-
-	for (x = x0; x < x1; ++x) {
-		for (y = y0; y < y1; ++y) {
-			for (z = z0; z < z1; ++z) {
-				update_cell(&buf, x, y, z);
-			}
-		}
-	}
-
+	for (auto p : v3ll(x0, y0, z0) + shard_box)
+		update_cell(&buf, p.x, p.y, p.z);
 	shard_vertex_buffer->update(id, buf.data(), buf.size());
 }
 

@@ -4,6 +4,8 @@
 
 #include <stdlib.h>
 
+#include "box2.h"
+
 ToneMapper::ToneMapper(float dt, size_t samples)
 	: samples(samples), dt(dt)
 {
@@ -71,11 +73,9 @@ void ToneMapper::update(float sky, float spot)
 		mapped_spot_color[i] = c2 * static_cast<float>(i);
 	}
 
-	for (int j = 0, k = 0; j < samples; ++j) {
-		for (int i = 0; i < samples; ++i, ++k) {
-			mapped_color[k] = A * pow(mapped_sky_color[i] + mapped_spot_color[j], gamma);
-		}
-	}
+	int i = 0;
+	for (auto p : box2s(0, 0, samples - 1, samples - 1))
+		mapped_color[i++] = A * pow(mapped_sky_color[p.y] + mapped_spot_color[p.x], gamma);
 
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, samples, samples, GL_RGB,
