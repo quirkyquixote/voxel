@@ -44,7 +44,7 @@ class Renderer : public NonCopyable {
 			int64_t z, const v2f *mt, const int *tilted);
 	void update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y,
 			int64_t z);
-	void update_shard(int id, int64_t x0, int64_t y0, int64_t z0);
+	void update_shard(int id, const v3ll &p);
 	void update_camera();
 
 	inline void add_callback(Callback *cb) { callback_list.push_back(cb); }
