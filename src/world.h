@@ -25,6 +25,7 @@ class World : public NonCopyable {
 	void set_flags(const box3ll &bb, int flags);
 	inline Chunk *get_chunk(const v2ll &p) { return chunks[p.x][p.y]; }
 	inline const v2ll &get_p() { return p; }
+	inline void set_p(const v2ll &new_p) { p = new_p; }
 
 	inline int get_mat(const v3ll &p) const
 	{

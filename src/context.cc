@@ -289,8 +289,29 @@ void Context::drop_block(const v3ll &p)
 
 void Context::update_chunks()
 {
+	static const box2ll chunk_box(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1);
+
 	std::map<int, Chunk *> out_of_date;
 	v2ll p(player->get_body()->get_p().x, player->get_body()->get_p().z);
+	v2ll world_p((p & ~0xfLL) - v2ll(World::H, World::D) / 2LL);
+	if (world_p != world->get_p()) {
+		for (auto r : chunk_box + (world_p >> 4LL)) {
+			Chunk *c = world->get_chunk(r & 0xfLL);
+			v2ll new_p(r * v2ll(Chunk::W, Chunk::D));
+			if (c->get_p() != new_p) {
+				save_chunk(c);
+				c->set_p(new_p);
+				if (!load_chunk(c)) {
+					terraform(0, c);
+					c->set_flags(Chunk::UNLIT);
+				} else {
+					c->set_flags(Chunk::UNRENDERED);
+				}
+				c->set_p(new_p);
+			}
+		}
+		world->set_p(world_p);
+	}
 
 	for (auto q : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
 		Chunk *c = world->get_chunk(q);
