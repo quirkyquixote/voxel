@@ -3,7 +3,7 @@
 #ifndef SRC_V3_H_
 #define SRC_V3_H_
 
-#include <math.h>
+#include <cmath>
 
 template<typename T> struct v3 {
 	T x, y, z;
@@ -51,7 +51,7 @@ template<typename T> inline T dot(const v3<T> &lhs, const v3<T> &rhs)
 
 template<typename T> inline T length(const v3<T> &lhs)
 {
-	return hypot(hypot(lhs.x, lhs.y), lhs.z);
+	return std::hypot(std::hypot(lhs.x, lhs.y), lhs.z);
 }
 
 template<typename T> inline T dist(const v3<T> &lhs, const v3<T> &rhs)
@@ -66,22 +66,22 @@ template<typename T> inline v3<T> normalize(const v3<T> &lhs)
 
 template<typename T> inline v3<T> rotx(const v3<T> &lhs, T a)
 {
-	T c = cos(a);
-	T s = sin(a);
+	T c = std::cos(a);
+	T s = std::sin(a);
 	return v3<T>(lhs.x, c * lhs.y - s * lhs.z, s * lhs.y + c * lhs.z);
 }
 
 template<typename T> inline v3<T> roty(const v3<T> &lhs, T a)
 {
-	T c = cos(a);
-	T s = sin(a);
+	T c = std::cos(a);
+	T s = std::sin(a);
 	return v3<T>(c * lhs.x - s * lhs.z, lhs.y, s * lhs.x + c * lhs.z);
 }
 
 template<typename T> inline v3<T> rotz(const v3<T> &lhs, T a)
 {
-	T c = cos(a);
-	T s = sin(a);
+	T c = std::cos(a);
+	T s = std::sin(a);
 	return v3<T>(c * lhs.x - s * lhs.y, s * lhs.x + c * lhs.y, lhs.z);
 }
 

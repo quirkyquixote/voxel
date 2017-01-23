@@ -3,6 +3,10 @@
 #ifndef SRC_BOX2_H_
 #define SRC_BOX2_H_
 
+#include <cmath>
+
+#include "v2.h"
+
 template<typename T> struct box2 {
 	struct iterator {
 		v2<T> cur;
@@ -67,7 +71,8 @@ template<typename T> bool overlap(const box2<T> &b1, const box2<T> &b2)
 
 template<typename T> box2<T> floor(const box2<T> &b)
 {
-	return box2<T>(floor(b.x0), floor(b.y0), floor(b.x1), floor(b.y1));
+	return box2<T>(std::floor(b.x0), std::floor(b.y0),
+			std::floor(b.x1), std::floor(b.y1));
 }
 
 #endif  // SRC_BOX2_H_

@@ -3,7 +3,7 @@
 #ifndef SRC_V2_H_
 #define SRC_V2_H_
 
-#include <math.h>
+#include <cmath>
 
 template<typename T> struct v2 {
 	T x, y;
@@ -50,7 +50,7 @@ template<typename T> inline T dot(const v2<T> &lhs, const v2<T> &rhs)
 
 template<typename T> inline T length(const v2<T> &lhs)
 {
-	return hypot(lhs.x, lhs.y);
+	return std::hypot(lhs.x, lhs.y);
 }
 
 template<typename T> inline T dist(const v2<T> &lhs, const v2<T> &rhs)
@@ -65,8 +65,8 @@ template<typename T> inline v2<T> normalize(const v2<T> &lhs)
 
 template<typename T> inline v2<T> rot(const v2<T> &lhs, T a)
 {
-	T c = cos(a);
-	T s = sin(a);
+	T c = std::cos(a);
+	T s = std::sin(a);
 	return v2<T>(c * lhs.x - s * lhs.y, s * lhs.x + c * lhs.y);
 }
 

@@ -3,7 +3,7 @@
 #ifndef SRC_V4_H_
 #define SRC_V4_H_
 
-#include <math.h>
+#include <cmath>
 
 template<typename T> struct v4 {
 	T x, y, z, w;
@@ -52,7 +52,7 @@ template<typename T> inline T dot(const v4<T> &lhs, const v4<T> &rhs)
 
 template<typename T> inline T length(const v4<T> &lhs)
 {
-	return hypot(hypot(hypot(lhs.x, lhs.y), lhs.z), lhs.w);
+	return std::hypot(std::hypot(std::hypot(lhs.x, lhs.y), lhs.z), lhs.w);
 }
 
 template<typename T> inline T dist(const v4<T> &lhs, const v4<T> &rhs)
