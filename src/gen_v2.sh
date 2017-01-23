@@ -65,6 +65,30 @@ template<typename T> inline v2<T> operator${op}(const v2<T> &lhs, const v2<T> &r
 }";
 done
 
+for op in "floor" "ceil" "rint"; do echo "
+template<typename T> inline v2<T> ${op}(const v2<T> &lhs)
+{
+	return v2<T>(std::${op}(lhs.x), std::${op}(lhs.y));
+}";
+done
+
+for op in "pow"; do echo "
+template<typename T> inline v2<T> ${op}(const v2<T> &lhs, T rhs)
+{
+	return v2<T>(std::${op}(lhs.x, rhs), std::${op}(lhs.y, rhs));
+}
+
+template<typename T> inline v2<T> ${op}(T lhs, const v2<T> &rhs)
+{
+	return v2<T>(std::${op}(lhs, rhs.x), std::${op}(lhs, rhs.y));
+}
+
+template<typename T> inline v2<T> ${op}(const v2<T> &lhs, const v2<T> &rhs)
+{
+	return v2<T>(std::${op}(lhs.x, rhs.x), std::${op}(lhs.y, rhs.y));
+}";
+done
+
 echo "
 template<typename T> inline T dot(const v2<T> &lhs, const v2<T> &rhs)
 {

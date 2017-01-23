@@ -108,6 +108,14 @@ template<typename T> inline box2<T> operator${op}(const box2<T> &lhs, const box2
 }";
 done
 
+for op in "floor" "ceil" "rint"; do echo "
+template<typename T> inline box2<T> ${op}(const box2<T> &lhs)
+{
+	return box2<T>(std::${op}(lhs.x0), std::${op}(lhs.y0),
+			std::${op}(lhs.x1), std::${op}(lhs.y1));
+}";
+done
+
 echo "
 template<typename T> box2<T> fix(const box2<T> &b)
 {
@@ -122,12 +130,6 @@ template<typename T> bool overlap(const box2<T> &b1, const box2<T> &b2)
 {
 	return (b2.x0 <= b1.x1 && b2.x1 >= b1.x0 &&
 			b2.y0 <= b1.y1 && b2.y1 >= b1.y0);
-}
-
-template<typename T> box2<T> floor(const box2<T> &b)
-{
-	return box2<T>(std::floor(b.x0), std::floor(b.y0),
-			std::floor(b.x1), std::floor(b.y1));
 }
 
 #endif  // SRC_BOX2_H_

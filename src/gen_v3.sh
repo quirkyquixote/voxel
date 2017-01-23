@@ -68,6 +68,33 @@ template<typename T> inline v3<T> operator${op}(const v3<T> &lhs, const v3<T> &r
 }";
 done
 
+for op in "floor" "ceil" "rint"; do echo "
+template<typename T> inline v3<T> ${op}(const v3<T> &lhs)
+{
+	return v3<T>(std::${op}(lhs.x), std::${op}(lhs.y), std::${op}(lhs.z));
+}";
+done
+
+for op in "pow"; do echo "
+template<typename T> inline v3<T> ${op}(const v3<T> &lhs, T rhs)
+{
+	return v3<T>(std::${op}(lhs.x, rhs), std::${op}(lhs.y, rhs),
+			std::${op}(lhs.z, rhs));
+}
+
+template<typename T> inline v3<T> ${op}(T lhs, const v3<T> &rhs)
+{
+	return v3<T>(std::${op}(lhs, rhs.x), std::${op}(lhs, rhs.y),
+			std::${op}(lhs, rhs.z));
+}
+
+template<typename T> inline v3<T> ${op}(const v3<T> &lhs, const v3<T> &rhs)
+{
+	return v3<T>(std::${op}(lhs.x, rhs.x), std::${op}(lhs.y, rhs.y),
+			std::${op}(lhs.z, rhs.z));
+}";
+done
+
 echo "
 template<typename T> inline T dot(const v3<T> &lhs, const v3<T> &rhs)
 {

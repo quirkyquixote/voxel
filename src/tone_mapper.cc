@@ -73,18 +73,7 @@ void ToneMapper::update(float sky, float spot)
 
 	for (int j = 0, k = 0; j < samples; ++j) {
 		for (int i = 0; i < samples; ++i, ++k) {
-			mapped_color[k].x =
-				A * powf(mapped_sky_color[i].x +
-						mapped_spot_color[j].x,
-						gamma);
-			mapped_color[k].y =
-				A * powf(mapped_sky_color[i].y +
-						mapped_spot_color[j].y,
-						gamma);
-			mapped_color[k].z =
-				A * powf(mapped_sky_color[i].z +
-						mapped_spot_color[j].z,
-						gamma);
+			mapped_color[k] = A * pow(mapped_sky_color[i] + mapped_spot_color[j], gamma);
 		}
 	}
 
