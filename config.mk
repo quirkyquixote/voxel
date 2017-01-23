@@ -23,6 +23,7 @@ localstatedir = $(prefix)/var/voxel
 
 CXX = clang++
 AR = ar
+SH = sh
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
@@ -61,6 +62,9 @@ QUIET_GEN = @echo GEN $@;
 QUIET_INSTALL = @echo INSTALL $@;
 
 # Some generic targets that are the same for all Makefiles
+
+%.h: gen_%.sh
+	$(QUIET_GEN)$(SH) $^ > $@
 
 %: %.cc 
 
