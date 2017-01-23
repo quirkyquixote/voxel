@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <map>
+#include <thread>
 
 #include "drop_entity.h"
 
@@ -298,29 +299,38 @@ void Context::update_chunks()
 {
 	static const box2ll chunk_box(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1);
 
+	std::vector<std::thread> tasks;
 	std::map<int, Chunk *> out_of_date;
 	v2ll p(player->get_body()->get_p().x, player->get_body()->get_p().z);
 	v2ll world_p((p & ~0xfLL) - v2ll(World::H, World::D) / 2LL);
 	if (world_p != world->get_p()) {
+		log_info("off center!");
 		world->set_p(world_p);
 		world_p.x = div_floor(world_p.x, 16LL);
 		world_p.y = div_floor(world_p.y, 16LL);
+		int chunks_moved = 0;
 		for (auto r : chunk_box + world_p) {
 			Chunk *c = world->get_chunk(r & 0xfLL);
 			v2ll new_p(r * v2ll(Chunk::W, Chunk::D));
 			if (c->get_p() != new_p) {
-				//log_info("%lld,%lld", new_p.x, new_p.y);
-				save_chunk(c);
-				c->set_p(new_p);
-				if (!load_chunk(c)) {
-					terraform(0, c);
-					c->set_flags(Chunk::UNLIT);
-				}
-				c->set_flags(Chunk::UNRENDERED);
-				c->set_p(new_p);
+				tasks.emplace_back([this, c, new_p](){
+					//log_info("%lld,%lld", new_p.x, new_p.y);
+					save_chunk(c);
+					c->set_p(new_p);
+					if (!load_chunk(c)) {
+						terraform(0, c);
+						c->set_flags(Chunk::UNLIT);
+					}
+					c->set_flags(Chunk::UNRENDERED);
+					c->set_p(new_p);
+				});
+				++chunks_moved;
 			}
 		}
+		log_info("%d chunks moved", chunks_moved);
 	}
+	for (auto &t : tasks)
+		t.join();
 
 	for (auto q : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
 		Chunk *c = world->get_chunk(q);
