@@ -3,3 +3,8 @@
 voxel
 szcat
 *.dat
+src/v2.h
+src/v3.h
+src/v4.h
+src/box2.h
+src/box3.h
