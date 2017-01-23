@@ -131,12 +131,6 @@ template<typename T> box3<T> fix(const box3<T> &b)
 		b.z0 > b.z1 ? b.z0 : b.z1);
 }
 
-template<typename T> box3<T> grow(const box3<T> &b, T k)
-{
-	return box3<T>(b.x0 - k, b.y0 - k, b.z0 - k,
-			b.x1 + k, b.y1 + k, b.z1 + k);
-}
-
 template<typename T> bool overlap(const box3<T> &b1, const box3<T> &b3)
 {
 	return (b3.x0 <= b1.x1 && b3.x1 >= b1.x0 &&
