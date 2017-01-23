@@ -120,9 +120,9 @@ template<typename T> inline box3<T> operator${op}(const box3<T> &lhs, const box3
 done
 
 for op in "floor" "ceil" "rint"; do echo "
-template<typename T> inline box2<T> ${op}(const box2<T> &lhs)
+template<typename T> inline box3<T> ${op}(const box3<T> &lhs)
 {
-	return box2<T>(std::${op}(lhs.x0), std::${op}(lhs.y0), std::${op}(lhs.z0),
+	return box3<T>(std::${op}(lhs.x0), std::${op}(lhs.y0), std::${op}(lhs.z0),
 			std::${op}(lhs.x1), std::${op}(lhs.y1), std::${op}(lhs.z1));
 }";
 done
