@@ -76,7 +76,7 @@ double noise_4d(double a, double b, double c, double d, double zoom, int steps)
 int terraform(int64_t seed, Chunk *c)
 {
 	v2ll p;
-	uint64_t u, v;
+	int64_t u, v;
 	int x, y, z;
 	int height, heat, humidity;
 

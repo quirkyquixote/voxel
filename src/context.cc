@@ -41,7 +41,7 @@ Context::Context(const char *dir)
 	ml.reset(new MainLoop(30));
 	ml->set_event_callback([this](const SDL_Event &e){event(e);});
 	ml->set_update_callback([this](){update();});
-	ml->set_window(new Window("voxel", 0, 0, 1920, 1080, 0));
+	ml->set_window(new Window("voxel", 0, 0, 1280, 768, 0));
 
 	/* Create renderer */
 	renderer.reset(new Renderer(this));
@@ -51,6 +51,7 @@ Context::Context(const char *dir)
 	tcl = Tcl_CreateInterp();
 	Tcl_CreateObjCommand(tcl, "help", cmd_help, this, NULL);
 	Tcl_CreateObjCommand(tcl, "ls", cmd_ls, this, NULL);
+	Tcl_CreateObjCommand(tcl, "tp", cmd_tp, this, NULL);
 	Tcl_CreateObjCommand(tcl, "give", cmd_give, this, NULL);
 	Tcl_CreateObjCommand(tcl, "take", cmd_take, this, NULL);
 	Tcl_CreateObjCommand(tcl, "q", cmd_query, this, NULL);
@@ -295,10 +296,14 @@ void Context::update_chunks()
 	v2ll p(player->get_body()->get_p().x, player->get_body()->get_p().z);
 	v2ll world_p((p & ~0xfLL) - v2ll(World::H, World::D) / 2LL);
 	if (world_p != world->get_p()) {
-		for (auto r : chunk_box + (world_p >> 4LL)) {
+		world->set_p(world_p);
+		world_p.x = div_floor(world_p.x, 16LL);
+		world_p.y = div_floor(world_p.y, 16LL);
+		for (auto r : chunk_box + world_p) {
 			Chunk *c = world->get_chunk(r & 0xfLL);
 			v2ll new_p(r * v2ll(Chunk::W, Chunk::D));
 			if (c->get_p() != new_p) {
+				//log_info("%lld,%lld", new_p.x, new_p.y);
 				save_chunk(c);
 				c->set_p(new_p);
 				if (!load_chunk(c)) {
@@ -310,7 +315,6 @@ void Context::update_chunks()
 				c->set_p(new_p);
 			}
 		}
-		world->set_p(world_p);
 	}
 
 	for (auto q : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
@@ -330,14 +334,14 @@ void Context::update_chunks()
 		if (i >= chunks_per_tick)
 			break;
 		Chunk *c = iter.second;
-		//		log_info("Update chunk %d (%lld,%lld); priority:%d", c->get_id(), c->get_p().x, c->get_p().y, iter.first);
+		//log_info("Update chunk %d (%lld,%lld); priority:%d", c->get_id(), c->get_p().x, c->get_p().y, iter.first);
 		if ((c->get_flags() & Chunk::UNLOADED) != 0) {
-			//			log_info("load from file");
+			//log_info("load from file");
 			/* load this chunk */
 			c->unset_flags(Chunk::UNLOADED);
 		}
 		if ((c->get_flags() & Chunk::UNLIT) != 0) {
-			//			log_info("lit up");
+			//log_info("lit up");
 			box3ll bb;
 			bb.x0 = c->get_p().x;
 			bb.y0 = 0;
@@ -350,7 +354,7 @@ void Context::update_chunks()
 			c->set_flags(Chunk::UNRENDERED);
 		}
 		if ((c->get_flags() & Chunk::UNRENDERED) != 0) {
-			//			log_info("update vbos");
+			//log_info("update vbos");
 			for (int k = 0; k < Chunk::SHARD_NUM; ++k)
 				renderer->update_shard(c->get_shard(k)->get_id(), c->get_p().x,
 						k * Shard::H, c->get_p().y);

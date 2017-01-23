@@ -80,7 +80,7 @@ Renderer::Renderer(Context *ctx)
 	/* Setup camera */
 	cam.reset(new Camera());
 	cam->set_max_distance(1024);
-	cam->set_aspect_ratio(1920.0 / 1080.0);
+	cam->set_aspect_ratio(1280.0 / 768.0);
 
 	/* Create vertex_buffers */
 	shard_vertex_buffer.reset(new VertexBuffer(World::SHARD_NUM));
@@ -423,6 +423,9 @@ void Renderer::render_shards()
 		Chunk *c = ctx->world->get_chunk(q);
 		p.x = c->get_p().x + Chunk::W / 2;
 		p.z = c->get_p().y + Chunk::W / 2;
+		if (p.x < 0 || p.z < 0) {
+			abort();
+		}
 		for (int y = 0; y < Chunk::SHARD_NUM; ++y) {
 			Shard *s = c->get_shard(y);
 			if (shard_vertex_buffer->get_size(s->get_id()) == 0)
