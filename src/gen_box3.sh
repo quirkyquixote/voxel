@@ -146,5 +146,12 @@ template<typename T> bool overlap(const box3<T> &b1, const box3<T> &b3)
 			b3.z0 <= b1.z1 && b3.z1 >= b1.z0);
 }
 
+template<typename T> bool contains(const box3<T> &b, const v3<T> &v)
+{
+	return (v.x >= b.x0 && v.x <= b.x1
+		&& v.y >= b.y0 && v.y <= b.y1
+		&& v.z >= b.z0 && v.z <= b.z1);
+}
+
 #endif  // SRC_BOX3_H_
 ";

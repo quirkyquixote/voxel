@@ -4,11 +4,7 @@
 
 #include <stdlib.h>
 
-#define GL_GLEXT_PROTOTYPES 1
-#include "SDL2/SDL_opengl.h"
-#include "GL/glext.h"
-#include "GL/glu.h"
-#undef GL_GLEXT_PROTOTYPES
+#include "log.h"
 
 static const GLfloat bkgrcolor[] = { .5, .75, 1, 1 };
 
@@ -20,12 +16,30 @@ Camera::~Camera()
 {
 }
 
-bool Camera::is_visible(const v3f &x, float r)
+template<typename T> static inline v3<T> operator*(const T *m, const v3<T> &v)
 {
-	v3f q = x - p;
-	return (length(q) + r <= max_distance
-			&& dot(nup, q) < r && dot(ndn, q) < r
-			&& dot(nlf, q) < r && dot(nrt, q) < r);
+	return v3<T>(m[0] * v.x + m[4] * v.y + m[8] * v.z + m[12],
+			m[1] * v.x + m[5] * v.y + m[9] * v.z + m[13],
+			m[2] * v.x + m[6] * v.y + m[10] * v.z + m[14]);
+}
+
+
+bool Camera::is_visible(const v3f &a)
+{
+	v3f b = modelview * a;
+	return std::abs(b.x / b.z) < 1 && std::abs(b.y / b.z) < 1;
+}
+
+bool Camera::is_visible(const box3f &bb)
+{
+	return is_visible(v3f(bb.x0, bb.y0, bb.z0))
+		|| is_visible(v3f(bb.x0, bb.y0, bb.z1))
+		|| is_visible(v3f(bb.x0, bb.y1, bb.z0))
+		|| is_visible(v3f(bb.x0, bb.y1, bb.z1))
+		|| is_visible(v3f(bb.x1, bb.y0, bb.z0))
+		|| is_visible(v3f(bb.x1, bb.y0, bb.z1))
+		|| is_visible(v3f(bb.x1, bb.y1, bb.z0))
+		|| is_visible(v3f(bb.x1, bb.y1, bb.z1));
 }
 
 void Camera::load_gl_matrices()
@@ -64,6 +78,7 @@ void Camera::load_gl_matrices()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(p.x, p.y, p.z, target.x, target.y, target.z, 0, 1, 0);
+	glGetFloatv(GL_MODELVIEW_MATRIX, modelview);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

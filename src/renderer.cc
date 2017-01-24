@@ -400,10 +400,11 @@ void Renderer::render_commandline()
 
 void Renderer::render_shards()
 {
-	v3f p;
-	int shards_rendered;
+	box3f bb;
+	int rendered = 0;
+	int empty = 0;
+	int hidden = 0;
 
-	shards_rendered = 0;
 	cam->load_gl_matrices();
 	shader->enable();
 
@@ -421,20 +422,24 @@ void Renderer::render_shards()
 	shard_vertex_buffer->enable();
 	for (auto q : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
 		Chunk *c = ctx->world->get_chunk(q);
-		p.x = c->get_p().x + Chunk::W / 2;
-		p.z = c->get_p().y + Chunk::W / 2;
-		if (p.x < 0 || p.z < 0) {
-			abort();
-		}
+		bb.x0 = c->get_p().x;
+		bb.z0 = c->get_p().y;
+		bb.x1 = bb.x0 + Chunk::W;
+		bb.z1 = bb.z0 + Chunk::D;
 		for (int y = 0; y < Chunk::SHARD_NUM; ++y) {
 			Shard *s = c->get_shard(y);
-			if (shard_vertex_buffer->get_size(s->get_id()) == 0)
+			if (shard_vertex_buffer->get_size(s->get_id()) == 0) {
+				++empty;
 				continue;
-			p.y = (s->get_y() + 0.5) * Shard::W;
-			if (!cam->is_visible(p, Shard::W))
+			}
+			bb.y0 = s->get_y() * Shard::H;
+			bb.y1 = bb.y0 * Shard::H;
+			if (!cam->is_visible(bb)) {
+				++hidden;
 				continue;
+			}
 			shard_vertex_buffer->draw(GL_TRIANGLES, s->get_id());
-			++shards_rendered;
+			++rendered;
 		}
 	}
 	shard_vertex_buffer->disable();
