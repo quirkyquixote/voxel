@@ -349,14 +349,14 @@ void Context::update_chunks()
 		if (i >= chunks_per_tick)
 			break;
 		Chunk *c = iter.second;
-		//log_info("Update chunk %d (%lld,%lld); priority:%d", c->get_id(), c->get_p().x, c->get_p().y, iter.first);
+		log_info("Update chunk %d (%lld,%lld); priority:%d", c->get_id(), c->get_p().x, c->get_p().y, iter.first);
 		if ((c->get_flags() & Chunk::UNLOADED) != 0) {
-			//log_info("load from file");
+			log_info("load from file");
 			/* load this chunk */
 			c->unset_flags(Chunk::UNLOADED);
 		}
 		if ((c->get_flags() & Chunk::UNLIT) != 0) {
-			//log_info("lit up");
+			log_info("lit up");
 			#if 0
 			box3ll bb;
 			bb.x0 = c->get_p().x;
@@ -376,7 +376,7 @@ void Context::update_chunks()
 			c->set_flags(Chunk::UNRENDERED);
 		}
 		if ((c->get_flags() & Chunk::UNRENDERED) != 0) {
-			//log_info("update vbos");
+			log_info("update vbos");
 			for (int k = 0; k < Chunk::SHARD_NUM; ++k)
 				renderer->update_shard(c->get_shard(k)->get_id(), v3ll(c->get_p().x,
 							k * Shard::H, c->get_p().y));

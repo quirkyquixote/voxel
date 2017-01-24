@@ -30,20 +30,19 @@ class Renderer : public NonCopyable {
 	void render_board(const std::vector<Item> &inv, const v3ll &p);
 	void render_item(int obj, int mat, GLfloat alpha);
 
-	void update_face_lf(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_face_rt(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_face_dn(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_face_up(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_face_bk(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_face_ft(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z);
+	void update_face_lf(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_face_rt(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_face_dn(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_face_up(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_face_bk(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_face_ft(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_cell(std::vector<Vertex> *buf, const v3ll &p);
 	void update_shard(int id, const v3ll &p);
 	void update_camera();
 
