@@ -18,5 +18,6 @@ int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_replace(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
+int cmd_terraform(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 
 #endif  // SRC_TCL_COMMANDS_H_

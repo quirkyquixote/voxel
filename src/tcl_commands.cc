@@ -446,3 +446,24 @@ fail:
 	return TCL_ERROR;
 }
 
+int cmd_terraform(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: terraform";
+	Context *ctx = static_cast<Context *>(data);
+	v3f p;
+	v2ll q;
+	Chunk *c;
+
+	if (objc != 1)
+		goto fail;
+	p = ctx->player->get_body()->get_p();
+	q = (v2ll(p.x, p.z) >> 4LL) & 0xfLL;
+	c = ctx->world->get_chunk(q);
+	terraform(0, c);
+	c->set_flags(Chunk::UNLIT);
+	return 0;
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+
