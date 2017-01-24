@@ -32,7 +32,7 @@ INSTALL_DATA = $(INSTALL) -m 644
 
 CPPFLAGS =
 
-CXXFLAGS = -g -std=c++11 -Werror -Wfatal-errors
+CXXFLAGS = -Werror -Wfatal-errors
 
 LDFLAGS =
 
@@ -41,6 +41,7 @@ LDFLAGS =
 ALL_CXXFLAGS = $(CPPFLAGS) $(CXXFLAGS)
 ALL_LDFLAGS = $(LDFLAGS)
 
+ALL_CXXFLAGS += -std=c++11
 ALL_CXXFLAGS += -DVOXEL_VERSION=\"$(VERSION)\"
 ALL_CXXFLAGS += -DVOXEL_LIBDIR=\"$(libdir)\"
 ALL_CXXFLAGS += -DVOXEL_DATADIR=\"$(datadir)\"

@@ -137,8 +137,6 @@ bool Context::load_world()
 			/* do nothing */
 		}
 		close(fd);
-	} else {
-		log_info("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
@@ -176,8 +174,6 @@ bool Context::load_player()
 			/* do nothing */
 		}
 		close(fd);
-	} else {
-		log_info("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
@@ -220,8 +216,6 @@ bool Context::load_chunk(Chunk *c)
 			/* do nothing */
 		}
 		close(fd);
-	} else {
-		log_info("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
