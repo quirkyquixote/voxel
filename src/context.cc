@@ -357,6 +357,7 @@ void Context::update_chunks()
 		}
 		if ((c->get_flags() & Chunk::UNLIT) != 0) {
 			//log_info("lit up");
+			#if 0
 			box3ll bb;
 			bb.x0 = c->get_p().x;
 			bb.y0 = Chunk::H - 1/*0*/;
@@ -367,6 +368,10 @@ void Context::update_chunks()
 			log_info("Recalculate lighting for %lld,%lld,%lld %lld,%lld,%lld",
 					bb.x0, bb.y0, bb.z0, bb.x1, bb.y1, bb.z1);
 			light->update(bb, NULL);
+			#endif
+			light->init(box2ll(c->get_p().x, c->get_p().y,
+						c->get_p().x + Chunk::W - 1,
+						c->get_p().y + Chunk::D - 1));
 			c->unset_flags(Chunk::UNLIT);
 			c->set_flags(Chunk::UNRENDERED);
 		}
