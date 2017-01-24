@@ -227,6 +227,9 @@ bool Context::load_chunk(Chunk *c)
 
 void Context::save_chunk(Chunk *c)
 {
+	if (c->get_flags() & Chunk::UNLOADED)
+		return;
+
 	char name[64];
 	v2ll p = c->get_p();
 	snprintf(name, sizeof(name), "%016llx%016llx", p.x >> 4, p.y >> 4);
