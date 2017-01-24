@@ -393,10 +393,13 @@ void Context::event(const SDL_Event &e)
 	if (mode == MODE_COMMAND) {
 		if (e.type == SDL_KEYDOWN) {
 			if (e.key.keysym.sym == SDLK_RETURN) {
+				scrollback.push_front(strdup(cli->get_visible()));
 				Tcl_Eval(tcl, cli->get_visible());
 				const char *ret = Tcl_GetStringResult(tcl);
 				if (ret && *ret)
-					log_info("%s", ret);
+					scrollback.push_front(strdup(ret));
+				while (scrollback.size() > 10)
+					scrollback.pop_back();
 				cli->push();
 				mode = MODE_ROAM;
 				SDL_StopTextInput();

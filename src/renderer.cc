@@ -370,6 +370,13 @@ void Renderer::render_board(const std::vector<Item> &inv, const v3ll &p)
 
 void Renderer::render_commandline()
 {
+	static int command = 0;
+
+	if (ctx->mode == MODE_COMMAND)
+		command = 60;
+	else if (command > 0)
+		--command;
+
 	if (ctx->mode == MODE_COMMAND) {
 		v3f p = cam->get_p();
 		glMatrixMode(GL_MODELVIEW);
@@ -398,6 +405,25 @@ void Renderer::render_commandline()
 		glVertex3f(0, 0, 0);
 		glEnd();
 		glDisable(GL_BLEND);
+		glPopMatrix();
+	}
+
+	if (command > 0) {
+		v3f p = cam->get_p();
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glTranslatef(p.x, p.y, p.z);
+		glRotatef(180.0 * cam->get_r().y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * cam->get_r().x / M_PI, 1, 0, 0);
+		glTranslatef(-15, 0, -30);
+		for (auto s : ctx->scrollback) {
+			glTranslatef(0, 1, 0);
+			glColor3f(1, 1, 1);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			render_string(s);
+			glDisable(GL_BLEND);
+		}
 		glPopMatrix();
 	}
 }

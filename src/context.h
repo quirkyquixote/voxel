@@ -5,7 +5,7 @@
 
 #include <tcl.h>
 
-#include <list>
+#include <deque>
 
 #include "world.h"
 #include "terraform.h"
@@ -32,6 +32,7 @@ class Context {
 	std::unique_ptr<MainLoop> ml;
 	Tcl_Interp *tcl;
 	std::unique_ptr<CommandLine> cli;
+	std::deque<char *> scrollback;
 	std::unique_ptr<World> world;
 	std::unique_ptr<Renderer> renderer;
 	std::unique_ptr<Space> space;
