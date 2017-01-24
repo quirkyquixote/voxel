@@ -40,10 +40,6 @@ class Camera {
 	float fovy;
 	float max_distance;     // shards farther than this will not be drawn
 	float aspect_ratio;
-	v3f nlf;		// normal of the left clipping plane
-	v3f nrt;		// normal of the right clipping plane
-	v3f nup;		// normal of the top clipping plane
-	v3f ndn;		// normal of the bottom clipping plane
 	GLfloat modelview[16];	// modelview matrix
 };
 
