@@ -76,7 +76,7 @@ double noise_4d(double a, double b, double c, double d, double zoom, int steps)
 int terraform(int64_t seed, Chunk *c)
 {
 	v2ll p;
-	uint64_t u, v;
+	int64_t u, v;
 	int x, y, z;
 	int height, heat, humidity;
 
@@ -97,6 +97,10 @@ int terraform(int64_t seed, Chunk *c)
 			for (; y < height; ++y) {
 				c->set_mat(v3ll(x, y, z), MAT_GRASS);
 				c->set_shape(v3ll(x, y, z), SHAPE_BLOCK_DN);
+			}
+			for (; y < Chunk::H; ++y) {
+				c->set_mat(v3ll(x, y, z), 0);
+				c->set_shape(v3ll(x, y, z), SHAPE_NONE);
 			}
 		}
 	}

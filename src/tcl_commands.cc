@@ -88,6 +88,7 @@ int cmd_help(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	log_info("available commands:");
 	log_info("help: print this");
 	log_info("ls [mat|obj|sha]: list materials, objects, and shapes");
+	log_info("tp <x> <y> <z>: teleport to coordinates");
 	log_info("give <object> [amount]: add objects to inventory");
 	log_info("take <object> [amount]: remove objects to inventory");
 	log_info("q: query block under the cursor");
@@ -140,6 +141,27 @@ int cmd_ls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	} else {
 		goto fail;
 	}
+	return TCL_OK;
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+
+int cmd_tp(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: tp <x> <y> <z>";
+	Context *ctx = static_cast<Context *>(data);
+	int x, y, z;
+
+	if (objc != 4)
+		goto fail;
+	if (Tcl_GetIntFromObj(interp, objv[1], &x) != TCL_OK)
+		goto fail;
+	if (Tcl_GetIntFromObj(interp, objv[2], &y) != TCL_OK)
+		goto fail;
+	if (Tcl_GetIntFromObj(interp, objv[3], &z) != TCL_OK)
+		goto fail;
+	ctx->player->get_body()->set_p(v3f(x, y, z));
 	return TCL_OK;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));

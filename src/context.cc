@@ -13,6 +13,7 @@
 
 #include <memory>
 #include <map>
+#include <thread>
 
 #include "drop_entity.h"
 
@@ -41,7 +42,7 @@ Context::Context(const char *dir)
 	ml.reset(new MainLoop(30));
 	ml->set_event_callback([this](const SDL_Event &e){event(e);});
 	ml->set_update_callback([this](){update();});
-	ml->set_window(new Window("voxel", 0, 0, 1920, 1080, 0));
+	ml->set_window(new Window("voxel", 0, 0, 1280, 768, 0));
 
 	/* Create renderer */
 	renderer.reset(new Renderer(this));
@@ -51,6 +52,7 @@ Context::Context(const char *dir)
 	tcl = Tcl_CreateInterp();
 	Tcl_CreateObjCommand(tcl, "help", cmd_help, this, NULL);
 	Tcl_CreateObjCommand(tcl, "ls", cmd_ls, this, NULL);
+	Tcl_CreateObjCommand(tcl, "tp", cmd_tp, this, NULL);
 	Tcl_CreateObjCommand(tcl, "give", cmd_give, this, NULL);
 	Tcl_CreateObjCommand(tcl, "take", cmd_take, this, NULL);
 	Tcl_CreateObjCommand(tcl, "q", cmd_query, this, NULL);
@@ -86,6 +88,8 @@ Context::~Context()
 
 bool Context::load_all()
 {
+	static const box2ll chunk_box(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1);
+
 	mkpath(dir, 0700);
 	load_world();
 	if (!load_player()) {
@@ -94,13 +98,17 @@ bool Context::load_all()
 		p.y += Chunk::W * World::CHUNK_NUM / 2;
 		player->get_body()->set_p(v3f(p.x, World::H, p.y));
 	}
-	for (auto p : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM -1)) {
-		Chunk *c = world->get_chunk(p);
-		c->set_p(world->get_p() + p * v2ll(Chunk::W, Chunk::D));
+	v2ll world_p(world->get_p());
+	world_p.x = div_floor(world_p.x, 16LL);
+	world_p.y = div_floor(world_p.y, 16LL);
+	for (auto r : chunk_box + world_p) {
+		Chunk *c = world->get_chunk(r & 0xfLL);
+		c->set_p(r * v2ll(Chunk::W, Chunk::D));
 		if (!load_chunk(c)) {
 			terraform(0, c);
 			c->set_flags(Chunk::UNLIT);
 		}
+		c->set_flags(Chunk::UNRENDERED);
 	}
 	return true;
 }
@@ -129,7 +137,7 @@ bool Context::load_world()
 		}
 		close(fd);
 	} else {
-		log_error("%s: %s", path.c_str(), strerror(errno));
+		log_info("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
@@ -168,7 +176,7 @@ bool Context::load_player()
 		}
 		close(fd);
 	} else {
-		log_error("%s: %s", path.c_str(), strerror(errno));
+		log_info("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
@@ -194,9 +202,9 @@ void Context::save_player()
 bool Context::load_chunk(Chunk *c)
 {
 	bool ret;
-	char name[16];
+	char name[64];
 	v2ll p = c->get_p();
-	snprintf(name, sizeof(name), "%06llx%06llx", p.x / Chunk::W, p.y / Chunk::D);
+	snprintf(name, sizeof(name), "%016llx%016llx", p.x >> 4, p.y >> 4);
 	std::string path(dir);
 	path += "/";
 	path += name;
@@ -212,16 +220,16 @@ bool Context::load_chunk(Chunk *c)
 		}
 		close(fd);
 	} else {
-		log_error("%s: %s", path.c_str(), strerror(errno));
+		log_info("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
 
 void Context::save_chunk(Chunk *c)
 {
-	char name[16];
+	char name[64];
 	v2ll p = c->get_p();
-	snprintf(name, sizeof(name), "%06llx%06llx", p.x / Chunk::W, p.y / Chunk::D);
+	snprintf(name, sizeof(name), "%016llx%016llx", p.x >> 4, p.y >> 4);
 	std::string path(dir);
 	path += "/";
 	path += name;
@@ -289,8 +297,40 @@ void Context::drop_block(const v3ll &p)
 
 void Context::update_chunks()
 {
+	static const box2ll chunk_box(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1);
+
+	std::vector<std::thread> tasks;
 	std::map<int, Chunk *> out_of_date;
 	v2ll p(player->get_body()->get_p().x, player->get_body()->get_p().z);
+	v2ll world_p((p & ~0xfLL) - v2ll(World::H, World::D) / 2LL);
+	if (world_p != world->get_p()) {
+		log_info("off center!");
+		world->set_p(world_p);
+		world_p.x = div_floor(world_p.x, 16LL);
+		world_p.y = div_floor(world_p.y, 16LL);
+		int chunks_moved = 0;
+		for (auto r : chunk_box + world_p) {
+			Chunk *c = world->get_chunk(r & 0xfLL);
+			v2ll new_p(r * v2ll(Chunk::W, Chunk::D));
+			if (c->get_p() != new_p) {
+				tasks.emplace_back([this, c, new_p](){
+					//log_info("%lld,%lld", new_p.x, new_p.y);
+					save_chunk(c);
+					c->set_p(new_p);
+					if (!load_chunk(c)) {
+						terraform(0, c);
+						c->set_flags(Chunk::UNLIT);
+					}
+					c->set_flags(Chunk::UNRENDERED);
+					c->set_p(new_p);
+				});
+				++chunks_moved;
+			}
+		}
+		log_info("%d chunks moved", chunks_moved);
+	}
+	for (auto &t : tasks)
+		t.join();
 
 	for (auto q : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
 		Chunk *c = world->get_chunk(q);
@@ -309,30 +349,37 @@ void Context::update_chunks()
 		if (i >= chunks_per_tick)
 			break;
 		Chunk *c = iter.second;
-		//		log_info("Update chunk %d (%lld,%lld); priority:%d", c->get_id(), c->get_p().x, c->get_p().y, iter.first);
+		//log_info("Update chunk %d (%lld,%lld); priority:%d", c->get_id(), c->get_p().x, c->get_p().y, iter.first);
 		if ((c->get_flags() & Chunk::UNLOADED) != 0) {
-			//			log_info("load from file");
+			//log_info("load from file");
 			/* load this chunk */
 			c->unset_flags(Chunk::UNLOADED);
 		}
 		if ((c->get_flags() & Chunk::UNLIT) != 0) {
-			//			log_info("lit up");
+			//log_info("lit up");
+			#if 0
 			box3ll bb;
 			bb.x0 = c->get_p().x;
-			bb.y0 = 0;
+			bb.y0 = Chunk::H - 1/*0*/;
 			bb.z0 = c->get_p().y;
-			bb.x1 = c->get_p().x + Chunk::W;
-			bb.y1 = Chunk::H;
-			bb.z1 = c->get_p().y + Chunk::D;
+			bb.x1 = c->get_p().x + Chunk::W - 1;
+			bb.y1 = Chunk::H - 1;
+			bb.z1 = c->get_p().y + Chunk::D - 1;
+			log_info("Recalculate lighting for %lld,%lld,%lld %lld,%lld,%lld",
+					bb.x0, bb.y0, bb.z0, bb.x1, bb.y1, bb.z1);
 			light->update(bb, NULL);
+			#endif
+			light->init(box2ll(c->get_p().x, c->get_p().y,
+						c->get_p().x + Chunk::W - 1,
+						c->get_p().y + Chunk::D - 1));
 			c->unset_flags(Chunk::UNLIT);
 			c->set_flags(Chunk::UNRENDERED);
 		}
 		if ((c->get_flags() & Chunk::UNRENDERED) != 0) {
-			//			log_info("update vbos");
+			//log_info("update vbos");
 			for (int k = 0; k < Chunk::SHARD_NUM; ++k)
-				renderer->update_shard(c->get_shard(k)->get_id(), c->get_p().x,
-						k * Shard::H, c->get_p().y);
+				renderer->update_shard(c->get_shard(k)->get_id(), v3ll(c->get_p().x,
+							k * Shard::H, c->get_p().y));
 			c->unset_flags(Chunk::UNRENDERED);
 		}
 		++i;

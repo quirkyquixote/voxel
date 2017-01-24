@@ -80,7 +80,7 @@ Renderer::Renderer(Context *ctx)
 	/* Setup camera */
 	cam.reset(new Camera());
 	cam->set_max_distance(1024);
-	cam->set_aspect_ratio(1920.0 / 1080.0);
+	cam->set_aspect_ratio(1280.0 / 768.0);
 
 	/* Create vertex_buffers */
 	shard_vertex_buffer.reset(new VertexBuffer(World::SHARD_NUM));
@@ -423,6 +423,9 @@ void Renderer::render_shards()
 		Chunk *c = ctx->world->get_chunk(q);
 		p.x = c->get_p().x + Chunk::W / 2;
 		p.z = c->get_p().y + Chunk::W / 2;
+		if (p.x < 0 || p.z < 0) {
+			abort();
+		}
 		for (int y = 0; y < Chunk::SHARD_NUM; ++y) {
 			Shard *s = c->get_shard(y);
 			if (shard_vertex_buffer->get_size(s->get_id()) == 0)
@@ -735,12 +738,12 @@ void Renderer::update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y,
 	}
 }
 
-void Renderer::update_shard(int id, int64_t x0, int64_t y0, int64_t z0)
+void Renderer::update_shard(int id, const v3ll &p)
 {
 	static const box3ll shard_box(0, 0, 0, Shard::W - 1, Shard::H - 1, Shard::D - 1);
 	std::vector<Vertex> buf;
-	for (auto p : v3ll(x0, y0, z0) + shard_box)
-		update_cell(&buf, p.x, p.y, p.z);
+	for (auto q : p + shard_box)
+		update_cell(&buf, q.x, q.y, q.z);
 	shard_vertex_buffer->update(id, buf.data(), buf.size());
 }
 
