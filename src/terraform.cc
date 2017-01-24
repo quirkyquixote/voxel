@@ -98,6 +98,10 @@ int terraform(int64_t seed, Chunk *c)
 				c->set_mat(v3ll(x, y, z), MAT_GRASS);
 				c->set_shape(v3ll(x, y, z), SHAPE_BLOCK_DN);
 			}
+			for (; y < Chunk::H; ++y) {
+				c->set_mat(v3ll(x, y, z), 0);
+				c->set_shape(v3ll(x, y, z), SHAPE_NONE);
+			}
 		}
 	}
 	return 0;
