@@ -251,6 +251,8 @@ void Renderer::render_item(int obj, int mat, GLfloat alpha)
 
 void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 {
+	if (!cam->is_visible(box3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1)))
+		return;
 	GLfloat side = sqrt(inv.size());
 	GLfloat d = dist(ctx->player->get_body()->get_p(), v3f(p));
 	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
@@ -309,6 +311,8 @@ void Renderer::render_inventory(const std::vector<Item> &inv, const v3ll &p)
 
 void Renderer::render_board(const std::vector<Item> &inv, const v3ll &p)
 {
+	if (!cam->is_visible(box3ll(p.x, p.y, p.z, p.x + 1, p.y + 1, p.z + 1)))
+		return;
 	GLfloat side = sqrt(inv.size());
 	GLfloat d = dist(ctx->player->get_body()->get_p(), v3f(p));
 	GLubyte alpha = d > 4 ? 0 : d < 2 ? 255 : 255 * (2 - d / 2);
