@@ -102,13 +102,13 @@ bool Context::load_all()
 	world_p.x = div_floor(world_p.x, 16LL);
 	world_p.y = div_floor(world_p.y, 16LL);
 	for (auto r : chunk_box + world_p) {
-		Chunk *c = world->get_chunk(r & 0xfLL);
-		c->set_p(r * v2ll(Chunk::W, Chunk::D));
+		Chunk *c = new Chunk(this, r * v2ll(Chunk::W, Chunk::D));
 		if (!load_chunk(c)) {
 			terraform(0, c);
 			c->set_flags(Chunk::UNLIT);
 		}
 		c->set_flags(Chunk::UNRENDERED);
+		world->set_chunk(r & 0xfLL, c);
 	}
 	return true;
 }
@@ -304,7 +304,7 @@ void Context::update_chunks()
 	v2ll p(player->get_body()->get_p().x, player->get_body()->get_p().z);
 	v2ll world_p((p & ~0xfLL) - v2ll(World::H, World::D) / 2LL);
 	if (world_p != world->get_p()) {
-		log_info("off center!");
+		// log_info("off center!");
 		world->set_p(world_p);
 		world_p.x = div_floor(world_p.x, 16LL);
 		world_p.y = div_floor(world_p.y, 16LL);
@@ -313,24 +313,18 @@ void Context::update_chunks()
 			Chunk *c = world->get_chunk(r & 0xfLL);
 			v2ll new_p(r * v2ll(Chunk::W, Chunk::D));
 			if (c->get_p() != new_p) {
-				tasks.emplace_back([this, c, new_p](){
-					//log_info("%lld,%lld", new_p.x, new_p.y);
+				tasks.emplace_back([this, c](){
 					save_chunk(c);
-					c->set_p(new_p);
-					if (!load_chunk(c)) {
-						terraform(0, c);
-						c->set_flags(Chunk::UNLIT);
-					}
-					c->set_flags(Chunk::UNRENDERED);
-					c->set_p(new_p);
+					delete c;
 				});
+				c = new Chunk(this, new_p);
+				c->set_flags(Chunk::UNLOADED);
+				world->set_chunk(r & 0xfLL, c);
 				++chunks_moved;
 			}
 		}
-		log_info("%d chunks moved", chunks_moved);
+		// log_info("%d chunks moved", chunks_moved);
 	}
-	for (auto &t : tasks)
-		t.join();
 
 	for (auto q : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
 		Chunk *c = world->get_chunk(q);
@@ -339,36 +333,27 @@ void Context::update_chunks()
 			out_of_date.emplace(d, c);
 		}
 	}
-	if (out_of_date.empty()) {
-		//		log_info("no chunks to update");
-		return;
-	}
 
 	int i = 0;
 	for (auto &iter : out_of_date) {
 		if (i >= chunks_per_tick)
 			break;
 		Chunk *c = iter.second;
-		// log_info("Update chunk %d (%lld,%lld); priority:%d", c->get_id(), c->get_p().x, c->get_p().y, iter.first);
+		// log_info("Update chunk %d (%lld,%lld); priority:%d",
+		// c->get_id(), c->get_p().x, c->get_p().y, iter.first);
 		if ((c->get_flags() & Chunk::UNLOADED) != 0) {
 			// log_info("load from file");
 			/* load this chunk */
+			if (!load_chunk(c)) {
+				terraform(0, c);
+				c->set_flags(Chunk::UNLIT);
+			} else {
+				c->set_flags(Chunk::UNRENDERED);
+			}
 			c->unset_flags(Chunk::UNLOADED);
 		}
 		if ((c->get_flags() & Chunk::UNLIT) != 0) {
 			// log_info("lit up");
-			#if 0
-			box3ll bb;
-			bb.x0 = c->get_p().x;
-			bb.y0 = Chunk::H - 1/*0*/;
-			bb.z0 = c->get_p().y;
-			bb.x1 = c->get_p().x + Chunk::W - 1;
-			bb.y1 = Chunk::H - 1;
-			bb.z1 = c->get_p().y + Chunk::D - 1;
-			log_info("Recalculate lighting for %lld,%lld,%lld %lld,%lld,%lld",
-					bb.x0, bb.y0, bb.z0, bb.x1, bb.y1, bb.z1);
-			light->update(bb, NULL);
-			#endif
 			light->init(box2ll(c->get_p().x, c->get_p().y,
 						c->get_p().x + Chunk::W - 1,
 						c->get_p().y + Chunk::D - 1));
@@ -385,6 +370,8 @@ void Context::update_chunks()
 		++i;
 	}
 	//		log_info("update %d of %zd chunks (max: %d)", i, out_of_date.size(), chunks_per_tick);
+	for (auto &t : tasks)
+		t.join();
 }
 
 void Context::update()

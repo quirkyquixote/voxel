@@ -8,9 +8,10 @@
 #include "sz.h"
 #include "context.h"
 
-Chunk::Chunk(Context *ctx, int id)
-	: ctx(ctx), id(id)
+Chunk::Chunk(Context *ctx, const v2ll &p)
+	: ctx(ctx), x(p.x), z(p.y)
 {
+	id = ((x >> 4) & 0xf) + (z & 0xf0);
 	for (int i = 0; i < SHARD_NUM; ++i)
 		shards[i] = new Shard(id * SHARD_NUM + i, i);
 	flags = UNLOADED;
@@ -27,9 +28,9 @@ void Chunk::load(sz_Tag *root)
 	sz_Tag *tag;
 
 	tag = sz_dict_lookup(root, "x");
-	x = tag->get_i64();
+	assert(x == tag->get_i64());
 	tag = sz_dict_lookup(root, "z");
-	z = tag->get_i64();
+	assert(z == tag->get_i64());
 	tag = sz_dict_lookup(root, "shards");
 	{
 		int i = 0;
@@ -40,7 +41,13 @@ void Chunk::load(sz_Tag *root)
 	{
 		for (auto &it2 : tag->get_list()) {
 			Entity *e = load_entity(ctx, it2);
-			ctx->world->set_data(e->get_p(), e);
+			auto p = e->get_p() - v3ll(x, 0, z);
+			if (p.x < 0 || p.x >= W || p.y < 0 || p.y >= H || p.z < 0 || p.z >= D) {
+				log_warning("chunk contains entity outide itself");
+				delete e;
+			} else {
+				set_data(p, e);
+			}
 		}
 	}
 	flags = UNRENDERED;

@@ -8,15 +8,15 @@
 World::World(Context *ctx)
 	:ctx(ctx)
 {
-	int id = 0;
 	for (auto p : box2ll(0, 0, CHUNK_NUM - 1, CHUNK_NUM - 1))
-		chunks[p.x][p.y] = new Chunk(ctx, id++);
+		chunks[p.x][p.y] = nullptr;
 }
 
 World::~World()
 {
 	for (auto p : box2ll(0, 0, CHUNK_NUM - 1, CHUNK_NUM - 1))
-		delete chunks[p.x][p.y];
+		if (chunks[p.x][p.y])
+			delete chunks[p.x][p.y];
 }
 
 void World::load(sz_Tag *root)

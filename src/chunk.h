@@ -22,7 +22,7 @@ class Chunk : public NonCopyable {
 		UNRENDERED = 1 << 2,
 	};
 
-	Chunk(Context *ctx, int id);
+	Chunk(Context *ctx, const v2ll &p);
 	~Chunk();
 
 	void load(sz_Tag *root);
@@ -32,7 +32,6 @@ class Chunk : public NonCopyable {
 	inline void set_flags(int mask) { flags |= mask; }
 	inline void unset_flags(int mask) { flags &= ~mask; }
 	inline int get_flags() { return flags; }
-	inline void set_p(const v2ll &p) { x = p.x; z = p.y; }
 	inline v2ll get_p() { return v2ll(x, z); }
 	inline Shard *get_shard(int y) { return shards[y]; }
 
