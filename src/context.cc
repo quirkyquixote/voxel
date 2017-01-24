@@ -355,19 +355,33 @@ void Context::update_chunks()
 			}
 			c->unset_flags(Chunk::UNLOADED);
 		}
+		v2ll p = c->get_p();
 		if ((c->get_flags() & Chunk::UNLIT) != 0) {
 			// log_info("lit up");
-			light->init(box2ll(c->get_p().x, c->get_p().y,
-						c->get_p().x + Chunk::W - 1,
-						c->get_p().y + Chunk::D - 1));
+			light->init(box2ll(p.x, p.y, p.x + Chunk::W - 1, p.y + Chunk::D - 1));
 			c->unset_flags(Chunk::UNLIT);
 			c->set_flags(Chunk::UNRENDERED);
 		}
+		bool neighbours_loaded = true;
+		for (auto o : { v2ll(Chunk::W, 0), v2ll(-Chunk::W, 0),
+				v2ll(0, Chunk::D), v2ll(0, -Chunk::D) }) {
+			v2ll p2 = p + o;
+			v2ll q = (p2 >> 4LL) & 0xfLL;
+			Chunk *c2 = world->get_chunk(q);
+			if (c2->get_p() != p2
+				|| (c2->get_flags() & Chunk::UNLOADED) != 0
+				|| (c2->get_flags() & Chunk::UNLIT) != 0) {
+				neighbours_loaded = false;
+				break;
+			}
+		}
+		if (!neighbours_loaded)
+			continue;
 		if ((c->get_flags() & Chunk::UNRENDERED) != 0) {
 			// log_info("update vbos");
 			for (int k = 0; k < Chunk::SHARD_NUM; ++k)
-				renderer->update_shard(c->get_shard(k)->get_id(), v3ll(c->get_p().x,
-							k * Shard::H, c->get_p().y));
+				renderer->update_shard(c->get_shard(k)->get_id(),
+						v3ll(p.x, k * Shard::H, p.y));
 			c->unset_flags(Chunk::UNRENDERED);
 		}
 		++i;
