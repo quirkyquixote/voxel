@@ -5,6 +5,7 @@
 #include <cstring>
 
 CommandLine::CommandLine()
+	: cur_line(0), cur_char(0)
 {
 	visible = "";
 }
