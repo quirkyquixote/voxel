@@ -32,14 +32,45 @@ bool Camera::is_visible(const v3f &a)
 
 bool Camera::is_visible(const box3f &bb)
 {
-	return is_visible(v3f(bb.x0, bb.y0, bb.z0))
-		|| is_visible(v3f(bb.x0, bb.y0, bb.z1))
-		|| is_visible(v3f(bb.x0, bb.y1, bb.z0))
-		|| is_visible(v3f(bb.x0, bb.y1, bb.z1))
-		|| is_visible(v3f(bb.x1, bb.y0, bb.z0))
-		|| is_visible(v3f(bb.x1, bb.y0, bb.z1))
-		|| is_visible(v3f(bb.x1, bb.y1, bb.z0))
-		|| is_visible(v3f(bb.x1, bb.y1, bb.z1));
+	v3f a = modelview * v3f(bb.x0, bb.y0, bb.z0);
+	v3f b = modelview * v3f(bb.x0, bb.y0, bb.z1);
+	v3f c = modelview * v3f(bb.x0, bb.y1, bb.z0);
+	v3f d = modelview * v3f(bb.x0, bb.y1, bb.z1);
+	v3f e = modelview * v3f(bb.x1, bb.y0, bb.z0);
+	v3f f = modelview * v3f(bb.x1, bb.y0, bb.z1);
+	v3f g = modelview * v3f(bb.x1, bb.y1, bb.z0);
+	v3f h = modelview * v3f(bb.x1, bb.y1, bb.z1);
+
+	a.x /= a.z;
+	a.y /= a.z;
+	b.x /= b.z;
+	b.y /= b.z;
+	c.x /= c.z;
+	c.y /= c.z;
+	d.x /= d.z;
+	d.y /= d.z;
+	e.x /= e.z;
+	e.y /= e.z;
+	f.x /= f.z;
+	f.y /= f.z;
+	g.x /= g.z;
+	g.y /= g.z;
+	h.x /= h.z;
+	h.y /= h.z;
+
+	if (a.x > 1 && b.x > 1 && c.x > 1 && d.x > 1
+			&& e.x > 1 && f.x > 1 && g.x > 1 && h.x > 1)
+		return false;
+	if (a.x < -1 && b.x < -1 && c.x < -1 && d.x < -1
+			&& e.x < -1 && f.x < -1 && g.x < -1 && h.x < -1)
+		return false;
+	if (a.y > 1 && b.y > 1 && c.y > 1 && d.y > 1
+			&& e.y > 1 && f.y > 1 && g.y > 1 && h.y > 1)
+		return false;
+	if (a.y < -1 && b.y < -1 && c.y < -1 && d.y < -1
+			&& e.y < -1 && f.y < -1 && g.y < -1 && h.y < -1)
+		return false;
+	return true;
 }
 
 void Camera::load_gl_matrices()
