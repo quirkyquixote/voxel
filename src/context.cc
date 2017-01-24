@@ -137,7 +137,7 @@ bool Context::load_world()
 		}
 		close(fd);
 	} else {
-		log_error("%s: %s", path.c_str(), strerror(errno));
+		log_info("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
@@ -176,7 +176,7 @@ bool Context::load_player()
 		}
 		close(fd);
 	} else {
-		log_error("%s: %s", path.c_str(), strerror(errno));
+		log_info("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
@@ -220,7 +220,7 @@ bool Context::load_chunk(Chunk *c)
 		}
 		close(fd);
 	} else {
-		log_error("%s: %s", path.c_str(), strerror(errno));
+		log_info("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
