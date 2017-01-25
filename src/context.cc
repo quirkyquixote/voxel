@@ -298,7 +298,7 @@ void Context::update_chunks()
 	static const box2ll chunk_box(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1);
 
 	std::vector<std::thread> tasks;
-	std::map<int, Chunk *> out_of_date;
+	std::multimap<int, Chunk *> out_of_date;
 	v2ll p(player->get_body()->get_p().x, player->get_body()->get_p().z);
 	v2ll world_p((p & ~0xfLL) - v2ll(World::H, World::D) / 2LL);
 	if (world_p != world->get_p()) {
