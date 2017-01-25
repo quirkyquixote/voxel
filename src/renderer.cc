@@ -452,6 +452,8 @@ void Renderer::render_shards()
 	shard_vertex_buffer->enable();
 	for (auto q : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
 		Chunk *c = ctx->world->get_chunk(q);
+		if (c->get_flags() & Chunk::UNRENDERED)
+			continue;
 		bb.x0 = c->get_p().x;
 		bb.z0 = c->get_p().y;
 		bb.x1 = bb.x0 + Chunk::W;
