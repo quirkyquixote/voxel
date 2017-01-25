@@ -37,14 +37,19 @@ voxel_objs += crate_entity.o
 voxel_objs += pipe_entity.o
 voxel_objs += drop_entity.o
 voxel_objs += player_entity.o
+voxel_objs += noiseutils.o
 
 szcat_objs += sz.o
+
+terratest_objs += terratest.o
+terratest_objs += simplex.o
 
 objs = $(voxel_objs) $(szcat_objs)
 deps = $(objs:.o=.d)
 
 programs += voxel
 programs += szcat
+programs += terratest
 
 install_programs = $(addprefix $(DESTDIR)$(bindir)/,$(programs))
 
@@ -70,9 +75,12 @@ $(DESTDIR)$(localstatedir):
 
 # Rules to compile tools that require specific libraries or flags
 voxel: $(voxel_objs)
-	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $^ -lGL -lGLU -lSDL2 -lSDL2_mixer -lSDL2_image
+	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $^ -lGL -lGLU -lSDL2 -lSDL2_mixer -lSDL2_image -lnoise
 
 szcat: $(szcat_objs)
+
+terratest: $(terratest_objs)
+	$(QUIET_LINK)$(CC) $(ALL_CFLAGS) $(ALL_LDFLAGS) -o $@ $^ -lSDL
 
 -include $(deps)
 

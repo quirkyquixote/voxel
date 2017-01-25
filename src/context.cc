@@ -331,7 +331,7 @@ void Context::update_chunks()
 		}
 	}
 
-	int max_t = SDL_GetTicks() + 1000 / ml->get_fps();
+	int max_t = SDL_GetTicks() + 500 / ml->get_fps();
 	for (auto &iter : out_of_date) {
 		Chunk *c = iter.second;
 		v2ll p = c->get_p();

@@ -32,7 +32,7 @@ INSTALL_DATA = $(INSTALL) -m 644
 
 CPPFLAGS =
 
-CXXFLAGS = -Werror -Wfatal-errors
+CXXFLAGS = -Werror -Wfatal-errors -g
 
 LDFLAGS =
 
@@ -48,6 +48,7 @@ ALL_CXXFLAGS += -DVOXEL_DATADIR=\"$(datadir)\"
 ALL_CXXFLAGS += -DVOXEL_LOCALSTATEDIR=\"$(localstatedir)\"
 ALL_CXXFLAGS += -MD
 ALL_CXXFLAGS += -I/usr/include/tcl
+ALL_CXXFLAGS += -I/usr/include/libnoise
 
 ALL_LDFLAGS += -pthread
 ALL_LDFLAGS += -ltcl
