@@ -16,27 +16,65 @@ void terraform(int64_t seed, Chunk *c)
 	bb += v2f(p0);
 	bb /= 500.f;
 
-	noise::module::RidgedMulti baseMountainTerrain;
-	noise::module::ScaleBias mountainTerrain;
-	mountainTerrain.SetSourceModule (0, baseMountainTerrain);
-	mountainTerrain.SetScale (0.5);
-	mountainTerrain.SetBias (0.5);
+	noise::module::RidgedMulti hill_base;
+	noise::module::ScaleBias hill;
+	hill.SetSourceModule (0, hill_base);
+	hill.SetScale (0.5);
+	hill.SetBias (0.5);
 
-	noise::module::Billow baseFlatTerrain;
-	baseFlatTerrain.SetFrequency (2.0);
-	noise::module::ScaleBias flatTerrain;
-	flatTerrain.SetSourceModule (0, baseFlatTerrain);
-	flatTerrain.SetScale (0.125);
-	flatTerrain.SetBias (0.125);
+	noise::module::Billow flat_base;
+	flat_base.SetFrequency (2.0);
+	noise::module::ScaleBias flat;
+	flat.SetSourceModule (0, flat_base);
+	flat.SetScale (0.125);
+	flat.SetBias (0.125);
 
-	noise::module::Perlin terrainType;
-	terrainType.SetFrequency (0.5);
-	terrainType.SetPersistence (0.25);
+	noise::module::Perlin land_type;
+	land_type.SetFrequency (0.5);
+	land_type.SetPersistence (0.25);
+	land_type.SetSeed(0);
+
+	noise::module::Select land;
+	land.SetSourceModule (0, flat);
+	land.SetSourceModule (1, hill);
+	land.SetControlModule (land_type);
+	land.SetBounds (0.0, 1000.0);
+	land.SetEdgeFalloff (0.125);
+
+	noise::module::RidgedMulti deep_base;
+	noise::module::ScaleBias deep;
+	deep.SetSourceModule (0, deep_base);
+	deep.SetScale (0.5);
+	deep.SetBias (-0.5);
+
+	noise::module::Billow beach_base;
+	beach_base.SetFrequency (2.0);
+	noise::module::ScaleBias beach;
+	beach.SetSourceModule (0, beach_base);
+	beach.SetScale (0.125);
+	beach.SetBias (-0.125);
+
+	noise::module::Perlin ocean_type;
+	ocean_type.SetFrequency (0.5);
+	ocean_type.SetPersistence (0.25);
+	ocean_type.SetSeed(1000);
+
+	noise::module::Select ocean;
+	ocean.SetSourceModule (0, beach);
+	ocean.SetSourceModule (1, deep);
+	ocean.SetControlModule (ocean_type);
+	ocean.SetBounds (0.0, 1000.0);
+	ocean.SetEdgeFalloff (0.125);
+
+	noise::module::Perlin finalType;
+	finalType.SetFrequency (0.5);
+	finalType.SetPersistence (0.25);
+	finalType.SetSeed(2000);
 
 	noise::module::Select finalTerrain;
-	finalTerrain.SetSourceModule (0, flatTerrain);
-	finalTerrain.SetSourceModule (1, mountainTerrain);
-	finalTerrain.SetControlModule (terrainType);
+	finalTerrain.SetSourceModule (0, land);
+	finalTerrain.SetSourceModule (1, ocean);
+	finalTerrain.SetControlModule (finalType);
 	finalTerrain.SetBounds (0.0, 1000.0);
 	finalTerrain.SetEdgeFalloff (0.125);
 
@@ -53,9 +91,9 @@ void terraform(int64_t seed, Chunk *c)
 		float f = heightMap.GetValue(p.x, p.y);
 		int h = 128 + f * 64;
 		int mat;
-		if (f < .1)
+		if (f <= 0)
 			mat = MAT_SANDSTONE_SAND;
-		if (f < .5)
+		else if (f < .5)
 			mat = MAT_GRASS;
 		else if (f < .6)
 			mat = MAT_LIMESTONE_SAND;
