@@ -60,7 +60,7 @@ class Space : public NonCopyable {
 	explicit Space(World *w);
 	~Space();
 
-	void step();
+	void step(float dt);
 	int query(const v3f &p, const v3f &v, Query *q);
 
 	inline void set_gravity(float g) { gravity = g; }
@@ -82,12 +82,12 @@ class Space : public NonCopyable {
 	PtrList<Body> bodies;
 	std::vector<box3f> geom[256];
 
-	void move_xpos(Body *b);
-	void move_xneg(Body *b);
-	void move_zpos(Body *b);
-	void move_zneg(Body *b);
-	void move_ypos(Body *b);
-	void move_yneg(Body *b);
+	void move_xpos(Body *b, float dt);
+	void move_xneg(Body *b, float dt);
+	void move_zpos(Body *b, float dt);
+	void move_zneg(Body *b, float dt);
+	void move_ypos(Body *b, float dt);
+	void move_yneg(Body *b, float dt);
 
 	void query_xpos(const v3f &p, const v3f &v, Query *q, float *best_t);
 	void query_xneg(const v3f &p, const v3f &v, Query *q, float *best_t);

@@ -43,9 +43,9 @@ void PlayerEntity::update()
 	v = body->get_v();
 	if (move.x0 == 0 && move.x1 == 0 && move.z0 == 0 && move.z1 == 0)
 		run = 0;
-	v.x = (move.x1 - move.x0) * (run ? .18 : 0.15);
-	v.y += (move.y1 - move.y0) * (run ? .18 : 0.15);
-	v.z = (move.z1 - move.z0) * (run ? .18 : 0.15);
+	v.x = (move.x1 - move.x0) * (run ? 5.4 : 4.5);
+	v.y += (move.y1 - move.y0) * (run ? 5.4 : 4.5);
+	v.z = (move.z1 - move.z0) * (run ? 5.4 : 4.5);
 	v = roty(v, r.y);
 	body->set_v(v);
 	body->set_step_size(.5 * (1 + run));
