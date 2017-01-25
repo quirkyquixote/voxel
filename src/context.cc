@@ -36,7 +36,6 @@ Context::Context(const char *dir)
 {
 	world.reset(new World(this));
 	// prof_mgr = profile_manager();
-	max_update_time = 30;
 
 	/* Setup main loop */
 	ml.reset(new MainLoop(30));
@@ -332,13 +331,12 @@ void Context::update_chunks()
 		}
 	}
 
-	int t0, t = 0;
+	int max_t = SDL_GetTicks() + 1000 / ml->get_fps();
 	for (auto &iter : out_of_date) {
 		Chunk *c = iter.second;
-		// log_info("Update chunk %d (%lld,%lld); priority:%d",
-		// c->get_id(), c->get_p().x, c->get_p().y, iter.first);
+		v2ll p = c->get_p();
+		// log_info("Update chunk %lld,%lld; priority:%d", p.x, p.y, iter.first);
 		if ((c->get_flags() & Chunk::UNLOADED) != 0) {
-			t0 = SDL_GetTicks();
 			// log_info("load from file");
 			/* load this chunk */
 			if (!load_chunk(c)) {
@@ -348,45 +346,39 @@ void Context::update_chunks()
 				c->set_flags(Chunk::UNRENDERED);
 			}
 			c->unset_flags(Chunk::UNLOADED);
-			t += SDL_GetTicks() - t0;
-			if (t > max_update_time)
+			if (SDL_GetTicks() > max_t)
 				break;
 		}
-		v2ll p = c->get_p();
 		if ((c->get_flags() & Chunk::UNLIT) != 0) {
-			t0 = SDL_GetTicks();
 			// log_info("lit up");
 			light->init(box2ll(p.x, p.y, p.x + Chunk::W - 1, p.y + Chunk::D - 1));
 			c->unset_flags(Chunk::UNLIT);
 			c->set_flags(Chunk::UNRENDERED);
-			t += SDL_GetTicks() - t0;
-			if (t > max_update_time)
+			if (SDL_GetTicks() > max_t)
 				break;
 		}
-		bool neighbours_loaded = true;
-		for (auto o : { v2ll(Chunk::W, 0), v2ll(-Chunk::W, 0),
-				v2ll(0, Chunk::D), v2ll(0, -Chunk::D) }) {
-			v2ll p2 = p + o;
-			v2ll q = (p2 >> 4LL) & 0xfLL;
-			Chunk *c2 = world->get_chunk(q);
-			if (c2->get_p() != p2
-					|| (c2->get_flags() & Chunk::UNLOADED) != 0
-					|| (c2->get_flags() & Chunk::UNLIT) != 0) {
-				neighbours_loaded = false;
-				break;
-			}
-		}
-		if (!neighbours_loaded)
-			continue;
 		if ((c->get_flags() & Chunk::UNRENDERED) != 0) {
-			t0 = SDL_GetTicks();
+			bool neighbours_loaded = true;
+			for (auto o : { v2ll(Chunk::W, 0), v2ll(-Chunk::W, 0),
+					v2ll(0, Chunk::D), v2ll(0, -Chunk::D) }) {
+				v2ll p2 = p + o;
+				v2ll q = (p2 >> 4LL) & 0xfLL;
+				Chunk *c2 = world->get_chunk(q);
+				if (c2->get_p() != p2
+						|| (c2->get_flags() & Chunk::UNLOADED) != 0
+						|| (c2->get_flags() & Chunk::UNLIT) != 0) {
+					neighbours_loaded = false;
+					break;
+				}
+			}
+			if (!neighbours_loaded)
+				continue;
 			// log_info("update vbos");
 			for (int k = 0; k < Chunk::SHARD_NUM; ++k)
 				renderer->update_shard(c->get_shard(k)->get_id(),
 						v3ll(p.x, k * Shard::H, p.y));
 			c->unset_flags(Chunk::UNRENDERED);
-			t += SDL_GetTicks() - t0;
-			if (t > max_update_time)
+			if (SDL_GetTicks() > max_t)
 				break;
 		}
 	}

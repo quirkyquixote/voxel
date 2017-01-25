@@ -41,7 +41,6 @@ class Context {
 	PtrList<RoamingEntity> entities;
 	PtrList<Callback> callback_list;
 	char mode;
-	int max_update_time;
 	uint64_t tick;
 
 	explicit Context(const char *dir);
