@@ -32,7 +32,7 @@ INSTALL_DATA = $(INSTALL) -m 644
 
 CPPFLAGS =
 
-CXXFLAGS = -Werror -Wfatal-errors -g
+CXXFLAGS = -Werror -Wfatal-errors
 
 LDFLAGS =
 

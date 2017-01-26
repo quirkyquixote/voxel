@@ -9,12 +9,12 @@ class Context;
 
 class Chunk : public NonCopyable {
  public:
-	static const size_t SHARD_NUM = 16;
-	static const size_t W = Shard::W;
-	static const size_t H = Shard::H * SHARD_NUM;
-	static const size_t D = Shard::D;
-	static const size_t AREA = W * D;
-	static const size_t VOLUME = AREA * H;
+	static const long long SHARD_NUM = 16;
+	static const long long W = Shard::W;
+	static const long long H = Shard::H * SHARD_NUM;
+	static const long long D = Shard::D;
+	static const long long AREA = W * D;
+	static const long long VOLUME = AREA * H;
 
 	enum {
 		UNLOADED = 1 << 0,

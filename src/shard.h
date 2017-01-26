@@ -16,11 +16,11 @@
 
 class Shard : public NonCopyable {
  public:
-	static const size_t W = 16;
-	static const size_t H = 16;
-	static const size_t D = 16;
-	static const size_t AREA = W * D;
-	static const size_t VOLUME = AREA * H;
+	static const long long W = 16;
+	static const long long H = 16;
+	static const long long D = 16;
+	static const long long AREA = W * D;
+	static const long long VOLUME = AREA * H;
 
 	Shard(int id, int y);
 	~Shard();

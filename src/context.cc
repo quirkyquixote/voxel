@@ -98,17 +98,15 @@ bool Context::load_all()
 		p.y += Chunk::W * World::CHUNK_NUM / 2;
 		player->get_body()->set_p(v3f(p.x, World::H, p.y));
 	}
-	v2ll world_p(world->get_p());
-	world_p.x = div_floor(world_p.x, 16LL);
-	world_p.y = div_floor(world_p.y, 16LL);
-	for (auto r : chunk_box + world_p) {
-		Chunk *c = new Chunk(this, r * v2ll(Chunk::W, Chunk::D));
+	for (auto r : chunk_box) {
+		auto p = (r * Chunk::W) + world->get_p();
+		Chunk *c = new Chunk(this, p);
 		if (!load_chunk(c)) {
 			terraform(0, c);
 			c->set_flags(Chunk::UNLIT);
 		}
 		c->set_flags(Chunk::UNRENDERED);
-		world->set_chunk(r & 0xfLL, c);
+		world->set_chunk_at_block(p, c);
 	}
 	return true;
 }
@@ -299,31 +297,29 @@ void Context::update_chunks()
 	std::vector<std::thread> tasks;
 	std::multimap<int, Chunk *> out_of_date;
 	v2ll p(player->get_body()->get_p().x, player->get_body()->get_p().z);
-	v2ll world_p((p & ~0xfLL) - v2ll(World::H, World::D) / 2LL);
+	v2ll world_p((p & ~0xfLL) - v2ll(World::W, World::D) / 2LL);
 	if (world_p != world->get_p()) {
 		// log_info("off center!");
 		world->set_p(world_p);
-		world_p.x = div_floor(world_p.x, 16LL);
-		world_p.y = div_floor(world_p.y, 16LL);
 		int chunks_moved = 0;
-		for (auto r : chunk_box + world_p) {
-			Chunk *c = world->get_chunk(r & 0xfLL);
-			v2ll new_p(r * v2ll(Chunk::W, Chunk::D));
-			if (c->get_p() != new_p) {
+		for (auto r : chunk_box) {
+			auto p = (r * Chunk::W) + world_p;
+			Chunk *c = world->get_chunk_at_block(p);
+			if (c->get_p() != p) {
 				tasks.emplace_back([this, c](){
 					save_chunk(c);
 					delete c;
 				});
-				c = new Chunk(this, new_p);
+				c = new Chunk(this, p);
 				c->set_flags(Chunk::UNLOADED);
-				world->set_chunk(r & 0xfLL, c);
+				world->set_chunk_at_block(p, c);
 				++chunks_moved;
 			}
 		}
 		// log_info("%d chunks moved", chunks_moved);
 	}
 
-	for (auto q : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
+	for (auto q : chunk_box) {
 		Chunk *c = world->get_chunk(q);
 		if (c->get_flags() != 0) {
 			int d = dist(c->get_p(), p);
@@ -362,8 +358,7 @@ void Context::update_chunks()
 			for (auto o : { v2ll(Chunk::W, 0), v2ll(-Chunk::W, 0),
 					v2ll(0, Chunk::D), v2ll(0, -Chunk::D) }) {
 				v2ll p2 = p + o;
-				v2ll q = (p2 >> 4LL) & 0xfLL;
-				Chunk *c2 = world->get_chunk(q);
+				Chunk *c2 = world->get_chunk_at_block(p2);
 				if (c2->get_p() != p2
 						|| (c2->get_flags() & Chunk::UNLOADED) != 0
 						|| (c2->get_flags() & Chunk::UNLIT) != 0) {

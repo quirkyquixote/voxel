@@ -59,6 +59,6 @@ void World::set_block(const v3ll &p, int shape, int mat)
 
 void World::set_flags(const box3ll &bb, int flags)
 {
-	for (auto p : (box2ll(bb.x0, bb.z0, bb.x1, bb.z1) >> 4LL) & 0xfLL)
+	for (auto p : (box2ll(bb.x0, bb.z0, bb.x1, bb.z1) >> 4LL) & 0x1fLL)
 		chunks[p.x][p.y]->set_flags(flags);
 }

@@ -11,7 +11,7 @@
 Chunk::Chunk(Context *ctx, const v2ll &p)
 	: ctx(ctx), x(p.x), z(p.y)
 {
-	id = ((x >> 4) & 0xf) + (z & 0xf0);
+	id = ((x >> 4) & 0x1f) + (((z >> 4) & 0x1f) << 5);
 	for (int i = 0; i < SHARD_NUM; ++i)
 		shards[i] = new Shard(id * SHARD_NUM + i, i);
 	flags = UNLOADED;
