@@ -22,26 +22,25 @@ int mkpath(const char *path, mode_t mode);
 
 int main(int argc, char *argv[])
 {
-	BoolValue help_flag;
-	BoolValue version_flag;
+	bool help_flag;
+	bool version_flag;
 
-	std::vector<Option> options = {
+	Option options[] = {
 		Option('h', "help", "Show help options", &help_flag),
 		Option('v', "version", "Print version", &version_flag),
 	};
 
-	int i = parse_arguments(argc, argv, options);
+	int i = parse_arguments(argv, argc, options, 2);
 
-	if (help_flag.get_val()) {
+	if (help_flag) {
 		printf("usage: %s [OPTIONS] [<path>]\n", argv[0]);
 		printf("\n");
 		printf("Options:\n");
-		for (auto &o : options)
-			o.print_help();
+		print_help(options, 2);
 		exit(EXIT_SUCCESS);
 	}
 
-	if (version_flag.get_val()) {
+	if (version_flag) {
 		printf("%s\n", VOXEL_VERSION);
 		exit(EXIT_SUCCESS);
 	}

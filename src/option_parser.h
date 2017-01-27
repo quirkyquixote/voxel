@@ -5,46 +5,33 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
-struct Value {
-	virtual ~Value() {}
+#include "log.h"
+
+struct ValueBase {
+	virtual ~ValueBase() {}
 	virtual int parse(char **p) = 0;
 };
 
-class BoolValue : public Value {
+template<typename T> class Value : public ValueBase {
  public:
-	BoolValue() : val(false) {}
-	int parse(char **p);
-	bool get_val() const { return val; }
+	Value(T *val) : val(val) {}
+	~Value() {}
+	int parse(char **p) {
+		log_error("Unimplemented");
+		exit(EXIT_FAILURE);
+		return 0;
+	}
 
  private:
-	bool val;
-};
-
-class IntValue : public Value {
- public:
-	IntValue() : val(0) {}
-	int parse(char **p);
-	int get_val() const { return val; }
-
- private:
-	int val;
-};
-
-class StringValue : public Value {
- public:
-	StringValue() {}
-	int parse(char **p);
-	const char *get_val() const { return val.c_str(); }
-
- private:
-	std::string val;
+	T *val;
 };
 
 class Option {
  public:
-	Option(char sh, const char *lo, const char *help, Value *val)
-		: sh(sh), lo(lo), help(help), val(val) { }
+	template<typename T> Option(char sh, const char *lo, const char *help, T *val)
+		: sh(sh), lo(lo), help(help), val(new Value<T>(val)) { }
 
 	~Option() { }
 
@@ -55,9 +42,11 @@ class Option {
 	char sh;
 	const char *lo;
 	const char *help;
-	Value *val;
+	std::shared_ptr<ValueBase> val;
 };
 
-int parse_arguments(int argc, char *argv[], const std::vector<Option> &options);
+int parse_arguments(char *argv[], int argc, Option *optv, int optc);
+
+void print_help(Option *optv, int optc);
 
 #endif  // SRC_OPTION_PARSER_H_
