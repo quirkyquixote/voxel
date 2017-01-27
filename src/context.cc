@@ -19,12 +19,147 @@
 
 int mkpath(const char *path, mode_t mode);
 
+struct Value {
+	virtual ~Value() {}
+	virtual int parse(char **p) = 0;
+};
+
+class BoolValue : public Value {
+ public:
+	BoolValue() : val(false) {}
+	int parse(char **p)
+	{
+		val = true;
+		return 0;
+	}
+	bool get_val() const { return val; }
+
+ private:
+	bool val;
+};
+
+class IntValue : public Value {
+ public:
+	IntValue() : val(0) {}
+	int parse(char **p)
+	{
+		char *end;
+		val = strtol(*p, &end, 10);
+		if (*end != 0) {
+			log_error("%s: not an integer", *p);
+			exit(EXIT_FAILURE);
+		}
+		return 1;
+	}
+	int get_val() const { return val; }
+
+ private:
+	int val;
+};
+
+class StringValue : public Value {
+ public:
+	StringValue() : val(nullptr) {}
+	~StringValue()
+	{
+		if (val != nullptr)
+			free(val);
+	}
+	int parse(char **p)
+	{
+		if (**p == '-') {
+			log_error("%s: expected string", *p);
+			exit(EXIT_FAILURE);
+		}
+		val = strdup(*p);
+		return 1;
+	}
+	const char *get_val() const { return val; }
+
+ private:
+	char *val;
+};
+
+class Option {
+ public:
+	Option(char sh, const char *lo, const char *help, Value *val)
+		: sh(sh), lo(lo), help(help), val(val) { }
+
+	~Option()
+	{
+	}
+
+	int parse(char **p) const
+	{
+		char *s = (*p) + 1;
+		if (s[0] == '-') {
+			if (strcmp(s + 1, lo) != 0)
+				return false;
+		} else {
+			if (s[0] != sh)
+				return false;
+		}
+		return 1 + val->parse(p);
+	}
+
+ private:
+	char sh;
+	const char *lo;
+	const char *help;
+	Value *val;
+};
+
+int parse_arguments(int argc, char *argv[], const std::vector<Option> &options)
+{
+	int i = 1;
+	while (i < argc) {
+		bool found = false;
+		for (auto &o : options) {
+			int j = o.parse(argv + i);
+			if (j > 0) {
+				i += j;
+				found = true;
+				break;
+			}
+		}
+		if (found == false) {
+			log_error("Bad option: %s", argv[i]);
+			exit(EXIT_FAILURE);
+		}
+	}
+	return i;
+}
+
 int main(int argc, char *argv[])
 {
+	BoolValue help_flag;
+	BoolValue version_flag;
+
+	int i = parse_arguments(argc, argv, {
+		Option('h', "help", "Show help options", &help_flag),
+		Option('v', "version", "Print version", &version_flag),
+	});
+
+	if (help_flag.get_val()) {
+		printf("usage: %s [OPTIONS] [<path>]\n", argv[0]);
+		printf("\n");
+		printf("Help options:\n");
+		printf("  -h, --help                   Show help options\n");
+		printf("\n");
+		printf("Application options:\n");
+		printf("  --version                    Print version string\n");
+		exit(EXIT_SUCCESS);
+	}
+
+	if (version_flag.get_val()) {
+		printf("%s\n", VOXEL_VERSION);
+		exit(EXIT_SUCCESS);
+	}
+
 	populate_block_traits_table();
 	populate_material_texcoord_table();
 
-	std::unique_ptr<Context> ctx(new Context("foo"));
+	std::unique_ptr<Context> ctx(new Context(i < argc ? argv[i] : "foo"));
 	ctx->load_all();
 	ctx->ml->run();
 	ctx->save_all();
@@ -307,9 +442,9 @@ void Context::update_chunks()
 			Chunk *c = world->get_chunk_at_block(p);
 			if (c->get_p() != p) {
 				tasks.emplace_back([this, c](){
-					save_chunk(c);
-					delete c;
-				});
+						save_chunk(c);
+						delete c;
+						});
 				c = new Chunk(this, p);
 				c->set_flags(Chunk::UNLOADED);
 				world->set_chunk_at_block(p, c);
