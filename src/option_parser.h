@@ -7,6 +7,8 @@
 #include <vector>
 #include <memory>
 
+namespace option_parser {
+
 struct ValueBase {
 	virtual ~ValueBase() {}
 	virtual int parse(char **p) = 0;
@@ -39,8 +41,10 @@ class Option {
 	std::shared_ptr<ValueBase> val;
 };
 
-int parse_arguments(char *argv[], int argc, Option *optv, int optc);
+int parse(char *argv[], int argc, Option *optv, int optc);
 
 void print_help(Option *optv, int optc);
+
+};  // namespace option_parser
 
 #endif  // SRC_OPTION_PARSER_H_

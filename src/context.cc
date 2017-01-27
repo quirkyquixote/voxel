@@ -25,18 +25,18 @@ int main(int argc, char *argv[])
 	bool help_flag;
 	bool version_flag;
 
-	Option options[] = {
-		Option('h', "help", "Show help options", &help_flag),
-		Option('v', "version", "Print version", &version_flag),
+	option_parser::Option options[] = {
+		option_parser::Option('h', "help", "Show help options", &help_flag),
+		option_parser::Option('v', "version", "Print version", &version_flag),
 	};
 
-	int i = parse_arguments(argv, argc, options, 2);
+	int i = option_parser::parse(argv, argc, options, 2);
 
 	if (help_flag) {
 		printf("usage: %s [OPTIONS] [<path>]\n", argv[0]);
 		printf("\n");
 		printf("Options:\n");
-		print_help(options, 2);
+		option_parser::print_help(options, 2);
 		exit(EXIT_SUCCESS);
 	}
 

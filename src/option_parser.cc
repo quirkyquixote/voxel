@@ -8,6 +8,8 @@
 
 #include "log.h"
 
+namespace option_parser {
+
 template<typename T> int Value<T>::parse(char **p)
 {
 	log_error("Unimplemented");
@@ -106,10 +108,10 @@ void Option::print_help()
 	printf("%s\n", help);
 }
 
-int parse_arguments(char *argv[], int argc, Option *optv, int optc)
+int parse(char *argv[], int argc, Option *optv, int optc)
 {
 	int i = 1;
-	while (i < argc) {
+	while (i < argc && argv[i][0] == '-') {
 		bool found = false;
 		for (int j = 0; j < optc; ++j) {
 			int k = optv[j].parse(argv + i);
@@ -133,3 +135,4 @@ void print_help(Option *optv, int optc)
 		optv[i].print_help();
 }
 
+};  // namespace option_parser
