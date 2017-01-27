@@ -4,7 +4,14 @@
 #ifndef SRC_CAMERA_H_
 #define SRC_CAMERA_H_
 
+#define GL_GLEXT_PROTOTYPES 1
+#include "SDL2/SDL_opengl.h"
+#include "GL/glext.h"
+#include "GL/glu.h"
+#undef GL_GLEXT_PROTOTYPES
+
 #include "v3.h"
+#include "box3.h"
 
 class Camera {
  public:
@@ -12,7 +19,8 @@ class Camera {
 	~Camera();
 
 	void load_gl_matrices();
-	bool is_visible(const v3f &p, float r);
+	bool is_visible(const v3f &p);
+	bool is_visible(const box3f &bb);
 
 	inline const v3f &get_p() { return p; }
 	inline const v3f &get_r() { return r; }
@@ -32,10 +40,7 @@ class Camera {
 	float fovy;
 	float max_distance;     // shards farther than this will not be drawn
 	float aspect_ratio;
-	v3f nlf;		// normal of the left clipping plane
-	v3f nrt;		// normal of the right clipping plane
-	v3f nup;		// normal of the top clipping plane
-	v3f ndn;		// normal of the bottom clipping plane
+	GLfloat modelview[16];	// modelview matrix
 };
 
 #endif  // SRC_CAMERA_H_

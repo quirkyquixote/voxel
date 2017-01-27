@@ -6,10 +6,6 @@
 #include <stdio.h>
 
 #include "sz.h"
-#include "lighting.h"
-#include "inventory.h"
-#include "context.h"
-#include "block_entity.h"
 
 Shard::Shard(int id, int y)
 	: id(id), y(y)
@@ -40,9 +36,9 @@ sz_Tag *Shard::save()
 {
 	sz_Tag *root = new sz_Dict();
 	sz_dict_add(root, "y", new sz_i64(y));
-	sz_dict_add(root, "mat", new sz_Raw(mat, SHARD_VOLUME));
-	sz_dict_add(root, "shape", new sz_Raw(shape, SHARD_VOLUME));
-	sz_dict_add(root, "light", new sz_Raw(light, SHARD_VOLUME));
+	sz_dict_add(root, "mat", new sz_Raw(mat, VOLUME));
+	sz_dict_add(root, "shape", new sz_Raw(shape, VOLUME));
+	sz_dict_add(root, "light", new sz_Raw(light, VOLUME));
 	return root;
 }
 

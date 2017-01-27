@@ -6,12 +6,14 @@
 #include <vector>
 
 #include "world.h"
+#include "box2.h"
 
 class Lighting : public NonCopyable {
  public:
 	explicit Lighting(World *w);
 	~Lighting();
 
+	void init(const box2ll &bb);
 	void update(const box3ll &bb, box3ll *rbb);
  private:
 	World *w;
@@ -20,6 +22,7 @@ class Lighting : public NonCopyable {
 
 	void find_boundary(const v3ll &p, int k);
 	void lit_up(const v3ll &p, int k, int f1, int f2);
+	void strange_blocks(const box3ll &bb);
 };
 
 #endif  // SRC_LIGHTING_H_

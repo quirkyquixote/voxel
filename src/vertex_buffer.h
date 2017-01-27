@@ -21,6 +21,10 @@ struct Vertex {
 	GLfloat x, y, z;
 	GLfloat u, v;
 	GLfloat r, g, b, a;
+	Vertex() { }
+	Vertex(GLfloat x, GLfloat y, GLfloat z, GLfloat u, GLfloat v,
+			GLfloat r, GLfloat g, GLfloat b, GLfloat a)
+		: x(x), y(y), z(z), u(u), v(v), r(r), g(g), b(b), a(a) { }
 };
 
 struct VertexDesc {

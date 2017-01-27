@@ -5,6 +5,6 @@
 
 #include "chunk.h"
 
-int terraform(int64_t seed, Chunk *c);
+void terraform(int64_t seed, Chunk *c);
 
 #endif  // SRC_TERRAFORM_H_

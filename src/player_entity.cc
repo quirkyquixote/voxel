@@ -11,7 +11,7 @@
 PlayerEntity::PlayerEntity(Context *ctx)
 	: RoamingEntity(ctx, 9), act(0), use(0), pick(0), run(0), tool(0)
 {
-	body->set_p(v3f(p.x, WORLD_H, p.y));
+	body->set_p(v3f(p.x, World::H, p.y));
 	body->set_size(v2f(0.325, 0.825));
 	body->set_step_size(.5);
 }
@@ -43,9 +43,9 @@ void PlayerEntity::update()
 	v = body->get_v();
 	if (move.x0 == 0 && move.x1 == 0 && move.z0 == 0 && move.z1 == 0)
 		run = 0;
-	v.x = (move.x1 - move.x0) * (run ? .18 : 0.15);
-	v.y += (move.y1 - move.y0) * (run ? .18 : 0.15);
-	v.z = (move.z1 - move.z0) * (run ? .18 : 0.15);
+	v.x = (move.x1 - move.x0) * (run ? 5.4 : 4.5);
+	v.y += (move.y1 - move.y0) * (run ? 5.4 : 4.5);
+	v.z = (move.z1 - move.z0) * (run ? 5.4 : 4.5);
 	v = roty(v, r.y);
 	body->set_v(v);
 	body->set_step_size(.5 * (1 + run));

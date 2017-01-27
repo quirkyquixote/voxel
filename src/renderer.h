@@ -3,6 +3,8 @@
 #ifndef SRC_RENDERER_H_
 #define SRC_RENDERER_H_
 
+#include <memory>
+
 #include "vertex_buffer.h"
 #include "tone_mapper.h"
 #include "shader.h"
@@ -19,7 +21,7 @@ class Renderer : public NonCopyable {
 
 	void operator()();
 
-	inline Camera *get_cam() { return cam; }
+	inline Camera *get_cam() { return cam.get(); }
 
 	void render_shards();
 	void render_commandline();
@@ -28,32 +30,32 @@ class Renderer : public NonCopyable {
 	void render_board(const std::vector<Item> &inv, const v3ll &p);
 	void render_item(int obj, int mat, GLfloat alpha);
 
-	void update_face_lf(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_face_rt(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_face_dn(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_face_up(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_face_bk(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_face_ft(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z, const v2f *mt, const int *tilted);
-	void update_cell(std::vector<Vertex> *buf, int64_t x, int64_t y,
-			int64_t z);
-	void update_shard(int id, int64_t x0, int64_t y0, int64_t z0);
+	void update_face_lf(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_face_rt(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_face_dn(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_face_up(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_face_bk(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_face_ft(std::vector<Vertex> *buf, const v3ll &p,
+			const v2f *mt, const int *tilted);
+	void update_cell(std::vector<Vertex> *buf, const v3ll &p);
+	void update_shard(int id, const v3ll &p);
 	void update_camera();
 
 	inline void add_callback(Callback *cb) { callback_list.push_back(cb); }
 
  private:
 	Context *ctx;
-	VertexBuffer *shard_vertex_buffer;
-	VertexBuffer *obj_vertex_buffer;
-	ToneMapper *tone_mapper;
-	Shader *shader;
-	Camera *cam;
+	std::unique_ptr<VertexBuffer> shard_vertex_buffer;
+	std::unique_ptr<VertexBuffer> obj_vertex_buffer;
+	std::unique_ptr<VertexBuffer> text_vertex_buffer;
+	std::unique_ptr<ToneMapper> tone_mapper;
+	std::unique_ptr<Shader> shader;
+	std::unique_ptr<Camera> cam;
 	GLuint tex_terrain;
 	GLuint tex_font;
 	PtrList<Callback> callback_list;

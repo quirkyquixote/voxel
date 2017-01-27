@@ -67,6 +67,7 @@ class MainLoop : public NonCopyable {
 	inline void kill() { keep_going = false; }
 	inline void set_window(Window *w) { window = w; }
 	inline Window *get_window() { return window; }
+	inline int get_fps() { return fps; }
 
 	inline void set_update_callback(const std::function<UpdateFunc> &func)
 	{

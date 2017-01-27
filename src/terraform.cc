@@ -2,104 +2,116 @@
 
 #include "terraform.h"
 
-#include "simplex.h"
+#include <limits.h>
 
-/*----------------------------------------------------------------------------
- * More complex noise, adding several octaves. 2D version
- *----------------------------------------------------------------------------*/
-double noise_2d(double a, double b, double zoom, int steps)
+#include <libnoise/noise.h>
+#include "noiseutils.h"
+
+#include "box2.h"
+
+void terraform(int64_t seed, Chunk *c)
 {
-    double k = .5;
-    double ret = .5;
+	v2ll p0 = c->get_p();
+	box2f bb(0, 0, Chunk::W, Chunk::D);
+	bb += v2f(p0);
+	bb /= 500.f;
 
-    a /= zoom;
-    b /= zoom;
+	noise::module::RidgedMulti hill_base;
+	noise::module::ScaleBias hill;
+	hill.SetSourceModule (0, hill_base);
+	hill.SetScale (0.5);
+	hill.SetBias (0.5);
 
-    while (steps--) {
-	ret += noise_simplex_2d(a, b) * k;
-	a *= 2;
-	b *= 2;
-	k *= .5;
-    }
+	noise::module::Billow flat_base;
+	flat_base.SetFrequency (2.0);
+	noise::module::ScaleBias flat;
+	flat.SetSourceModule (0, flat_base);
+	flat.SetScale (0.125);
+	flat.SetBias (0.125);
 
-    return ret;
-}
+	noise::module::Perlin land_type;
+	land_type.SetFrequency (0.5);
+	land_type.SetPersistence (0.25);
+	land_type.SetSeed(0);
 
-/*----------------------------------------------------------------------------
- * More complex noise, adding several octaves. 2D version
- *----------------------------------------------------------------------------*/
-double noise_3d(double a, double b, double c, double zoom, int steps)
-{
-    double k = .5;
-    double ret = .5;
+	noise::module::Select land;
+	land.SetSourceModule (0, flat);
+	land.SetSourceModule (1, hill);
+	land.SetControlModule (land_type);
+	land.SetBounds (0.0, 1000.0);
+	land.SetEdgeFalloff (0.125);
 
-    a /= zoom;
-    b /= zoom;
-    c /= zoom;
+	noise::module::RidgedMulti deep_base;
+	noise::module::ScaleBias deep;
+	deep.SetSourceModule (0, deep_base);
+	deep.SetScale (0.5);
+	deep.SetBias (-0.5);
 
-    while (steps--) {
-	ret += noise_simplex_3d(a, b, c) * k;
-	a *= 2;
-	b *= 2;
-	c *= 2;
-	k *= .5;
-    }
+	noise::module::Billow beach_base;
+	beach_base.SetFrequency (2.0);
+	noise::module::ScaleBias beach;
+	beach.SetSourceModule (0, beach_base);
+	beach.SetScale (0.125);
+	beach.SetBias (-0.125);
 
-    return ret;
-}
+	noise::module::Perlin ocean_type;
+	ocean_type.SetFrequency (0.5);
+	ocean_type.SetPersistence (0.25);
+	ocean_type.SetSeed(1000);
 
-/*----------------------------------------------------------------------------
- * More complex noise, adding several octaves. 2D version
- *----------------------------------------------------------------------------*/
-double noise_4d(double a, double b, double c, double d, double zoom, int steps)
-{
-    double k = .5;
-    double ret = .5;
+	noise::module::Select ocean;
+	ocean.SetSourceModule (0, beach);
+	ocean.SetSourceModule (1, deep);
+	ocean.SetControlModule (ocean_type);
+	ocean.SetBounds (0.0, 1000.0);
+	ocean.SetEdgeFalloff (0.125);
 
-    a /= zoom;
-    b /= zoom;
-    c /= zoom;
-    d /= zoom;
+	noise::module::Perlin finalType;
+	finalType.SetFrequency (0.5);
+	finalType.SetPersistence (0.25);
+	finalType.SetSeed(2000);
 
-    while (steps--) {
-	ret += noise_simplex_4d(a, b, c, d) * k;
-	a *= 2;
-	b *= 2;
-	c *= 2;
-	d *= 2;
-	k *= .5;
-    }
+	noise::module::Select finalTerrain;
+	finalTerrain.SetSourceModule (0, land);
+	finalTerrain.SetSourceModule (1, ocean);
+	finalTerrain.SetControlModule (finalType);
+	finalTerrain.SetBounds (0.0, 1000.0);
+	finalTerrain.SetEdgeFalloff (0.125);
 
-    return ret;
-}
+	noise::utils::NoiseMap heightMap;
+	noise::utils::NoiseMapBuilderPlane heightMapBuilder;
+	heightMapBuilder.SetSourceModule (finalTerrain);
+	heightMapBuilder.SetDestNoiseMap (heightMap);
+	heightMapBuilder.SetDestSize (16, 16);
+	heightMapBuilder.SetBounds (bb.x0, bb.x1, bb.y0, bb.y1);
+	heightMapBuilder.Build ();
 
-int terraform(int64_t seed, Chunk *c)
-{
-	v2ll p;
-	uint64_t u, v;
-	int x, y, z;
-	int height, heat, humidity;
-
-	p = c->get_p();
-
-	for (x = 0, u = p.x; x < CHUNK_W; ++x, ++u) {
-		for (z = 0, v = p.y; z < CHUNK_D; ++z, ++v) {
-			// height = CHUNK_H * (0.5 + noise_3d(seed, u, v, 100, 4) * 0.1);
-			height = CHUNK_H / 2;
-			for (y = 0; y < height - 4; ++y) {
-				c->set_mat(v3ll(x, y, z), MAT_LIMESTONE);
-				c->set_shape(v3ll(x, y, z), SHAPE_BLOCK_DN);
-			}
-			for (; y < height - 1; ++y) {
-				c->set_mat(v3ll(x, y, z), MAT_DIRT);
-				c->set_shape(v3ll(x, y, z), SHAPE_BLOCK_DN);
-			}
-			for (; y < height; ++y) {
-				c->set_mat(v3ll(x, y, z), MAT_GRASS);
-				c->set_shape(v3ll(x, y, z), SHAPE_BLOCK_DN);
-			}
+	for (auto p : box2ll(0, 0, 15, 15)) {
+		v3ll q(p.x, 0, p.y);
+		float f = heightMap.GetValue(p.x, p.y);
+		int h = 128 + f * 64;
+		int mat;
+		if (f <= 0)
+			mat = MAT_SANDSTONE_SAND;
+		else if (f < .5)
+			mat = MAT_GRASS;
+		else if (f < .6)
+			mat = MAT_LIMESTONE_SAND;
+		else if (f < .75)
+			mat = MAT_LIMESTONE;
+		else
+			mat = MAT_MARBLE;
+	//	log_info("%lld,%lld = %d (%s)", p.x + p0.x, p.y + p0.y, h, mat_names[mat]);
+		while(q.y < h) {
+			c->set_mat(q, mat);
+			c->set_shape(q, SHAPE_BLOCK_DN);
+			++q.y;
+		}
+		while (q.y < Chunk::H) {
+			c->set_mat(q, 0);
+			c->set_shape(q, SHAPE_NONE);
+			++q.y;
 		}
 	}
-	return 0;
 }
 

@@ -13,17 +13,172 @@
 
 #include <memory>
 #include <map>
+#include <thread>
 
 #include "drop_entity.h"
 
 int mkpath(const char *path, mode_t mode);
 
+struct Value {
+	virtual ~Value() {}
+	virtual int parse(char **p) = 0;
+};
+
+class BoolValue : public Value {
+ public:
+	BoolValue() : val(false) {}
+	int parse(char **p)
+	{
+		val = true;
+		return 0;
+	}
+	bool get_val() const { return val; }
+
+ private:
+	bool val;
+};
+
+class IntValue : public Value {
+ public:
+	IntValue() : val(0) {}
+	int parse(char **p)
+	{
+		char *end;
+		val = strtol(*p, &end, 10);
+		if (*end != 0) {
+			log_error("%s: not an integer", *p);
+			exit(EXIT_FAILURE);
+		}
+		return 1;
+	}
+	int get_val() const { return val; }
+
+ private:
+	int val;
+};
+
+class StringValue : public Value {
+ public:
+	StringValue() : val(nullptr) {}
+	~StringValue()
+	{
+		if (val != nullptr)
+			free(val);
+	}
+	int parse(char **p)
+	{
+		if (**p == '-') {
+			log_error("%s: expected string", *p);
+			exit(EXIT_FAILURE);
+		}
+		val = strdup(*p);
+		return 1;
+	}
+	const char *get_val() const { return val; }
+
+ private:
+	char *val;
+};
+
+class Option {
+ public:
+	Option(char sh, const char *lo, const char *help, Value *val)
+		: sh(sh), lo(lo), help(help), val(val) { }
+
+	~Option()
+	{
+	}
+
+	int parse(char **p) const
+	{
+		char *s = (*p) + 1;
+		if (s[0] == '-') {
+			if (strcmp(s + 1, lo) != 0)
+				return false;
+		} else {
+			if (s[0] != sh)
+				return false;
+		}
+		return 1 + val->parse(p);
+	}
+
+	void print_help()
+	{
+		int i = 0;
+		i += printf("  ");
+		if (sh) {
+			i += printf("-%c", sh);
+			if (lo)
+				i += printf(", --%s", lo);
+		} else {
+			if (lo)
+				i += printf("--%s", lo);
+		}
+		while (i < 24) {
+			printf(" ");
+			++i;
+		}
+		printf("%s\n", help);
+	}
+
+ private:
+	char sh;
+	const char *lo;
+	const char *help;
+	Value *val;
+};
+
+int parse_arguments(int argc, char *argv[], const std::vector<Option> &options)
+{
+	int i = 1;
+	while (i < argc) {
+		bool found = false;
+		for (auto &o : options) {
+			int j = o.parse(argv + i);
+			if (j > 0) {
+				i += j;
+				found = true;
+				break;
+			}
+		}
+		if (found == false) {
+			log_error("Bad option: %s", argv[i]);
+			exit(EXIT_FAILURE);
+		}
+	}
+	return i;
+}
+
 int main(int argc, char *argv[])
 {
+	BoolValue help_flag;
+	BoolValue version_flag;
+
+	std::vector<Option> options = {
+		Option('h', "help", "Show help options", &help_flag),
+		Option('v', "version", "Print version", &version_flag),
+	};
+
+	int i = parse_arguments(argc, argv, options);
+
+	if (help_flag.get_val()) {
+		printf("usage: %s [OPTIONS] [<path>]\n", argv[0]);
+		printf("\n");
+		printf("Options:\n");
+		for (auto &o : options)
+			o.print_help();
+		exit(EXIT_SUCCESS);
+	}
+
+	if (version_flag.get_val()) {
+		printf("%s\n", VOXEL_VERSION);
+		exit(EXIT_SUCCESS);
+	}
+
 	populate_block_traits_table();
 	populate_material_texcoord_table();
 
-	std::unique_ptr<Context> ctx(new Context("foo"));
+	std::unique_ptr<Context> ctx(new Context(i < argc ? argv[i] : "foo"));
 	ctx->load_all();
 	ctx->ml->run();
 	ctx->save_all();
@@ -35,13 +190,12 @@ Context::Context(const char *dir)
 {
 	world.reset(new World(this));
 	// prof_mgr = profile_manager();
-	chunks_per_tick = 1;
 
 	/* Setup main loop */
 	ml.reset(new MainLoop(30));
 	ml->set_event_callback([this](const SDL_Event &e){event(e);});
 	ml->set_update_callback([this](){update();});
-	ml->set_window(new Window("voxel", 0, 0, 1920, 1080, 0));
+	ml->set_window(new Window("voxel", 0, 0, 1280, 768, 0));
 
 	/* Create renderer */
 	renderer.reset(new Renderer(this));
@@ -51,6 +205,7 @@ Context::Context(const char *dir)
 	tcl = Tcl_CreateInterp();
 	Tcl_CreateObjCommand(tcl, "help", cmd_help, this, NULL);
 	Tcl_CreateObjCommand(tcl, "ls", cmd_ls, this, NULL);
+	Tcl_CreateObjCommand(tcl, "tp", cmd_tp, this, NULL);
 	Tcl_CreateObjCommand(tcl, "give", cmd_give, this, NULL);
 	Tcl_CreateObjCommand(tcl, "take", cmd_take, this, NULL);
 	Tcl_CreateObjCommand(tcl, "q", cmd_query, this, NULL);
@@ -61,13 +216,14 @@ Context::Context(const char *dir)
 	Tcl_CreateObjCommand(tcl, "walls", cmd_walls, this, NULL);
 	Tcl_CreateObjCommand(tcl, "relit", cmd_relit, this, NULL);
 	Tcl_CreateObjCommand(tcl, "replace", cmd_replace, this, NULL);
+	Tcl_CreateObjCommand(tcl, "terraform", cmd_terraform, this, NULL);
 	cli.reset(new CommandLine());
 
 	/* Initialize physics */
 	space.reset(new Space(world.get()));
-	space->set_gravity(-0.05);
+	space->set_gravity(-1.5);
 	space->set_impulse(0.001);
-	space->set_terminal_speed(1);
+	space->set_terminal_speed(30);
 
 	/* Initialize lighting */
 	light.reset(new Lighting(world.get()));
@@ -86,41 +242,35 @@ Context::~Context()
 
 bool Context::load_all()
 {
-	int x, z;
-	Chunk *c;
+	static const box2ll chunk_box(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1);
 
 	mkpath(dir, 0700);
 	load_world();
 	if (!load_player()) {
 		v2ll p = world->get_p();
-		p.x += CHUNK_W * CHUNKS_PER_WORLD / 2;
-		p.y += CHUNK_W * CHUNKS_PER_WORLD / 2;
-		player->get_body()->set_p(v3f(p.x, WORLD_H, p.y));
+		p.x += Chunk::W * World::CHUNK_NUM / 2;
+		p.y += Chunk::W * World::CHUNK_NUM / 2;
+		player->get_body()->set_p(v3f(p.x, World::H, p.y));
 	}
-	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
-		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
-			c = world->get_chunk(v2ll(x, z));
-			v2ll p = world->get_p();
-			p.x += x * CHUNK_W;
-			p.y += z * CHUNK_D;
-			c->set_p(p);
-			if (!load_chunk(c)) {
-				terraform(0, c);
-				c->set_flags(CHUNK_UNLIT);
-			}
+	for (auto r : chunk_box) {
+		auto p = (r * Chunk::W) + world->get_p();
+		Chunk *c = new Chunk(this, p);
+		if (!load_chunk(c)) {
+			terraform(0, c);
+			c->set_flags(Chunk::UNLIT);
 		}
+		c->set_flags(Chunk::UNRENDERED);
+		world->set_chunk_at_block(p, c);
 	}
 	return true;
 }
 
 void Context::save_all()
 {
-	v2ll p;
 	save_world();
 	save_player();
-	for (p.x = 0; p.x < CHUNKS_PER_WORLD; ++p.x)
-		for (p.y = 0; p.y < CHUNKS_PER_WORLD; ++p.y)
-			save_chunk(world->get_chunk(p));
+	for (auto p : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1))
+		save_chunk(world->get_chunk(p));
 }
 
 bool Context::load_world()
@@ -138,8 +288,6 @@ bool Context::load_world()
 			/* do nothing */
 		}
 		close(fd);
-	} else {
-		log_error("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
@@ -177,8 +325,6 @@ bool Context::load_player()
 			/* do nothing */
 		}
 		close(fd);
-	} else {
-		log_error("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
@@ -204,9 +350,9 @@ void Context::save_player()
 bool Context::load_chunk(Chunk *c)
 {
 	bool ret;
-	char name[16];
+	char name[64];
 	v2ll p = c->get_p();
-	snprintf(name, sizeof(name), "%06llx%06llx", p.x / CHUNK_W, p.y / CHUNK_D);
+	snprintf(name, sizeof(name), "%016llx%016llx", p.x >> 4, p.y >> 4);
 	std::string path(dir);
 	path += "/";
 	path += name;
@@ -221,17 +367,18 @@ bool Context::load_chunk(Chunk *c)
 			/* do nothing */
 		}
 		close(fd);
-	} else {
-		log_error("%s: %s", path.c_str(), strerror(errno));
 	}
 	return ret;
 }
 
 void Context::save_chunk(Chunk *c)
 {
-	char name[16];
+	if (c->get_flags() & Chunk::UNLOADED)
+		return;
+
+	char name[64];
 	v2ll p = c->get_p();
-	snprintf(name, sizeof(name), "%06llx%06llx", p.x / CHUNK_W, p.y / CHUNK_D);
+	snprintf(name, sizeof(name), "%016llx%016llx", p.x >> 4, p.y >> 4);
 	std::string path(dir);
 	path += "/";
 	path += name;
@@ -299,76 +446,102 @@ void Context::drop_block(const v3ll &p)
 
 void Context::update_chunks()
 {
-	int x, z;
-	Chunk *c;
-	std::map<int, Chunk *> out_of_date;
-	box2ll bb;
-	v3ll m;
+	static const box2ll chunk_box(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1);
 
+	std::vector<std::thread> tasks;
+	std::multimap<int, Chunk *> out_of_date;
 	v2ll p(player->get_body()->get_p().x, player->get_body()->get_p().z);
-	bb.x0 = floor(p.x) - CHUNK_W * CHUNKS_PER_WORLD / 2;
-	bb.y0 = floor(p.y) - CHUNK_D * CHUNKS_PER_WORLD / 2;
-	bb.x1 = bb.x0 + CHUNK_W * CHUNKS_PER_WORLD;
-	bb.y1 = bb.y0 + CHUNK_D * CHUNKS_PER_WORLD;
-	m.x = CHUNK_W * CHUNKS_PER_WORLD * floor(bb.x1 / (CHUNK_W * CHUNKS_PER_WORLD));
-	m.y = CHUNK_D * CHUNKS_PER_WORLD * floor(bb.y1 / (CHUNK_D * CHUNKS_PER_WORLD));
-
-	for (x = 0; x < CHUNKS_PER_WORLD; ++x) {
-		for (z = 0; z < CHUNKS_PER_WORLD; ++z) {
-			c = world->get_chunk(v2ll(x, z));
-			if (c->get_flags() != 0) {
-				int d = dist(c->get_p(), p);
-				out_of_date.emplace(d, c);
+	v2ll world_p((p & ~0xfLL) - v2ll(World::W, World::D) / 2LL);
+	if (world_p != world->get_p()) {
+		// log_info("off center!");
+		world->set_p(world_p);
+		int chunks_moved = 0;
+		for (auto r : chunk_box) {
+			auto p = (r * Chunk::W) + world_p;
+			Chunk *c = world->get_chunk_at_block(p);
+			if (c->get_p() != p) {
+				tasks.emplace_back([this, c](){
+						save_chunk(c);
+						delete c;
+						});
+				c = new Chunk(this, p);
+				c->set_flags(Chunk::UNLOADED);
+				world->set_chunk_at_block(p, c);
+				++chunks_moved;
 			}
 		}
-	}
-	if (out_of_date.empty()) {
-//		log_info("no chunks to update");
-		return;
+		// log_info("%d chunks moved", chunks_moved);
 	}
 
-	int i = 0;
-	for (auto &iter : out_of_date) {
-		if (i >= chunks_per_tick)
-			break;
-		c = iter.second;
-//		log_info("Update chunk %d (%lld,%lld); priority:%d", c->get_id(), c->get_p().x, c->get_p().y, iter.first);
-		if ((c->get_flags() & CHUNK_UNLOADED) != 0) {
-//			log_info("load from file");
-			/* load this chunk */
-			c->unset_flags(CHUNK_UNLOADED);
+	for (auto q : chunk_box) {
+		Chunk *c = world->get_chunk(q);
+		if (c->get_flags() != 0) {
+			int d = dist(c->get_p(), p);
+			out_of_date.emplace(d, c);
 		}
-		if ((c->get_flags() & CHUNK_UNLIT) != 0) {
-//			log_info("lit up");
-			box3ll bb;
-			bb.x0 = c->get_p().x;
-			bb.y0 = 0;
-			bb.z0 = c->get_p().y;
-			bb.x1 = c->get_p().x + CHUNK_W;
-			bb.y1 = CHUNK_H;
-			bb.z1 = c->get_p().y + CHUNK_D;
-			light->update(bb, NULL);
-			c->unset_flags(CHUNK_UNLIT);
-			c->set_flags(CHUNK_UNRENDERED);
-		}
-		if ((c->get_flags() & CHUNK_UNRENDERED) != 0) {
-//			log_info("update vbos");
-			for (int k = 0; k < SHARDS_PER_CHUNK; ++k)
-				renderer->update_shard(c->get_shard(k)->get_id(), c->get_p().x,
-						k * SHARD_H, c->get_p().y);
-			c->unset_flags(CHUNK_UNRENDERED);
-		}
-		++i;
 	}
-//		log_info("update %d of %zd chunks (max: %d)", i, out_of_date.size(), chunks_per_tick);
+
+	int max_t = SDL_GetTicks() + 500 / ml->get_fps();
+	for (auto &iter : out_of_date) {
+		Chunk *c = iter.second;
+		v2ll p = c->get_p();
+		// log_info("Update chunk %lld,%lld; priority:%d", p.x, p.y, iter.first);
+		if ((c->get_flags() & Chunk::UNLOADED) != 0) {
+			// log_info("load from file");
+			/* load this chunk */
+			if (!load_chunk(c)) {
+				terraform(0, c);
+				c->set_flags(Chunk::UNLIT);
+			} else {
+				c->set_flags(Chunk::UNRENDERED);
+			}
+			c->unset_flags(Chunk::UNLOADED);
+			if (SDL_GetTicks() > max_t)
+				break;
+		}
+		if ((c->get_flags() & Chunk::UNLIT) != 0) {
+			// log_info("lit up");
+			light->init(box2ll(p.x, p.y, p.x + Chunk::W - 1, p.y + Chunk::D - 1));
+			c->unset_flags(Chunk::UNLIT);
+			c->set_flags(Chunk::UNRENDERED);
+			if (SDL_GetTicks() > max_t)
+				break;
+		}
+		if ((c->get_flags() & Chunk::UNRENDERED) != 0) {
+			bool neighbours_loaded = true;
+			for (auto o : { v2ll(Chunk::W, 0), v2ll(-Chunk::W, 0),
+					v2ll(0, Chunk::D), v2ll(0, -Chunk::D) }) {
+				v2ll p2 = p + o;
+				Chunk *c2 = world->get_chunk_at_block(p2);
+				if (c2->get_p() != p2
+						|| (c2->get_flags() & Chunk::UNLOADED) != 0
+						|| (c2->get_flags() & Chunk::UNLIT) != 0) {
+					neighbours_loaded = false;
+					break;
+				}
+			}
+			if (!neighbours_loaded)
+				continue;
+			// log_info("update vbos");
+			for (int k = 0; k < Chunk::SHARD_NUM; ++k)
+				renderer->update_shard(c->get_shard(k)->get_id(),
+						v3ll(p.x, k * Shard::H, p.y));
+			c->unset_flags(Chunk::UNRENDERED);
+			if (SDL_GetTicks() > max_t)
+				break;
+		}
+	}
+	//		log_info("update %d of %zd chunks (max: %d)", i, out_of_date.size(), chunks_per_tick);
+	for (auto &t : tasks)
+		t.join();
 }
 
 void Context::update()
 {
 	if (!ml->get_window()->has_mouse_focus())
 		return;
-	space->step();
-/*	if ((tick & 1) == 0)
+	space->step(1.0 / ml->get_fps());
+	/*	if ((tick & 1) == 0)
 		flowsim_step(flowsim);*/
 	player->update();
 	renderer->update_camera();
@@ -382,10 +555,13 @@ void Context::event(const SDL_Event &e)
 	if (mode == MODE_COMMAND) {
 		if (e.type == SDL_KEYDOWN) {
 			if (e.key.keysym.sym == SDLK_RETURN) {
+				scrollback.push_front(strdup(cli->get_visible()));
 				Tcl_Eval(tcl, cli->get_visible());
 				const char *ret = Tcl_GetStringResult(tcl);
 				if (ret && *ret)
-					log_info("%s", ret);
+					scrollback.push_front(strdup(ret));
+				while (scrollback.size() > 10)
+					scrollback.pop_back();
 				cli->push();
 				mode = MODE_ROAM;
 				SDL_StopTextInput();
@@ -426,7 +602,7 @@ void Context::event(const SDL_Event &e)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else if (e.key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE START ===\n");
-		//	profile_manager_reset(prof_mgr);
+			//	profile_manager_reset(prof_mgr);
 		}
 	} else if (e.type == SDL_KEYUP) {
 		if (e.key.repeat) {

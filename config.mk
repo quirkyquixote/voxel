@@ -23,6 +23,7 @@ localstatedir = $(prefix)/var/voxel
 
 CXX = clang++
 AR = ar
+SH = sh
 INSTALL = install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
@@ -31,7 +32,7 @@ INSTALL_DATA = $(INSTALL) -m 644
 
 CPPFLAGS =
 
-CXXFLAGS = -g -std=c++11 -Werror -Wfatal-errors
+CXXFLAGS = -Werror -Wfatal-errors
 
 LDFLAGS =
 
@@ -40,12 +41,14 @@ LDFLAGS =
 ALL_CXXFLAGS = $(CPPFLAGS) $(CXXFLAGS)
 ALL_LDFLAGS = $(LDFLAGS)
 
+ALL_CXXFLAGS += -std=c++11
 ALL_CXXFLAGS += -DVOXEL_VERSION=\"$(VERSION)\"
 ALL_CXXFLAGS += -DVOXEL_LIBDIR=\"$(libdir)\"
 ALL_CXXFLAGS += -DVOXEL_DATADIR=\"$(datadir)\"
 ALL_CXXFLAGS += -DVOXEL_LOCALSTATEDIR=\"$(localstatedir)\"
 ALL_CXXFLAGS += -MD
 ALL_CXXFLAGS += -I/usr/include/tcl
+ALL_CXXFLAGS += -I/usr/include/libnoise
 
 ALL_LDFLAGS += -pthread
 ALL_LDFLAGS += -ltcl
@@ -61,6 +64,9 @@ QUIET_GEN = @echo GEN $@;
 QUIET_INSTALL = @echo INSTALL $@;
 
 # Some generic targets that are the same for all Makefiles
+
+%.h: gen_%.sh
+	$(QUIET_GEN)$(SH) $^ > $@
 
 %: %.cc 
 

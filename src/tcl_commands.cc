@@ -88,6 +88,7 @@ int cmd_help(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	log_info("available commands:");
 	log_info("help: print this");
 	log_info("ls [mat|obj|sha]: list materials, objects, and shapes");
+	log_info("tp <x> <y> <z>: teleport to coordinates");
 	log_info("give <object> [amount]: add objects to inventory");
 	log_info("take <object> [amount]: remove objects to inventory");
 	log_info("q: query block under the cursor");
@@ -146,6 +147,27 @@ fail:
 	return TCL_ERROR;
 }
 
+int cmd_tp(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: tp <x> <y> <z>";
+	Context *ctx = static_cast<Context *>(data);
+	int x, y, z;
+
+	if (objc != 4)
+		goto fail;
+	if (Tcl_GetIntFromObj(interp, objv[1], &x) != TCL_OK)
+		goto fail;
+	if (Tcl_GetIntFromObj(interp, objv[2], &y) != TCL_OK)
+		goto fail;
+	if (Tcl_GetIntFromObj(interp, objv[3], &z) != TCL_OK)
+		goto fail;
+	ctx->player->get_body()->set_p(v3f(x, y, z));
+	return TCL_OK;
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+
 int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: give <item> [<amount>]";
@@ -160,8 +182,8 @@ int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		if (Tcl_GetIntFromObj(interp, objv[2], &num) != TCL_OK)
 			goto fail;
 	}
-	inventory_add(ctx->player->get_items(), Item(obj, mat, num));
-	log_info("given %s_%s %d", mat_names[mat], obj_names[obj], num);
+	num = inventory_add(ctx->player->get_items(), Item(obj, mat, num));
+	Tcl_SetObjResult(interp, Tcl_NewIntObj(num));
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -187,8 +209,8 @@ int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		if (Tcl_GetIntFromObj(interp, objv[2], &num) != TCL_OK)
 			goto fail;
 	}
-	inventory_remove(ctx->player->get_items(), Item(obj, mat, num));
-	log_info("taken %s_%s %d", mat_names[mat], obj_names[obj], num);
+	num = inventory_remove(ctx->player->get_items(), Item(obj, mat, num));
+	Tcl_SetObjResult(interp, Tcl_NewIntObj(num));
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -200,6 +222,8 @@ int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	static const char *usage = "usage: query";
 	Context *ctx = static_cast<Context *>(data);
 	const Query &cur = ctx->player->get_cur();
+	char buf[256];
+	int len = 0;
 
 	if (objc != 1)
 		goto fail;
@@ -207,27 +231,19 @@ int cmd_query(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		log_info("no block selected");
 		return TCL_OK;
 	}
-	log_info("block: %lld,%lld,%lld", cur.p.x, cur.p.y, cur.p.z);
-	log_info("offset: %.02g,%.02g,%.02g", cur.q.x, cur.q.y, cur.q.z);
-	log_info("face: %s", face_names[cur.face]);
-	log_info("type: %s.%s",
+	len += snprintf(buf + len, sizeof(buf) + len,
+			"block: %lld,%lld,%lld\n", cur.p.x, cur.p.y, cur.p.z);
+	len += snprintf(buf + len, sizeof(buf) + len,
+			"offset: %.02g,%.02g,%.02g\n", cur.q.x, cur.q.y, cur.q.z);
+	len += snprintf(buf + len, sizeof(buf) + len,
+			"face: %s\n", face_names[cur.face]);
+	len += snprintf(buf + len, sizeof(buf) + len,
+			"type: %s.%s\n",
 			mat_names[ctx->world->get_mat(cur.p)],
 			shape_names[ctx->world->get_shape(cur.p)]);
-	log_info("light level: %d", ctx->world->get_light(cur.p));
-/*
-	struct array *inv = world_get_data(ctx->w, cur.p);
-	if (inv != NULL) {
-		log_info("inventory:");
-		struct item s;
-		int i = 0;
-		array_foreach(s, inv) {
-			if (s.num > 0)
-				log_info("%d: %s_%s %d", i, mat_names[s.mat],
-						obj_names[s.obj], s.num);
-			++i;
-		}
-	}
-*/
+	len += snprintf(buf + len, sizeof(buf) + len,
+			"light level: %d\n", ctx->world->get_light(cur.p));
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(buf, len));
 	return TCL_OK;
 
 fail:
@@ -250,7 +266,9 @@ int cmd_seta(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	sel_bb.x0 = cur.p.x;
 	sel_bb.y0 = cur.p.y;
 	sel_bb.z0 = cur.p.z;
-	log_info("a set to %lld,%lld,%lld", sel_bb.x0, sel_bb.y0, sel_bb.z0);
+	char buf[64];
+	snprintf(buf, sizeof(buf), "%lld %lld %lld", sel_bb.x0, sel_bb.y0, sel_bb.z0);
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(buf, strlen(buf)));
 	return TCL_OK;
 
 fail:
@@ -273,7 +291,9 @@ int cmd_setb(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	sel_bb.x1 = cur.p.x;
 	sel_bb.y1 = cur.p.y;
 	sel_bb.z1 = cur.p.z;
-	log_info("b set to %lld,%lld,%lld", sel_bb.x1, sel_bb.y1, sel_bb.z1);
+	char buf[64];
+	snprintf(buf, sizeof(buf), "%lld %lld %lld", sel_bb.x1, sel_bb.y1, sel_bb.z1);
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(buf, strlen(buf)));
 	return TCL_OK;
 
 fail:
@@ -285,7 +305,7 @@ int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: box <block>";
 	Context *ctx = static_cast<Context *>(data);
-	int mat, shape;
+	int mat, shape, ret = 0;
 	box3ll bb;
 
 	if (objc != 2)
@@ -293,8 +313,11 @@ int cmd_box(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	if (parse_block(Tcl_GetString(objv[1]), &mat, &shape) != 0)
 		goto fail;
 	bb = fix(sel_bb);
-	for (auto &p : bb)
+	for (auto &p : bb) {
 		ctx->world->set_block(p, shape, mat);
+		++ret;
+	}
+	Tcl_SetObjResult(interp, Tcl_NewIntObj(ret));
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -305,7 +328,7 @@ int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: hbox <block>";
 	Context *ctx = static_cast<Context *>(data);
-	int mat, shape;
+	int mat, shape, ret = 0;
 	box3ll bb;
 	v3ll p;
 
@@ -320,6 +343,7 @@ int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 			ctx->world->set_block(p, shape, mat);
 			p.y = bb.y1;
 			ctx->world->set_block(p, shape, mat);
+			ret += 2;
 		}
 	for (p.x = bb.x0; p.x <= bb.x1; ++p.x)
 		for (p.y = bb.y0; p.y <= bb.y1; ++p.y) {
@@ -327,6 +351,7 @@ int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 			ctx->world->set_block(p, shape, mat);
 			p.z = bb.z1;
 			ctx->world->set_block(p, shape, mat);
+			ret += 2;
 		}
 	for (p.y = bb.y0; p.y <= bb.y1; ++p.y)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
@@ -334,7 +359,9 @@ int cmd_hbox(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 			ctx->world->set_block(p, shape, mat);
 			p.x = bb.x1;
 			ctx->world->set_block(p, shape, mat);
+			ret += 2;
 		}
+	Tcl_SetObjResult(interp, Tcl_NewIntObj(ret));
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -345,7 +372,7 @@ int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: walls <block>";
 	Context *ctx = static_cast<Context *>(data);
-	int mat, shape;
+	int mat, shape, ret = 0;
 	box3ll bb;
 	v3ll p;
 
@@ -360,6 +387,7 @@ int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 			ctx->world->set_block(p, shape, mat);
 			p.z = bb.z1;
 			ctx->world->set_block(p, shape, mat);
+			ret += 2;
 		}
 	for (p.y = bb.y0; p.y <= bb.y1; ++p.y)
 		for (p.z = bb.z0; p.z <= bb.z1; ++p.z) {
@@ -367,7 +395,9 @@ int cmd_walls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 			ctx->world->set_block(p, shape, mat);
 			p.x = bb.x1;
 			ctx->world->set_block(p, shape, mat);
+			ret += 2;
 		}
+	Tcl_SetObjResult(interp, Tcl_NewIntObj(ret));
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -384,7 +414,7 @@ int cmd_relit(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 		goto fail;
 	bb = fix(sel_bb);
 	ctx->light->update(bb, &bb2);
-	ctx->world->set_flags(bb2, CHUNK_UNRENDERED);
+	ctx->world->set_flags(bb2, Chunk::UNRENDERED);
 	return TCL_OK;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
@@ -410,6 +440,27 @@ int cmd_replace(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 				&& ctx->world->get_shape(p) == s1)
 			ctx->world->set_block(p, s2, m2);
 	}
+	return 0;
+fail:
+	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));
+	return TCL_ERROR;
+}
+
+int cmd_terraform(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+{
+	static const char *usage = "usage: terraform";
+	Context *ctx = static_cast<Context *>(data);
+	v3f p;
+	v2ll q;
+	Chunk *c;
+
+	if (objc != 1)
+		goto fail;
+	p = ctx->player->get_body()->get_p();
+	q = (v2ll(p.x, p.z) >> 4LL) & 0xfLL;
+	c = ctx->world->get_chunk(q);
+	terraform(0, c);
+	c->set_flags(Chunk::UNLIT);
 	return 0;
 fail:
 	Tcl_SetObjResult(interp, Tcl_NewStringObj(usage, strlen(usage)));

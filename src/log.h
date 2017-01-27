@@ -5,11 +5,17 @@
 
 #include <stdio.h>
 
+static inline int log_index()
+{
+	static int ret = 0;
+	return ret++;
+}
+
 #define log_info(fmt, ...) \
-	fprintf(stderr, "INFO: %s: " fmt "\n", __func__, ##__VA_ARGS__)
+	fprintf(stderr, "[%d] INFO: %s: " fmt "\n", log_index(), __func__, ##__VA_ARGS__)
 #define log_warning(fmt, ...) \
-	fprintf(stderr, "WARNING: %s: " fmt "\n", __func__, ##__VA_ARGS__)
+	fprintf(stderr, "[%d] WARNING: %s: " fmt "\n", log_index(), __func__, ##__VA_ARGS__)
 #define log_error(fmt, ...) \
-	fprintf(stderr, "ERROR: %s: " fmt "\n", __func__, ##__VA_ARGS__)
+	fprintf(stderr, "[%d] ERROR: %s: " fmt "\n", log_index(), __func__, ##__VA_ARGS__)
 
 #endif  // SRC_LOG_H_
