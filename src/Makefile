@@ -17,6 +17,7 @@ voxel_objs += inventory.o
 voxel_objs += lighting.o
 voxel_objs += main_loop.o
 voxel_objs += media.o
+voxel_objs += option_parser.o
 voxel_objs += physics.o
 #voxel_objs += profile.o
 voxel_objs += recipes.o
