@@ -25,8 +25,8 @@ class Chunk : public NonCopyable {
 	Chunk(Context *ctx, const v2ll &p);
 	~Chunk();
 
-	void load(sz::Tag *root);
-	sz::Tag *save();
+	void load(serializer::Tag *root);
+	serializer::Tag *save();
 
 	inline int get_id() const { return id; }
 	inline void set_flags(int mask) { flags |= mask; }

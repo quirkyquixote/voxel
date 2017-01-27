@@ -14,8 +14,8 @@ class RoamingEntity : public Entity, public PtrNode {
 	RoamingEntity(Context *ctx, int capacity);
 	virtual ~RoamingEntity();
 
-	virtual sz::Tag *save();
-	virtual void load(sz::Tag *root);
+	virtual serializer::Tag *save();
+	virtual void load(serializer::Tag *root);
 
 	inline Body *get_body() { return body.get(); }
 

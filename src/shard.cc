@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "sz.h"
+#include "serializer.h"
 
 Shard::Shard(int id, int y)
 	: id(id), y(y)
@@ -17,28 +17,28 @@ Shard::~Shard()
 {
 }
 
-void Shard::load(sz::Tag *root)
+void Shard::load(serializer::Tag *root)
 {
 	memset(data, 0, sizeof(data));
-	sz::Tag *tag;
+	serializer::Tag *tag;
 
-	tag = sz::dict_lookup(root, "y");
+	tag = serializer::dict_lookup(root, "y");
 	y = tag->get_i64();
-	tag = sz::dict_lookup(root, "mat");
+	tag = serializer::dict_lookup(root, "mat");
 	memcpy(mat, tag->get_raw().data(), sizeof(mat));
-	tag = sz::dict_lookup(root, "shape");
+	tag = serializer::dict_lookup(root, "shape");
 	memcpy(shape, tag->get_raw().data(), sizeof(shape));
-	tag = sz::dict_lookup(root, "light");
+	tag = serializer::dict_lookup(root, "light");
 	memcpy(light, tag->get_raw().data(), sizeof(light));
 }
 
-sz::Tag *Shard::save()
+serializer::Tag *Shard::save()
 {
-	sz::Tag *root = new sz::Dict();
-	sz::dict_add(root, "y", new sz::i64(y));
-	sz::dict_add(root, "mat", new sz::Raw(mat, VOLUME));
-	sz::dict_add(root, "shape", new sz::Raw(shape, VOLUME));
-	sz::dict_add(root, "light", new sz::Raw(light, VOLUME));
+	serializer::Tag *root = new serializer::Dict();
+	serializer::dict_add(root, "y", new serializer::i64(y));
+	serializer::dict_add(root, "mat", new serializer::Raw(mat, VOLUME));
+	serializer::dict_add(root, "shape", new serializer::Raw(shape, VOLUME));
+	serializer::dict_add(root, "light", new serializer::Raw(light, VOLUME));
 	return root;
 }
 

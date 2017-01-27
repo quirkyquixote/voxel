@@ -1,7 +1,7 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
 
-#include "sz.h"
+#include "serializer.h"
 
 #include <string.h>
 #include <unistd.h>
@@ -10,7 +10,7 @@
 
 #include "context.h"
 
-namespace sz {
+namespace serializer {
 
 void read_bytes(int fd, void *data, size_t nbytes)
 {
@@ -213,4 +213,4 @@ void write(int fd, Tag *tag)
 	throw Exception();
 }
 
-};  // namespace sz
+};  // namespace serializer

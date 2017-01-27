@@ -3,7 +3,7 @@
 #ifndef SRC_ENTITY_H_
 #define SRC_ENTITY_H_
 
-#include "sz.h"
+#include "serializer.h"
 #include "inventory.h"
 #include "v3.h"
 #include "physics.h"
@@ -19,8 +19,8 @@ class Entity : public NonCopyable {
 
 	virtual ~Entity() { }
 
-	virtual sz::Tag *save();
-	virtual void load(sz::Tag *val);
+	virtual serializer::Tag *save();
+	virtual void load(serializer::Tag *val);
 	virtual bool use(PlayerEntity *player) { return false; }
 	virtual Inventory *get_items() { return &items; }
 
@@ -35,6 +35,6 @@ class Entity : public NonCopyable {
 	Inventory items;
 };
 
-Entity *load_entity(Context *ctx, sz::Tag *val);
+Entity *load_entity(Context *ctx, serializer::Tag *val);
 
 #endif  // SRC_ENTITY_H_

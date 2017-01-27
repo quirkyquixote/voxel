@@ -14,34 +14,34 @@ RoamingEntity::~RoamingEntity()
 {
 }
 
-sz::Tag *RoamingEntity::save()
+serializer::Tag *RoamingEntity::save()
 {
-	sz::Tag *root, *tmp;
+	serializer::Tag *root, *tmp;
 	root = Entity::save();
-	tmp = new sz::List();
-	sz::list_add(tmp, new sz::f64(body->get_p().x));
-	sz::list_add(tmp, new sz::f64(body->get_p().y));
-	sz::list_add(tmp, new sz::f64(body->get_p().z));
-	sz::dict_add(root, "pos", tmp);
-	tmp = new sz::List();
-	sz::list_add(tmp, new sz::f64(body->get_r().x));
-	sz::list_add(tmp, new sz::f64(body->get_r().y));
-	sz::list_add(tmp, new sz::f64(body->get_r().z));
-	sz::dict_add(root, "rot", tmp);
-	tmp = new sz::List();
-	sz::list_add(tmp, new sz::f64(body->get_v().x));
-	sz::list_add(tmp, new sz::f64(body->get_v().y));
-	sz::list_add(tmp, new sz::f64(body->get_v().z));
-	sz::dict_add(root, "vel", tmp);
+	tmp = new serializer::List();
+	serializer::list_add(tmp, new serializer::f64(body->get_p().x));
+	serializer::list_add(tmp, new serializer::f64(body->get_p().y));
+	serializer::list_add(tmp, new serializer::f64(body->get_p().z));
+	serializer::dict_add(root, "pos", tmp);
+	tmp = new serializer::List();
+	serializer::list_add(tmp, new serializer::f64(body->get_r().x));
+	serializer::list_add(tmp, new serializer::f64(body->get_r().y));
+	serializer::list_add(tmp, new serializer::f64(body->get_r().z));
+	serializer::dict_add(root, "rot", tmp);
+	tmp = new serializer::List();
+	serializer::list_add(tmp, new serializer::f64(body->get_v().x));
+	serializer::list_add(tmp, new serializer::f64(body->get_v().y));
+	serializer::list_add(tmp, new serializer::f64(body->get_v().z));
+	serializer::dict_add(root, "vel", tmp);
 	return root;
 }
 
-void RoamingEntity::load(sz::Tag *root)
+void RoamingEntity::load(serializer::Tag *root)
 {
 	Entity::load(root);
 
-	sz::Tag *tag;
-	tag = sz::dict_lookup(root, "pos");
+	serializer::Tag *tag;
+	tag = serializer::dict_lookup(root, "pos");
 	{
 		v3f p;
 		p.x = tag->get_list()[0]->get_f64();
@@ -49,7 +49,7 @@ void RoamingEntity::load(sz::Tag *root)
 		p.z = tag->get_list()[2]->get_f64();
 		body->set_p(p);
 	}
-	tag = sz::dict_lookup(root, "rot");
+	tag = serializer::dict_lookup(root, "rot");
 	{
 		v3f r;
 		r.x = tag->get_list()[0]->get_f64();
@@ -57,7 +57,7 @@ void RoamingEntity::load(sz::Tag *root)
 		r.z = tag->get_list()[2]->get_f64();
 		body->set_r(r);
 	}
-	tag = sz::dict_lookup(root, "vel");
+	tag = serializer::dict_lookup(root, "vel");
 	{
 		v3f v;
 		v.x = tag->get_list()[0]->get_f64();

@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "sz.h"
+#include "serializer.h"
 #include "v2.h"
 #include "v3.h"
 #include "box3.h"
@@ -25,8 +25,8 @@ class Shard : public NonCopyable {
 	Shard(int id, int y);
 	~Shard();
 
-	void load(sz::Tag *root);
-	sz::Tag *save();
+	void load(serializer::Tag *root);
+	serializer::Tag *save();
 
 	inline int get_id() const { return id; }
 	inline int get_y() const { return y; }

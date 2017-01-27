@@ -17,12 +17,12 @@ CrateEntity::~CrateEntity()
 }
 
 
-void CrateEntity::load(sz::Tag *tag)
+void CrateEntity::load(serializer::Tag *tag)
 {
 	BlockEntity::load(tag);
 }
 
-sz::Tag *CrateEntity::save()
+serializer::Tag *CrateEntity::save()
 {
 	return BlockEntity::save();
 }

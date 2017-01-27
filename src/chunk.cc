@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "sz.h"
+#include "serializer.h"
 #include "context.h"
 
 Chunk::Chunk(Context *ctx, const v2ll &p)
@@ -23,21 +23,21 @@ Chunk::~Chunk()
 		delete shards[i];
 }
 
-void Chunk::load(sz::Tag *root)
+void Chunk::load(serializer::Tag *root)
 {
-	sz::Tag *tag;
+	serializer::Tag *tag;
 
-	tag = sz::dict_lookup(root, "x");
+	tag = serializer::dict_lookup(root, "x");
 	assert(x == tag->get_i64());
-	tag = sz::dict_lookup(root, "z");
+	tag = serializer::dict_lookup(root, "z");
 	assert(z == tag->get_i64());
-	tag = sz::dict_lookup(root, "shards");
+	tag = serializer::dict_lookup(root, "shards");
 	{
 		int i = 0;
 		for (auto &it2 : tag->get_list())
 			shards[i++]->load(it2);
 	}
-	tag = sz::dict_lookup(root, "entities");
+	tag = serializer::dict_lookup(root, "entities");
 	{
 		for (auto &it2 : tag->get_list()) {
 			Entity *e = load_entity(ctx, it2);
@@ -53,24 +53,24 @@ void Chunk::load(sz::Tag *root)
 	flags = UNRENDERED;
 }
 
-sz::Tag *Chunk::save()
+serializer::Tag *Chunk::save()
 {
-	sz::Tag *root, *tmp;
-	root = new sz::Dict();
-	sz::dict_add(root, "x", new sz::i64(x));
-	sz::dict_add(root, "z", new sz::i64(z));
-	tmp = new sz::List();
+	serializer::Tag *root, *tmp;
+	root = new serializer::Dict();
+	serializer::dict_add(root, "x", new serializer::i64(x));
+	serializer::dict_add(root, "z", new serializer::i64(z));
+	tmp = new serializer::List();
 	for (int i = 0; i < SHARD_NUM; ++i) {
-		sz::list_add(tmp, shards[i]->save());
+		serializer::list_add(tmp, shards[i]->save());
 	}
-	sz::dict_add(root, "shards", tmp);
-	tmp = new sz::List();
+	serializer::dict_add(root, "shards", tmp);
+	tmp = new serializer::List();
 	for (auto &p : box3ll(0, 0, 0, W - 1, H - 1, D - 1)) {
 		Entity *e = get_data(p);
 		if (e != NULL)
-			sz::list_add(tmp, e->save());
+			serializer::list_add(tmp, e->save());
 	}
-	sz::dict_add(root, "entities", tmp);
+	serializer::dict_add(root, "entities", tmp);
 	return root;
 }
 

@@ -82,12 +82,12 @@ void BoardEntity::update()
 	}
 }
 
-void BoardEntity::load(sz::Tag *tag)
+void BoardEntity::load(serializer::Tag *tag)
 {
 	BlockEntity::load(tag);
 }
 
-sz::Tag *BoardEntity::save()
+serializer::Tag *BoardEntity::save()
 {
 	return BlockEntity::save();
 }

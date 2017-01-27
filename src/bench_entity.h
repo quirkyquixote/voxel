@@ -13,8 +13,8 @@ class BenchEntity : public BlockEntity {
 	explicit BenchEntity(Context *ctx);
 	~BenchEntity();
 
-	sz::Tag *save();
-	void load(sz::Tag *val);
+	serializer::Tag *save();
+	void load(serializer::Tag *val);
 	bool use(PlayerEntity *player);
 
 	const char *get_name() { return "bench"; }

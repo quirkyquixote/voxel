@@ -8,12 +8,12 @@
 #include "board_entity.h"
 #include "context.h"
 
-Entity *load_entity(Context *ctx, sz::Tag *root)
+Entity *load_entity(Context *ctx, serializer::Tag *root)
 {
-	sz::Tag *tag;
+	serializer::Tag *tag;
 	Entity *e;
 
-	tag = sz::dict_lookup(root, "name");
+	tag = serializer::dict_lookup(root, "name");
 	if (strcmp(tag->get_str(), "crate") == 0) {
 		e = new CrateEntity(ctx);
 	} else if (strcmp(tag->get_str(), "bench") == 0) {
@@ -24,42 +24,42 @@ Entity *load_entity(Context *ctx, sz::Tag *root)
 		e = new PipeEntity(ctx);
 	} else {
 		log_error("bad entity type: %s", tag->get_str());
-		throw sz::Exception();
+		throw serializer::Exception();
 	}
 	e->load(root);
 	return e;
 }
 
-sz::Tag *Entity::save()
+serializer::Tag *Entity::save()
 {
-	sz::Tag *root, *tmp;
-	root = new sz::Dict();
-	sz::dict_add(root, "name", new sz::Str(get_name()));
-	tmp = new sz::List();
-	sz::list_add(tmp, new sz::i64(p.x));
-	sz::list_add(tmp, new sz::i64(p.y));
-	sz::list_add(tmp, new sz::i64(p.z));
-	sz::dict_add(root, "p", tmp);
+	serializer::Tag *root, *tmp;
+	root = new serializer::Dict();
+	serializer::dict_add(root, "name", new serializer::Str(get_name()));
+	tmp = new serializer::List();
+	serializer::list_add(tmp, new serializer::i64(p.x));
+	serializer::list_add(tmp, new serializer::i64(p.y));
+	serializer::list_add(tmp, new serializer::i64(p.z));
+	serializer::dict_add(root, "p", tmp);
 	if (!items.empty()) {
-		tmp = new sz::Raw(items.data(), sizeof(Item) * items.size());
-		sz::dict_add(root, "items", tmp);
+		tmp = new serializer::Raw(items.data(), sizeof(Item) * items.size());
+		serializer::dict_add(root, "items", tmp);
 	}
 	return root;
 }
 
-void Entity::load(sz::Tag *root)
+void Entity::load(serializer::Tag *root)
 {
-	sz::Tag *tag;
+	serializer::Tag *tag;
 
-	tag = sz::dict_lookup(root, "p");
+	tag = serializer::dict_lookup(root, "p");
 	p.x = tag->get_list()[0]->get_i64();
 	p.y = tag->get_list()[1]->get_i64();
 	p.z = tag->get_list()[2]->get_i64();
 
 	try {
-		tag = sz::dict_lookup(root, "items");
+		tag = serializer::dict_lookup(root, "items");
 		memcpy(items.data(), tag->get_raw().data(), sizeof(Item) * items.size());
-	} catch (sz::Exception &ex) {
+	} catch (serializer::Exception &ex) {
 		/* do nothing */
 	}
 }

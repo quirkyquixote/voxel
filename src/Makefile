@@ -30,7 +30,7 @@ voxel_objs += recipes.o
 voxel_objs += renderer.o
 voxel_objs += vertex_buffer.o
 voxel_objs += shader.o
-voxel_objs += sz.o
+voxel_objs += serializer.o
 voxel_objs += tcl_commands.o
 voxel_objs += terraform.o
 voxel_objs += tone_mapper.o
@@ -45,7 +45,7 @@ voxel_objs += drop_entity.o
 voxel_objs += player_entity.o
 voxel_objs += noiseutils.o
 
-szcat_objs += sz.o
+szcat_objs += serializer.o
 
 gens = $(voxel_gens)
 objs = $(voxel_objs) $(szcat_objs)

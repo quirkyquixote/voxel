@@ -1,7 +1,7 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef SRC_SZ_H_
-#define SRC_SZ_H_
+#ifndef SRC_SERIALIZER_H_
+#define SRC_SERIALIZER_H_
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -14,7 +14,7 @@
 
 #include "log.h"
 
-namespace sz {
+namespace serializer {
 
 enum {
 	NUL = 0,
@@ -222,7 +222,7 @@ static inline Tag *dict_lookup(Tag *d, const char *k)
 	return v->second;
 }
 
-};  // namespace sz
+};  // namespace serializer
 
-#endif  // SRC_SZ_H_
+#endif  // SRC_SERIALIZER_H_
 

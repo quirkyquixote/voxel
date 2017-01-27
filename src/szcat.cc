@@ -6,51 +6,51 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "sz.h"
+#include "serializer.h"
 
-int sz_print(sz::Tag *tag, int depth)
+int serializer_print(serializer::Tag *tag, int depth)
 {
 	int i;
 	char *key;
-	sz::Tag *val;
-	if (tag->get_tag() == sz::NUL) {
+	serializer::Tag *val;
+	if (tag->get_tag() == serializer::NUL) {
 		/* do nothing */
-	} else if (tag->get_tag() == sz::I8) {
+	} else if (tag->get_tag() == serializer::I8) {
 		printf("%d", tag->get_i8());
-	} else if (tag->get_tag() == sz::I16) {
+	} else if (tag->get_tag() == serializer::I16) {
 		printf("%d", tag->get_i16());
-	} else if (tag->get_tag() == sz::I32) {
+	} else if (tag->get_tag() == serializer::I32) {
 		printf("%d", tag->get_i32());
-	} else if (tag->get_tag() == sz::I64) {
+	} else if (tag->get_tag() == serializer::I64) {
 		printf("%ld", tag->get_i64());
-	} else if (tag->get_tag() == sz::F32) {
+	} else if (tag->get_tag() == serializer::F32) {
 		printf("%g", tag->get_f32());
-	} else if (tag->get_tag() == sz::F64) {
+	} else if (tag->get_tag() == serializer::F64) {
 		printf("%lg", tag->get_f64());
-	} else if (tag->get_tag() == sz::STR) {
+	} else if (tag->get_tag() == serializer::STR) {
 		printf("%s", tag->get_str());
-	} else if (tag->get_tag() == sz::RAW) {
+	} else if (tag->get_tag() == serializer::RAW) {
 		printf("<%zd bytes>", tag->get_raw().size());
-	} else if (tag->get_tag() == sz::LIST) {
+	} else if (tag->get_tag() == serializer::LIST) {
 		putchar('[');
 		putchar('\n');
 		for (auto &iter : tag->get_list()) {
 			for (i = 0; i < depth + 1; ++i)
 				putchar('\t');
-			sz_print(iter, depth + 1);
+			serializer_print(iter, depth + 1);
 			putchar('\n');
 		}
 		for (i = 0; i < depth; ++i)
 			putchar('\t');
 		putchar(']');
-	} else if (tag->get_tag() == sz::DICT) {
+	} else if (tag->get_tag() == serializer::DICT) {
 		putchar('{');
 		putchar('\n');
 		for (auto &iter : tag->get_dict()) {
 			for (i = 0; i < depth + 1; ++i)
 				putchar('\t');
 			printf("%s:", iter.first.c_str());
-			sz_print(iter.second, depth + 1);
+			serializer_print(iter.second, depth + 1);
 			putchar('\n');
 		}
 		for (i = 0; i < depth; ++i)
@@ -66,8 +66,8 @@ int sz_print(sz::Tag *tag, int depth)
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
-		sz::Tag *tag = sz::read(STDIN_FILENO);
-		sz_print(tag, 0);
+		serializer::Tag *tag = serializer::read(STDIN_FILENO);
+		serializer_print(tag, 0);
 		delete tag;
 		return 0;
 	}
@@ -78,8 +78,8 @@ int main(int argc, char *argv[])
 			perror(argv[i]);
 			return -1;
 		}
-		sz::Tag *tag = sz::read(fd);
-		sz_print(tag, 0);
+		serializer::Tag *tag = serializer::read(fd);
+		serializer_print(tag, 0);
 		delete tag;
 	}
 
