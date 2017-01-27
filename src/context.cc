@@ -102,6 +102,25 @@ class Option {
 		return 1 + val->parse(p);
 	}
 
+	void print_help()
+	{
+		int i = 0;
+		i += printf("  ");
+		if (sh) {
+			i += printf("-%c", sh);
+			if (lo)
+				i += printf(", --%s", lo);
+		} else {
+			if (lo)
+				i += printf("--%s", lo);
+		}
+		while (i < 24) {
+			printf(" ");
+			++i;
+		}
+		printf("%s\n", help);
+	}
+
  private:
 	char sh;
 	const char *lo;
@@ -135,19 +154,19 @@ int main(int argc, char *argv[])
 	BoolValue help_flag;
 	BoolValue version_flag;
 
-	int i = parse_arguments(argc, argv, {
+	std::vector<Option> options = {
 		Option('h', "help", "Show help options", &help_flag),
 		Option('v', "version", "Print version", &version_flag),
-	});
+	};
+
+	int i = parse_arguments(argc, argv, options);
 
 	if (help_flag.get_val()) {
 		printf("usage: %s [OPTIONS] [<path>]\n", argv[0]);
 		printf("\n");
-		printf("Help options:\n");
-		printf("  -h, --help                   Show help options\n");
-		printf("\n");
-		printf("Application options:\n");
-		printf("  --version                    Print version string\n");
+		printf("Options:\n");
+		for (auto &o : options)
+			o.print_help();
 		exit(EXIT_SUCCESS);
 	}
 
