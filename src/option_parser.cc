@@ -6,6 +6,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "log.h"
+
+template<typename T> int Value<T>::parse(char **p)
+{
+	log_error("Unimplemented");
+	exit(EXIT_FAILURE);
+	return 0;
+}
+
 template<> int Value<bool>::parse(char **p)
 {
 	*val = true;

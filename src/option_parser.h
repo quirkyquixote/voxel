@@ -7,8 +7,6 @@
 #include <vector>
 #include <memory>
 
-#include "log.h"
-
 struct ValueBase {
 	virtual ~ValueBase() {}
 	virtual int parse(char **p) = 0;
@@ -18,11 +16,7 @@ template<typename T> class Value : public ValueBase {
  public:
 	Value(T *val) : val(val) {}
 	~Value() {}
-	int parse(char **p) {
-		log_error("Unimplemented");
-		exit(EXIT_FAILURE);
-		return 0;
-	}
+	int parse(char **p);
 
  private:
 	T *val;
