@@ -13,8 +13,8 @@ class CrateEntity : public BlockEntity {
 	explicit CrateEntity(Context *ctx);
 	~CrateEntity();
 
-	sz_Tag *save();
-	void load(sz_Tag *val);
+	sz::Tag *save();
+	void load(sz::Tag *val);
 	bool use(PlayerEntity *player);
 
 	const char *get_name() { return "crate"; }

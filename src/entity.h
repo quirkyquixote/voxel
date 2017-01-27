@@ -19,8 +19,8 @@ class Entity : public NonCopyable {
 
 	virtual ~Entity() { }
 
-	virtual sz_Tag *save();
-	virtual void load(sz_Tag *val);
+	virtual sz::Tag *save();
+	virtual void load(sz::Tag *val);
 	virtual bool use(PlayerEntity *player) { return false; }
 	virtual Inventory *get_items() { return &items; }
 
@@ -35,6 +35,6 @@ class Entity : public NonCopyable {
 	Inventory items;
 };
 
-Entity *load_entity(Context *ctx, sz_Tag *val);
+Entity *load_entity(Context *ctx, sz::Tag *val);
 
 #endif  // SRC_ENTITY_H_

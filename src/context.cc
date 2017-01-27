@@ -151,10 +151,10 @@ bool Context::load_world()
 	int fd = open(path.c_str(), O_RDONLY, 0400);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(sz_read(fd));
+			std::unique_ptr<sz::Tag> root(sz::read(fd));
 			world->load(root.get());
 			ret = true;
-		} catch (sz_Exception &ex) {
+		} catch (sz::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);
@@ -169,9 +169,9 @@ void Context::save_world()
 	int fd = creat(path.c_str(), 0600);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(world->save());
-			sz_write(fd, root.get());
-		} catch(sz_Exception &ex) {
+			std::unique_ptr<sz::Tag> root(world->save());
+			sz::write(fd, root.get());
+		} catch(sz::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);
@@ -188,10 +188,10 @@ bool Context::load_player()
 	int fd = open(path.c_str(), O_RDONLY, 0400);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(sz_read(fd));
+			std::unique_ptr<sz::Tag> root(sz::read(fd));
 			player->load(root.get());
 			ret = true;
-		} catch (sz_Exception &ex) {
+		} catch (sz::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);
@@ -206,9 +206,9 @@ void Context::save_player()
 	int fd = creat(path.c_str(), 0600);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(player->save());
-			sz_write(fd, root.get());
-		} catch(sz_Exception &ex) {
+			std::unique_ptr<sz::Tag> root(player->save());
+			sz::write(fd, root.get());
+		} catch(sz::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);
@@ -230,10 +230,10 @@ bool Context::load_chunk(Chunk *c)
 	int fd = open(path.c_str(), O_RDONLY, 0400);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(sz_read(fd));
+			std::unique_ptr<sz::Tag> root(sz::read(fd));
 			c->load(root.get());
 			ret = true;
-		} catch (sz_Exception &ex) {
+		} catch (sz::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);
@@ -256,9 +256,9 @@ void Context::save_chunk(Chunk *c)
 	int fd = creat(path.c_str(), 0600);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(c->save());
-			sz_write(fd, root.get());
-		} catch (sz_Exception &ex) {
+			std::unique_ptr<sz::Tag> root(c->save());
+			sz::write(fd, root.get());
+		} catch (sz::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);

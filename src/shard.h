@@ -25,8 +25,8 @@ class Shard : public NonCopyable {
 	Shard(int id, int y);
 	~Shard();
 
-	void load(sz_Tag *root);
-	sz_Tag *save();
+	void load(sz::Tag *root);
+	sz::Tag *save();
 
 	inline int get_id() const { return id; }
 	inline int get_y() const { return y; }

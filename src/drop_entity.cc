@@ -57,12 +57,12 @@ void DropEntity::render()
 	glPopMatrix();
 }
 
-sz_Tag *DropEntity::save()
+sz::Tag *DropEntity::save()
 {
 	return RoamingEntity::save();
 }
 
-void DropEntity::load(sz_Tag *root)
+void DropEntity::load(sz::Tag *root)
 {
 	RoamingEntity::load(root);
 }

@@ -13,8 +13,8 @@ class DropEntity : public RoamingEntity {
 	DropEntity(Context *ctx, Item item);
 	~DropEntity();
 
-	void load(sz_Tag *root);
-	sz_Tag *save();
+	void load(sz::Tag *root);
+	sz::Tag *save();
 
 	const char *get_name() { return "drop"; }
 

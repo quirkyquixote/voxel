@@ -10,12 +10,12 @@ PipeEntity::~PipeEntity()
 {
 }
 
-void PipeEntity::load(sz_Tag *tag)
+void PipeEntity::load(sz::Tag *tag)
 {
 	BlockEntity::load(tag);
 }
 
-sz_Tag *PipeEntity::save()
+sz::Tag *PipeEntity::save()
 {
 	return BlockEntity::save();
 }

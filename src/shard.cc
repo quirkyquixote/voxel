@@ -17,28 +17,28 @@ Shard::~Shard()
 {
 }
 
-void Shard::load(sz_Tag *root)
+void Shard::load(sz::Tag *root)
 {
 	memset(data, 0, sizeof(data));
-	sz_Tag *tag;
+	sz::Tag *tag;
 
-	tag = sz_dict_lookup(root, "y");
+	tag = sz::dict_lookup(root, "y");
 	y = tag->get_i64();
-	tag = sz_dict_lookup(root, "mat");
+	tag = sz::dict_lookup(root, "mat");
 	memcpy(mat, tag->get_raw().data(), sizeof(mat));
-	tag = sz_dict_lookup(root, "shape");
+	tag = sz::dict_lookup(root, "shape");
 	memcpy(shape, tag->get_raw().data(), sizeof(shape));
-	tag = sz_dict_lookup(root, "light");
+	tag = sz::dict_lookup(root, "light");
 	memcpy(light, tag->get_raw().data(), sizeof(light));
 }
 
-sz_Tag *Shard::save()
+sz::Tag *Shard::save()
 {
-	sz_Tag *root = new sz_Dict();
-	sz_dict_add(root, "y", new sz_i64(y));
-	sz_dict_add(root, "mat", new sz_Raw(mat, VOLUME));
-	sz_dict_add(root, "shape", new sz_Raw(shape, VOLUME));
-	sz_dict_add(root, "light", new sz_Raw(light, VOLUME));
+	sz::Tag *root = new sz::Dict();
+	sz::dict_add(root, "y", new sz::i64(y));
+	sz::dict_add(root, "mat", new sz::Raw(mat, VOLUME));
+	sz::dict_add(root, "shape", new sz::Raw(shape, VOLUME));
+	sz::dict_add(root, "light", new sz::Raw(light, VOLUME));
 	return root;
 }
 

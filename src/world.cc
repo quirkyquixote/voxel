@@ -19,22 +19,22 @@ World::~World()
 			delete chunks[p.x][p.y];
 }
 
-void World::load(sz_Tag *root)
+void World::load(sz::Tag *root)
 {
-	sz_Tag *tag;
+	sz::Tag *tag;
 
-	tag = sz_dict_lookup(root, "x");
+	tag = sz::dict_lookup(root, "x");
 	p.x = tag->get_i64();
-	tag = sz_dict_lookup(root, "z");
+	tag = sz::dict_lookup(root, "z");
 	p.y = tag->get_i64();
 }
 
-sz_Tag *World::save()
+sz::Tag *World::save()
 {
-	sz_Tag *root;
-	root = new sz_Dict();
-	sz_dict_add(root, "x", new sz_i64(p.x));
-	sz_dict_add(root, "z", new sz_i64(p.y));
+	sz::Tag *root;
+	root = new sz::Dict();
+	sz::dict_add(root, "x", new sz::i64(p.x));
+	sz::dict_add(root, "z", new sz::i64(p.y));
 	return root;
 }
 

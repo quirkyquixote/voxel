@@ -428,12 +428,12 @@ void PlayerEntity::render_hotbar()
 	}
 }
 
-sz_Tag *PlayerEntity::save()
+sz::Tag *PlayerEntity::save()
 {
 	return RoamingEntity::save();
 }
 
-void PlayerEntity::load(sz_Tag *root)
+void PlayerEntity::load(sz::Tag *root)
 {
 	RoamingEntity::load(root);
 }

@@ -23,21 +23,21 @@ Chunk::~Chunk()
 		delete shards[i];
 }
 
-void Chunk::load(sz_Tag *root)
+void Chunk::load(sz::Tag *root)
 {
-	sz_Tag *tag;
+	sz::Tag *tag;
 
-	tag = sz_dict_lookup(root, "x");
+	tag = sz::dict_lookup(root, "x");
 	assert(x == tag->get_i64());
-	tag = sz_dict_lookup(root, "z");
+	tag = sz::dict_lookup(root, "z");
 	assert(z == tag->get_i64());
-	tag = sz_dict_lookup(root, "shards");
+	tag = sz::dict_lookup(root, "shards");
 	{
 		int i = 0;
 		for (auto &it2 : tag->get_list())
 			shards[i++]->load(it2);
 	}
-	tag = sz_dict_lookup(root, "entities");
+	tag = sz::dict_lookup(root, "entities");
 	{
 		for (auto &it2 : tag->get_list()) {
 			Entity *e = load_entity(ctx, it2);
@@ -53,24 +53,24 @@ void Chunk::load(sz_Tag *root)
 	flags = UNRENDERED;
 }
 
-sz_Tag *Chunk::save()
+sz::Tag *Chunk::save()
 {
-	sz_Tag *root, *tmp;
-	root = new sz_Dict();
-	sz_dict_add(root, "x", new sz_i64(x));
-	sz_dict_add(root, "z", new sz_i64(z));
-	tmp = new sz_List();
+	sz::Tag *root, *tmp;
+	root = new sz::Dict();
+	sz::dict_add(root, "x", new sz::i64(x));
+	sz::dict_add(root, "z", new sz::i64(z));
+	tmp = new sz::List();
 	for (int i = 0; i < SHARD_NUM; ++i) {
-		sz_list_add(tmp, shards[i]->save());
+		sz::list_add(tmp, shards[i]->save());
 	}
-	sz_dict_add(root, "shards", tmp);
-	tmp = new sz_List();
+	sz::dict_add(root, "shards", tmp);
+	tmp = new sz::List();
 	for (auto &p : box3ll(0, 0, 0, W - 1, H - 1, D - 1)) {
 		Entity *e = get_data(p);
 		if (e != NULL)
-			sz_list_add(tmp, e->save());
+			sz::list_add(tmp, e->save());
 	}
-	sz_dict_add(root, "entities", tmp);
+	sz::dict_add(root, "entities", tmp);
 	return root;
 }
 

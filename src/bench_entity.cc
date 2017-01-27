@@ -16,12 +16,12 @@ BenchEntity::~BenchEntity()
 {
 }
 
-void BenchEntity::load(sz_Tag *tag)
+void BenchEntity::load(sz::Tag *tag)
 {
 	BlockEntity::load(tag);
 }
 
-sz_Tag *BenchEntity::save()
+sz::Tag *BenchEntity::save()
 {
 	return BlockEntity::save();
 }

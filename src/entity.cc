@@ -8,12 +8,12 @@
 #include "board_entity.h"
 #include "context.h"
 
-Entity *load_entity(Context *ctx, sz_Tag *root)
+Entity *load_entity(Context *ctx, sz::Tag *root)
 {
-	sz_Tag *tag;
+	sz::Tag *tag;
 	Entity *e;
 
-	tag = sz_dict_lookup(root, "name");
+	tag = sz::dict_lookup(root, "name");
 	if (strcmp(tag->get_str(), "crate") == 0) {
 		e = new CrateEntity(ctx);
 	} else if (strcmp(tag->get_str(), "bench") == 0) {
@@ -24,42 +24,42 @@ Entity *load_entity(Context *ctx, sz_Tag *root)
 		e = new PipeEntity(ctx);
 	} else {
 		log_error("bad entity type: %s", tag->get_str());
-		throw sz_Exception();
+		throw sz::Exception();
 	}
 	e->load(root);
 	return e;
 }
 
-sz_Tag *Entity::save()
+sz::Tag *Entity::save()
 {
-	sz_Tag *root, *tmp;
-	root = new sz_Dict();
-	sz_dict_add(root, "name", new sz_Str(get_name()));
-	tmp = new sz_List();
-	sz_list_add(tmp, new sz_i64(p.x));
-	sz_list_add(tmp, new sz_i64(p.y));
-	sz_list_add(tmp, new sz_i64(p.z));
-	sz_dict_add(root, "p", tmp);
+	sz::Tag *root, *tmp;
+	root = new sz::Dict();
+	sz::dict_add(root, "name", new sz::Str(get_name()));
+	tmp = new sz::List();
+	sz::list_add(tmp, new sz::i64(p.x));
+	sz::list_add(tmp, new sz::i64(p.y));
+	sz::list_add(tmp, new sz::i64(p.z));
+	sz::dict_add(root, "p", tmp);
 	if (!items.empty()) {
-		tmp = new sz_Raw(items.data(), sizeof(Item) * items.size());
-		sz_dict_add(root, "items", tmp);
+		tmp = new sz::Raw(items.data(), sizeof(Item) * items.size());
+		sz::dict_add(root, "items", tmp);
 	}
 	return root;
 }
 
-void Entity::load(sz_Tag *root)
+void Entity::load(sz::Tag *root)
 {
-	sz_Tag *tag;
+	sz::Tag *tag;
 
-	tag = sz_dict_lookup(root, "p");
+	tag = sz::dict_lookup(root, "p");
 	p.x = tag->get_list()[0]->get_i64();
 	p.y = tag->get_list()[1]->get_i64();
 	p.z = tag->get_list()[2]->get_i64();
 
 	try {
-		tag = sz_dict_lookup(root, "items");
+		tag = sz::dict_lookup(root, "items");
 		memcpy(items.data(), tag->get_raw().data(), sizeof(Item) * items.size());
-	} catch (sz_Exception &ex) {
+	} catch (sz::Exception &ex) {
 		/* do nothing */
 	}
 }
