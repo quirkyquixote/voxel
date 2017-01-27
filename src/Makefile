@@ -54,7 +54,7 @@ install_files = $(addprefix $(DESTDIR)$(datadir)/,$(files))
 
 # The default target of this makefile
 .PHONY: all
-all: $(programs)
+all: v2.h v3.h v4.h box2.h box3.h $(programs)
 
 .PHONY: clean
 clean:
