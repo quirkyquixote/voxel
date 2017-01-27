@@ -5,6 +5,12 @@ include ../config.mk
 # headers in the current directory.
 ALL_CXXFLAGS += -I$(shell pwd)/..
 
+voxel_gens += v2.h
+voxel_gens += v3.h
+voxel_gens += v4.h
+voxel_gens += box2.h
+voxel_gens += box3.h
+
 voxel_objs += camera.o
 voxel_objs += shard.o
 voxel_objs += chunk.o
@@ -41,6 +47,7 @@ voxel_objs += noiseutils.o
 
 szcat_objs += sz.o
 
+gens = $(voxel_gens)
 objs = $(voxel_objs) $(szcat_objs)
 deps = $(objs:.o=.d)
 
@@ -55,10 +62,11 @@ install_files = $(addprefix $(DESTDIR)$(datadir)/,$(files))
 
 # The default target of this makefile
 .PHONY: all
-all: v2.h v3.h v4.h box2.h box3.h $(programs)
+all: $(gens) $(programs)
 
 .PHONY: clean
 clean:
+	$(RM) $(gens)
 	$(RM) $(deps)
 	$(RM) $(objs)
 	$(RM) $(programs)
