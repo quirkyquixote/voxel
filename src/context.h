@@ -15,7 +15,7 @@
 #include "renderer.h"
 #include "inventory.h"
 #include "lighting.h"
-#include "cli.h"
+#include "command_line.h"
 #include "tcl_commands.h"
 #include "roaming_entity.h"
 #include "player_entity.h"

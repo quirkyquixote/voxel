@@ -17,8 +17,8 @@ class BoardEntity : public BlockEntity {
 	explicit BoardEntity(Context *ctx);
 	~BoardEntity();
 
-	sz_Tag *save();
-	void load(sz_Tag *val);
+	serializer::Tag *save();
+	void load(serializer::Tag *val);
 	bool use(PlayerEntity *player);
 
 	const char *get_name() { return "board"; }

@@ -21,7 +21,7 @@ localstatedir = $(prefix)/var/voxel
 
 # There are so many tools needed...
 
-CXX = clang++
+CXX = c++
 AR = ar
 SH = sh
 INSTALL = install

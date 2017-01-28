@@ -1,6 +1,6 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#include "cli.h"
+#include "command_line.h"
 
 #include <cstring>
 

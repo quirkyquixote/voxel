@@ -16,161 +16,31 @@
 #include <thread>
 
 #include "drop_entity.h"
+#include "option_parser.h"
 
 int mkpath(const char *path, mode_t mode);
 
-struct Value {
-	virtual ~Value() {}
-	virtual int parse(char **p) = 0;
-};
-
-class BoolValue : public Value {
- public:
-	BoolValue() : val(false) {}
-	int parse(char **p)
-	{
-		val = true;
-		return 0;
-	}
-	bool get_val() const { return val; }
-
- private:
-	bool val;
-};
-
-class IntValue : public Value {
- public:
-	IntValue() : val(0) {}
-	int parse(char **p)
-	{
-		char *end;
-		val = strtol(*p, &end, 10);
-		if (*end != 0) {
-			log_error("%s: not an integer", *p);
-			exit(EXIT_FAILURE);
-		}
-		return 1;
-	}
-	int get_val() const { return val; }
-
- private:
-	int val;
-};
-
-class StringValue : public Value {
- public:
-	StringValue() : val(nullptr) {}
-	~StringValue()
-	{
-		if (val != nullptr)
-			free(val);
-	}
-	int parse(char **p)
-	{
-		if (**p == '-') {
-			log_error("%s: expected string", *p);
-			exit(EXIT_FAILURE);
-		}
-		val = strdup(*p);
-		return 1;
-	}
-	const char *get_val() const { return val; }
-
- private:
-	char *val;
-};
-
-class Option {
- public:
-	Option(char sh, const char *lo, const char *help, Value *val)
-		: sh(sh), lo(lo), help(help), val(val) { }
-
-	~Option()
-	{
-	}
-
-	int parse(char **p) const
-	{
-		char *s = (*p) + 1;
-		if (s[0] == '-') {
-			if (strcmp(s + 1, lo) != 0)
-				return false;
-		} else {
-			if (s[0] != sh)
-				return false;
-		}
-		return 1 + val->parse(p);
-	}
-
-	void print_help()
-	{
-		int i = 0;
-		i += printf("  ");
-		if (sh) {
-			i += printf("-%c", sh);
-			if (lo)
-				i += printf(", --%s", lo);
-		} else {
-			if (lo)
-				i += printf("--%s", lo);
-		}
-		while (i < 24) {
-			printf(" ");
-			++i;
-		}
-		printf("%s\n", help);
-	}
-
- private:
-	char sh;
-	const char *lo;
-	const char *help;
-	Value *val;
-};
-
-int parse_arguments(int argc, char *argv[], const std::vector<Option> &options)
-{
-	int i = 1;
-	while (i < argc) {
-		bool found = false;
-		for (auto &o : options) {
-			int j = o.parse(argv + i);
-			if (j > 0) {
-				i += j;
-				found = true;
-				break;
-			}
-		}
-		if (found == false) {
-			log_error("Bad option: %s", argv[i]);
-			exit(EXIT_FAILURE);
-		}
-	}
-	return i;
-}
-
 int main(int argc, char *argv[])
 {
-	BoolValue help_flag;
-	BoolValue version_flag;
+	bool help_flag;
+	bool version_flag;
 
-	std::vector<Option> options = {
-		Option('h', "help", "Show help options", &help_flag),
-		Option('v', "version", "Print version", &version_flag),
+	option_parser::Option options[] = {
+		option_parser::Option('h', "help", "Show help options", &help_flag),
+		option_parser::Option('v', "version", "Print version", &version_flag),
 	};
 
-	int i = parse_arguments(argc, argv, options);
+	int i = option_parser::parse(argv, argc, options, 2);
 
-	if (help_flag.get_val()) {
+	if (help_flag) {
 		printf("usage: %s [OPTIONS] [<path>]\n", argv[0]);
 		printf("\n");
 		printf("Options:\n");
-		for (auto &o : options)
-			o.print_help();
+		option_parser::print_help(options, 2);
 		exit(EXIT_SUCCESS);
 	}
 
-	if (version_flag.get_val()) {
+	if (version_flag) {
 		printf("%s\n", VOXEL_VERSION);
 		exit(EXIT_SUCCESS);
 	}
@@ -281,10 +151,10 @@ bool Context::load_world()
 	int fd = open(path.c_str(), O_RDONLY, 0400);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(sz_read(fd));
+			std::unique_ptr<serializer::Tag> root(serializer::read(fd));
 			world->load(root.get());
 			ret = true;
-		} catch (sz_Exception &ex) {
+		} catch (serializer::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);
@@ -299,9 +169,9 @@ void Context::save_world()
 	int fd = creat(path.c_str(), 0600);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(world->save());
-			sz_write(fd, root.get());
-		} catch(sz_Exception &ex) {
+			std::unique_ptr<serializer::Tag> root(world->save());
+			serializer::write(fd, root.get());
+		} catch(serializer::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);
@@ -318,10 +188,10 @@ bool Context::load_player()
 	int fd = open(path.c_str(), O_RDONLY, 0400);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(sz_read(fd));
+			std::unique_ptr<serializer::Tag> root(serializer::read(fd));
 			player->load(root.get());
 			ret = true;
-		} catch (sz_Exception &ex) {
+		} catch (serializer::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);
@@ -336,9 +206,9 @@ void Context::save_player()
 	int fd = creat(path.c_str(), 0600);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(player->save());
-			sz_write(fd, root.get());
-		} catch(sz_Exception &ex) {
+			std::unique_ptr<serializer::Tag> root(player->save());
+			serializer::write(fd, root.get());
+		} catch(serializer::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);
@@ -360,10 +230,10 @@ bool Context::load_chunk(Chunk *c)
 	int fd = open(path.c_str(), O_RDONLY, 0400);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(sz_read(fd));
+			std::unique_ptr<serializer::Tag> root(serializer::read(fd));
 			c->load(root.get());
 			ret = true;
-		} catch (sz_Exception &ex) {
+		} catch (serializer::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);
@@ -386,9 +256,9 @@ void Context::save_chunk(Chunk *c)
 	int fd = creat(path.c_str(), 0600);
 	if (fd >= 0) {
 		try {
-			std::unique_ptr<sz_Tag> root(c->save());
-			sz_write(fd, root.get());
-		} catch (sz_Exception &ex) {
+			std::unique_ptr<serializer::Tag> root(c->save());
+			serializer::write(fd, root.get());
+		} catch (serializer::Exception &ex) {
 			/* do nothing */
 		}
 		close(fd);

@@ -5,11 +5,17 @@ include ../config.mk
 # headers in the current directory.
 ALL_CXXFLAGS += -I$(shell pwd)/..
 
+voxel_gens += v2.h
+voxel_gens += v3.h
+voxel_gens += v4.h
+voxel_gens += box2.h
+voxel_gens += box3.h
+
 voxel_objs += camera.o
 voxel_objs += shard.o
 voxel_objs += chunk.o
 voxel_objs += world.o
-voxel_objs += cli.o
+voxel_objs += command_line.o
 voxel_objs += context.o
 voxel_objs += fps_manager.o
 #voxel_objs += flowsim.o
@@ -17,13 +23,14 @@ voxel_objs += inventory.o
 voxel_objs += lighting.o
 voxel_objs += main_loop.o
 voxel_objs += media.o
+voxel_objs += option_parser.o
 voxel_objs += physics.o
 #voxel_objs += profile.o
 voxel_objs += recipes.o
 voxel_objs += renderer.o
 voxel_objs += vertex_buffer.o
 voxel_objs += shader.o
-voxel_objs += sz.o
+voxel_objs += serializer.o
 voxel_objs += tcl_commands.o
 voxel_objs += terraform.o
 voxel_objs += tone_mapper.o
@@ -38,8 +45,9 @@ voxel_objs += drop_entity.o
 voxel_objs += player_entity.o
 voxel_objs += noiseutils.o
 
-szcat_objs += sz.o
+szcat_objs += serializer.o
 
+gens = $(voxel_gens)
 objs = $(voxel_objs) $(szcat_objs)
 deps = $(objs:.o=.d)
 
@@ -54,10 +62,11 @@ install_files = $(addprefix $(DESTDIR)$(datadir)/,$(files))
 
 # The default target of this makefile
 .PHONY: all
-all: v2.h v3.h v4.h box2.h box3.h $(programs)
+all: $(gens) $(programs)
 
 .PHONY: clean
 clean:
+	$(RM) $(gens)
 	$(RM) $(deps)
 	$(RM) $(objs)
 	$(RM) $(programs)

@@ -18,8 +18,8 @@ class World : public NonCopyable {
 	explicit World(Context *ctx);
 	~World();
 
-	void load(sz_Tag *root);
-	sz_Tag *save();
+	void load(serializer::Tag *root);
+	serializer::Tag *save();
 
 	void set_block(const v3ll &p, int shape, int mat);
 	void set_flags(const box3ll &bb, int flags);

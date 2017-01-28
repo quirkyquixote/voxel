@@ -1,7 +1,7 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
 
-#include "sz.h"
+#include "serializer.h"
 
 #include <string.h>
 #include <unistd.h>
@@ -10,17 +10,19 @@
 
 #include "context.h"
 
+namespace serializer {
+
 void read_bytes(int fd, void *data, size_t nbytes)
 {
 	int ret;
-	ret = read(fd, data, nbytes);
+	ret = ::read(fd, data, nbytes);
 	if (ret < 0) {
 		log_error("%s", strerror(errno));
-		throw sz_Exception();
+		throw Exception();
 	}
 	if (ret < nbytes) {
 		log_error("read %d of %zd bytes", ret, nbytes);
-		throw sz_Exception();
+		throw Exception();
 	}
 }
 
@@ -51,97 +53,97 @@ void read_raw(int fd, void **data, int32_t *len)
 	read_bytes(fd, *data, *len);
 }
 
-sz_Tag *read_list(int fd)
+Tag *read_list(int fd)
 {
-	sz_Tag *root, *tag;
+	Tag *root, *tag;
 	int32_t size;
 	int i;
 
-	root = new sz_List();
+	root = new List();
 	read_atom(fd, &size);
 	for (i = 0; i < size; ++i) {
-		tag = sz_read(fd);
+		tag = read(fd);
 		root->get_list().push_back(tag);
 	}
 	return root;
 }
 
-sz_Tag *read_dict(int fd)
+Tag *read_dict(int fd)
 {
-	sz_Tag *root, *tag;
+	Tag *root, *tag;
 	int32_t size;
 	int i;
 	char *key;
 
-	root = new sz_Dict();
+	root = new Dict();
 	read_atom(fd, &size);
 	for (i = 0; i < size; ++i) {
 		read_str(fd, &key, NULL);
-		tag = sz_read(fd);
+		tag = read(fd);
 		root->get_dict().insert(std::make_pair(key, tag));
 	}
 	return root;
 }
 
-sz_Tag *sz_read(int fd)
+Tag *read(int fd)
 {
 	uint8_t tag;
 	read_atom(fd, &tag);
-	if (tag == SZ_NULL) {
-		return NULL;
-	} else if (tag == SZ_I8) {
+	if (tag == NUL) {
+		return nullptr;
+	} else if (tag == I8) {
 		int8_t data;
 		read_atom(fd, &data);
-		return new sz_i8(data);
-	} else if (tag == SZ_I16) {
+		return new i8(data);
+	} else if (tag == I16) {
 		int16_t data;
 		read_atom(fd, &data);
-		return new sz_i16(data);
-	} else if (tag == SZ_I32) {
+		return new i16(data);
+	} else if (tag == I32) {
 		int32_t data;
 		read_atom(fd, &data);
-		return new sz_i32(data);
-	} else if (tag == SZ_I64) {
+		return new i32(data);
+	} else if (tag == I64) {
 		int64_t data;
 		read_atom(fd, &data);
-		return new sz_i64(data);
-	} else if (tag == SZ_F32) {
+		return new i64(data);
+	} else if (tag == F32) {
 		float data;
 		read_atom(fd, &data);
-		return new sz_f32(data);
-	} else if (tag == SZ_F64) {
+		return new f32(data);
+	} else if (tag == F64) {
 		double data;
 		read_atom(fd, &data);
-		return new sz_f64(data);
-	} else if (tag == SZ_STR) {
+		return new f64(data);
+	} else if (tag == STR) {
 		char *data;
 		read_str(fd, &data, NULL);
-		return new sz_Str(data);
-	} else if (tag == SZ_RAW) {
+		return new Str(data);
+	} else if (tag == RAW) {
 		void *data;
 		int32_t size;
 		read_raw(fd, &data, &size);
-		return new sz_Raw(data, size);
-	} else if (tag == SZ_LIST) {
+		return new Raw(data, size);
+	} else if (tag == LIST) {
 		return read_list(fd);
-	} else if (tag == SZ_DICT) {
+	} else if (tag == DICT) {
 		return read_dict(fd);
 	}
 	log_error("bad tag %02x", tag);
-	throw sz_Exception();
+	throw Exception();
 }
 
 void write_bytes(int fd, const void *data, size_t nbytes)
 {
 	int ret;
-	ret = write(fd, data, nbytes);
+	ret = ::write(fd, data, nbytes);
 	if (ret < 0) {
 		log_error("%s", strerror(errno));
-		throw sz_Exception();
+		throw Exception();
 	}
 	if (ret < nbytes) {
 		log_error("write %d of %zd bytes", ret, nbytes);
-		throw sz_Exception();
+		throw Exception();
 	}
 }
 
@@ -162,51 +164,53 @@ void write_raw(int fd, const char *data, int32_t len)
 	write_bytes(fd, data, len);
 }
 
-void write_list(int fd, sz_Tag *root)
+void write_list(int fd, Tag *root)
 {
 	int32_t size = root->get_list().size();
 	write_atom(fd, size);
 	for (auto &iter : root->get_list())
-		sz_write(fd, iter);
+		write(fd, iter);
 }
 
-void write_dict(int fd, sz_Tag *root)
+void write_dict(int fd, Tag *root)
 {
 	int32_t size = root->get_dict().size();
 	write_atom(fd, size);
 	for (auto &iter : root->get_dict()) {
 		write_str(fd, iter.first.data(), iter.first.size());
-		sz_write(fd, iter.second);
+		write(fd, iter.second);
 	}
 }
 
-void sz_write(int fd, sz_Tag *tag)
+void write(int fd, Tag *tag)
 {
 	int8_t tt = tag->get_tag();
 	write_atom(fd, tt);
-	if (tt == SZ_NULL) {
+	if (tt == NUL) {
 		return;
-	} else if (tt == SZ_I8) {
+	} else if (tt == I8) {
 		return write_atom(fd, tag->get_i8());
-	} else if (tt == SZ_I16) {
+	} else if (tt == I16) {
 		return write_atom(fd, tag->get_i16());
-	} else if (tt == SZ_I32) {
+	} else if (tt == I32) {
 		return write_atom(fd, tag->get_i32());
-	} else if (tt == SZ_I64) {
+	} else if (tt == I64) {
 		return write_atom(fd, tag->get_i64());
-	} else if (tt == SZ_F32) {
+	} else if (tt == F32) {
 		return write_atom(fd, tag->get_f32());
-	} else if (tt == SZ_F64) {
+	} else if (tt == F64) {
 		return write_atom(fd, tag->get_f64());
-	} else if (tt == SZ_STR) {
+	} else if (tt == STR) {
 		return write_str(fd, tag->get_str(), strlen(tag->get_str()));
-	} else if (tt == SZ_RAW) {
+	} else if (tt == RAW) {
 		return write_raw(fd, tag->get_raw().data(), tag->get_raw().size());
-	} else if (tt == SZ_LIST) {
+	} else if (tt == LIST) {
 		return write_list(fd, tag);
-	} else if (tt == SZ_DICT) {
+	} else if (tt == DICT) {
 		return write_dict(fd, tag);
 	}
 	log_error("bad tag %02x", tt);
-	throw sz_Exception();
+	throw Exception();
 }
+
+};  // namespace serializer

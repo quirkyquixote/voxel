@@ -19,22 +19,22 @@ World::~World()
 			delete chunks[p.x][p.y];
 }
 
-void World::load(sz_Tag *root)
+void World::load(serializer::Tag *root)
 {
-	sz_Tag *tag;
+	serializer::Tag *tag;
 
-	tag = sz_dict_lookup(root, "x");
+	tag = serializer::dict_lookup(root, "x");
 	p.x = tag->get_i64();
-	tag = sz_dict_lookup(root, "z");
+	tag = serializer::dict_lookup(root, "z");
 	p.y = tag->get_i64();
 }
 
-sz_Tag *World::save()
+serializer::Tag *World::save()
 {
-	sz_Tag *root;
-	root = new sz_Dict();
-	sz_dict_add(root, "x", new sz_i64(p.x));
-	sz_dict_add(root, "z", new sz_i64(p.y));
+	serializer::Tag *root;
+	root = new serializer::Dict();
+	serializer::dict_add(root, "x", new serializer::i64(p.x));
+	serializer::dict_add(root, "z", new serializer::i64(p.y));
 	return root;
 }
 

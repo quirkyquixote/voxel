@@ -1,7 +1,7 @@
 /* Copyright 2017 Luis Sanz <luis.sanz@gmail.com> */
 
-#ifndef SRC_CLI_H_
-#define SRC_CLI_H_
+#ifndef SRC_COMMAND_LINE_H_
+#define SRC_COMMAND_LINE_H_
 
 #include <string>
 #include <vector>
@@ -34,4 +34,4 @@ class CommandLine {
 	int cur_char;
 };
 
-#endif  // SRC_CLI_H_
+#endif  // SRC_COMMAND_LINE_H_

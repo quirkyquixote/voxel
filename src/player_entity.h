@@ -13,8 +13,8 @@ class PlayerEntity : public RoamingEntity {
 
 	void update();
 	void render();
-	void load(sz_Tag *root);
-	sz_Tag *save();
+	void load(serializer::Tag *root);
+	serializer::Tag *save();
 
 	const char *get_name() { return "player"; }
 
