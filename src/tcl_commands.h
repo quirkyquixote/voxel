@@ -5,8 +5,6 @@
 
 #include <tcl.h>
 
-int cmd_help(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
-int cmd_ls(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_tp(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_give(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);
 int cmd_take(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[]);

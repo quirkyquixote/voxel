@@ -17,6 +17,7 @@
 
 #include "drop_entity.h"
 #include "option_parser.h"
+#include "log.h"
 
 int mkpath(const char *path, mode_t mode);
 
@@ -73,8 +74,6 @@ Context::Context(const char *dir)
 
 	/* Initialize Tcl */
 	tcl = Tcl_CreateInterp();
-	Tcl_CreateObjCommand(tcl, "help", cmd_help, this, NULL);
-	Tcl_CreateObjCommand(tcl, "ls", cmd_ls, this, NULL);
 	Tcl_CreateObjCommand(tcl, "tp", cmd_tp, this, NULL);
 	Tcl_CreateObjCommand(tcl, "give", cmd_give, this, NULL);
 	Tcl_CreateObjCommand(tcl, "take", cmd_take, this, NULL);
@@ -154,8 +153,8 @@ bool Context::load_world()
 			std::unique_ptr<serializer::Tag> root(serializer::read(fd));
 			world->load(root.get());
 			ret = true;
-		} catch (serializer::Exception &ex) {
-			/* do nothing */
+		} catch (Exception &ex) {
+			log_error("%s: %s", path.c_str(), ex.get_str());
 		}
 		close(fd);
 	}
@@ -171,8 +170,8 @@ void Context::save_world()
 		try {
 			std::unique_ptr<serializer::Tag> root(world->save());
 			serializer::write(fd, root.get());
-		} catch(serializer::Exception &ex) {
-			/* do nothing */
+		} catch(Exception &ex) {
+			log_error("%s: %s", path.c_str(), ex.get_str());
 		}
 		close(fd);
 	} else {
@@ -191,8 +190,8 @@ bool Context::load_player()
 			std::unique_ptr<serializer::Tag> root(serializer::read(fd));
 			player->load(root.get());
 			ret = true;
-		} catch (serializer::Exception &ex) {
-			/* do nothing */
+		} catch (Exception &ex) {
+			log_error("%s: %s", path.c_str(), ex.get_str());
 		}
 		close(fd);
 	}
@@ -208,8 +207,8 @@ void Context::save_player()
 		try {
 			std::unique_ptr<serializer::Tag> root(player->save());
 			serializer::write(fd, root.get());
-		} catch(serializer::Exception &ex) {
-			/* do nothing */
+		} catch(Exception &ex) {
+			log_error("%s: %s", path.c_str(), ex.get_str());
 		}
 		close(fd);
 	} else {
@@ -233,8 +232,8 @@ bool Context::load_chunk(Chunk *c)
 			std::unique_ptr<serializer::Tag> root(serializer::read(fd));
 			c->load(root.get());
 			ret = true;
-		} catch (serializer::Exception &ex) {
-			/* do nothing */
+		} catch (Exception &ex) {
+			log_error("%s: %s", path.c_str(), ex.get_str());
 		}
 		close(fd);
 	}
@@ -258,8 +257,8 @@ void Context::save_chunk(Chunk *c)
 		try {
 			std::unique_ptr<serializer::Tag> root(c->save());
 			serializer::write(fd, root.get());
-		} catch (serializer::Exception &ex) {
-			/* do nothing */
+		} catch (Exception &ex) {
+			log_error("%s: %s", path.c_str(), ex.get_str());
 		}
 		close(fd);
 	} else {

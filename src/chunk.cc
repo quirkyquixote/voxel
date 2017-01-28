@@ -7,6 +7,7 @@
 
 #include "serializer.h"
 #include "context.h"
+#include "log.h"
 
 Chunk::Chunk(Context *ctx, const v2ll &p)
 	: ctx(ctx), x(p.x), z(p.y)
