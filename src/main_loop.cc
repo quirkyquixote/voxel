@@ -6,6 +6,7 @@
 
 #include "fps_manager.h"
 #include "context.h"
+#include "log.h"
 
 Window::Window(const char *title, int x, int y, int sx, int sy, int flags)
 {

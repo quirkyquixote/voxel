@@ -7,6 +7,7 @@
 #include "pipe_entity.h"
 #include "board_entity.h"
 #include "context.h"
+#include "log.h"
 
 Entity *load_entity(Context *ctx, serializer::Tag *root)
 {
@@ -23,8 +24,7 @@ Entity *load_entity(Context *ctx, serializer::Tag *root)
 	} else if (strcmp(tag->get_str(), "pipe") == 0) {
 		e = new PipeEntity(ctx);
 	} else {
-		log_error("bad entity type: %s", tag->get_str());
-		throw serializer::Exception();
+		throw Exception("bad entity type: %s", tag->get_str());
 	}
 	e->load(root);
 	return e;
@@ -59,7 +59,7 @@ void Entity::load(serializer::Tag *root)
 	try {
 		tag = serializer::dict_lookup(root, "items");
 		memcpy(items.data(), tag->get_raw().data(), sizeof(Item) * items.size());
-	} catch (serializer::Exception &ex) {
-		/* do nothing */
+	} catch (Exception &ex) {
+		log_error("%s", ex.get_str());
 	}
 }

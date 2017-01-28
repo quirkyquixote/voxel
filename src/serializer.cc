@@ -16,14 +16,10 @@ void read_bytes(int fd, void *data, size_t nbytes)
 {
 	int ret;
 	ret = ::read(fd, data, nbytes);
-	if (ret < 0) {
-		log_error("%s", strerror(errno));
-		throw Exception();
-	}
-	if (ret < nbytes) {
-		log_error("read %d of %zd bytes", ret, nbytes);
-		throw Exception();
-	}
+	if (ret < 0)
+		throw Exception("%s", strerror(errno));
+	if (ret < nbytes)
+		throw Exception("read %d of %zd bytes", ret, nbytes);
 }
 
 template<typename T> void read_atom(int fd, T *atom)
@@ -129,22 +125,17 @@ Tag *read(int fd)
 	} else if (tag == DICT) {
 		return read_dict(fd);
 	}
-	log_error("bad tag %02x", tag);
-	throw Exception();
+	throw Exception("bad tag %02x", tag);
 }
 
 void write_bytes(int fd, const void *data, size_t nbytes)
 {
 	int ret;
 	ret = ::write(fd, data, nbytes);
-	if (ret < 0) {
-		log_error("%s", strerror(errno));
-		throw Exception();
-	}
-	if (ret < nbytes) {
-		log_error("write %d of %zd bytes", ret, nbytes);
-		throw Exception();
-	}
+	if (ret < 0)
+		throw Exception("%s", strerror(errno));
+	if (ret < nbytes)
+		throw Exception("write %d of %zd bytes", ret, nbytes);
 }
 
 template<typename T> void write_atom(int fd, T atom)
@@ -209,8 +200,7 @@ void write(int fd, Tag *tag)
 	} else if (tt == DICT) {
 		return write_dict(fd, tag);
 	}
-	log_error("bad tag %02x", tt);
-	throw Exception();
+	throw Exception("bad tag %02x", tt);
 }
 
 };  // namespace serializer

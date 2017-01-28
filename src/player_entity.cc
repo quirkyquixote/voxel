@@ -7,6 +7,7 @@
 #include "board_entity.h"
 #include "drop_entity.h"
 #include "recipes.h"
+#include "log.h"
 
 PlayerEntity::PlayerEntity(Context *ctx)
 	: RoamingEntity(ctx, 9), act(0), use(0), pick(0), run(0), tool(0)

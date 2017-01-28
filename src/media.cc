@@ -9,6 +9,7 @@
 #undef GL_GLEXT_PROTOTYPES
 
 #include "context.h"
+#include "log.h"
 
 GLuint texture(const char *path)
 {

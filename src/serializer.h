@@ -12,7 +12,7 @@
 #include <utility>
 #include <unordered_map>
 
-#include "log.h"
+#include "exception.h"
 
 namespace serializer {
 
@@ -30,12 +30,6 @@ enum {
 	DICT = 10,
 };
 
-class Exception {
- public:
-	Exception() { }
-	~Exception() { }
-};
-
 class Tag {
  public:
 	typedef std::string RawData;
@@ -48,44 +42,34 @@ class Tag {
 	virtual inline uint8_t get_tag() const { return NUL; }
 
 	virtual inline int8_t get_i8() const {
-		log_error("expected i8");
-		throw Exception();
+		throw Exception("expected i8");
 	}
 	virtual inline int16_t get_i16() const {
-		log_error("expected i16");
-		throw Exception();
+		throw Exception("expected i16");
 	}
 	virtual inline int32_t get_i32() const {
-		log_error("expected i32");
-		throw Exception();
+		throw Exception("expected i32");
 	}
 	virtual inline int64_t get_i64() const {
-		log_error("expected i64");
-		throw Exception();
+		throw Exception("expected i64");
 	}
 	virtual inline float get_f32() const {
-		log_error("expected f32");
-		throw Exception();
+		throw Exception("expected f32");
 	}
 	virtual inline double get_f64() const {
-		log_error("expected f64");
-		throw Exception();
+		throw Exception("expected f64");
 	}
 	virtual inline const char *get_str() const {
-		log_error("expected str");
-		throw Exception();
+		throw Exception("expected string");
 	}
 	virtual inline RawData &get_raw() {
-		log_error("expected raw");
-		throw Exception();
+		throw Exception("expected raw");
 	}
 	virtual inline ListData &get_list() {
-		log_error("expected list");
-		throw Exception();
+		throw Exception("expected list");
 	}
 	virtual inline DictData &get_dict() {
-		log_error("expected dict");
-		throw Exception();
+		throw Exception("expected dict");
 	}
 };
 
@@ -216,8 +200,7 @@ static inline Tag *dict_lookup(Tag *d, const char *k)
 {
 	auto v = d->get_dict().find(k);
 	if (v == d->get_dict().end()) {
-		log_error("expected \"%s\"", k);
-		throw Exception();
+		throw Exception("expected \"%s\"", k);
 	}
 	return v->second;
 }

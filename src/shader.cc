@@ -6,6 +6,7 @@
 #include <stdlib.h>
 
 #include "context.h"
+#include "log.h"
 
 int load_shader(GLuint type, const char *path, GLuint *obj)
 {
