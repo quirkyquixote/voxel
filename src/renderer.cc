@@ -128,7 +128,8 @@ void Renderer::render_string(const char *str)
 	glPushMatrix();
 	text_vertex_buffer->enable();
 	while (*str) {
-		text_vertex_buffer->draw_slice(GL_TRIANGLES, 0, *str * 6, 6);
+		text_vertex_buffer->draw_slice(GL_TRIANGLES, 0,
+				static_cast<unsigned char>(*str) * 6, 6);
 		glTranslatef(.5, 0, 0);
 		++str;
 	}
