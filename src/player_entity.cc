@@ -417,13 +417,10 @@ void PlayerEntity::render_hotbar()
 		if (s.num > 0)
 			ctx->renderer->render_item(s.obj, s.mat, 255);
 		if (s.num > 1) {
-			glEnable(GL_BLEND);
-			glColor3f(1, 1, 1);
 			glTranslatef(0, -1.5, 0);
 			char buf[3];
 			snprintf(buf, sizeof(buf), "%02d", s.num);
 			ctx->renderer->render_string(buf);
-			glDisable(GL_BLEND);
 		}
 		glPopMatrix();
 	}
