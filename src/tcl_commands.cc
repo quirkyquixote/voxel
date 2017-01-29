@@ -369,7 +369,7 @@ int cmd_replace(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 	}
 }
 
-int cmd_terraform(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
+int cmd_regen(void *data, Tcl_Interp *interp, int objc, Tcl_Obj *const objv[])
 {
 	static const char *usage = "usage: terraform";
 	Context *ctx = static_cast<Context *>(data);

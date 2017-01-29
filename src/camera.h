@@ -40,7 +40,7 @@ class Camera {
 	float fovy;
 	float max_distance;     // shards farther than this will not be drawn
 	float aspect_ratio;
-	GLfloat modelview[16];	// modelview matrix
+	GLfloat modelview[16];  // modelview matrix
 };
 
 #endif  // SRC_CAMERA_H_

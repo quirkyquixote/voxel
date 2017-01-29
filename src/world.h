@@ -23,12 +23,37 @@ class World : public NonCopyable {
 
 	void set_block(const v3ll &p, int shape, int mat);
 	void set_flags(const box3ll &bb, int flags);
-	inline Chunk *get_chunk(const v2ll &p) { return chunks[p.x][p.y]; }
-	inline Chunk *get_chunk_absolute(const v2ll &p) { return get_chunk(p & 0x1fLL); }
-	inline Chunk *get_chunk_at_block(const v2ll &p) { return get_chunk_absolute(p >> 4LL); }
-	inline void set_chunk(const v2ll &p, Chunk *c) { chunks[p.x][p.y] = c; }
-	inline void set_chunk_absolute(const v2ll &p, Chunk *c) { set_chunk(p & 0x1fLL, c); }
-	inline void set_chunk_at_block(const v2ll &p, Chunk *c) { set_chunk_absolute(p >> 4LL, c); }
+
+	inline Chunk *get_chunk(const v2ll &p)
+	{
+		return chunks[p.x][p.y];
+	}
+
+	inline Chunk *get_chunk_absolute(const v2ll &p)
+	{
+		return get_chunk(p & 0x1fLL);
+	}
+
+	inline Chunk *get_chunk_at_block(const v2ll &p)
+	{
+		return get_chunk_absolute(p >> 4LL);
+	}
+
+	inline void set_chunk(const v2ll &p, Chunk *c)
+	{
+		chunks[p.x][p.y] = c;
+	}
+
+	inline void set_chunk_absolute(const v2ll &p, Chunk *c)
+	{
+		set_chunk(p & 0x1fLL, c);
+	}
+
+	inline void set_chunk_at_block(const v2ll &p, Chunk *c)
+	{
+		set_chunk_absolute(p >> 4LL, c);
+	}
+
 	inline const v2ll &get_p() { return p; }
 	inline void set_p(const v2ll &new_p) { p = new_p; }
 

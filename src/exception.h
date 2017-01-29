@@ -10,7 +10,7 @@ class Exception {
  public:
 	Exception()
 	{
-		strcpy(str, "");
+		snprintf(str, sizeof(str), "");
 	}
 
 	Exception(const char *fmt, ...)
@@ -27,4 +27,4 @@ class Exception {
 	char str[256];
 };
 
-#endif
+#endif  // SRC_EXCEPTION_H_

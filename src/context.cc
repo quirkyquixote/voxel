@@ -85,7 +85,7 @@ Context::Context(const char *dir)
 	Tcl_CreateObjCommand(tcl, "walls", cmd_walls, this, NULL);
 	Tcl_CreateObjCommand(tcl, "relit", cmd_relit, this, NULL);
 	Tcl_CreateObjCommand(tcl, "replace", cmd_replace, this, NULL);
-	Tcl_CreateObjCommand(tcl, "terraform", cmd_terraform, this, NULL);
+	Tcl_CreateObjCommand(tcl, "regen", cmd_regen, this, NULL);
 	cli.reset(new CommandLine());
 
 	/* Initialize physics */
@@ -111,8 +111,6 @@ Context::~Context()
 
 bool Context::load_all()
 {
-	static const box2ll chunk_box(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1);
-
 	mkpath(dir, 0700);
 	load_world();
 	if (!load_player()) {
@@ -121,7 +119,7 @@ bool Context::load_all()
 		p.y += Chunk::W * World::CHUNK_NUM / 2;
 		player->get_body()->set_p(v3f(p.x, World::H, p.y));
 	}
-	for (auto r : chunk_box) {
+	for (auto r : box2ll(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1)) {
 		auto p = (r * Chunk::W) + world->get_p();
 		Chunk *c = new Chunk(this, p);
 		if (!load_chunk(c)) {
@@ -276,14 +274,14 @@ void Context::spill_inventory(const v3ll &p)
 		if (s.num) {
 			DropEntity *d = new DropEntity(this, s);
 			v3f q(p);
-			q.x += (float)rand() / RAND_MAX;
-			q.y += (float)rand() / RAND_MAX;
-			q.z += (float)rand() / RAND_MAX;
+			q.x += static_cast<float>(rand()) / RAND_MAX;
+			q.y += static_cast<float>(rand()) / RAND_MAX;
+			q.z += static_cast<float>(rand()) / RAND_MAX;
 			d->get_body()->set_p(q);
 			v3f v(0, 0, 0);
-			v.x += .1 * ((float)rand() / RAND_MAX - .5);
-			v.y += .2 * ((float)rand() / RAND_MAX);
-			v.z += .1 * ((float)rand() / RAND_MAX - .5);
+			v.x += .1 * (static_cast<float>(rand()) / RAND_MAX - .5);
+			v.y += .2 * (static_cast<float>(rand()) / RAND_MAX);
+			v.z += .1 * (static_cast<float>(rand()) / RAND_MAX - .5);
 			d->get_body()->set_v(v);
 			entities.push_back(d);
 		}
@@ -301,21 +299,21 @@ void Context::drop_block(const v3ll &p)
 		return;
 	DropEntity *d = new DropEntity(this, s);
 	v3f q(p);
-	q.x += (float)rand() / RAND_MAX;
-	q.y += (float)rand() / RAND_MAX;
-	q.z += (float)rand() / RAND_MAX;
+	q.x += static_cast<float>(rand()) / RAND_MAX;
+	q.y += static_cast<float>(rand()) / RAND_MAX;
+	q.z += static_cast<float>(rand()) / RAND_MAX;
 	d->get_body()->set_p(q);
 	v3f v(0, 0, 0);
-	v.x += .1 * ((float)rand() / RAND_MAX - .5);
-	v.y += .2 * ((float)rand() / RAND_MAX);
-	v.z += .1 * ((float)rand() / RAND_MAX - .5);
+	v.x += .1 * (static_cast<float>(rand()) / RAND_MAX - .5);
+	v.y += .2 * (static_cast<float>(rand()) / RAND_MAX);
+	v.z += .1 * (static_cast<float>(rand()) / RAND_MAX - .5);
 	d->get_body()->set_v(v);
 	entities.push_back(d);
 }
 
 void Context::update_chunks()
 {
-	static const box2ll chunk_box(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1);
+	box2ll chunk_box(0, 0, World::CHUNK_NUM - 1, World::CHUNK_NUM - 1);
 
 	std::vector<std::thread> tasks;
 	std::multimap<int, Chunk *> out_of_date;
@@ -400,7 +398,6 @@ void Context::update_chunks()
 				break;
 		}
 	}
-	//		log_info("update %d of %zd chunks (max: %d)", i, out_of_date.size(), chunks_per_tick);
 	for (auto &t : tasks)
 		t.join();
 }
@@ -471,7 +468,7 @@ void Context::event(const SDL_Event &e)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		} else if (e.key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE START ===\n");
-			//	profile_manager_reset(prof_mgr);
+			// profile_manager_reset(prof_mgr);
 		}
 	} else if (e.type == SDL_KEYUP) {
 		if (e.key.repeat) {
@@ -480,7 +477,7 @@ void Context::event(const SDL_Event &e)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		} else if (e.key.keysym.sym == SDLK_p) {
 			fprintf(stdout, "=== PROFILE DUMP ===\n");
-			//profile_manager_dump(prof_mgr);
+			// profile_manager_dump(prof_mgr);
 		} else if (e.key.keysym.sym == SDLK_PERIOD) {
 			mode = MODE_COMMAND;
 			SDL_StartTextInput();
@@ -503,19 +500,17 @@ unsigned long long max_id(void)
 
 static int do_mkdir(const char *path, mode_t mode)
 {
-	struct stat     st;
-	int             status = 0;
+	struct stat st;
+	int status = 0;
 
 	if (stat(path, &st) != 0) {
 		/* Directory does not exist. EEXIST for race condition */
 		if (mkdir(path, mode) != 0 && errno != EEXIST)
 			status = -1;
-	}
-	else if (!S_ISDIR(st.st_mode)) {
+	} else if (!S_ISDIR(st.st_mode)) {
 		errno = ENOTDIR;
 		status = -1;
 	}
-
 	return status;
 }
 
@@ -527,10 +522,10 @@ static int do_mkdir(const char *path, mode_t mode)
  * */
 int mkpath(const char *path, mode_t mode)
 {
-	char           *pp;
-	char           *sp;
-	int             status;
-	char           *copypath = strdup(path);
+	char *pp;
+	char *sp;
+	int status;
+	char *copypath = strdup(path);
 
 	status = 0;
 	pp = copypath;
