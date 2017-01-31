@@ -16,7 +16,7 @@ struct ValueBase {
 
 template<typename T> class Value : public ValueBase {
  public:
-	Value(T *val) : val(val) {}
+	explicit Value(T *val) : val(val) {}
 	~Value() {}
 	int parse(char **p);
 

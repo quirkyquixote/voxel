@@ -75,7 +75,8 @@ void ToneMapper::update(float sky, float spot)
 
 	int i = 0;
 	for (auto p : box2s(0, 0, samples - 1, samples - 1))
-		mapped_color[i++] = A * pow(mapped_sky_color[p.y] + mapped_spot_color[p.x], gamma);
+		mapped_color[i++] = A * pow(mapped_sky_color[p.y]
+				+ mapped_spot_color[p.x], gamma);
 
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, samples, samples, GL_RGB,

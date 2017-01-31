@@ -143,7 +143,7 @@ int rotations[4][9] = {
 	{ 2, 5, 8, 1, 4, 7, 0, 3, 6 },
 };
 
-int rotation_match(const Recipe *r, std::vector<Item> *inv, int *rot, Item *rval)
+int rot_match(const Recipe *r, std::vector<Item> *inv, int *rot, Item *rval)
 {
 	int k;
 	Item s;
@@ -175,7 +175,7 @@ int recipe_match(std::vector<Item> *inv, Item *rval)
 	int i, j;
 	for (i = 0; i < sizeof(recipes) / sizeof(*recipes); ++i) {
 		for (j = 0; j < 4; ++j) {
-			if (rotation_match(&recipes[i], inv, rotations[j], rval))
+			if (rot_match(&recipes[i], inv, rotations[j], rval))
 				return 1;
 		}
 	}
