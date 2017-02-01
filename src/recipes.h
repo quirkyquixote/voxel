@@ -5,7 +5,6 @@
 
 #include <vector>
 
-#include "context.h"
 #include "inventory.h"
 #include "box2.h"
 

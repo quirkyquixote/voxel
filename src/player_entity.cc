@@ -6,11 +6,11 @@
 #include "block_entity.h"
 #include "board_entity.h"
 #include "drop_entity.h"
-#include "recipes.h"
 #include "log.h"
 
 PlayerEntity::PlayerEntity(Context *ctx)
-	: RoamingEntity(ctx, 9), act(0), use(0), pick(0), run(0), tool(0)
+	: RoamingEntity(ctx, 9), act(0), use(0), pick(0), run(0), tool(0),
+	  selected_recipe(0)
 {
 	body->set_p(v3f(p.x, World::H, p.y));
 	body->set_size(v2f(0.325, 0.825));
@@ -58,6 +58,7 @@ void PlayerEntity::update()
 	v = rotx(v, r.x);
 	v = roty(v, r.y);
 	ctx->space->query(ctx->renderer->get_cam()->get_p(), v, &cur);
+	recipe_matches.clear();
 
 	if (cur.face != -1) {
 		v3ll p = cur.p;
@@ -138,22 +139,25 @@ void PlayerEntity::use_inventory(std::vector<Item> *inv)
 void PlayerEntity::use_workbench(std::vector<Item> *inv)
 {
 	CraftGrid grid(inv);
-	std::vector<RecipeMatch> m;
-	match_recipes(grid, &m);
+	match_recipes(grid, &recipe_matches);
+	if (selected_recipe >= recipe_matches.size())
+		selected_recipe = recipe_matches.size() - 1;
 	if (act == 1) {
-		if (m.size() > 0) {
-			Item i = m[0].recipe->result;
-			i.num *= m[0].times;
+		if (recipe_matches.size() > 0) {
+			RecipeMatch &m = recipe_matches[selected_recipe];
+			Item i = m.recipe->result;
+			i.num *= m.times;
 			inventory_add(&items, i);
-			exec_recipe(*m[0].recipe, m[0].p, m[0].times, &grid);
+			exec_recipe(*m.recipe, m.p, m.times, &grid);
 		} else {
 			log_info("no matching recipe");
 		}
 	} else if (use == 1) {
-		if (m.size() > 0) {
-			Item i = m[0].recipe->result;
+		if (recipe_matches.size() > 0) {
+			RecipeMatch &m = recipe_matches[selected_recipe];
+			Item i = m.recipe->result;
 			inventory_add(&items, i);
-			exec_recipe(*m[0].recipe, m[0].p, 1, &grid);
+			exec_recipe(*m.recipe, m.p, 1, &grid);
 		} else {
 			log_info("no matching recipe");
 		}
@@ -310,6 +314,7 @@ void PlayerEntity::render()
 	glDisable(GL_DEPTH_TEST);
 	render_held_item();
 	render_hotbar();
+	render_recipe_matches();
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -428,6 +433,37 @@ void PlayerEntity::render_hotbar()
 	}
 }
 
+void PlayerEntity::render_recipe_matches()
+{
+	if (recipe_matches.empty())
+		return;
+	v3f p = ctx->renderer->get_cam()->get_p();
+	v3f r = ctx->renderer->get_cam()->get_r();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glTranslatef(p.x, p.y, p.z);
+	glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
+	glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
+	glTranslatef(-15, 0, -30);
+	int i = 0;
+	for (auto &m : recipe_matches) {
+		glTranslatef(0, 1, 0);
+		glColor3f(1, 1, 1);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		char buf[256];
+		snprintf(buf, sizeof(buf), "%s%s_%s%s",
+				i == selected_recipe ? "> " : "  ",
+				mat_names[m.recipe->result.mat],
+				obj_names[m.recipe->result.obj],
+				i == selected_recipe ? " <" : "  ");
+		ctx->renderer->render_string(buf);
+		glDisable(GL_BLEND);
+		++i;
+	}
+	glPopMatrix();
+}
+
 serializer::Tag *PlayerEntity::save()
 {
 	return RoamingEntity::save();
@@ -529,7 +565,17 @@ void PlayerEntity::handle_event(const SDL_Event &e)
 			use = 0;
 		}
 	} else if (e.type == SDL_MOUSEWHEEL) {
-		if (move.y0) {
+		if (!recipe_matches.empty()) {
+			if (e.wheel.y > 0) {
+				++selected_recipe;
+				if (selected_recipe >= recipe_matches.size())
+					selected_recipe = 0;
+			} else {
+				if (selected_recipe <= 0)
+					selected_recipe = recipe_matches.size();
+				--selected_recipe;
+			}
+		} else if (move.y0) {
 			auto &mat = items[tool].mat;
 			if (e.wheel.y > 0) {
 				do {
