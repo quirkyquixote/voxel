@@ -435,33 +435,38 @@ void PlayerEntity::render_hotbar()
 
 void PlayerEntity::render_recipe_matches()
 {
-	if (recipe_matches.empty())
-		return;
-	v3f p = ctx->renderer->get_cam()->get_p();
-	v3f r = ctx->renderer->get_cam()->get_r();
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glTranslatef(p.x, p.y, p.z);
-	glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
-	glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
-	glTranslatef(-15, 0, -30);
 	int i = 0;
 	for (auto &m : recipe_matches) {
-		glTranslatef(0, 1, 0);
-		glColor3f(1, 1, 1);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		char buf[256];
-		snprintf(buf, sizeof(buf), "%s%s_%s%s",
-				i == selected_recipe ? "> " : "  ",
-				mat_names[m.recipe->result.mat],
-				obj_names[m.recipe->result.obj],
-				i == selected_recipe ? " <" : "  ");
-		ctx->renderer->render_string(buf);
-		glDisable(GL_BLEND);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		v3f p = ctx->renderer->get_cam()->get_p();
+		v3f r = ctx->renderer->get_cam()->get_r();
+		glTranslatef(p.x, p.y, p.z);
+		glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
+		glTranslatef(i * .06 - .30, -.3, -.8);
+		glScalef(.03125, .03125, .03125);
+		if (i == selected_recipe)
+			glColor3ub(255, 255, 255);
+		else
+			glColor3ub(64, 64, 64);
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(-.25, 0, -.25);
+		glVertex3f(-.25, 0, 1.25);
+		glVertex3f(1.25, 0, 1.25);
+		glVertex3f(1.25, 0, -.25);
+		glEnd();
+		Item s = m.recipe->result;
+		ctx->renderer->render_item(s.obj, s.mat, 255);
+		if (s.num > 1) {
+			glTranslatef(0, -1.5, 0);
+			char buf[3];
+			snprintf(buf, sizeof(buf), "%02d", s.num);
+			ctx->renderer->render_string(buf);
+		}
+		glPopMatrix();
 		++i;
 	}
-	glPopMatrix();
 }
 
 serializer::Tag *PlayerEntity::save()
