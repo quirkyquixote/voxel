@@ -36,7 +36,19 @@ template<typename T> struct box2 {
 		: x0(b.x0), y0(b.y0), x1(b.x1), y1(b.y1) {}
 
 	iterator begin() const { return iterator(v2<T>(x0, y0), *this); }
-	iterator end() const { return iterator(v2<T>(x1 + 1, y0), *this); }";
+	iterator end() const { return iterator(v2<T>(x1 + 1, y0), *this); }
+
+	bool operator==(const box2<T> &rhs) const
+	{
+		return x0 == rhs.x0 && y0 == rhs.y0
+			&& x1 == rhs.x1 && y1 == rhs.y1;
+	}
+
+	bool operator!=(const box2<T> &rhs) const
+	{
+		return x0 != rhs.x0 || y0 != rhs.y0
+			|| x1 != rhs.x1 || y1 != rhs.y1;
+	}";
 
 for op in "+" "-" "*" "/" "%" "&" "|" "^" "<<" ">>"; do echo "
 	inline box2<T> operator${op}=(const box2<T> &rhs)

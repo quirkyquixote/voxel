@@ -136,10 +136,9 @@ void PlayerEntity::use_inventory(std::vector<Item> *inv)
 	}
 }
 
-void PlayerEntity::use_workbench(std::vector<Item> *inv)
+void PlayerEntity::use_workbench(CraftGrid *grid)
 {
-	CraftGrid grid(inv);
-	match_recipes(grid, &recipe_matches);
+	match_recipes(*grid, &recipe_matches);
 	if (selected_recipe >= recipe_matches.size())
 		selected_recipe = recipe_matches.size() - 1;
 	if (act == 1) {
@@ -148,7 +147,7 @@ void PlayerEntity::use_workbench(std::vector<Item> *inv)
 			Item i = m.recipe->result;
 			i.num *= m.times;
 			inventory_add(&items, i);
-			exec_recipe(*m.recipe, m.p, m.times, &grid);
+			exec_recipe(*m.recipe, m.p, m.times, grid);
 		} else {
 			log_info("no matching recipe");
 		}
@@ -157,7 +156,7 @@ void PlayerEntity::use_workbench(std::vector<Item> *inv)
 			RecipeMatch &m = recipe_matches[selected_recipe];
 			Item i = m.recipe->result;
 			inventory_add(&items, i);
-			exec_recipe(*m.recipe, m.p, 1, &grid);
+			exec_recipe(*m.recipe, m.p, 1, grid);
 		} else {
 			log_info("no matching recipe");
 		}
