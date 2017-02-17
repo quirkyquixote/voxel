@@ -138,7 +138,7 @@ void PlayerEntity::use_inventory(std::vector<Item> *inv)
 
 void PlayerEntity::use_workbench(CraftGrid *grid)
 {
-	match_recipes(*grid, &recipe_matches);
+	match_recipes(*grid, v2ll(0, 0), &recipe_matches);
 	if (selected_recipe >= recipe_matches.size())
 		selected_recipe = recipe_matches.size() - 1;
 	if (act == 1) {

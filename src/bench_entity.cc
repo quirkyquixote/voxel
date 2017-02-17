@@ -32,8 +32,8 @@ bool BenchEntity::use(PlayerEntity *player)
 		player->use_inventory(&items);
 		return true;
 	} else {
-		CraftGrid grid;
-		grid.add_inv(v2ll(0, 0), &items);
+		CraftGrid grid(3);
+		grid.add_inv(v2ll(p.x, p.z), &items);
 		player->use_workbench(&grid);
 		return true;
 	}

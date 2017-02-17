@@ -134,7 +134,7 @@ static const Recipe recipes[] = {
 	WOOD_RECIPES(MAT_WOOD7),
 };
 
-bool match_recipe(const CraftGrid &grid, RecipeMatch *m)
+bool match_recipe(const CraftGrid &grid, const v2ll &p0, RecipeMatch *m)
 {
 	for (auto p : grid.get_box()) {
 		bool found = true;
@@ -158,13 +158,13 @@ bool match_recipe(const CraftGrid &grid, RecipeMatch *m)
 	return false;
 }
 
-int match_recipes(const CraftGrid &grid, std::vector<RecipeMatch> *matches)
+int match_recipes(const CraftGrid &grid, const v2ll &p0, std::vector<RecipeMatch> *matches)
 {
 	RecipeMatch m;
 	for (m.recipe = recipes;
 			m.recipe < recipes + sizeof(recipes) / sizeof(*recipes);
 			++m.recipe) {
-		if (match_recipe(grid, &m))
+		if (match_recipe(grid, p0, &m))
 			matches->push_back(m);
 	}
 	return matches->size();
