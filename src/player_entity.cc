@@ -577,7 +577,7 @@ void PlayerEntity::handle_event(const SDL_Event &e)
 			use = 0;
 		}
 	} else if (e.type == SDL_MOUSEWHEEL) {
-		if (!recipe_matches.empty()) {
+		if (move.y0 && !recipe_matches.empty()) {
 			if (e.wheel.y > 0) {
 				++selected_recipe;
 				if (selected_recipe >= recipe_matches.size())
@@ -586,21 +586,6 @@ void PlayerEntity::handle_event(const SDL_Event &e)
 				if (selected_recipe <= 0)
 					selected_recipe = recipe_matches.size();
 				--selected_recipe;
-			}
-		} else if (move.y0) {
-			auto &mat = items[tool].mat;
-			if (e.wheel.y > 0) {
-				do {
-					if (mat == 0)
-						mat = MAT_COUNT;
-					--mat;
-				} while (texcoord_from_mat[mat][0] == v2f(0, 0));
-			} else if (e.wheel.y < 0) {
-				do {
-					++mat;
-					if (mat == MAT_COUNT)
-						mat = 0;
-				} while (texcoord_from_mat[mat][0] == v2f(0, 0));
 			}
 		} else {
 			if (e.wheel.y > 0) {
