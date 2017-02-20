@@ -58,8 +58,8 @@ During play, the following bindings are used:
 - Right Mouse Button + SHIFT: place blocks sideways
 - 1 through 9: select hotbar slot
 
-Controls behave differently when the mouse points to the top side of a bench,
-crate or board:
+Controls behave differently when the mouse points to the top side of a crate or
+board:
 
 - Left Mouse Button: Move all items from the current hotbar slot to the pointed
   block inventory slot.
@@ -70,11 +70,20 @@ crate or board:
 - Right mouse Button + SHIFT: Move one items from the pointed block inventory
   slot to the current hotbar slot.
 
+Benches behave similarly to crates, but when the cursor points to a particular
+inventory slot, a second hotbar appears displaying all possible results of the
+recipes involving the object in the pointed slot. This includes the object on
+the slot itself in the first, so by default benches behave like crates, but:
+
+- Mouse wheel + SHIFT: Scroll through the secondary hotbar holding all valid
+  recipes that involve the object in the slot pointed at by the cursor.
+
+When pressing a Mouse Button + SHIFT, the corresponding amount of items frm the
+secondary hotbar will be moved to the player's hotbar, and objects will be
+removed from the bench according to the recipe.
+
 Crates have sixteen inventory spaces, benches have nine, and boards have
 sixty-four; boards won't take more than one item in each slot, though.
-
-A bench can be used to craft items; after putting a pattern on its slots; click
-on the side to take the results (yeah, this needs a much better interface)
 
 - The period (.) key allows entering commands
 
