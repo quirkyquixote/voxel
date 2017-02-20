@@ -143,7 +143,7 @@ void PlayerEntity::use_workbench(std::vector<Item> *inv)
 	v2ll a(v2ll(cur.p.x, cur.p.z) * grid.get_res());
 	v2ll b(floor(v2f(cur.q.x, cur.q.z) * (float)grid.get_res()));
 	match_recipes(grid, a + b, &recipe_matches);
-	if (selected_recipe >= recipe_matches.size())
+	if (!recipe_matches.empty() && selected_recipe >= recipe_matches.size())
 		selected_recipe = recipe_matches.size() - 1;
 	if (!move.y0) {
 		use_inventory(inv);
@@ -579,13 +579,13 @@ void PlayerEntity::handle_event(const SDL_Event &e)
 	} else if (e.type == SDL_MOUSEWHEEL) {
 		if (move.y0 && !recipe_matches.empty()) {
 			if (e.wheel.y > 0) {
-				++selected_recipe;
-				if (selected_recipe >= recipe_matches.size())
-					selected_recipe = 0;
-			} else {
 				if (selected_recipe <= 0)
 					selected_recipe = recipe_matches.size();
 				--selected_recipe;
+			} else {
+				++selected_recipe;
+				if (selected_recipe >= recipe_matches.size())
+					selected_recipe = 0;
 			}
 		} else {
 			if (e.wheel.y > 0) {
