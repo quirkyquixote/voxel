@@ -49,7 +49,7 @@ class PlayerEntity : public RoamingEntity {
 
 	void use_inventory(std::vector<Item> *inv);
 	void use_board(std::vector<Item> *inv);
-	void use_workbench(CraftGrid *grid);
+	void use_workbench(std::vector<Item> *inv);
 
 	void handle_event(const SDL_Event &e);
 

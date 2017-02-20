@@ -137,9 +137,11 @@ static const Recipe recipes[] = {
 bool match_recipe(const CraftGrid &grid, const v2ll &p0, RecipeMatch *m)
 {
 	for (auto p : grid.get_box()) {
-		bool found = true;
+		bool found = false;
 		m->times = 64;
 		for (auto i = m->recipe->ingredients; i->item.num != 0; ++i) {
+			if (p0 == i->p + p)
+				found = true;
 			Item item = grid.get_item(i->p + p);
 			if (item.num < i->item.num
 					|| item.obj != i->item.obj

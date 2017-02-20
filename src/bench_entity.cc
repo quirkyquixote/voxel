@@ -29,12 +29,7 @@ serializer::Tag *BenchEntity::save()
 bool BenchEntity::use(PlayerEntity *player)
 {
 	if (player->get_cur().face == FACE_UP) {
-		player->use_inventory(&items);
-		return true;
-	} else {
-		CraftGrid grid(3);
-		grid.add_inv(v2ll(p.x, p.z), &items);
-		player->use_workbench(&grid);
+		player->use_workbench(&items);
 		return true;
 	}
 	return false;
