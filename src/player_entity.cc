@@ -407,20 +407,26 @@ void PlayerEntity::render_held_item()
 
 void PlayerEntity::render_hotbar()
 {
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	v3f p = ctx->renderer->get_cam()->get_p();
+	v3f r = ctx->renderer->get_cam()->get_r();
+	glTranslatef(p.x, p.y, p.z);
+	glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
+	glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
+	glTranslatef(0, -.4, -.8);
+	if (move.y0)
+		glScalef(.8, .8, .8);
 	for (int i = 0; i < 9; ++i) {
-		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		v3f p = ctx->renderer->get_cam()->get_p();
-		v3f r = ctx->renderer->get_cam()->get_r();
-		glTranslatef(p.x, p.y, p.z);
-		glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
-		glTranslatef(i * .06 - .30, -.4, -.8);
+		glTranslatef(i * .06 - .30, 0, 0);
 		glScalef(.03125, .03125, .03125);
-		if (i == tool)
-			glColor3ub(255, 255, 255);
-		else
+		if (i != tool)
 			glColor3ub(64, 64, 64);
+		else if (move.y0)
+			glColor3ub(128, 128, 128);
+		else
+			glColor3ub(255, 255, 255);
 		glBegin(GL_LINE_LOOP);
 		glVertex3f(-.25, 0, -.25);
 		glVertex3f(-.25, 0, 1.25);
@@ -438,25 +444,32 @@ void PlayerEntity::render_hotbar()
 		}
 		glPopMatrix();
 	}
+	glPopMatrix();
 }
 
 void PlayerEntity::render_recipe_matches()
 {
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	v3f p = ctx->renderer->get_cam()->get_p();
+	v3f r = ctx->renderer->get_cam()->get_r();
+	glTranslatef(p.x, p.y, p.z);
+	glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
+	glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
+	glTranslatef(0, -.3, -.8);
+	if (!move.y0)
+		glScalef(.8, .8, .8);
 	int i = 0;
 	for (auto &m : recipe_matches) {
-		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		v3f p = ctx->renderer->get_cam()->get_p();
-		v3f r = ctx->renderer->get_cam()->get_r();
-		glTranslatef(p.x, p.y, p.z);
-		glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
-		glTranslatef(i * .06 - .30, -.3, -.8);
+		glTranslatef(i * .06 - .30, 0, 0);
 		glScalef(.03125, .03125, .03125);
-		if (i == selected_recipe)
-			glColor3ub(255, 255, 255);
-		else
+		if (i != selected_recipe)
 			glColor3ub(64, 64, 64);
+		else if (!move.y0)
+			glColor3ub(128, 128, 128);
+		else
+			glColor3ub(255, 255, 255);
 		glBegin(GL_LINE_LOOP);
 		glVertex3f(-.25, 0, -.25);
 		glVertex3f(-.25, 0, 1.25);
@@ -474,6 +487,7 @@ void PlayerEntity::render_recipe_matches()
 		glPopMatrix();
 		++i;
 	}
+	glPopMatrix();
 }
 
 serializer::Tag *PlayerEntity::save()
