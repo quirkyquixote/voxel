@@ -29,9 +29,6 @@ serializer::Tag *BenchEntity::save()
 bool BenchEntity::use(PlayerEntity *player)
 {
 	if (player->get_cur().face == FACE_UP) {
-		player->use_inventory(&items);
-		return true;
-	} else {
 		player->use_workbench(&items);
 		return true;
 	}

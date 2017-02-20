@@ -2,99 +2,104 @@
 
 #include "recipes.h"
 
-struct Ingredient {
-	int obj;
-	int mat;
-};
-
-struct Recipe {
-	Ingredient result;
-	int amount;
-	Ingredient pattern[9];
-};
-
 #define PATTERN_1x1(o1, m1, num, o2, m2) \
-	{ { o1, m1 }, num, { \
-		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
-		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
-		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
-	} }, \
-	{ { o1, m1 }, num, { \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
-		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
-		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
-	} }, \
-	{ { o1, m1 }, num, { \
-		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
-		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	{ { o1, m1, num }, { \
+		{ { 0, 0 }, { o2, m2, 1 } }, \
 	} }
 
 #define PATTERN_2x1(o1, m1, num, o2, m2) \
-	{ { o1, m1 }, num, { \
-		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
-		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
-		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	{ { o1, m1, num }, { \
+		{ { 0, 0 }, { o2, m2, 1 } }, \
+		{ { 0, 1 }, { o2, m2, 1 } }, \
 	} }, \
-	{ { o1, m1 }, num, { \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
-		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
-	} }, \
-	{ { o1, m1 }, num, { \
-		{ -1, -1 }, { -1, -1 }, { o2, m2 }, \
-		{ -1, -1 }, { -1, -1 }, { o2, m2 }, \
-		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	{ { o1, m1, num }, { \
+		{ { 0, 0 }, { o2, m2, 1 } }, \
+		{ { 1, 0 }, { o2, m2, 1 } }, \
 	} }
 
 #define PATTERN_3x1(o1, m1, num, o2, m2) \
-	{ { o1, m1 }, num, { \
-		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
-		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
-		{ o2, m2 }, { -1, -1 }, { -1, -1 }, \
+	{ { o1, m1, num }, { \
+		{ { 0, 0 }, { o2, m2, 1 } }, \
+		{ { 0, 1 }, { o2, m2, 1 } }, \
+		{ { 0, 2 }, { o2, m2, 1 } }, \
 	} }, \
-	{ { o1, m1 }, num, { \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+	{ { o1, m1, num }, { \
+		{ { 0, 0 }, { o2, m2, 1 } }, \
+		{ { 1, 0 }, { o2, m2, 1 } }, \
+		{ { 2, 0 }, { o2, m2, 1 } }, \
 	} }
 
 #define PATTERN_2x2(o1, m1, num, o2, m2) \
-	{ { o1, m1 }, num, { \
-		{ o2, m2 }, { o2, m2 }, { -1, -1 }, \
-		{ o2, m2 }, { o2, m2 }, { -1, -1 }, \
-		{ -1, -1 }, { -1, -1 }, { -1, -1 }, \
+	{ { o1, m1, num }, { \
+		{ { 0, 0 }, { o2, m2, 1 } }, \
+		{ { 0, 1 }, { o2, m2, 1 } }, \
+		{ { 1, 0 }, { o2, m2, 1 } }, \
+		{ { 1, 1 }, { o2, m2, 1 } }, \
 	} }
 
 #define PATTERN_DIAMOND(o1, m1, num, o2, m2) \
-	{ { o1, m1 }, num, { \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
-		{ o2, m2 }, { -1, -1 }, { o2, m2 }, \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+	{ { o1, m1, num }, { \
+		{ { 0, 1 }, { o2, m2, 1 } }, \
+		{ { 1, 0 }, { o2, m2, 1 } }, \
+		{ { 2, 1 }, { o2, m2, 1 } }, \
+		{ { 1, 2 }, { o2, m2, 1 } }, \
 	} }
 
 #define PATTERN_CROSS(o1, m1, num, o2, m2) \
-	{ { o1, m1 }, num, { \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
-		{ o2, m2 }, { o2, m2 }, { o2, m2 }, \
-		{ -1, -1 }, { o2, m2 }, { -1, -1 }, \
+	{ { o1, m1, num }, { \
+		{ { 0, 1 }, { o2, m2, 1 } }, \
+		{ { 1, 0 }, { o2, m2, 1 } }, \
+		{ { 1, 1 }, { o2, m2, 1 } }, \
+		{ { 2, 1 }, { o2, m2, 1 } }, \
+		{ { 1, 2 }, { o2, m2, 1 } }, \
 	} }
 
+#define PATTERN_STAIRS(o1, m1, num, o2, m2) \
+	{ { o1, m1, num }, { \
+		{ { 0, 0 }, { o2, m2, 1 } }, \
+		{ { 1, 0 }, { o2, m2, 1 } }, \
+		{ { 1, 1 }, { o2, m2, 1 } }, \
+		{ { 2, 0 }, { o2, m2, 1 } }, \
+		{ { 2, 1 }, { o2, m2, 1 } }, \
+		{ { 2, 2 }, { o2, m2, 1 } }, \
+	} }, \
+	{ { o1, m1, num }, { \
+		{ { 0, 0 }, { o2, m2, 1 } }, \
+		{ { 0, 1 }, { o2, m2, 1 } }, \
+		{ { 1, 1 }, { o2, m2, 1 } }, \
+		{ { 0, 2 }, { o2, m2, 1 } }, \
+		{ { 1, 2 }, { o2, m2, 1 } }, \
+		{ { 2, 2 }, { o2, m2, 1 } }, \
+	} }, \
+	{ { o1, m1, num }, { \
+		{ { 0, 0 }, { o2, m2, 1 } }, \
+		{ { 1, 0 }, { o2, m2, 1 } }, \
+		{ { 2, 0 }, { o2, m2, 1 } }, \
+		{ { 1, 0 }, { o2, m2, 1 } }, \
+		{ { 1, 1 }, { o2, m2, 1 } }, \
+		{ { 2, 0 }, { o2, m2, 1 } }, \
+	} }, \
+	{ { o1, m1, num }, { \
+		{ { 2, 2 }, { o2, m2, 1 } }, \
+		{ { 2, 1 }, { o2, m2, 1 } }, \
+		{ { 2, 0 }, { o2, m2, 1 } }, \
+		{ { 1, 2 }, { o2, m2, 1 } }, \
+		{ { 1, 1 }, { o2, m2, 1 } }, \
+		{ { 0, 2 }, { o2, m2, 1 } }, \
+	} }
+
+
+#define SELF_RECIPE(shape, mat)\
+	PATTERN_1x1(shape, mat, 1, shape, mat)
 
 #define COMMON_RECIPES(mat)\
+	SELF_RECIPE(OBJ_BLOCK, mat), \
+	SELF_RECIPE(OBJ_PANE, mat), \
+	SELF_RECIPE(OBJ_SLAB, mat), \
+	SELF_RECIPE(OBJ_STAIRS, mat), \
 	PATTERN_3x1(OBJ_SLAB, mat, 6, OBJ_BLOCK, mat), \
 	PATTERN_3x1(OBJ_PANE, mat, 6, OBJ_SLAB, mat), \
-	{ { OBJ_STAIRS, mat }, 6, {\
-		{ OBJ_BLOCK, mat }, \
-		{ OBJ_BLOCK, mat }, \
-		{ OBJ_BLOCK, mat }, \
-		{ OBJ_BLOCK, mat }, \
-		{ OBJ_BLOCK, mat }, \
-		{ -1, -1 }, \
-		{ OBJ_BLOCK, mat }, \
-		{ -1, -1 }, \
-		{ -1, -1 }, \
-	} }
+	PATTERN_STAIRS(OBJ_STAIRS, mat, 6, OBJ_BLOCK, mat)
 
 #define STONE_RECIPES(mat) \
 	COMMON_RECIPES(mat), \
@@ -108,13 +113,20 @@ struct Recipe {
 	PATTERN_1x1(OBJ_BLOCK, mat##_LBRICK, 1, OBJ_BLOCK, mat##_BLOCK), \
 	PATTERN_1x1(OBJ_BLOCK, mat##_SBRICK, 1, OBJ_BLOCK, mat##_LBRICK), \
 	PATTERN_1x1(OBJ_BLOCK, mat##_TILE, 1, OBJ_BLOCK, mat##_SBRICK), \
+	SELF_RECIPE(OBJ_BLOCK, mat##_BENCH), \
+	SELF_RECIPE(OBJ_BLOCK, mat##_CRATE), \
+	SELF_RECIPE(OBJ_BLOCK, mat##_PIPE), \
 	PATTERN_2x2(OBJ_BLOCK, mat##_BENCH, 1, OBJ_BLOCK, mat), \
 	PATTERN_CROSS(OBJ_BLOCK, mat##_CRATE, 1, OBJ_PANE, mat), \
 	PATTERN_DIAMOND(OBJ_BLOCK, mat##_PIPE, 1, OBJ_PANE, mat)
 
 #define WOOD_RECIPES(mat)\
+	SELF_RECIPE(OBJ_BLOCK, mat##_LOG), \
 	PATTERN_1x1(OBJ_BLOCK, mat, 4, OBJ_BLOCK, mat##_LOG), \
 	COMMON_RECIPES(mat), \
+	SELF_RECIPE(OBJ_BLOCK, mat##_BENCH), \
+	SELF_RECIPE(OBJ_BLOCK, mat##_CRATE), \
+	SELF_RECIPE(OBJ_BLOCK, mat##_PIPE), \
 	PATTERN_2x2(OBJ_BLOCK, mat##_BENCH, 1, OBJ_BLOCK, mat), \
 	PATTERN_CROSS(OBJ_BLOCK, mat##_CRATE, 1, OBJ_PANE, mat), \
 	PATTERN_DIAMOND(OBJ_BLOCK, mat##_PIPE, 1, OBJ_PANE, mat)
@@ -136,49 +148,48 @@ static const Recipe recipes[] = {
 	WOOD_RECIPES(MAT_WOOD7),
 };
 
-int rotations[4][9] = {
-	{ 0, 1, 2, 3, 4, 5, 6, 7, 8 },
-	{ 6, 3, 0, 7, 4, 1, 8, 5, 2 },
-	{ 8, 7, 6, 5, 4, 3, 2, 1, 0 },
-	{ 2, 5, 8, 1, 4, 7, 0, 3, 6 },
-};
-
-int rot_match(const Recipe *r, std::vector<Item> *inv, int *rot, Item *rval)
+bool match_recipe(const CraftGrid &grid, const v2ll &p0, RecipeMatch *m)
 {
-	int k;
-	Item s;
-	Ingredient i;
-	for (k = 0; k < 9; ++k)	{
-		s = (*inv)[k];
-		i = r->pattern[rot[k]];
-		if (i.obj < 0) {
-			if (s.num > 0)
-				return 0;
-		} else if (s.num == 0 || i.obj != s.obj || i.mat != s.mat) {
-			return 0;
+	for (auto p : grid.get_box()) {
+		bool found = false;
+		m->times = 64;
+		for (auto i = m->recipe->ingredients; i->item.num != 0; ++i) {
+			if (p0 == i->p + p)
+				found = true;
+			Item item = grid.get_item(i->p + p);
+			if (item.num < i->item.num
+					|| item.obj != i->item.obj
+					|| item.mat != i->item.mat) {
+				found = false;
+				break;
+			}
+			if (m->times > item.num / i->item.num)
+				m->times = item.num / i->item.num;
+		}
+		if (found) {
+			m->p = p;
+			return true;
 		}
 	}
-	for (k = 0; k < 9; ++k)	{
-		s = (*inv)[k];
-		i = r->pattern[rot[k]];
-		if (i.obj >= 0)
-			--(*inv)[k].num;
-	}
-	rval->obj = r->result.obj;
-	rval->mat = r->result.mat;
-	rval->num = r->amount;
-	return 1;
+	return false;
 }
 
-int recipe_match(std::vector<Item> *inv, Item *rval)
+int match_recipes(const CraftGrid &grid, const v2ll &p0, std::vector<RecipeMatch> *matches)
 {
-	int i, j;
-	for (i = 0; i < sizeof(recipes) / sizeof(*recipes); ++i) {
-		for (j = 0; j < 4; ++j) {
-			if (rot_match(&recipes[i], inv, rotations[j], rval))
-				return 1;
-		}
+	RecipeMatch m;
+	for (m.recipe = recipes;
+			m.recipe < recipes + sizeof(recipes) / sizeof(*recipes);
+			++m.recipe) {
+		if (match_recipe(grid, p0, &m))
+			matches->push_back(m);
 	}
-	return 0;
+	return matches->size();
 }
+
+void exec_recipe(const Recipe &r, const v2ll &p, int times, CraftGrid *grid)
+{
+	for (auto i = r.ingredients; i->item.num != 0; ++i)
+		grid->get_item(i->p + p).num -= i->item.num * times;
+}
+
 

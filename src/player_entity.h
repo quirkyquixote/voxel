@@ -5,6 +5,7 @@
 
 #include "roaming_entity.h"
 #include "main_loop.h"
+#include "recipes.h"
 
 class PlayerEntity : public RoamingEntity {
  public:
@@ -61,10 +62,13 @@ class PlayerEntity : public RoamingEntity {
 	char tool;
 	v2c rot;
 	Query cur;
+	std::vector<RecipeMatch> recipe_matches;
+	int selected_recipe;
 
 	void render_cursor();
 	void render_held_item();
 	void render_hotbar();
+	void render_recipe_matches();
 
 	void use_tool();
 };

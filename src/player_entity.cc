@@ -6,11 +6,11 @@
 #include "block_entity.h"
 #include "board_entity.h"
 #include "drop_entity.h"
-#include "recipes.h"
 #include "log.h"
 
 PlayerEntity::PlayerEntity(Context *ctx)
-	: RoamingEntity(ctx, 9), act(0), use(0), pick(0), run(0), tool(0)
+	: RoamingEntity(ctx, 9), act(0), use(0), pick(0), run(0), tool(0),
+	  selected_recipe(0)
 {
 	body->set_p(v3f(p.x, World::H, p.y));
 	body->set_size(v2f(0.325, 0.825));
@@ -58,6 +58,7 @@ void PlayerEntity::update()
 	v = rotx(v, r.x);
 	v = roty(v, r.y);
 	ctx->space->query(ctx->renderer->get_cam()->get_p(), v, &cur);
+	recipe_matches.clear();
 
 	if (cur.face != -1) {
 		v3ll p = cur.p;
@@ -137,23 +138,35 @@ void PlayerEntity::use_inventory(std::vector<Item> *inv)
 
 void PlayerEntity::use_workbench(std::vector<Item> *inv)
 {
+	CraftGrid grid(3);
+	grid.add_inv(v2ll(cur.p.x, cur.p.z), inv);
+	v2ll a(v2ll(cur.p.x, cur.p.z) * grid.get_res());
+	v2ll b(floor(v2f(cur.q.x, cur.q.z) * (float)grid.get_res()));
+	match_recipes(grid, a + b, &recipe_matches);
+	if (!recipe_matches.empty() && selected_recipe >= recipe_matches.size())
+		selected_recipe = recipe_matches.size() - 1;
+	if (!move.y0) {
+		use_inventory(inv);
+		return;
+	}
 	if (act == 1) {
-		Item s;
-		if (recipe_match(inv, &s)) {
-			int i = 0;
-			do {
-				inventory_add(&items, s);
-				++i;
-			} while (recipe_match(inv, &s));
+		if (recipe_matches.size() > 0) {
+			RecipeMatch &m = recipe_matches[selected_recipe];
+			Item i = m.recipe->result;
+			i.num *= m.times;
+			inventory_add(&items, i);
+			exec_recipe(*m.recipe, m.p, m.times, &grid);
 		} else {
-			log_info("not a recipe");
+			log_info("no matching recipe");
 		}
 	} else if (use == 1) {
-		Item s;
-		if (recipe_match(inv, &s)) {
-			inventory_add(&items, s);
+		if (recipe_matches.size() > 0) {
+			RecipeMatch &m = recipe_matches[selected_recipe];
+			Item i = m.recipe->result;
+			inventory_add(&items, i);
+			exec_recipe(*m.recipe, m.p, 1, &grid);
 		} else {
-			log_info("not a recipe");
+			log_info("no matching recipe");
 		}
 	}
 }
@@ -308,6 +321,7 @@ void PlayerEntity::render()
 	glDisable(GL_DEPTH_TEST);
 	render_held_item();
 	render_hotbar();
+	render_recipe_matches();
 	glEnable(GL_DEPTH_TEST);
 }
 
@@ -426,6 +440,42 @@ void PlayerEntity::render_hotbar()
 	}
 }
 
+void PlayerEntity::render_recipe_matches()
+{
+	int i = 0;
+	for (auto &m : recipe_matches) {
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		v3f p = ctx->renderer->get_cam()->get_p();
+		v3f r = ctx->renderer->get_cam()->get_r();
+		glTranslatef(p.x, p.y, p.z);
+		glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
+		glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
+		glTranslatef(i * .06 - .30, -.3, -.8);
+		glScalef(.03125, .03125, .03125);
+		if (i == selected_recipe)
+			glColor3ub(255, 255, 255);
+		else
+			glColor3ub(64, 64, 64);
+		glBegin(GL_LINE_LOOP);
+		glVertex3f(-.25, 0, -.25);
+		glVertex3f(-.25, 0, 1.25);
+		glVertex3f(1.25, 0, 1.25);
+		glVertex3f(1.25, 0, -.25);
+		glEnd();
+		Item s = m.recipe->result;
+		ctx->renderer->render_item(s.obj, s.mat, 255);
+		if (s.num > 1) {
+			glTranslatef(0, -1.5, 0);
+			char buf[3];
+			snprintf(buf, sizeof(buf), "%02d", s.num);
+			ctx->renderer->render_string(buf);
+		}
+		glPopMatrix();
+		++i;
+	}
+}
+
 serializer::Tag *PlayerEntity::save()
 {
 	return RoamingEntity::save();
@@ -527,20 +577,15 @@ void PlayerEntity::handle_event(const SDL_Event &e)
 			use = 0;
 		}
 	} else if (e.type == SDL_MOUSEWHEEL) {
-		if (move.y0) {
-			auto &mat = items[tool].mat;
+		if (move.y0 && !recipe_matches.empty()) {
 			if (e.wheel.y > 0) {
-				do {
-					if (mat == 0)
-						mat = MAT_COUNT;
-					--mat;
-				} while (texcoord_from_mat[mat][0] == v2f(0, 0));
-			} else if (e.wheel.y < 0) {
-				do {
-					++mat;
-					if (mat == MAT_COUNT)
-						mat = 0;
-				} while (texcoord_from_mat[mat][0] == v2f(0, 0));
+				if (selected_recipe <= 0)
+					selected_recipe = recipe_matches.size();
+				--selected_recipe;
+			} else {
+				++selected_recipe;
+				if (selected_recipe >= recipe_matches.size())
+					selected_recipe = 0;
 			}
 		} else {
 			if (e.wheel.y > 0) {
