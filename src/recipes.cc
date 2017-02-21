@@ -2,6 +2,8 @@
 
 #include "recipes.h"
 
+#include "log.h"
+
 #define PATTERN_1x1(o1, m1, num, o2, m2) \
 	{ { o1, m1, num }, { \
 		{ { 0, 0 }, { o2, m2, 1 } }, \
@@ -147,6 +149,40 @@ static const Recipe recipes[] = {
 	WOOD_RECIPES(MAT_WOOD6),
 	WOOD_RECIPES(MAT_WOOD7),
 };
+
+void CraftGrid::add_inv(const v2ll &p, std::vector<Item> *inv)
+{
+	if (invv.empty()) {
+		invv.push_back(inv);
+		box = box2ll(p.x, p.y, p.x + 1, p.y + 1);
+		dim = v2ll(1, 1);
+		return;
+	}
+	box2ll n_box;
+	n_box.x0 = std::min(p.x, box.x0);
+	n_box.x1 = std::max(p.x + 1, box.x1);
+	n_box.y0 = std::min(p.y, box.y0);
+	n_box.y1 = std::max(p.y + 1, box.y1);
+	if (n_box != box) {
+		v2ll n_dim;
+		n_dim.x = n_box.x1 - n_box.x0;
+		n_dim.y = n_box.y1 - n_box.y0;
+		std::vector<std::vector<Item> *> n_invv(n_dim.x * n_dim.y, nullptr);
+		for (auto p : box2ll(box.x0, box.y0, box.x1 - 1, box.y1 - 1)) {
+			auto a = p - v2ll(box.x0, box.y0);
+			auto b = p - v2ll(n_box.x0, n_box.y0);
+			n_invv[b.x * n_dim.y + b.y] =
+				invv[a.x * dim.y + a.y];
+		}
+		box = n_box;
+		dim = n_dim;
+		invv = n_invv;
+	}
+	auto a = p - v2ll(box.x0, box.y0);
+	assert(a.x < dim.x && a.y < dim.y);
+	assert(invv[a.x * dim.y + a.y] == nullptr);
+	invv[a.x * dim.y + a.y] = inv;
+}
 
 bool match_recipe(const CraftGrid &grid, const v2ll &p0, RecipeMatch *m)
 {

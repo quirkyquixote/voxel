@@ -2,6 +2,9 @@
 
 #include "player_entity.h"
 
+#include <algorithm>
+#include <stack>
+
 #include "context.h"
 #include "block_entity.h"
 #include "board_entity.h"
@@ -136,10 +139,39 @@ void PlayerEntity::use_inventory(std::vector<Item> *inv)
 	}
 }
 
+void build_grid(Context *ctx, const v3ll &p0, const char *name, CraftGrid *grid)
+{
+	std::stack<v3ll> stack;
+	std::vector<v3ll> marked;
+	stack.push(p0);
+	while (!stack.empty()) {
+		auto p = stack.top();
+		stack.pop();
+		marked.push_back(p);
+		Entity *e = ctx->world->get_data(p);
+		grid->add_inv(v2ll(p.x, p.z), e->get_items());
+		v3ll candidates[] = {
+			{ p.x - 1, p.y, p.z },
+			{ p.x + 1, p.y, p.z },
+			{ p.x, p.y, p.z - 1 },
+			{ p.x, p.y, p.z + 1 }
+		};
+		for (auto a : candidates) {
+			if (std::find(marked.begin(), marked.end(), a) != marked.end())
+				continue;
+			Entity *e = ctx->world->get_data(a);
+			if (e == nullptr || e->get_name() != name)
+				continue;
+			stack.push(a);
+			marked.push_back(a);
+		}
+	}
+}
+
 void PlayerEntity::use_workbench(std::vector<Item> *inv)
 {
 	CraftGrid grid(3);
-	grid.add_inv(v2ll(cur.p.x, cur.p.z), inv);
+	build_grid(ctx, cur.p, ctx->world->get_data(cur.p)->get_name(), &grid);
 	v2ll a(v2ll(cur.p.x, cur.p.z) * grid.get_res());
 	v2ll b(floor(v2f(cur.q.x, cur.q.z) * (float)grid.get_res()));
 	match_recipes(grid, a + b, &recipe_matches);
