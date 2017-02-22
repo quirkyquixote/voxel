@@ -36,8 +36,8 @@ void PlayerEntity::update()
 	SDL_WarpMouseInWindow(ctx->ml->get_window()->get_sdl_window(), w / 2, h / 2);
 
 	r = body->get_r();
-	r.y += (x - w / 2) * .005;
-	r.x -= (y - h / 2) * .005;
+	r.y += (x - w / 2) * .01;
+	r.x -= (y - h / 2) * .01;
 	if (r.x < -M_PI_2 * .99)
 		r.x = -M_PI_2 * .99;
 	else if (r.x > M_PI_2 * .99)
