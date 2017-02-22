@@ -17,7 +17,7 @@ PlayerEntity::PlayerEntity(Context *ctx)
 {
 	body->set_p(v3f(p.x, World::H, p.y));
 	body->set_size(v2f(0.325, 0.825));
-	body->set_step_size(.5);
+	body->set_step_size(1);
 }
 
 PlayerEntity::~PlayerEntity()
@@ -52,7 +52,7 @@ void PlayerEntity::update()
 	v.z = (move.z1 - move.z0) * (run ? 5.4 : 4.5);
 	v = roty(v, r.y);
 	body->set_v(v);
-	body->set_step_size(.5 * (1 + run));
+	body->set_step_size(1);
 
 	rot.x = (unsigned int)floor(0.5 + r.x / M_PI_2) & 3;
 	rot.y = (unsigned int)floor(0.5 + r.y / M_PI_2) & 3;
