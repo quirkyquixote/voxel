@@ -60,10 +60,13 @@ class PlayerEntity : public RoamingEntity {
 	char pick;
 	char run;
 	char tool;
+	int jump_countdown;
 	v2c rot;
 	Query cur;
 	std::vector<RecipeMatch> recipe_matches;
 	int selected_recipe;
+
+	void collision_callback(Body *b, const v3ll &p, int face);
 
 	void render_cursor();
 	void render_held_item();

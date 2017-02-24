@@ -2,6 +2,9 @@
 
 #include "player_entity.h"
 
+#include <algorithm>
+#include <stack>
+
 #include "context.h"
 #include "block_entity.h"
 #include "board_entity.h"
@@ -10,15 +13,28 @@
 
 PlayerEntity::PlayerEntity(Context *ctx)
 	: RoamingEntity(ctx, 9), act(0), use(0), pick(0), run(0), tool(0),
-	  selected_recipe(0)
+	  selected_recipe(0), jump_countdown(0)
 {
 	body->set_p(v3f(p.x, World::H, p.y));
 	body->set_size(v2f(0.325, 0.825));
-	body->set_step_size(.5);
+	body->set_step_size(1);
+	body->set_callback([this](Body *b, const v3ll &p, int face){
+		this->collision_callback(b, p, face);
+	});
 }
 
 PlayerEntity::~PlayerEntity()
 {
+}
+
+void PlayerEntity::collision_callback(Body *b, const v3ll &p, int face)
+{
+	if (face == FACE_UP) {
+		if (move.y1 && jump_countdown == 0)
+			jump_countdown = 4;
+	} else if (face == FACE_DN) {
+		jump_countdown = 0;
+	}
 }
 
 void PlayerEntity::update()
@@ -33,8 +49,8 @@ void PlayerEntity::update()
 	SDL_WarpMouseInWindow(ctx->ml->get_window()->get_sdl_window(), w / 2, h / 2);
 
 	r = body->get_r();
-	r.y += (x - w / 2) * .005;
-	r.x -= (y - h / 2) * .005;
+	r.y += (x - w / 2) * .01;
+	r.x -= (y - h / 2) * .01;
 	if (r.x < -M_PI_2 * .99)
 		r.x = -M_PI_2 * .99;
 	else if (r.x > M_PI_2 * .99)
@@ -44,12 +60,18 @@ void PlayerEntity::update()
 	v = body->get_v();
 	if (move.x0 == 0 && move.x1 == 0 && move.z0 == 0 && move.z1 == 0)
 		run = 0;
+	if (move.y1) {
+		if (jump_countdown > 0)
+			--jump_countdown;
+	} else {
+		jump_countdown = 0;
+	}
 	v.x = (move.x1 - move.x0) * (run ? 5.4 : 4.5);
-	v.y += (move.y1 - move.y0) * (run ? 5.4 : 4.5);
+	v.y += (!!jump_countdown - move.y0) * 5.0;
 	v.z = (move.z1 - move.z0) * (run ? 5.4 : 4.5);
 	v = roty(v, r.y);
 	body->set_v(v);
-	body->set_step_size(.5 * (1 + run));
+	body->set_step_size(1);
 
 	rot.x = (unsigned int)floor(0.5 + r.x / M_PI_2) & 3;
 	rot.y = (unsigned int)floor(0.5 + r.y / M_PI_2) & 3;
@@ -136,10 +158,39 @@ void PlayerEntity::use_inventory(std::vector<Item> *inv)
 	}
 }
 
+void build_grid(Context *ctx, const v3ll &p0, const char *name, CraftGrid *grid)
+{
+	std::stack<v3ll> stack;
+	std::vector<v3ll> marked;
+	stack.push(p0);
+	while (!stack.empty()) {
+		auto p = stack.top();
+		stack.pop();
+		marked.push_back(p);
+		Entity *e = ctx->world->get_data(p);
+		grid->add_inv(v2ll(p.x, p.z), e->get_items());
+		v3ll candidates[] = {
+			{ p.x - 1, p.y, p.z },
+			{ p.x + 1, p.y, p.z },
+			{ p.x, p.y, p.z - 1 },
+			{ p.x, p.y, p.z + 1 }
+		};
+		for (auto a : candidates) {
+			if (std::find(marked.begin(), marked.end(), a) != marked.end())
+				continue;
+			Entity *e = ctx->world->get_data(a);
+			if (e == nullptr || e->get_name() != name)
+				continue;
+			stack.push(a);
+			marked.push_back(a);
+		}
+	}
+}
+
 void PlayerEntity::use_workbench(std::vector<Item> *inv)
 {
 	CraftGrid grid(3);
-	grid.add_inv(v2ll(cur.p.x, cur.p.z), inv);
+	build_grid(ctx, cur.p, ctx->world->get_data(cur.p)->get_name(), &grid);
 	v2ll a(v2ll(cur.p.x, cur.p.z) * grid.get_res());
 	v2ll b(floor(v2f(cur.q.x, cur.q.z) * (float)grid.get_res()));
 	match_recipes(grid, a + b, &recipe_matches);
@@ -407,20 +458,26 @@ void PlayerEntity::render_held_item()
 
 void PlayerEntity::render_hotbar()
 {
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	v3f p = ctx->renderer->get_cam()->get_p();
+	v3f r = ctx->renderer->get_cam()->get_r();
+	glTranslatef(p.x, p.y, p.z);
+	glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
+	glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
+	glTranslatef(0, -.4, -.8);
+	if (move.y0)
+		glScalef(.8, .8, .8);
 	for (int i = 0; i < 9; ++i) {
-		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		v3f p = ctx->renderer->get_cam()->get_p();
-		v3f r = ctx->renderer->get_cam()->get_r();
-		glTranslatef(p.x, p.y, p.z);
-		glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
-		glTranslatef(i * .06 - .30, -.4, -.8);
+		glTranslatef(i * .06 - .30, 0, 0);
 		glScalef(.03125, .03125, .03125);
-		if (i == tool)
-			glColor3ub(255, 255, 255);
-		else
+		if (i != tool)
 			glColor3ub(64, 64, 64);
+		else if (move.y0)
+			glColor3ub(128, 128, 128);
+		else
+			glColor3ub(255, 255, 255);
 		glBegin(GL_LINE_LOOP);
 		glVertex3f(-.25, 0, -.25);
 		glVertex3f(-.25, 0, 1.25);
@@ -438,25 +495,32 @@ void PlayerEntity::render_hotbar()
 		}
 		glPopMatrix();
 	}
+	glPopMatrix();
 }
 
 void PlayerEntity::render_recipe_matches()
 {
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	v3f p = ctx->renderer->get_cam()->get_p();
+	v3f r = ctx->renderer->get_cam()->get_r();
+	glTranslatef(p.x, p.y, p.z);
+	glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
+	glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
+	glTranslatef(0, -.3, -.8);
+	if (!move.y0)
+		glScalef(.8, .8, .8);
 	int i = 0;
 	for (auto &m : recipe_matches) {
-		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		v3f p = ctx->renderer->get_cam()->get_p();
-		v3f r = ctx->renderer->get_cam()->get_r();
-		glTranslatef(p.x, p.y, p.z);
-		glRotatef(180.0 * r.y / M_PI, 0, -1, 0);
-		glRotatef(180.0 * r.x / M_PI, 1, 0, 0);
-		glTranslatef(i * .06 - .30, -.3, -.8);
+		glTranslatef(i * .06 - .30, 0, 0);
 		glScalef(.03125, .03125, .03125);
-		if (i == selected_recipe)
-			glColor3ub(255, 255, 255);
-		else
+		if (i != selected_recipe)
 			glColor3ub(64, 64, 64);
+		else if (!move.y0)
+			glColor3ub(128, 128, 128);
+		else
+			glColor3ub(255, 255, 255);
 		glBegin(GL_LINE_LOOP);
 		glVertex3f(-.25, 0, -.25);
 		glVertex3f(-.25, 0, 1.25);
@@ -474,6 +538,7 @@ void PlayerEntity::render_recipe_matches()
 		glPopMatrix();
 		++i;
 	}
+	glPopMatrix();
 }
 
 serializer::Tag *PlayerEntity::save()

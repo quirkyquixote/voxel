@@ -79,28 +79,22 @@ void Space::move_xpos(Body *b, float dt)
 	for (auto p : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
 			bb2 += v3f(p);
-			if (overlap(bb, bb2) && best > bb2.x0) {
-				collide = true;
-				best = bb2.x0;
-				best_y = bb2.y1;
-				best_p = p;
+			if (overlap(bb, bb2)) {
+				if (best > bb2.x0) {
+					collide = true;
+					best = bb2.x0;
+					best_y = bb2.y1;
+					best_p = p;
+				} else if (best == bb2.x0) {
+					if (best_y < bb2.y1)
+						best_y = bb2.y1;
+				}
 			}
 		}
 	}
 	if (collide) {
-		if (best_y < b->bb.y0 + b->step_size) {
-			auto p = b->p;
-			b->p.y = best_y + b->s.y + impulse;
-			b->bb.y0 = b->p.y - b->s.y;
-			b->bb.y1 = b->p.y + b->s.y;
-			move_xpos(b, dt);
-			if (p.x == b->p.x) {
-				b->p.y = p.y;
-				b->bb.y0 = b->p.y - b->s.y;
-				b->bb.y1 = b->p.y + b->s.y;
-			}
-			return;
-		}
+		if (best_y <= b->bb.y0 + b->step_size)
+			b->v.y = -2 * gravity;
 		b->v.x = 0;
 		b->p.x = best - b->s.x - impulse;
 		if (b->cb_func)
@@ -126,28 +120,22 @@ void Space::move_xneg(Body *b, float dt)
 	for (auto p : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
 			bb2 += v3f(p);
-			if (overlap(bb, bb2) && best < bb2.x1) {
-				collide = true;
-				best = bb2.x1;
-				best_y = bb2.y1;
-				best_p = p;
+			if (overlap(bb, bb2)) {
+				if (best < bb2.x1) {
+					collide = true;
+					best = bb2.x1;
+					best_y = bb2.y1;
+					best_p = p;
+				} else if (best == bb2.x1) {
+					if (best_y < bb2.y1)
+						best_y = bb2.y1;
+				}
 			}
 		}
 	}
 	if (collide) {
-		if (best_y < b->bb.y0 + b->step_size) {
-			auto p = b->p;
-			b->p.y = best_y + b->s.y + impulse;
-			b->bb.y0 = b->p.y - b->s.y;
-			b->bb.y1 = b->p.y + b->s.y;
-			move_xneg(b, dt);
-			if (p.x == b->p.x) {
-				b->p.y = p.y;
-				b->bb.y0 = b->p.y - b->s.y;
-				b->bb.y1 = b->p.y + b->s.y;
-			}
-			return;
-		}
+		if (best_y <= b->bb.y0 + b->step_size)
+			b->v.y = -2 * gravity;
 		b->v.x = 0;
 		b->p.x = best + b->s.x + impulse;
 		if (b->cb_func)
@@ -173,28 +161,22 @@ void Space::move_zpos(Body *b, float dt)
 	for (auto p : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
 			bb2 += v3f(p);
-			if (overlap(bb, bb2) && best > bb2.z0) {
-				collide = true;
-				best = bb2.z0;
-				best_y = bb2.y1;
-				best_p = p;
+			if (overlap(bb, bb2)) {
+				if (best > bb2.z0) {
+					collide = true;
+					best = bb2.z0;
+					best_y = bb2.y1;
+					best_p = p;
+				} else if (best == bb2.z0) {
+					if (best_y < bb2.y1)
+						best_y = bb2.y1;
+				}
 			}
 		}
 	}
 	if (collide) {
-		if (best_y < b->bb.y0 + b->step_size) {
-			auto p = b->p;
-			b->p.y = best_y + b->s.y + impulse;
-			b->bb.y0 = b->p.y - b->s.y;
-			b->bb.y1 = b->p.y + b->s.y;
-			move_zpos(b, dt);
-			if (p.z == b->p.z) {
-				b->p.y = p.y;
-				b->bb.y0 = b->p.y - b->s.y;
-				b->bb.y1 = b->p.y + b->s.y;
-			}
-			return;
-		}
+		if (best_y <= b->bb.y0 + b->step_size)
+			b->v.y = -2 * gravity;
 		b->v.z = 0;
 		b->p.z = best - b->s.x - impulse;
 		if (b->cb_func)
@@ -220,28 +202,22 @@ void Space::move_zneg(Body *b, float dt)
 	for (auto p : box3ll(floor(bb))) {
 		for (auto bb2 : geom[world->get_shape(p)]) {
 			bb2 += v3f(p);
-			if (overlap(bb, bb2) && best < bb2.z1) {
-				collide = true;
-				best = bb2.z1;
-				best_y = bb2.y1;
-				best_p = p;
+			if (overlap(bb, bb2)) {
+				if (best < bb2.z1) {
+					collide = true;
+					best = bb2.z1;
+					best_y = bb2.y1;
+					best_p = p;
+				} else if (best == bb2.z1) {
+					if (best_y < bb2.y1)
+						best_y = bb2.y1;
+				}
 			}
 		}
 	}
 	if (collide) {
-		if (best_y < b->bb.y0 + b->step_size) {
-			auto p = b->p;
-			b->p.y = best_y + b->s.y + impulse;
-			b->bb.y0 = b->p.y - b->s.y;
-			b->bb.y1 = b->p.y + b->s.y;
-			move_zneg(b, dt);
-			if (p.z == b->p.z) {
-				b->p.y = p.y;
-				b->bb.y0 = b->p.y - b->s.y;
-				b->bb.y1 = b->p.y + b->s.y;
-			}
-			return;
-		}
+		if (best_y <= b->bb.y0 + b->step_size)
+			b->v.y = -2 * gravity;
 		b->v.z = 0;
 		b->p.z = best + b->s.x + impulse;
 		if (b->cb_func)
